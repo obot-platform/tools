@@ -44,13 +44,48 @@ export async function searchIssuesAndPRs(octokit, owner, repo, query, perPage = 
 }
 
 export async function getIssue(octokit, owner, repo, issueNumber) {
-    const { data } = await octokit.issues.get({
+    const { repository } = await octokit.graphql(`
+        query($owner: String!, $repo: String!, $number: Int!) {
+            repository(owner: $owner, name: $repo) {
+                issue(number: $number) {
+                    id
+                    number
+                    title
+                    url
+                    state
+                    createdAt
+                    updatedAt
+                    assignees(first: 10) {
+                        nodes {
+                            login
+                        }
+                    }
+                    labels(first: 10) {
+                        nodes {
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    `, {
         owner,
         repo,
-        issue_number: issueNumber,
+        number: parseInt(issueNumber, 10)
     });
-    console.log(data);
-    console.log(`https://github.com/${owner}/${repo}/issues/${issueNumber}`);
+
+    const issue = repository.issue;
+    const assignees = issue.assignees.nodes.map(a => a.login).join(', ');
+    const labels = issue.labels.nodes.map(l => l.name).join(', ');
+
+    console.log(`#${issue.number} - ${issue.title}
+ID: ${issue.id}
+State: ${issue.state}
+Created: ${issue.createdAt}
+Updated: ${issue.updatedAt}
+Assignees: ${assignees}
+Labels: ${labels}
+URL: ${issue.url}`);
 }
 
 export async function createIssue(octokit, owner, repo, title, body) {
@@ -344,4 +379,479 @@ export async function removeIssueLabels(octokit, owner, repo, issueNumber, label
 
 export async function getUser(octokit) {
     await octokit.users.getAuthenticated();
+
+export async function listProjects(octokit, owner) {
+    const { data: { type } } = await octokit.users.getByUsername({ username: owner });
+    
+    let projects;
+    if (type === 'User') {
+        const { user } = await octokit.graphql(`
+            query($username: String!) {
+                user(login: $username) {
+                    projectsV2(first: 100) {
+                        nodes {
+                            id
+                            title
+                            number
+                            url
+                        }
+                    }
+                }
+            }
+        `, {
+            username: owner
+        });
+        projects = user.projectsV2.nodes;
+    } else {
+        const { organization } = await octokit.graphql(`
+            query($org: String!) {
+                organization(login: $org) {
+                    projectsV2(first: 100) {
+                        nodes {
+                            id
+                            title
+                            number
+                            url
+                        }
+                    }
+                }
+            }
+        `, {
+            org: owner
+        });
+        projects = organization.projectsV2.nodes;
+    }
+
+    try {
+        const gptscriptClient = new GPTScript();
+        const elements = projects.map(project => {
+            return {
+                name: project.id,
+                description: '',
+                contents: `${project.title} (#${project.number}) - ${project.url}`
+            }
+        });
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `${owner}_github_projects`,
+            description: `GitHub Projects (V2) for ${type.toLowerCase()} ${owner}`
+        });
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} projects`);
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
+}
+
+export async function getProject(octokit, projectId) {
+    const { node } = await octokit.graphql(`
+        query($projectId: ID!) {
+            node(id: $projectId) {
+                ... on ProjectV2 {
+                    id
+                    title
+                    number
+                    url
+                    fields(first: 100) {
+                        nodes {
+                            ... on ProjectV2Field {
+                                id
+                                name
+                            }
+                            ... on ProjectV2IterationField {
+                                id
+                                name
+                            }
+                            ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options {
+                                    id
+                                    name
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `, {
+        projectId
+    });
+
+    try {
+        const gptscriptClient = new GPTScript();
+        const elements = node.fields.nodes.map(field => {
+            if (field.options) {
+                return {
+                    name: field.id,
+                    description: 'Single Select Field',
+                    contents: `${field.name} - Options: ${field.options.map(opt => opt.name).join(', ')}`
+                };
+            } else {
+                return {
+                    name: field.id,
+                    description: field.__typename || 'Field',
+                    contents: `${field.name}`
+                };
+            }
+        });
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `project_${projectId}_fields`,
+            description: `Fields for project ID ${projectId} (${node.title} #${node.number})`
+        });
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} fields`);
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
+}
+
+export async function listCards(octokit, projectId, perPage = 100) {
+    const parsedPerPage = parseInt(perPage, 10) || 100;
+    let hasNextPage = true;
+    let cursor = null;
+    let allItems = [];
+    let projectTitle, projectNumber;
+
+    while (hasNextPage) {
+        const { node } = await octokit.graphql(`
+            query($projectId: ID!, $first: Int!, $after: String) {
+                node(id: $projectId) {
+                    ... on ProjectV2 {
+                        id
+                        title
+                        number
+                        url
+                        items(first: $first, after: $after) {
+                            nodes {
+                                id
+                                fieldValues(first: 100) {
+                                    nodes {
+                                        ... on ProjectV2ItemFieldTextValue {
+                                            field {
+                                                ... on ProjectV2FieldCommon {
+                                                    name
+                                                }
+                                            }
+                                            text
+                                        }
+                                        ... on ProjectV2ItemFieldDateValue {
+                                            field {
+                                                ... on ProjectV2FieldCommon {
+                                                    name
+                                                }
+                                            }
+                                            date
+                                        }
+                                        ... on ProjectV2ItemFieldSingleSelectValue {
+                                            field {
+                                                ... on ProjectV2FieldCommon {
+                                                    name
+                                                }
+                                            }
+                                            name
+                                        }
+                                        ... on ProjectV2ItemFieldIterationValue {
+                                            field {
+                                                ... on ProjectV2FieldCommon {
+                                                    name
+                                                }
+                                            }
+                                            title
+                                        }
+                                    }
+                                }
+                                content {
+                                    ... on Issue {
+                                        id
+                                        title
+                                        number
+                                        url
+                                        state
+                                        createdAt
+                                        updatedAt
+                                        assignees(first: 10) {
+                                            nodes {
+                                                login
+                                            }
+                                        }
+                                        labels(first: 10) {
+                                            nodes {
+                                                name
+                                            }
+                                        }
+                                    }
+                                    ... on PullRequest {
+                                        id
+                                        title
+                                        number
+                                        url
+                                        state
+                                        createdAt
+                                        updatedAt
+                                        assignees(first: 10) {
+                                            nodes {
+                                                login
+                                            }
+                                        }
+                                        labels(first: 10) {
+                                            nodes {
+                                                name
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            pageInfo {
+                                hasNextPage
+                                endCursor
+                            }
+                        }
+                    }
+                }
+            }
+        `, {
+            projectId,
+            first: parsedPerPage,
+            after: cursor
+        });
+
+        if (!projectTitle) {
+            projectTitle = node.title;
+            projectNumber = node.number;
+        }
+
+        allItems = allItems.concat(node.items.nodes);
+        hasNextPage = node.items.pageInfo.hasNextPage;
+        cursor = node.items.pageInfo.endCursor;
+    }
+
+    try {
+        const gptscriptClient = new GPTScript();
+        const elements = allItems.map(item => {
+            const fieldValues = {};
+            item.fieldValues.nodes.forEach(fieldValue => {
+                // Skip if field or field.name is undefined
+                if (!fieldValue?.field?.name) return;
+                
+                const fieldName = fieldValue.field.name;
+                // Handle different field types
+                if ('name' in fieldValue) {
+                    fieldValues[fieldName] = fieldValue.name; // Status/Single select fields
+                } else if ('text' in fieldValue) {
+                    fieldValues[fieldName] = fieldValue.text; // Text fields
+                } else if ('date' in fieldValue) {
+                    fieldValues[fieldName] = fieldValue.date; // Date fields
+                } else if ('title' in fieldValue) {
+                    fieldValues[fieldName] = fieldValue.title; // Iteration fields
+                }
+            });
+
+            const content = item.content;
+            const assignees = content ? content.assignees.nodes.map(a => a.login).join(', ') : '';
+            const labels = content ? content.labels.nodes.map(l => l.name).join(', ') : '';
+
+            return {
+                name: item.id,
+                description: '',
+                contents: content ? 
+                    `${content.title} (#${content.number})
+ID: ${item.id}
+State: ${content.state}
+Created: ${content.createdAt}
+Updated: ${content.updatedAt}
+Assignees: ${assignees} 
+Labels: ${labels}
+Fields: ${Object.entries(fieldValues).map(([k,v]) => `${k}: ${v}`).join(', ')}
+URL: ${content.url}` :
+                    `Draft Item (ID: ${item.id})`
+            }
+        });
+        const datasetID = await gptscriptClient.addDatasetElements(elements, {
+            name: `project_${projectId}_items`,
+            description: `All items in project ${projectTitle} (#${projectNumber})`
+        });
+        console.log(`Created dataset with ID ${datasetID} with ${elements.length} items`);
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
+}
+
+export async function createCard(octokit, projectId, contentId, status) {
+    const { addProjectV2ItemById } = await octokit.graphql(`
+        mutation($projectId: ID!, $contentId: ID!) {
+            addProjectV2ItemById(input: {
+                projectId: $projectId,
+                contentId: $contentId
+            }) {
+                item {
+                    id
+                }
+            }
+        }
+    `, {
+        projectId,
+        contentId
+    });
+
+    console.log(`Added item to project. Item ID: ${addProjectV2ItemById.item.id}`);
+
+    if (status) {
+        // First get the status field ID and option ID
+        const { node: project } = await octokit.graphql(`
+            query($projectId: ID!) {
+                node(id: $projectId) {
+                    ... on ProjectV2 {
+                        fields(first: 100) {
+                            nodes {
+                                ... on ProjectV2SingleSelectField {
+                                    id
+                                    name
+                                    options {
+                                        id
+                                        name
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        `, {
+            projectId
+        });
+
+        // Find the status field and matching option
+        const statusField = project.fields.nodes.find(field => field?.name === 'Status');
+        if (!statusField) {
+            throw new Error('Status field not found in project');
+        }
+
+        const statusOption = statusField.options.find(option => option.name === status);
+        if (!statusOption) {
+            throw new Error(`Status "${status}" not found. Available options: ${statusField.options.map(o => o.name).join(', ')}`);
+        }
+
+        // Update the status
+        await octokit.graphql(`
+            mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId,
+                    itemId: $itemId,
+                    fieldId: $fieldId,
+                    value: { singleSelectOptionId: $optionId }
+                }) {
+                    projectV2Item {
+                        id
+                    }
+                }
+            }
+        `, {
+            projectId,
+            itemId: addProjectV2ItemById.item.id,
+            fieldId: statusField.id,
+            optionId: statusOption.id
+        });
+
+        console.log(`Set item status to "${status}"`);
+    }
+}
+
+export async function moveCard(octokit, projectId, itemId, fieldId, optionId) {
+    // First get the field and its options to validate
+    const { node: project } = await octokit.graphql(`
+        query($projectId: ID!) {
+            node(id: $projectId) {
+                ... on ProjectV2 {
+                    fields(first: 100) {
+                        nodes {
+                            ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options {
+                                    id
+                                    name
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `, {
+        projectId
+    });
+
+    // Find the matching option
+    const field = project.fields.nodes.find(f => f?.id === fieldId);
+    if (!field || !field.options) {
+        throw new Error('Field not found or is not a single select field');
+    }
+
+    const option = field.options.find(opt => opt.name === optionId);
+    if (!option) {
+        throw new Error(`Option "${optionId}" not found. Available options: ${field.options.map(o => o.name).join(', ')}`);
+    }
+
+    const { updateProjectV2ItemFieldValue } = await octokit.graphql(`
+        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+            updateProjectV2ItemFieldValue(input: {
+                projectId: $projectId,
+                itemId: $itemId,
+                fieldId: $fieldId,
+                value: { singleSelectOptionId: $optionId }
+            }) {
+                projectV2Item {
+                    id
+                }
+            }
+        }
+    `, {
+        projectId,
+        itemId,
+        fieldId,
+        optionId: option.id
+    });
+
+    console.log(`Updated item status. Item ID: ${updateProjectV2ItemFieldValue.projectV2Item.id}`);
+}
+
+export async function updateCard(octokit, projectId, itemId, fieldId, value) {
+    const { updateProjectV2ItemFieldValue } = await octokit.graphql(`
+        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+            updateProjectV2ItemFieldValue(input: {
+                projectId: $projectId,
+                itemId: $itemId,
+                fieldId: $fieldId,
+                value: { text: $value }
+            }) {
+                projectV2Item {
+                    id
+                }
+            }
+        }
+    `, {
+        projectId,
+        itemId,
+        fieldId,
+        value
+    });
+
+    console.log(`Updated item field. Item ID: ${updateProjectV2ItemFieldValue.projectV2Item.id}`);
+}
+
+export async function deleteCard(octokit, projectId, itemId) {
+    await octokit.graphql(`
+        mutation($projectId: ID!, $itemId: ID!) {
+            deleteProjectV2Item(input: {
+                projectId: $projectId,
+                itemId: $itemId
+            }) {
+                deletedItemId
+            }
+        }
+    `, {
+        projectId,
+        itemId
+    });
+
+    console.log(`Deleted item ID: ${itemId}`);
 }
