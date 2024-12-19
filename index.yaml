@@ -119,3 +119,5 @@ modelProviders:
     reference: ./xai-model-provider
   deepseek-model-provider:
     reference: ./deepseek-model-provider
+  gemini-vertex-model-provider:
+    reference: ./gemini-vertex-model-provider
