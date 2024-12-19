@@ -1,12 +1,12 @@
-Name: Anthropic on AWS Bedrock
-Description: Model provider for AWS Bedrock hosted Anthropic models
-Metadata: envVars: OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN
+Name: Google Gemini Vertex AI Model Provider
+Description: Model provider for Google Gemini Vertex AI
+Metadata: envVars: OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON,OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_PROJECT
 Model Provider: true
-Credential: ../model-provider-credential as anthropic-bedrock-model-provider
+Credential: ../model-provider-credential as gemini-vertex-model-provider
 
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
 
 ---
 !metadata:*:icon
-/admin/assets/anthropic_bedrock_icon.svg
+/admin/assets/gemini_icon.svg

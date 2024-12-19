@@ -1,6 +1,9 @@
 import json
 import os
+import tempfile
 from typing import AsyncIterable, List
+
+from contextlib import asynccontextmanager
 
 import google.auth.exceptions
 import vertexai.preview.generative_models as generative_models
@@ -10,15 +13,60 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.routing import APIRouter
 from openai.types.chat import ChatCompletionChunk
 from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta
-from vertexai.preview.generative_models import Content, FunctionDeclaration, GenerationConfig, GenerationResponse, \
-    GenerativeModel, Part, Tool
+from vertexai.preview.generative_models import (
+    Content,
+    FunctionDeclaration,
+    GenerationConfig,
+    GenerationResponse,
+    GenerativeModel,
+    Part,
+    Tool,
+)
+
+
+@asynccontextmanager
+async def lifespan(a: FastAPI):
+    project = os.environ.get(
+        "OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_PROJECT", None
+    )
+    if not project:
+        raise Exception("Google Cloud project is required.")
+
+    creds_json = os.environ.get(
+        "OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON", None
+    )
+    if not creds_json:
+        raise Exception("Google application credentials content is required.")
+
+    try:
+        _ = json.loads(creds_json)
+    except json.JSONDecodeError as e:
+        raise Exception("Invalid JSON in Google application credentials: ", e)
+
+    creds_file: str
+    with tempfile.NamedTemporaryFile(
+        suffix="-google-credentials.json", delete=False, delete_on_close=False
+    ) as f:
+        creds_file = f.name
+        f.write(creds_json.encode("utf-8"))
+        f.close()
+
+    # secure access by setting file permissions
+    os.chmod(creds_file, 0o600)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+
+    os.environ["GOOGLE_CLOUD_PROJECT"] = project
+
+    yield  # App shutdown
+
+    os.remove(creds_file)
+
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 app = FastAPI()
 router = APIRouter()
 
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
-
 
 
 def log(*args):
@@ -53,8 +101,8 @@ def list_models() -> JSONResponse:
             },
             {
                 "id": "gemini-1.5-pro-preview-0409",
-                "name": "Gemini 1.5 Pro Preview 0409"
-            }
+                "name": "Gemini 1.5 Pro Preview 0409",
+            },
         ]
     }
     return JSONResponse(content=content)
@@ -66,10 +114,9 @@ async def map_tools(req_tools: List | None = None) -> List[Tool] | None:
 
     function_declarations = []
     for tool in req_tools:
-        parameters = tool['function'].get('parameters', {
-            "properties": {},
-            "type": "object"
-        })
+        parameters = tool["function"].get(
+            "parameters", {"properties": {}, "type": "object"}
+        )
 
         function_declarations.append(
             FunctionDeclaration(
@@ -91,9 +138,15 @@ def merge_consecutive_dicts_with_same_value(list_of_dicts, key) -> list[dict]:
         current_dict = list_of_dicts[index]
         value_to_match = current_dict.get(key)
         compared_index = index + 1
-        while compared_index < len(list_of_dicts) and list_of_dicts[compared_index].get(key) == value_to_match:
-            list_of_dicts[compared_index]["content"] = current_dict["content"] + "\n" + list_of_dicts[compared_index][
-                "content"]
+        while (
+            compared_index < len(list_of_dicts)
+            and list_of_dicts[compared_index].get(key) == value_to_match
+        ):
+            list_of_dicts[compared_index]["content"] = (
+                current_dict["content"]
+                + "\n"
+                + list_of_dicts[compared_index]["content"]
+            )
             current_dict.update(list_of_dicts[compared_index])
             compared_index += 1
         merged_list.append(current_dict)
@@ -120,56 +173,54 @@ Do not make up arguments for tools.
 Call functions one at a time to make sure you have the correct inputs.
 """
         req_messages = [
-                           {"role": "system", "content": system},
-                           {"role": "model", "content": "Understood."}
-                       ] + req_messages
+            {"role": "system", "content": system},
+            {"role": "model", "content": "Understood."},
+        ] + req_messages
 
         for message in req_messages:
             match message["role"]:
                 case "system":
-                    message['role'] = "user"
+                    message["role"] = "user"
                 case "user":
-                    message['role'] = "user"
+                    message["role"] = "user"
                 case "assistant":
-                    message['role'] = "model"
+                    message["role"] = "model"
                 case "model":
-                    message['role'] = "model"
+                    message["role"] = "model"
                 case "tool":
-                    message['role'] = "function"
+                    message["role"] = "function"
                 case _:
-                    message['role'] = "user"
+                    message["role"] = "user"
         req_messages = merge_consecutive_dicts_with_same_value(req_messages, "role")
 
         for message in req_messages:
-            if 'tool_call_id' in message.keys():
+            if "tool_call_id" in message.keys():
                 convert_message = Content(
-                    role=message['role'],
-                    parts=[Part.from_function_response(
-                        name=message.get('name', ''),
-                        response={
-                            'name': message.get('name', ''),
-                            'content': message['content']
-                        },
-                    )]
+                    role=message["role"],
+                    parts=[
+                        Part.from_function_response(
+                            name=message.get("name", ""),
+                            response={
+                                "name": message.get("name", ""),
+                                "content": message["content"],
+                            },
+                        )
+                    ],
                 )
-            elif 'tool_calls' in message.keys():
+            elif "tool_calls" in message.keys():
                 tool_call_parts: list[Part] = []
-                for tool_call in message['tool_calls']:
+                for tool_call in message["tool_calls"]:
                     function_call = {
                         "functionCall": {
-                            "name": tool_call['function']['name'],
-                            "args": json.loads(tool_call['function']['arguments'])
+                            "name": tool_call["function"]["name"],
+                            "args": json.loads(tool_call["function"]["arguments"]),
                         }
                     }
                     tool_call_parts.append(Part.from_dict(function_call))
+                convert_message = Content(role=message["role"], parts=tool_call_parts)
+            elif "content" in message.keys():
                 convert_message = Content(
-                    role=message['role'],
-                    parts=tool_call_parts
-                )
-            elif 'content' in message.keys():
-                convert_message = Content(
-                    role=message['role'],
-                    parts=[Part.from_text(message["content"])]
+                    role=message["role"], parts=[Part.from_text(message["content"])]
                 )
             messages.append(convert_message)
 
@@ -215,8 +266,10 @@ async def chat_completion(request: Request):
         model = GenerativeModel(data["model"])
     except google.auth.exceptions.GoogleAuthError as e:
         log("AUTH ERROR: ", e)
-        raise HTTPException(status_code=401,
-                            detail="Authentication error. Please ensure you are properly authenticated with GCP and have the correct project configured.")
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication error. Please ensure you are properly authenticated with GCP and have the correct project configured.",
+        )
     except Exception as e:
         log("ERROR: ", e)
         log(type(e))
@@ -237,12 +290,14 @@ async def chat_completion(request: Request):
                 generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
                 generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
                 generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_ONLY_HIGH,
-            }
+            },
         )
         if not stream:
             return JSONResponse(content=jsonable_encoder(response))
 
-        return StreamingResponse(to_chunk(data['model'], response), media_type="application/x-ndjson")
+        return StreamingResponse(
+            to_chunk(data["model"], response), media_type="application/x-ndjson"
+        )
 
     except Exception as e:
         log("ERROR: ", e)
@@ -262,26 +317,28 @@ def map_resp(model: str, chunk: GenerationResponse) -> ChatCompletionChunk | Non
     tool_calls = []
     if len(chunk.candidates) > 0:
         if len(chunk.candidates[0].function_calls) > 0:
-            parts = chunk.candidates[0].to_dict().get('content', {}).get('parts', [])
+            parts = chunk.candidates[0].to_dict().get("content", {}).get("parts", [])
 
             for idx, part in enumerate(parts):
-                call = part.get('function_call', None)
+                call = part.get("function_call", None)
                 if not call:
                     continue
 
-                tool_calls.append({
-                    "index": idx,
-                    "id": call['name'] + "_" + str(idx),
-                    "function": {
-                        "name": call['name'],
-                        "arguments": json.dumps(call['args'])
-                    },
-                    "type": "function"
-                })
+                tool_calls.append(
+                    {
+                        "index": idx,
+                        "id": call["name"] + "_" + str(idx),
+                        "function": {
+                            "name": call["name"],
+                            "arguments": json.dumps(call["args"]),
+                        },
+                        "type": "function",
+                    }
+                )
 
         try:
             content = chunk.candidates[0].content.text
-        except:
+        except KeyError:
             content = None
 
         match chunk.candidates[0].content.role:
@@ -302,7 +359,9 @@ def map_resp(model: str, chunk: GenerationResponse) -> ChatCompletionChunk | Non
             if len(tool_calls) > 0:
                 finish_reason = "tool_calls"
             else:
-                finish_reason = map_finish_reason(str(chunk.candidates[0].finish_reason))
+                finish_reason = map_finish_reason(
+                    str(chunk.candidates[0].finish_reason)
+                )
         except KeyError:
             finish_reason = None
 
@@ -313,9 +372,7 @@ def map_resp(model: str, chunk: GenerationResponse) -> ChatCompletionChunk | Non
             choices=[
                 Choice(
                     delta=ChoiceDelta(
-                        content=content,
-                        tool_calls=tool_calls,
-                        role=role
+                        content=content, tool_calls=tool_calls, role=role
                     ),
                     finish_reason=finish_reason,
                     index=0,
@@ -331,9 +388,9 @@ def map_resp(model: str, chunk: GenerationResponse) -> ChatCompletionChunk | Non
 
 
 def map_finish_reason(finish_reason: str) -> str:
-    if (finish_reason == "ERROR"):
+    if finish_reason == "ERROR":
         return "stop"
-    elif (finish_reason == "FINISH_REASON_UNSPECIFIED" or finish_reason == "STOP"):
+    elif finish_reason == "FINISH_REASON_UNSPECIFIED" or finish_reason == "STOP":
         return "stop"
     elif finish_reason == "SAFETY":
         return "content_filter"
@@ -367,7 +424,13 @@ if __name__ == "__main__":
     import asyncio
 
     try:
-        uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
-                log_level="debug" if debug else "critical", access_log=debug)
+        uvicorn.run(
+            "main:app",
+            workers=4,
+            host="127.0.0.1",
+            port=int(os.environ.get("PORT", "8000")),
+            log_level="debug" if debug else "critical",
+            access_log=debug,
+        )
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
