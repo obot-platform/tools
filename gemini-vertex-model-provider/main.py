@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import tempfile
 from typing import AsyncIterable, List
 
@@ -23,47 +24,62 @@ from vertexai.preview.generative_models import (
     Tool,
 )
 
+startup_err: str | None = None
 
 @asynccontextmanager
 async def lifespan(a: FastAPI):
-    project = os.environ.get(
-        "OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_PROJECT", None
-    )
-    if not project:
-        raise Exception("Google Cloud project is required.")
+    global startup_err
 
     creds_json = os.environ.get(
         "OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON", None
     )
     if not creds_json:
-        raise Exception("Google application credentials content is required.")
+        startup_err = "Google application credentials content is required."
+    else:
 
-    try:
-        _ = json.loads(creds_json)
-    except json.JSONDecodeError as e:
-        raise Exception("Invalid JSON in Google application credentials: ", e)
+        c: dict | None = None
+        try:
+            c = json.loads(creds_json)
+        except json.JSONDecodeError as e:
+            startup_err = f"Invalid JSON in Google application credentials: {e}"
 
-    creds_file: str
-    with tempfile.NamedTemporaryFile(
-        suffix="-google-credentials.json", delete=False, delete_on_close=False
-    ) as f:
-        creds_file = f.name
-        f.write(creds_json.encode("utf-8"))
-        f.close()
 
-    # secure access by setting file permissions
-    os.chmod(creds_file, 0o600)
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+        if c is not None and "project_id" in c:
+            os.environ["GOOGLE_CLOUD_PROJECT"] = c["project_id"]
+        else:
+            p = os.getenv("OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_PROJECT", None)
+            if not p:
+                startup_err = "Google Cloud project ID is required."
+            else:
+                os.environ["GOOGLE_CLOUD_PROJECT"] = p
 
-    os.environ["GOOGLE_CLOUD_PROJECT"] = project
+
+        if  creds_json:
+            creds_file: str
+            with tempfile.NamedTemporaryFile(
+                suffix="-google-credentials.json", delete=False, delete_on_close=False
+            ) as f:
+                creds_file = f.name
+                f.write(creds_json.encode("utf-8"))
+                f.close()
+
+            # secure access by setting file permissions
+            os.chmod(creds_file, 0o600)
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
+
 
     yield  # App shutdown
 
-    os.remove(creds_file)
+    try:
+        os.remove(creds_file)
+    except Exception:
+        pass
 
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-app = FastAPI()
+app = FastAPI(
+    lifespan=lifespan,
+)
 router = APIRouter()
 
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
@@ -89,6 +105,10 @@ async def get_root():
 
 @app.get("/v1/models")
 def list_models() -> JSONResponse:
+    if startup_err:
+        return JSONResponse(
+            content={"error": startup_err}, status_code=500
+        )
     content = {
         "data": [
             {
@@ -233,6 +253,8 @@ Call functions one at a time to make sure you have the correct inputs.
 async def chat_completion(request: Request):
     data = await request.body()
     data = json.loads(data)
+
+    log("Env: ", os.environ)
 
     req_tools = data.get("tools", None)
     tools: list[Tool] | None = None
