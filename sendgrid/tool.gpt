@@ -1,0 +1,31 @@
+Name: SendGrid
+Metadata: category: Capability
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/envelope-duotone.svg
+Share Tools: Send Email
+
+---
+
+Name: Send Email
+Description: Send an email using SendGrid.
+Share Context: Send Email Context
+Credentials: ./credential/tool.gpt
+Param: to: A comma-delimited list of email addresses to send the email to.
+Param: subject: The subject of the email.
+Param: html_body: (optional) The HTML body of the email.
+Param: text_body: (optional) The plain text body of the email.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool sendEmail
+
+---
+Name: Send Email Context
+Type: context
+
+# START INSTRUCTIONS: Send Email tool
+
+The Send Email tool allows you to send emails using SendGrid.
+
+- At least one of `html_body` or `text_body` must be provided.
+- If both `html_body` and `text_body` are provided, both will be included in the email.
+- Don't sign the email unless otherwise asked to do so.
+
+# END INSTRUCTIONS: Send Email tool

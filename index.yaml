@@ -1,4 +1,6 @@
 tools:
+  sendgrid:
+    reference: ./sendgrid
   database:
     reference: ./database
   atlassian-jira:
