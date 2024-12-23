@@ -26,38 +26,33 @@ from vertexai.preview.generative_models import (
 
 startup_err: str | None = None
 
-@asynccontextmanager
-async def lifespan(a: FastAPI):
-    global startup_err
-
+def configure():
     creds_json = os.environ.get(
         "OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON", None
     )
     if not creds_json:
-        startup_err = "Google application credentials content is required."
+        raise KeyError("Google application credentials content is required.")
     else:
 
         c: dict | None = None
         try:
             c = json.loads(creds_json)
         except json.JSONDecodeError as e:
-            startup_err = f"Invalid JSON in Google application credentials: {e}"
-
+            raise ValueError(f"Invalid JSON in Google application credentials: {e}")
 
         if c is not None and "project_id" in c:
             os.environ["GOOGLE_CLOUD_PROJECT"] = c["project_id"]
         else:
             p = os.getenv("OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_PROJECT", None)
             if not p:
-                startup_err = "Google Cloud project ID is required."
+                raise KeyError("Google Cloud project ID is required.")
             else:
                 os.environ["GOOGLE_CLOUD_PROJECT"] = p
 
-
-        if  creds_json:
+        if creds_json:
             creds_file: str
             with tempfile.NamedTemporaryFile(
-                suffix="-google-credentials.json", delete=False, delete_on_close=False
+                    suffix="-google-credentials.json", delete=False, delete_on_close=False
             ) as f:
                 creds_file = f.name
                 f.write(creds_json.encode("utf-8"))
@@ -67,12 +62,24 @@ async def lifespan(a: FastAPI):
             os.chmod(creds_file, 0o600)
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
 
+def cleanup():
+    os.remove(os.getenv("GOOGLE_APPLICATION_CREDENTIALS", ""))
+
+@asynccontextmanager
+async def lifespan(a: FastAPI):
+    global startup_err
+
+    try:
+        configure()
+    except Exception as e:
+        startup_err = e
+
 
     yield  # App shutdown
 
     try:
-        os.remove(creds_file)
-    except Exception:
+        cleanup()
+    except FileNotFoundError:
         pass
 
 
