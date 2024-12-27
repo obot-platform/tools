@@ -32,14 +32,14 @@ Type: context
 
 #!sys.echo
 
-## START TOOL USAGE: Generate Images
+# START INSTRUCTIONS: Generate Images tool
 
 The Generate Images tool returns JSON containing the `workspaceFilePath` and `downloadUrl` of every image it generates.
 Always use the `downloadUrl` of a generated image when embedding it in markdown.
 Unless otherwise specified, always display the images you generate in embedded markdown after generating them.
 Never provide the `downloadUrl` to the user as a clickable link.
 
-## END TOOL USAGE: Generate Images
+# END INSTRUCTIONS: Generate Images tool
 
 ---
 Name: Analyze Images Context
@@ -47,7 +47,7 @@ Type: context
 
 #!sys.echo
 
-## START TOOL USAGE: Analyze Images
+# START INSTRUCTIONS: Analyze Images tool
 
 Use the Analyze Images tool to whenever you need to inspect, compare, or answer questions about the contents of images.
 
@@ -57,7 +57,7 @@ When calling the Analyze Images tool, always provide a JSON array containing one
 e.g. Analyzing a single image: ["https://example.com/image2.png"]
 e.g. Analyzing multiple images: ["https://example.com/image1.webp", "cool.jpg", "cow.webp", "generated_image_defg1234.png", "https://example.com/image2.png"]
 
-## END TOOL USAGE: Analyze Images tool
+# END INSTRUCTIONS: Analyze Images tool
 
 ---
 !metadata:*:category
