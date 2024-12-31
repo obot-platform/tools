@@ -100,3 +100,5 @@ modelProviders:
     reference: ./vllm-model-provider
   anthropic-bedrock-model-provider:
     reference: ./anthropic-bedrock-model-provider
+  xai-model-provider:
+    reference: ./xai-model-provider
