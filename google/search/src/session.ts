@@ -83,6 +83,16 @@ export class SessionManager {
       }
     })
   }
+
+  async cleanup (): Promise<void> {
+    console.log('Cleaning up all sessions...')
+    await this.sessionsLock.runExclusive(async () => {
+      for (const [sessionId, managedSession] of this.sessions.entries()) {
+        await managedSession.session.close()
+        this.sessions.delete(sessionId)
+      }
+    })
+  }
 }
 
 const SESSION_TTL = 5 * 60 * 1000 // 5 minutes
