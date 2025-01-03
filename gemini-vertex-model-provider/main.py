@@ -63,7 +63,10 @@ def configure():
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_file
 
 def cleanup():
-    os.remove(os.getenv("GOOGLE_APPLICATION_CREDENTIALS", ""))
+    try:
+        os.remove(os.getenv("GOOGLE_APPLICATION_CREDENTIALS", ""))
+    except FileNotFoundError:
+        pass
 
 @asynccontextmanager
 async def lifespan(a: FastAPI):
@@ -112,9 +115,10 @@ async def get_root():
 
 @app.get("/v1/models")
 def list_models() -> JSONResponse:
+    global startup_err
     if startup_err:
         return JSONResponse(
-            content={"error": startup_err}, status_code=500
+            content={"error": str(startup_err)}, status_code=500
         )
     content = {
         "data": [

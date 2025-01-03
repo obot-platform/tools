@@ -13,7 +13,7 @@ def validate_credentials():
         log("Credentials are valid")
     except Exception as e:
         print(json.dumps({"error": str(e)}))
-        exit(1)
+        exit(0)
     finally:
         cleanup()
 
@@ -22,10 +22,10 @@ def test_model():
         _ = GenerativeModel("gemini-1.5-pro")
     except GoogleAuthError as e:
         print(json.dumps({"error": f"Invalid Google Credentials: {str(e)}"}))
-        exit(1)
+        exit(0)
     except Exception as e:
         print(json.dumps({"error": f"Unknown Error: {str(e)}"}))
-        exit(1)
+        exit(0)
 
 if __name__ == "__main__":
     validate_credentials()
