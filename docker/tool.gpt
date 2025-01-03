@@ -1,0 +1,6 @@
+name: Docker Container
+description: Runs a docker container with the specified image.
+Params: image: The image to run.
+Params: envs: Optional comma separated list of environment variables to pass to the container
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

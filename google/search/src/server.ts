@@ -65,10 +65,15 @@ async function main (): Promise<void> {
   }) as RequestHandler)
 
   let stopped = false
-  const stop = (): void => {
+  const stop = async (): Promise<void> => {
     if (stopped) return
     stopped = true
     console.error('Daemon shutting down...')
+    try {
+      await sessionManager.cleanup() // Ensure all browsers are closed
+    } catch (err) {
+      console.error('Error during session cleanup:', err)
+    }
     server.close(() => process.exit(0))
   }
 

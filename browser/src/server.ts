@@ -1,21 +1,21 @@
-import express, {type Request, type Response} from "express"
-import bodyParser from "body-parser"
-import {type Page} from "playwright"
-import {browse, filterContent} from "./browse.ts"
-import {fill} from "./fill.ts"
-import {enter} from "./enter.ts"
-import {scrollToBottom} from "./scrollToBottom.ts"
-import {randomBytes} from "node:crypto"
-import {getSessionId, SessionManager} from "./session.ts"
-import {screenshot, ScreenshotInfo} from "./screenshot.ts"
+import express, { type Request, type Response } from 'express'
+import bodyParser from 'body-parser'
+import { type Page } from 'playwright'
+import { browse, filterContent } from './browse.ts'
+import { fill } from './fill.ts'
+import { enter } from './enter.ts'
+import { scrollToBottom } from './scrollToBottom.ts'
+import { randomBytes } from 'node:crypto'
+import { getSessionId, SessionManager } from './session.ts'
+import { screenshot, ScreenshotInfo } from './screenshot.ts'
 
 async function main (): Promise<void> {
   console.log('Starting browser server')
 
   const app = express()
   // Get port from the environment variable or use 9888 if it is not defined
-  const port = parseInt(process.env.PORT ?? "9888", 10)
-  delete (process.env.GPTSCRIPT_INPUT)
+  const port = parseInt(process.env.PORT ?? '9888', 10)
+  delete process.env.GPTSCRIPT_INPUT
   app.use(bodyParser.json())
 
   const sessionManager = await SessionManager.create()
@@ -46,15 +46,14 @@ async function main (): Promise<void> {
         // Get the page for this tab, creating a new one if it doesn't exist or the existing page is closed
         let page: Page = openPages.get(tabID)!
         if (!openPages.has(tabID) || page.isClosed()) {
-            page = await browserContext.newPage()
-            openPages.set(tabID, page)
+          page = await browserContext.newPage()
+          openPages.set(tabID, page)
         }
         await page.bringToFront()
 
         let response: { result?: any, screenshotInfo?: ScreenshotInfo } = {}
         switch (req.path) {
           case '/browse':
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             response.result = await browse(page, website, 'browse', tabID, printTabID)
             break
 
@@ -76,7 +75,14 @@ async function main (): Promise<void> {
 
           case '/fill':
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            response.result = await fill(page, model, userInput, data.content ?? '', keywords, (data.matchTextOnly as boolean) ?? false)
+            response.result = await fill(
+              page,
+              model,
+              userInput,
+              data.content ?? '',
+              keywords,
+              (data.matchTextOnly as boolean) ?? false
+            )
             break
 
           case '/enter':
@@ -119,35 +125,48 @@ async function main (): Promise<void> {
   })
 
   // Start the server
-  const server = app.listen(port, "127.0.0.1", () => {
+  const server = app.listen(port, '127.0.0.1', () => {
     console.log(`Server is listening on port ${port}`)
   })
 
-  // stdin is used as a keep-alive mechanism. When the parent process dies the stdin will be closed and this process
-  // will exit.
+  async function shutdown(): Promise<void> {
+    try {
+      console.log('Shutting down server...')
+      await new Promise<void>((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()))
+      })
+
+      if (sessionManager) {
+        await sessionManager.cleanup() // Cleanup all sessions and resources
+      }
+
+      console.log('Server shutdown complete.')
+      process.exit(0)
+    } catch (error) {
+      console.error('Error during shutdown:', error)
+      process.exit(1)
+    }
+  }
+
   process.stdin.resume()
-  process.stdin.on('close', () => {
-    console.log('Closing the server')
-    server.close()
-    process.exit(0)
+  process.stdin.on('close', async () => {
+    console.log('stdin closed.')
+    await shutdown()
   })
 
-  process.on('SIGINT', () => {
-    console.log('Closing the server')
-    server.close()
-    process.exit(0)
+  process.on('SIGINT', async () => {
+    console.log('SIGINT received.')
+    await shutdown()
   })
 
-  process.on('SIGTERM', () => {
-    console.log('Closing the server')
-    server.close()
-    process.exit(0)
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received.')
+    await shutdown()
   })
 
-  process.on('SIGHUP', () => {
-    console.log('Closing the server')
-    server.close()
-    process.exit(0)
+  process.on('SIGHUP', async () => {
+    console.log('SIGHUP received.')
+    await shutdown()
   })
 }
 

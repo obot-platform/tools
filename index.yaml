@@ -1,4 +1,7 @@
 tools:
+  sendgrid:
+    reference: ./sendgrid
+    all: true
   database:
     reference: ./database
   atlassian-jira:
@@ -54,6 +57,8 @@ tools:
     reference: ./tasks
   knowledge:
     reference: ./knowledge
+  shell:
+    reference: ./shell
 
 knowledgeDataSources:
   notion-data-source:
@@ -82,6 +87,12 @@ system:
     reference: ./result-formatter
   obot-model-provider:
     reference: ./obot-model-provider
+  existing-credential:
+    reference: ./existing-credential
+  docker-shell-id:
+    reference: ./docker-shell-id
+  docker:
+    reference: ./docker
 
 modelProviders:
   openai-model-provider:

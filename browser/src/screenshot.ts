@@ -3,6 +3,7 @@ import { GPTScript } from '@gptscript-ai/gptscript'
 import { getWorkspaceId, getGPTScriptEnv } from './session.ts'
 import { type IncomingHttpHeaders } from 'node:http'
 import { createHash } from 'node:crypto'
+import sharp from 'sharp'
 
 const client = new GPTScript()
 
@@ -22,11 +23,14 @@ export async function screenshot (
   // Generate a unique workspace file name for the screenshot
   const timestamp = Date.now()
   const pageHash = createHash('sha256').update(page.url()).digest('hex').substring(0, 8)
-  const screenshotName = `screenshot-${timestamp}_${pageHash}.png`
+  const screenshotName = `screenshot-${timestamp}_${pageHash}.webp`
 
   try {
     // Take the screenshot
-    const screenshot = await page.screenshot({ fullPage, animations: 'disabled' })
+    let screenshot = await page.screenshot({ fullPage, animations: 'disabled' })
+
+    // Convert the image to webp format
+    screenshot = await sharp(screenshot).webp({ quality: 100 }).toBuffer()
 
     // If we are running in obot, we need to save the screenshot in the files directory
     const workspaceId = getWorkspaceId(headers)

@@ -1,0 +1,10 @@
+Name: Shell
+Description: Runs a shell command in a Linux console.
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/terminal-window-duotone.svg
+Metadata: category: Capability
+Context: ../docker-shell-id
+Params: CMD: The shell command to run
+
+#!/bin/bash
+
+exec docker exec ${OBOT_SHELL_RUN_ARGS} ${GPTSCRIPT_CONTEXT} ${OBOT_SHELL:-/bin/sh} -c "${CMD}"
