@@ -40,6 +40,9 @@ tools:
   google-sheets:
     reference: ./google/sheets
     all: true
+  gitlab:
+    reference: ./gitlab
+    all: true
   images:
     reference: ./images
     all: true

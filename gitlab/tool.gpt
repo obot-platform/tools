@@ -1,0 +1,227 @@
+---
+Name: GitLab
+Metadata: bundle: true
+Description: Tools for interacting with GitLab.
+Share Tools: Search Issues, List Project Issues, List My Assigned Issues, List My Created Issues, Get Issue Details, Create Issue, Update Issue, Delete Issue, Add Issue Comment, Search Merge Requests, List Project Merge Requests, List My Assigned Merge Requests, List My Opened Merge Requests, Get Merge Request Details, Create Merge Request, Update Merge Request, Delete Merge Request, Add Merge Request Comment, Approve Merge Request, Lookup User ID
+
+---
+Name: Search Issues
+Description: Search GitLab Issues.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_query: A JSON formatted string that conforms to the API spec for GitLab's Issue Search
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool queryIssues
+
+---
+Name: List Project Issues
+Description: List GitLab Issues inside a Project.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_query: A JSON formatted string that conforms to the API spec for GitLab's Issue Search
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listProjectIssues
+
+---
+Name: List My Assigned Issues
+Description: List GitLab Issues assigned to the current user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMyAssignedIssues
+
+---
+Name: List My Created Issues
+Description: List GitLab Issues created by the current user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMyCreatedIssues
+
+---
+Name: Get Issue Details
+Description: Show detailed information about a single Issue.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric IID (Internal ID) of an issue.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getIssueDetails
+
+---
+Name: Create Issue
+Description: Create a new Issue.
+Share Context: GitLab Context
+Credential: ./credential
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: issue_name: The new issue title.
+Param: issue_description: The new issue description.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createIssue
+
+---
+Name: Update Issue
+Description: Update values in an existing Issue.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric IID (Internal ID) of an issue.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: updates: A JSON-formatted string that conforms to the GitLab API, containing fields to be updated on an Issue.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool updateIssue
+
+---
+Name: Delete Issue
+Description: Deletes an Issue.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric IID (Internal ID) of an issue.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteIssue
+
+---
+Name: Add Issue Comment
+Description: Adds a new comment on an existing Issue.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric IID (Internal ID) of an issue.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: comment: The text to use as the body of the comment. Can contain markdown.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addIssueComment
+
+---
+Name: Search Merge Requests
+Description: Search GitLab Merge Requests.
+Share Context: GitLab Context
+Credential: ./credential
+Param: mr_query: A JSON formatted string that conforms to the API spec for GitLab's Merge Request Search
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool queryMergeRequests
+
+---
+Name: List Project Merge Requests
+Description: List GitLab Merge Requests inside a Project.
+Share Context: GitLab Context
+Credential: ./credential
+Param: mr_query: A JSON formatted string that conforms to the API spec for GitLab's Merge Request Search
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listProjectMergeRequests
+
+---
+Name: List My Assigned Merge Requests
+Description: List GitLab Merge Requests assigned to the current user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMyAssignedMergeRequests
+
+---
+Name: List My Opened Merge Requests
+Description: List GitLab Merge Requests opened by the current user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMyOpenedMergeRequests
+
+---
+Name: Get Merge Request Details
+Description: Show detailed information about a single Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric internal ID of a Merge Request.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMergeRequestDetails
+
+---
+Name: Create Merge Request
+Description: Create a new Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: mr_name: The new Merge Request title.
+Param: mr_description: The new Merge Request description.
+Param: mr_source_branch: The source git branch.
+Param: mr_target_branch: The target git branch.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createMergeRequest
+
+---
+Name: Update Merge Request
+Description: Update values in an existing Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: issue_iid: The numeric internal ID of a Merge Request.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: updates: A JSON-formatted string that conforms to the GitLab API, containing fields to be updated on a Merge Request.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool updateMergeRequest
+
+---
+Name: Delete Merge Request
+Description: Deletes a Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: mr_id: The numeric internal ID of a Merge Request.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMergeRequest
+
+---
+Name: Add Merge Request Comment
+Description: Adds a new comment on an existing Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: mr_id: The numeric internal ID of a Merge Request.
+Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
+Param: comment: The text to use as the body of the comment. Can contain markdown.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addMergeRequestComment
+
+---
+Name: Approve Merge Request
+Description: Approves a Merge Request.
+Share Context: GitLab Context
+Credential: ./credential
+Param: mr_id: The numeric internal ID of a Merge Request.
+Param: project_id: The numeric ID or url-escaped name of a Project.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool approveMergeRequest
+
+---
+Name: Lookup User ID
+Description: Takes a username and returns the ID for that user.
+Share Context: GitLab Context
+Credential: ./credential
+Param: gitlab_username: A GitLab username.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool lookupUserID
+
+
+---
+Name: GitLab Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using the GitLab tools
+
+Do not show IDs to the user, they are not helpful.
+Do show them 'IIDs' - these are very useful.
+
+Do not guess at the correct spelling of projects, usernames, etc. Report to the user that there may be a typo if the resource they requested cannot be found.
+
+
+## End of instructions for using the GitLab tools
+
+---
+!metadata:*:category
+GitLab
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/gitlab.svg
