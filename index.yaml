@@ -111,3 +111,5 @@ modelProviders:
     reference: ./vllm-model-provider
   anthropic-bedrock-model-provider:
     reference: ./anthropic-bedrock-model-provider
+  gemini-vertex-model-provider:
+    reference: ./gemini-vertex-model-provider
