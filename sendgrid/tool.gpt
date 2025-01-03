@@ -8,7 +8,7 @@ Share Tools: Send Email
 Name: Send Email
 Description: Send an email using SendGrid.
 Share Context: Send Email Context
-Credentials: ./credential/tool.gpt
+Credentials: ./credential
 Param: to: A comma-delimited list of email addresses to send the email to.
 Param: subject: The subject of the email.
 Param: html_body: (optional) The HTML body of the email.
@@ -20,13 +20,17 @@ Param: text_body: (optional) The plain text body of the email.
 Name: Send Email Context
 Type: context
 
+#!sys.echo
+
 # START INSTRUCTIONS: Send Email tool
 
 The Send Email tool allows you to send emails using SendGrid.
 
-- At least one of `html_body` or `text_body` must be provided.
-- If both `html_body` and `text_body` are provided, both will be included in the email.
-- Don't sign the email unless otherwise asked to do so.
+When calling the Send Email tool:
+- At least one of `html_body` or `text_body` must be provided
+- If both `html_body` and `text_body` are provided, both will be included in the email
+- An email can be sent to multiple recipients by providing a comma-delimited list of email addresses for the `to` parameter
+- Before sending every email, check the body for placeholder or template text and, when found, prompt the user to resolve them. Afterwards, send the email using the resolved values in the body.
 
 # END INSTRUCTIONS: Send Email tool
 
