@@ -13,10 +13,9 @@ Credential: ../model-provider-credential as gemini-vertex-model-provider
 /admin/assets/gemini_icon.svg
 
 ---
-Name: Validate Credentials
+Name: validate
 Description: Validate the credentials for the Google Gemini Vertex AI Model Provider
 Metadata: envVars: OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON
 Metadata: optionalEnvVars: OBOT_GEMINI_VERTEX_MODEL_PROVIDER_PROJECT_ID
-Credential: ../model-provider-credential as gemini-vertex-model-provider
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/validate.py
