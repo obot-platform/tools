@@ -51,6 +51,7 @@ tools:
     all: true
   time:
     reference: ./time
+    all: true
   workspace-files:
     reference: ./workspace-files
   tasks:
