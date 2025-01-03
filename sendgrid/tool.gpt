@@ -1,10 +1,10 @@
+---
 Name: SendGrid
-Metadata: category: Capability
-Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/envelope-duotone.svg
+Metadata: bundle: true
+Description: Tools for interacting with SendGrid.
 Share Tools: Send Email
 
 ---
-
 Name: Send Email
 Description: Send an email using SendGrid.
 Share Context: Send Email Context
@@ -29,3 +29,11 @@ The Send Email tool allows you to send emails using SendGrid.
 - Don't sign the email unless otherwise asked to do so.
 
 # END INSTRUCTIONS: Send Email tool
+
+---
+!metadata:*:category
+SendGrid
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/envelope-duotone.svg
