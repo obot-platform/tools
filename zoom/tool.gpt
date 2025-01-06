@@ -2,7 +2,7 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, List Meeting Templates, Get Meeting, Delete Meeting, Update Meeting, List Meetings
+Share Tools: Get User, Create Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings
 
 ---
 Name: Get User
