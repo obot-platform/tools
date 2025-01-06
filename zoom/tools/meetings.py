@@ -1,4 +1,4 @@
-from helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool
+from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool
 import requests
 import os
 import re

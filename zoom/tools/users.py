@@ -1,4 +1,4 @@
-from helper import ZOOM_API_URL, ACCESS_TOKEN
+from tools.helper import ZOOM_API_URL, ACCESS_TOKEN
 import requests
 import os
 
