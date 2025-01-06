@@ -8,6 +8,7 @@ import { scrollToBottom } from './scrollToBottom.ts'
 import { randomBytes } from 'node:crypto'
 import { getSessionId, SessionManager } from './session.ts'
 import { screenshot, ScreenshotInfo } from './screenshot.ts'
+import { download } from './download.ts'
 
 async function main (): Promise<void> {
   console.log('Starting browser server')
@@ -23,6 +24,28 @@ async function main (): Promise<void> {
   // gptscript requires "GET /" to return 200 status code
   app.get('/', (_req: Request, res: Response) => {
     res.send('OK')
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  app.post('/download', async (req: Request, res: Response) => {
+    try {
+      const data = req.body
+      const url = data.url ?? ''
+      if (url === '') {
+        throw new Error('URL is required')
+      }
+
+      const fileName = data.fileName ?? ''
+      if (fileName === '') {
+        throw new Error('File name is required')
+      }
+
+      const downloadInfo = await download(req.headers, url, fileName)
+      res.json(downloadInfo)
+    } catch (e) {
+      // Send a 200 status code GPTScript will pass the error to the LLM
+      res.status(200).send(`Error: ${e}`)
+    }
   })
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises

@@ -2,7 +2,7 @@ Name: Browser
 Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
 Credentials: github.com/gptscript-ai/credentials/model-provider
-Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot
+Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download
 
 ---
 Name: Get Page Contents
@@ -26,7 +26,6 @@ Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be c
 Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 
 #!http://service.daemon.gptscript.local/browse
-
 
 ---
 Name: Filter
@@ -115,6 +114,33 @@ Tools: service
 #!http://service.daemon.gptscript.local/forward
 
 ---
+Name: Download
+Share Context: Download Context
+Tools: service
+Description: Downloads the content from an HTTP/HTTPS URL and saves it to the workspace.
+Params: url: (required) The URL of the content to download.
+Params: fileName: (required) The name of the workspace file to save the content to.
+
+#!http://service.daemon.gptscript.local/download
+
+---
+Name: Download Context
+Metadata: index: false
+Type: context
+
+#!sys.echo
+
+START TOOL USAGE: Download
+
+The `Download` tool saves the content from any HTTP or HTTPS URL to a file in the workspace. It can be used to download any well formed HTTP or HTTPS URL, including URLs to web pages, files, and API endpoints.
+
+The tool returns A JSON object that contains the `url`, `resolvedUrl`, `contentType`, `workspaceFile`, and `downloadedAt` fields. The `resolvedUrl` is the final URL after any redirects.
+
+Do not attempt to link to a `workspaceFile` when displaying the results of a `Download` tool call.
+
+END TOOL USAGE: Download
+
+---
 Name: Browser Context
 Metadata: index: false
 Type: context
@@ -153,7 +179,6 @@ Screenshots can only be displayed to the user by embedding their `imageDownloadU
 When the `screenshotInfo` field is present in tool response, ALWAYS stop what you're doing and display the respective screenshot to the user immediately before continuing.
 
 END TOOL USAGE: The `screenshotInfo` response field
-
 
 ---
 Name: service
