@@ -114,3 +114,5 @@ modelProviders:
     reference: ./anthropic-bedrock-model-provider
   xai-model-provider:
     reference: ./xai-model-provider
+  deepseek-model-provider:
+    reference: ./deepseek-model-provider
