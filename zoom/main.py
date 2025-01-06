@@ -16,11 +16,11 @@ tool_map = {
 }
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print(f"Error running command: {' '.join(sys.argv)} \nUsage: python3 main.py <command>")
         sys.exit(1)
 
-    command = sys.argv[2]
+    command = sys.argv[1]
     try:
         json_response = tool_map[command]()
         print(json.dumps(json_response, indent=4))
