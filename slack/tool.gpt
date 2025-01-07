@@ -183,7 +183,7 @@ Credential: ./credential
 ---
 Name: Slack Context
 Type: context
-Share Context: Current Date and Time from ../time
+Share Context: ../time
 Share Tools: User Context
 
 #!sys.echo
@@ -199,6 +199,8 @@ The user ID can be obtained from the List Users or Search Users tool.
 
 Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
 When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
+
+Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
 
 ## End of instructions for using Slack tools
 
