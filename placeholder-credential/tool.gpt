@@ -1,0 +1,7 @@
+Name: Placeholder credential
+Description: This is a fake credential tool for the model and auth providers. These credentials are handled in Obot and this tool should never be called.
+
+#!/bin/bash
+
+echo "The credential has not been properly configured"
+exit 1

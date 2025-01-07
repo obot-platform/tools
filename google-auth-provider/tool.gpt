@@ -1,0 +1,10 @@
+Name: Google
+Description: Auth provider for Google
+Metadata: envVars: OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID,OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_SECRET,OBOT_AUTH_PROVIDER_COOKIE_SECRET,OBOT_AUTH_PROVIDER_EMAIL_DOMAINS
+Credential: ../placeholder-credential as google-auth-provider
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:*:icon
+/admin/assets/google_icon_small.png

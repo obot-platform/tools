@@ -114,3 +114,9 @@ modelProviders:
     reference: ./xai-model-provider
   deepseek-model-provider:
     reference: ./deepseek-model-provider
+
+authProviders:
+  github-auth-provider:
+    reference: ./github-auth-provider
+  google-auth-provider:
+    reference: ./google-auth-provider
