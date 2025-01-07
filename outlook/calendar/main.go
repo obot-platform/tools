@@ -127,11 +127,6 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-	case "getDefaultTimezone":
-		if err := commands.GetDefaultTimezone(context.Background()); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
 	default:
 		fmt.Printf("Unknown command: %q\n", command)
 		os.Exit(1)
