@@ -1,0 +1,27 @@
+Name: HubSpot CRM Properties
+Description: Work with properties in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: HubSpot CRM Get Properties, HubSpot CRM Read Property Group
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: HubSpot CRM Get Properties
+Description: Returns a simplified response with available properties for an object.
+Credential: ./credential
+Params: object_type: The name of the object type
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getSimpleProperties.py
+
+---
+Name: HubSpot CRM Read Property Group
+Description: Reads a property group from the HubSpot CRM by name.
+Credential: ./credential
+Params: object_type: The specific object that you want the property group for. Must be one of: tickets, products, or line_items
+Params: group_name: The name of the property group
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readPropertyGroup.py

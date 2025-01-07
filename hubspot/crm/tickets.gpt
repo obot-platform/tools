@@ -1,0 +1,52 @@
+Name: HubSpot CRM Tickets
+Description: Work with tickets in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: Create Ticket, Get Ticket, Delete Ticket, Update Ticket, Search Tickets
+Tools: ./associations.gpt, ./properties.gpt, ./owners.gpt
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: Create Ticket
+Description: Creates a new ticket in the HubSpot CRM
+Credential: ./credential
+Params: properties: a json object with all the properties of the ticket
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createTicket.py
+
+---
+Name: Get Ticket
+Description: Retrieves a ticket by ID from the HubSpot CRM
+Credential: ./credential
+Params: ticket_id: the ID of the ticket to retrieve
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getTicket.py
+
+---
+Name: Delete Ticket
+Description: Deletes a ticket by ID from the HubSpot CRM
+Credential: ./credential
+Params: ticket_id: the ID of the ticket to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteTicket.py
+
+---
+Name: Update Ticket
+Description: Updates an existing ticket in the HubSpot CRM by ID
+Credential: ./credential
+Params: ticket_id: the ID of the ticket to update
+Params: properties: a json object with all the properties of the ticket
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateTicket.py
+
+---
+Name: Search Tickets
+Description: Searches for tickets in the HubSpot CRM
+Credential: ./credential
+Params: filters: a json object with one or more keys in the format `{"<PROPERTY_NAME>":"<VALUE_TO_SEARCH_FOR>"}`. Each key in the json must be a valid property name returned by the 'HubSpot CRM Get Properties' tool.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchTickets.py

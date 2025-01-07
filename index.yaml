@@ -22,6 +22,9 @@ tools:
   bluesky:
     reference: ./bluesky
     all: true
+  hubspot-crm:
+    reference: ./hubspot/crm
+    all: true
   slack:
     reference: ./slack
     all: true

@@ -1,0 +1,52 @@
+Name: HubSpot CRM Deals
+Description: Work with deals in the HubSpot CRM
+Tools: Create Deal, Get Deal, Delete Deal, Update Deal, Search Deals
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: ./associations.gpt, ./properties.gpt, ./owners.gpt
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: Create Deal
+Description: Creates a new deal in the HubSpot CRM
+Credential: ./credential
+Params: properties: a json object with all the properties of the deal
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createDeal.py
+
+---
+Name: Get Deal
+Description: Retrieves a deal by ID from the HubSpot CRM
+Credential: ./credential
+Params: deal_id: the ID of the deal to retrieve
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getDeal.py
+
+---
+Name: Delete Deal
+Description: Deletes a deal by ID from the HubSpot CRM
+Credential: ./credential
+Params: deal_id: the ID of the deal to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteDeal.py
+
+---
+Name: Update Deal
+Description: Updates an existing deal in the HubSpot CRM by ID
+Credential: ./credential
+Params: deal_id: the ID of the deal to update
+Params: properties: a json object with all the properties of the deal
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateDeal.py
+
+---
+Name: Search Deals
+Description: Searches for deals in the HubSpot CRM
+Credential: ./credential
+Params: filters: a json object with one or more keys in the format `{"<PROPERTY_NAME>":"<VALUE_TO_SEARCH_FOR>"}`. Each key in the json must be a valid property name returned by the 'HubSpot CRM Get Properties' tool.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchDeals.py

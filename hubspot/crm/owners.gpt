@@ -1,0 +1,25 @@
+Name: HubSpot CRM Owners
+Description: Work with owners in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: HubSpot CRM List All Owners, HubSpot CRM Get Owner
+Params: prompt: detailed request to be executed against the HubSpot API
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: HubSpot CRM List All Owners
+Description: Lists all the Owners in HubSpot who can have resources assigned to them.
+Credential: ./credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listOwners.py
+
+
+---
+Name: HubSpot CRM Get Owner
+Description: Retrieve a HubSpot CRM Owner by ID
+Credential: ./credential
+Params: owner_id: The ID of the owner to retrieve
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getOwner.py

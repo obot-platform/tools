@@ -1,0 +1,52 @@
+Name: HubSpot CRM Companies
+Description: Work with companies in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: Create Company,  Get Company, Delete Company, Update Company, Search Companies
+Tools: ./associations.gpt, ./properties.gpt, ./owners.gpt
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: Create Company
+Description: Creates a new company/lead in the HubSpot CRM
+Credential: ./credential
+Params: properties: a json object with all the properties of the company
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createCompany.py
+
+---
+Name: Get Company
+Description: Retrieves a company by ID from the HubSpot CRM
+Credential: ./credential
+Params: company_id: the ID of the company to retrieve
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getCompany.py
+
+---
+Name: Delete Company
+Description: Deletes a company by ID from the HubSpot CRM
+Credential: ./credential
+Params: company_id: the ID of the company to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteCompany.py
+
+---
+Name: Update Company
+Description: Updates an existing company in the HubSpot CRM by ID
+Credential: ./credential
+Params: company_id: the ID of the company to update
+Params: properties: a json object with all the properties of the company
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateCompany.py
+
+---
+Name: Search Companies
+Description: Searches for companies in the HubSpot CRM
+Credential: ./credential
+Params: filters: a json object with one or more keys in the format `{"<PROPERTY_NAME>":"<VALUE_TO_SEARCH_FOR>"}`. Each key in the json must be a valid property name returned by the 'HubSpot CRM Get Properties' tool.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchCompanies.py

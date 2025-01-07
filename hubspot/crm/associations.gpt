@@ -1,0 +1,40 @@
+Name: HubSpot CRM Associations
+Description: Work with associations between objects in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: Get Association Type From Object ID, Get AssociationType ID, Create Association
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: Get Association Type From Object ID
+Description: Gets a list of associations of a certain type for a given object ID. For example, to get all contacts associated with a company, you would set from_object_type to 'company' and to_object_type to 'contact'. from_object_id would be the ID of the company in HubSpot.
+Credential: ./credential
+Params: from_object_type: The type of object we want to get associations from
+Params: from_object_id: The ID of the object we want to get associations from
+Params: to_object_type: The type of object we want to get associations to.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getAssociationsFromObjectToType.py
+
+---
+name: Get AssociationType ID
+Description: This tool returns the correct Id number and category for a HubSpot associationTypeId
+Credential: ./credential
+params: from_object_type: The name of the object type that is being mapped from
+params: to_object_type: The name of the object type that is being mapped to
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getAssociationTypeIdFromObjectToObject.py
+
+---
+name: Create Association
+description: Creates an association between two objects in HubSpot
+Credential: ./credential
+params: from_object_type: the type of the object that is being associated from - such as contact, company, deal, etc
+params: from_object_id: the ID of the object that is being associated from
+params: to_object_type: the type of the object that is being associated to - such as contact, company, deal, etc
+params: to_object_id: the ID of the object that is being associated to
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/createAssociation.py

@@ -1,0 +1,37 @@
+Name: HubSpot CRM Lists
+Description: Work with Lists in the HubSpot CRM
+Share Context: HubSpot CRM Context from ./tool.gpt
+Tools: HubSpot CRM Search Lists, HubSpot CRM Get List, HubSpot CRM Update List Membership
+Tools: ./contacts.gpt, ./owners.gpt
+Params: prompt: detailed request to be executed against the HubSpot API
+
+
+Fulfill the users request: ${PROMPT}
+
+Use the tools available to you.
+
+---
+Name: HubSpot CRM Search Lists
+Description: Search for a list by name
+Credential: ./credential
+Params: search_terms: search terms to find a list by name
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchLists.py
+
+---
+Name: HubSpot CRM Get List
+Description: Get a  List by ID
+Credential: ./credential
+Params: list_id: the ID of the list to retrieve
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getList.py
+
+---
+Name: HubSpot CRM Update List Membership
+Description: Add and Remove contacts from a list
+Credential: ./credential
+Params: list_id: the ID of the list to update
+Params: add_contacts: a comma-delimited list of contact IDs to add to the list
+Params: remove_contacts: a comma-delimited list of contact IDs to remove from the list
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateListMembers.py
