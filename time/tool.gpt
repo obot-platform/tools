@@ -10,9 +10,12 @@ Description: Context that provides the current date and time in ISO 8601 format.
 Type: context
 
 #!python3
-from datetime import datetime, timezone
+import os
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
-print("The current date and time is ", datetime.now(timezone.utc).isoformat())
+timezone = ZoneInfo(os.getenv('OBOT_USER_TIMEZONE', 'UTC'))
+print(f"The current local date and time for the user is {datetime.now(timezone).isoformat()}")
 
 ---
 Name: User Timezone
@@ -24,7 +27,7 @@ Type: context
 import os
 
 timezone = os.getenv('OBOT_USER_TIMEZONE', 'UTC')
-print(f"The user's preferred time zone is {timezone}")
+print(f"The user's preferred time zone is {timezone}.")
 
 ---
 !metadata:*:category
