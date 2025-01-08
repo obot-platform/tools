@@ -4,7 +4,7 @@ import sys
 import json
 from tools.users import get_user
 from tools.meetings import create_meeting, list_meeting_templates, get_meeting, delete_meeting, update_meeting, list_meetings, list_upcoming_meetings, get_meeting_invitation
-
+from tools.recordings import get_meeting_recordings, list_user_recordings
 tool_map = {
     "GetUser": get_user,
     "CreateMeeting": create_meeting,
@@ -15,6 +15,8 @@ tool_map = {
     "ListMeetings": list_meetings,
     "ListUpcomingMeetings": list_upcoming_meetings,
     "GetMeetingInvitation": get_meeting_invitation,
+    "GetMeetingRecordings": get_meeting_recordings,
+    "ListUserRecordings": list_user_recordings,
 }
 
 def main():
