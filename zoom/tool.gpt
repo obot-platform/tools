@@ -139,6 +139,7 @@ Share Context: Zoom Context
 ---
 Name: Zoom Context
 Type: context
+Share Context: ../time
 
 #!sys.echo
 
