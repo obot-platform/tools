@@ -2,7 +2,7 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings
+Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, Get Meeting Invitation
 
 ---
 Name: Get User
@@ -14,10 +14,9 @@ Share Context: Zoom Context
 
 ---
 Name: Create Meeting
-Description: Create a meeting.
+Description: Use this tool to create a zoom meeting. 
 Credential: ./credential
 Share Context: Zoom Context
-Param: schedule_for: The email address or user ID of the user to schedule a meeting for.
 Param: meeting_invitees: Optional. A list of emails separated by commas
 Param: agenda: Optional. The agenda of the meeting, less than 2000 characters
 Param: default_password: Optional. Defaults to false. Whether to use the default password
@@ -25,16 +24,41 @@ Param: duration: Optional. Defaults to 60. The duration of the meeting in minute
 Param: password: Optional. The password for the meeting, if not provided, a random password will be generated
 Param: pre_schedule: Optional. Defaults to false. Whether to create a prescheduled meeting. This only supports the meeting type value of 2 (scheduled meetings) and 3 (recurring meetings with no fixed time).
 Param: audio_recording: Optional. none, local or cloud. Defaults to none. The audio recording setting for the meeting
-Param: contact_email: Optional. Defaults to empty. The email of the contact for the meeting
-Param: contact_name: Optional. Defaults to empty. The name of the contact for the meeting
+Param: contact_email: Optional. Defaults to empty. The email of the contact for the meeting, should be user's email
+Param: contact_name: Optional. Defaults to empty. The name of the contact for the meeting, should be user's name
 Param: private_meeting: Optional. Defaults to false. Whether the meeting is private
 Param: start_time: Optional. The meeting's start time. This field is only used for scheduled or recurring meetings with a fixed time. This supports local time and GMT formats.To set a meeting's start time in GMT, use the yyyy-MM-ddTHH:mm:ssZ date-time format. For example, 2020-03-31T12:02:00Z. To set a meeting's start time using a specific timezone, use the yyyy-MM-ddTHH:mm:ss date-time format and specify the timezone ID in the timezone field. If you do not specify a timezone, the timezone value defaults to your Zoom account's timezone. You can also use UTC for the timezone value. Note: If no start_time is set for a scheduled meeting, the start_time is set at the current time and the meeting type changes to an instant meeting, which expires after 30 days.
 Param: meeting_template_id: Optional. Defaults to empty. The ID of the meeting template to use.
-Param: timezone: Optional. The timezone of the meeting, if not provided, the meeting will be created in the user's account timezone. available options: en-GB - English (UK), en-US - English (US), ar - Arabic, da-DK - Danish (Denmark), de-DE - German (Germany), es-ES - Spanish (Spain), es-MX - Spanish (Mexico), fr-CA - French (Canada), fr-FR - French (France), it-IT - Italian (Italy), ja - Japanese, ko-KR - Korean (Korea), nl-NL - Dutch (Netherlands), pt-BR - Portuguese (Brazil), pt-PT - Portuguese (Portugal), ru - Russian, zh-CN - Chinese (PRC), zh-HK - Chinese (Hong Kong)
+Param: timezone: Optional. The timezone of the meeting, if not provided, the meeting will be created in the user's account timezone. Use format like `en-US`. Available options: en-GB - English (UK), en-US - English (US), ar - Arabic, da-DK - Danish (Denmark), de-DE - German (Germany), es-ES - Spanish (Spain), es-MX - Spanish (Mexico), fr-CA - French (Canada), fr-FR - French (France), it-IT - Italian (Italy), ja - Japanese, ko-KR - Korean (Korea), nl-NL - Dutch (Netherlands), pt-BR - Portuguese (Brazil), pt-PT - Portuguese (Portugal), ru - Russian, zh-CN - Chinese (PRC), zh-HK - Chinese (Hong Kong)
 Param: topic: Optional. Defaults to empty. The topic of the meeting, up to 2000 characters
-Param: meeting_type: Optional. Defaults to 2. The type of the meeting. 1 for instant meeting, 2 for scheduled meeting, 3 for recurring meeting with no fixed time, 8 for recurring meeting with fixed time, 10 for screen share only meeting
+Param: meeting_type: Optional. Defaults to 2(scheduled meeting). The type of the meeting: 1 for instant meeting, 2 for scheduled meeting, 3 for recurring meeting with no fixed time, 8 for recurring meeting with fixed time, 10 for screen share only meeting
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreateMeeting
+
+---
+Name: Update Meeting
+Description: Use this tool to update some fields of a zoom meeting. Only specify the fields you want to update.
+Credential: ./credential
+Share Context: Zoom Context
+Param: meeting_id: The ID of the meeting to update
+Param: meeting_invitees: Optional. A list of emails separated by commas. This will overwrite the existing invitees, so if you want to add more invitees, you need to provide the full list of invitees including the existing ones.
+Param: agenda: Optional. The agenda of the meeting, less than 2000 characters
+Param: default_password: Optional. Whether to use the default password
+Param: duration: Optional. The duration of the meeting in minutes
+Param: password: Optional. The password for the meeting, if not provided, a random password will be generated
+Param: pre_schedule: Optional. Whether to create a prescheduled meeting. This only supports the meeting type value of 2 (scheduled meetings) and 3 (recurring meetings with no fixed time).
+Param: audio_recording: Optional. none, local or cloud. The audio recording setting for the meeting
+Param: contact_email: Optional.  The email of the contact for the meeting, should be user's email
+Param: contact_name: Optional.  The name of the contact for the meeting, should be user's name
+Param: private_meeting: Optional. Whether the meeting is private
+Param: start_time: Optional. The meeting's start time. This field is only used for scheduled or recurring meetings with a fixed time. This supports local time and GMT formats.To set a meeting's start time in GMT, use the yyyy-MM-ddTHH:mm:ssZ date-time format. For example, 2020-03-31T12:02:00Z. To set a meeting's start time using a specific timezone, use the yyyy-MM-ddTHH:mm:ss date-time format and specify the timezone ID in the timezone field. If you do not specify a timezone, the timezone value defaults to your Zoom account's timezone. You can also use UTC for the timezone value. Note: If no start_time is set for a scheduled meeting, the start_time is set at the current time and the meeting type changes to an instant meeting, which expires after 30 days.
+Param: meeting_template_id: Optional. The ID of the meeting template to use.
+Param: timezone: Optional. The timezone of the meeting, if not provided, the meeting will be created in the user's account timezone. available options: en-GB - English (UK), en-US - English (US), ar - Arabic, da-DK - Danish (Denmark), de-DE - German (Germany), es-ES - Spanish (Spain), es-MX - Spanish (Mexico), fr-CA - French (Canada), fr-FR - French (France), it-IT - Italian (Italy), ja - Japanese, ko-KR - Korean (Korea), nl-NL - Dutch (Netherlands), pt-BR - Portuguese (Brazil), pt-PT - Portuguese (Portugal), ru - Russian, zh-CN - Chinese (PRC), zh-HK - Chinese (Hong Kong)
+Param: topic: Optional. The topic of the meeting, up to 2000 characters
+Param: meeting_type: Optional. The type of the meeting. 1 for instant meeting, 2 for scheduled meeting, 3 for recurring meeting with no fixed time, 8 for recurring meeting with fixed time, 10 for screen share only meeting
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdateMeeting
+
 
 ---
 Name: List Meeting Templates
@@ -70,7 +94,22 @@ Share Context: Zoom Context
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListMeetings
 
+---
+Name: Get Meeting Invitation
+Description: Retrieve the meeting invitation note for a specific meeting.
+Credential: ./credential
+Share Context: Zoom Context
+Param: meeting_id: The ID of the meeting to get the invitation for
 
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingInvitation
+
+---
+Name: List Upcoming Meetings
+Description: List all upcoming meetings hosted by the current user.
+Credential: ./credential
+Share Context: Zoom Context
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListUpcomingMeetings
 
 ---
 Name: Zoom Context

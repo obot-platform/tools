@@ -79,7 +79,7 @@ def create_meeting():
     if password == "":
         password = generate_password()
     pre_schedule = str_to_bool(os.getenv("PRE_SCHEDULE", "false"))
-    schedule_for = os.environ["SCHEDULE_FOR"]
+    # schedule_for = os.environ["SCHEDULE_FOR"] # only for account level app
     audio_recording = os.getenv("AUDIO_RECORDING", "none")
     contact_email = os.getenv("CONTACT_EMAIL", "")
     contact_name = os.getenv("CONTACT_NAME", "")
@@ -101,7 +101,6 @@ def create_meeting():
         "duration": duration,
         "password": password,
         "pre_schedule": pre_schedule,
-        "schedule_for": schedule_for,
         "settings": {
             "allow_multiple_devices": True,
             "approval_type": 2,
@@ -115,7 +114,7 @@ def create_meeting():
             "email_notification": True,
             "encryption_type": "enhanced_encryption",
             "focus_mode": True,
-            "global_dial_in_countries": ["US"],
+            # "global_dial_in_countries": ["US"], # Only supported for non-basic accounts
             "host_video": True,
             "in_meeting": False,
             "jbh_time": 0,
@@ -162,12 +161,12 @@ def create_meeting():
     }
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_SECRET_TOKEN"
+        "Authorization": f"Bearer {ACCESS_TOKEN}"
     }
 
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 201:
-        raise Exception(f"Error creating meeting: {response.json()}")   
+        return {"message": f"Error creating meeting: {response.text}"}   
     return response.json()
 
 
@@ -179,7 +178,7 @@ def get_meeting():
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Exception(f"Error getting meeting: {response.json()}")
+        return {"message": f"Error getting meeting: {response.text}"}
     return response.json()
 
 
@@ -191,8 +190,9 @@ def delete_meeting():
     }
     response = requests.delete(url, headers=headers)
     if response.status_code != 204:
-        raise Exception(f"Error deleting meeting: {response.json()}")
-    return response.json()
+        return {"message": f"Error deleting meeting: {response.text}"}
+    
+    return {"message": f"successfully deleted meeting, ID: {meeting_id}"}
 
 
 def list_meetings():
@@ -202,108 +202,126 @@ def list_meetings():
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Exception(f"Error listing meetings: {response.json()}")
+        return {"message": f"Error listing meetings: {response.text}"}
+    return response.json()
+
+
+def list_upcoming_meetings():
+    url = f"{ZOOM_API_URL}/users/me/upcoming_meetings"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {"message": f"Error listing upcoming meetings: {response.text}"}
+    return response.json()
+
+
+def get_meeting_invitation():
+    meeting_id = os.environ["MEETING_ID"]
+    url = f"{ZOOM_API_URL}/meetings/{meeting_id}/invitation"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {"message": f"Error getting meeting invitation: {response.text}"}
     return response.json()
 
 
 def update_meeting():
     meeting_id = os.environ["MEETING_ID"]
+    previous_meeting_payload = get_meeting()
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
-    meeting_invitees = os.getenv("MEETING_INVITEES", "") # a list of emails separated by commas
-    if meeting_invitees != "" and not validate_invitees(meeting_invitees.split(",")):
-        raise ValueError(f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas.")
-    agenda = os.getenv("AGENDA", "My Meeting")
-    default_password = str_to_bool(os.getenv("DEFAULT_PASSWORD", "false"))
-    duration = int(os.getenv("DURATION", 60))
-    password = os.getenv("PASSWORD", "123456")
-    pre_schedule = str_to_bool(os.getenv("PRE_SCHEDULE", "false"))
-    audio_recording = os.getenv("AUDIO_RECORDING", "none")
-    contact_email = os.getenv("CONTACT_EMAIL", "")
-    contact_name = os.getenv("CONTACT_NAME", "")
-    private_meeting = str_to_bool(os.getenv("PRIVATE_MEETING", "false"))
-    start_time = os.getenv("START_TIME", "")
-    if start_time != "" and not validate_meeting_start_time(start_time):
-        raise ValueError(f"Invalid start time format: {start_time}. Must be in GMT or local timezone format.")
-    meeting_template_id = os.getenv("MEETING_TEMPLATE_ID", "")
-    timezone = os.getenv("TIMEZONE", "")
-    topic = os.getenv("TOPIC", "")
-    meeting_type = int(os.getenv("MEETING_TYPE", 2))
-    if meeting_type not in meeting_types:
-        raise ValueError(f"Invalid meeting type: {meeting_type}. Must be one of: {meeting_types.keys()}")
-    # TODO: support recurrence and more settings in the future
-    payload = {
-        "agenda": agenda,
-        "default_password": default_password,
-        "duration": duration,
-        "password": password,
-        "pre_schedule": pre_schedule,
-        "settings": {
-            "allow_multiple_devices": True,
-            "approval_type": 2,
-            "audio": "both",
-            "auto_recording": audio_recording,
-            "calendar_type": 1,
-            "close_registration": False,
-            "cn_meeting": False,
-            "contact_email": contact_email,
-            "contact_name": contact_name,
-            "email_notification": True,
-            "encryption_type": "enhanced_encryption",
-            "focus_mode": True,
-            "global_dial_in_countries": ["US"],
-            "host_video": True,
-            "in_meeting": False,
-            "jbh_time": 0,
-            "join_before_host": True,
-            "question_and_answer": {
-                "enable": True,
-                "allow_submit_questions": True,
-                "allow_anonymous_questions": True,
-                "question_visibility": "all",
-                "attendees_can_comment": True,
-                "attendees_can_upvote": True
-            },
-            "meeting_authentication": False,
-            "meeting_invitees": [{"email": invitee} for invitee in meeting_invitees.split(",")],
-            "mute_upon_entry": True,
-            "participant_video": False,
-            "private_meeting": private_meeting,
-            "registrants_confirmation_email": True,
-            "registrants_email_notification": True,
-            "registration_type": 1,
-            "show_share_button": True,
-            "use_pmi": False,
-            "waiting_room": False,
-            "watermark": False,
-            "host_save_video_order": True,
-            "alternative_host_update_polls": True,
-            "internal_meeting": False,
-            "continuous_meeting_chat": {
-                "enable": True,
-                "auto_add_invited_external_users": True,
-                "auto_add_meeting_participants": True
-            },
-            "participant_focused_meeting": False,
-            "push_change_to_calendar": False,
-            "auto_start_meeting_summary": False,
-            "auto_start_ai_companion_questions": False,
-            "device_testing": False
-        },
-        "start_time": start_time,
-        "template_id": meeting_template_id,
-        "timezone": timezone,
-        "topic": topic,
-        "type": meeting_type
-    }
+    
+    payload = {}
+    settings = {}
+    if "MEETING_INVITEES" in os.environ:
+        meeting_invitees = os.environ["MEETING_INVITEES"] # a list of emails separated by commas
+        if meeting_invitees != "" and not validate_invitees(meeting_invitees.split(",")):
+            raise ValueError(f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas.")
+        meeting_invitees_list = [{"email": invitee} for invitee in meeting_invitees.split(",")]
+        if meeting_invitees_list != previous_meeting_payload["settings"]["meeting_invitees"]:
+            settings["meeting_invitees"] = meeting_invitees_list
+    
+    
+    if "AGENDA" in os.environ:
+        agenda = os.environ["AGENDA"]
+        if agenda != previous_meeting_payload["agenda"]:
+            payload["agenda"] = agenda
+    if "DEFAULT_PASSWORD" in os.environ:
+        default_password = str_to_bool(os.environ["DEFAULT_PASSWORD"])
+        if default_password != previous_meeting_payload["default_password"]:
+            payload["default_password"] = default_password
+    if "DURATION" in os.environ:
+        duration = int(os.environ["DURATION"])
+        if duration != previous_meeting_payload["duration"]:
+            payload["duration"] = duration
+    if "PASSWORD" in os.environ:
+        password = os.environ["PASSWORD"]
+        if password == "":
+            password = generate_password()
+        if password != previous_meeting_payload["password"]:
+            payload["password"] = password
+    if "PRE_SCHEDULE" in os.environ:
+        pre_schedule = str_to_bool(os.environ["PRE_SCHEDULE"])
+        if pre_schedule != previous_meeting_payload["pre_schedule"]:
+            payload["pre_schedule"] = pre_schedule
+    # schedule_for = os.environ["SCHEDULE_FOR"] # only for account level app
+    if "AUDIO_RECORDING" in os.environ:
+        audio_recording = os.environ["AUDIO_RECORDING"]
+        if audio_recording != previous_meeting_payload["settings"]["auto_recording"]:
+            settings["auto_recording"] = audio_recording
+    if "CONTACT_EMAIL" in os.environ:
+        contact_email = os.environ["CONTACT_EMAIL"]
+        if contact_email != previous_meeting_payload["settings"]["contact_email"]:
+            settings["contact_email"] = contact_email
+    if "CONTACT_NAME" in os.environ:
+        contact_name = os.environ["CONTACT_NAME"]
+        if contact_name != previous_meeting_payload["settings"]["contact_name"]:
+            settings["contact_name"] = contact_name
+    if "PRIVATE_MEETING" in os.environ:
+        private_meeting = str_to_bool(os.environ["PRIVATE_MEETING"])
+        if private_meeting != previous_meeting_payload["settings"]["private_meeting"]:
+            settings["private_meeting"] = private_meeting
+    if "START_TIME" in os.environ:
+        start_time = os.environ["START_TIME"]
+        if start_time != "" and not validate_meeting_start_time(start_time):
+            raise ValueError(f"Invalid start time format: {start_time}. Must be in GMT or local timezone format.")
+        if start_time != previous_meeting_payload["start_time"]:
+            payload["start_time"] = start_time
+    if "MEETING_TEMPLATE_ID" in os.environ:
+        meeting_template_id = os.environ["MEETING_TEMPLATE_ID"]
+        if meeting_template_id != previous_meeting_payload["template_id"]:
+            payload["template_id"] = meeting_template_id
+    if "TIMEZONE" in os.environ:
+        timezone = os.environ["TIMEZONE"]
+        if timezone != previous_meeting_payload["timezone"]:
+            payload["timezone"] = timezone
+    if "TOPIC" in os.environ:
+        topic = os.environ["TOPIC"]
+        if topic != previous_meeting_payload["topic"]:
+            payload["topic"] = topic
+
+    if "MEETING_TYPE" in os.environ:
+        meeting_type = int(os.environ["MEETING_TYPE"])
+        if meeting_type not in meeting_types:
+            raise ValueError(f"Invalid meeting type: {meeting_type}. Must be one of: {meeting_types.keys()}")
+        if meeting_type != previous_meeting_payload["type"]:
+            payload["type"] = meeting_type
+            
+    if settings:
+        payload["settings"] = settings
+        
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_SECRET_TOKEN"
+        "Authorization": f"Bearer {ACCESS_TOKEN}"
     }
 
     response = requests.patch(url, json=payload, headers=headers)
     if response.status_code != 204:
-        raise Exception(f"Error updating meeting: {response.json()}")   
-    return response.json()
+        return {"message": f"Error updating meeting: {response.text}"}   
+    return {"message": "successfully updated meeting"}
 
 
 def list_meeting_templates():
@@ -313,5 +331,5 @@ def list_meeting_templates():
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Exception(f"Error listing meeting templates: {response.json()}")
+        return {"message": f"Error listing meeting templates: {response.text}"}
     return response.json()
