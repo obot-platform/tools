@@ -9,3 +9,10 @@ Credential: ../model-provider-credential as deepseek-model-provider
 ---
 !metadata:*:icon
 /admin/assets/deepseek-logo.svg
+
+---
+Name: validate
+Description: Validate the DeepSeek API key
+Metadata: envVars: OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY
+
+#!${GPTSCRIPT_TOOL_DIR}/validate/bin/gptscript-go-tool
