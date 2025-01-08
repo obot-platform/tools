@@ -102,3 +102,7 @@ Google Sheets
 ---
 !metadata:*:icon
 /admin/assets/google_sheets_icon_small.png
+
+---
+!metadata:*:oauth
+google

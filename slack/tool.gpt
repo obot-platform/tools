@@ -209,3 +209,7 @@ Slack
 ---
 !metadata:*:icon
 /admin/assets/slack_icon_small.svg
+
+---
+!metadata:*:oauth
+slack

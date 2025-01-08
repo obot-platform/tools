@@ -234,3 +234,7 @@ GitHub
 ---
 !metadata:*:icon
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg
+
+---
+!metadata:*:oauth
+github

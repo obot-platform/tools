@@ -140,3 +140,7 @@ Outlook Mail
 ---
 !metadata:*:icon
 /admin/assets/outlook_icon_small.svg
+
+---
+!metadata:*:oauth
+microsoft365

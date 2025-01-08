@@ -230,3 +230,7 @@ Salesforce
 ---
 !metadata:*:icon
 /admin/assets/salesforce_logo.png
+
+---
+!metadata:*:oauth
+salesforce

@@ -35,3 +35,7 @@ Google Docs
 ---
 !metadata:*:icon
 /admin/assets/google_docs_icon_small.png
+
+---
+!metadata:*:oauth
+google

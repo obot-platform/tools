@@ -117,3 +117,7 @@ Notion
 ---
 !metadata:*:icon
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/notion.svg
+
+---
+!metadata:*:oauth
+notion
