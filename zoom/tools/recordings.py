@@ -1,8 +1,9 @@
-from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool
+from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool, tool_registry
 import requests
 import os
 import re
 
+@tool_registry.decorator("GetMeetingRecordings")
 def get_meeting_recordings():
     meeting_id = os.environ["MEETING_ID"]
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}/recordings"
@@ -15,6 +16,7 @@ def get_meeting_recordings():
     return response.json()
 
 
+@tool_registry.decorator("ListUserRecordings")
 def list_user_recordings():
     url = f"{ZOOM_API_URL}/users/me/recordings"
     headers = {

@@ -1,7 +1,9 @@
-from tools.helper import ZOOM_API_URL, ACCESS_TOKEN
+from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, tool_registry
 import requests
 import os
 
+
+@tool_registry.decorator("GetUser")
 def get_user():
     url = f"{ZOOM_API_URL}/users/me"
     headers = {
