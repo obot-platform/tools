@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -43,7 +44,8 @@ func main() {
 func validateAPIKey(apiKey string) error {
 	req, err := http.NewRequest("GET", "https://api.deepseek.com/v1/models", nil)
 	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+		log.Printf("Error creating request: %v", err)
+		return fmt.Errorf("failed to initialize validation")
 	}
 
 	req.Header.Set("Authorization", "Bearer "+apiKey)
@@ -52,30 +54,36 @@ func validateAPIKey(apiKey string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
+		log.Printf("Error making request: %v", err)
+		return fmt.Errorf("failed to connect to DeepSeek API")
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
+		log.Printf("Error reading response body: %v", err)
+		return fmt.Errorf("failed to process API response")
 	}
 
 	if resp.StatusCode != 200 {
 		var errResp ErrorResponse
 		if err := json.Unmarshal(body, &errResp); err == nil && errResp.Error.Message != "" {
-			return fmt.Errorf("%s", errResp.Error.Message)
+			log.Printf("DeepSeek API error: %s (Type: %s)", errResp.Error.Message, errResp.Error.Type)
+			return fmt.Errorf("authentication failed")
 		}
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		log.Printf("Unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("API validation failed")
 	}
 
 	var modelsResp ModelsResponse
 	if err := json.Unmarshal(body, &modelsResp); err != nil {
-		return fmt.Errorf("failed to parse response: %w", err)
+		log.Printf("Error parsing response: %v, body: %s", err, string(body))
+		return fmt.Errorf("failed to process API response")
 	}
 
 	if len(modelsResp.Data) == 0 {
-		return fmt.Errorf("no models found in response")
+		log.Printf("No models found in response: %s", string(body))
+		return fmt.Errorf("invalid API response")
 	}
 
 	return nil
