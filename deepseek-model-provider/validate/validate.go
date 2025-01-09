@@ -7,14 +7,28 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
-// Run performs the validation of the DeepSeek API key
+const loggerPath = "/tools/deepseek-model-provider/validate"
+
+func init() {
+	log.SetFlags(0)
+}
+
+func logInfo(msg string) {
+	log.Printf("time=%q level=info msg=%q logger=%s", time.Now().Format(time.RFC3339), msg, loggerPath)
+}
+
+func logError(msg string, args ...any) {
+	log.Printf("time=%q level=error msg=%q %s logger=%s", time.Now().Format(time.RFC3339), msg, fmt.Sprint(args...), loggerPath)
+}
+
 func Run(apiKey string) error {
 	if err := validateAPIKey(apiKey); err != nil {
 		return err
 	}
-	fmt.Println("Credentials are valid")
+	logInfo("Credentials are valid")
 	return nil
 }
 
@@ -37,7 +51,7 @@ type ModelsResponse struct {
 func validateAPIKey(apiKey string) error {
 	req, err := http.NewRequest("GET", "https://api.deepseek.com/v1/models", nil)
 	if err != nil {
-		log.Printf("Error creating request: %v", err)
+		logError("Failed to create request", fmt.Sprintf("error=%q", err))
 		return fmt.Errorf("failed to initialize validation")
 	}
 
@@ -47,42 +61,45 @@ func validateAPIKey(apiKey string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error making request: %v", err)
+		logError("Failed to make request", fmt.Sprintf("error=%q", err))
 		return fmt.Errorf("failed to connect to DeepSeek API")
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		logError("Failed to read response body", fmt.Sprintf("error=%q", err))
 		return fmt.Errorf("failed to process API response")
 	}
 
 	if resp.StatusCode != 200 {
 		var errResp ErrorResponse
 		if err := json.Unmarshal(body, &errResp); err == nil && errResp.Error.Message != "" {
-			log.Printf("DeepSeek API error: %s (Type: %s)", errResp.Error.Message, errResp.Error.Type)
+			logError("Authentication failed",
+				fmt.Sprintf("error=%q type=%s", errResp.Error.Message, errResp.Error.Type))
 			return fmt.Errorf("authentication failed")
 		}
-		log.Printf("Unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+		logError("Unexpected status code",
+			fmt.Sprintf("status=%d body=%q", resp.StatusCode, string(body)))
 		return fmt.Errorf("API validation failed")
 	}
 
 	var modelsResp ModelsResponse
 	if err := json.Unmarshal(body, &modelsResp); err != nil {
-		log.Printf("Error parsing response: %v, body: %s", err, string(body))
+		logError("Failed to parse response",
+			fmt.Sprintf("error=%q body=%q", err, string(body)))
 		return fmt.Errorf("failed to process API response")
 	}
 
 	if len(modelsResp.Data) == 0 {
-		log.Printf("No models found in response: %s", string(body))
+		logError("No models found in response", fmt.Sprintf("body=%q", string(body)))
 		return fmt.Errorf("invalid API response")
 	}
 
 	return nil
 }
 
-func printError(msg string) {
+func PrintError(msg string) {
 	json.NewEncoder(os.Stdout).Encode(map[string]string{
 		"error": msg,
 	})
