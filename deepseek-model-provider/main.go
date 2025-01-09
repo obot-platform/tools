@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/obot-platform/tools/xai-model-provider/server"
+	"github.com/obot-platform/tools/deepseek-model-provider/server"
 )
 
 func main() {
