@@ -6,7 +6,7 @@ Model Provider: true
 Credential: ../model-provider-credential as gemini-vertex-model-provider
 
 
-#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
 !metadata:*:icon
@@ -18,4 +18,4 @@ Description: Validate the credentials for the Google Gemini Vertex AI Model Prov
 Metadata: envVars: OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON
 Metadata: optionalEnvVars: OBOT_GEMINI_VERTEX_MODEL_PROVIDER_PROJECT_ID
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/validate.py
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate

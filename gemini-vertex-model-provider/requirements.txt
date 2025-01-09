@@ -1,4 +1,0 @@
-fastapi
-uvicorn[standard]
-openai
-google-cloud-aiplatform
