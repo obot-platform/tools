@@ -6,9 +6,8 @@ from auth import gspread_client
 
 async def main():
     spreadsheet_id = os.getenv('SPREADSHEET_ID')
-    spreadsheet_name = os.getenv('SPREADSHEET_NAME')
-    if spreadsheet_id is None and spreadsheet_name is None:
-        raise ValueError("Either spreadsheet_id or spreadsheet_name parameter must be set")
+    if spreadsheet_id is None:
+        raise ValueError("spreadsheet_id parameter must be set")
 
     range = os.getenv('RANGE')
     if range is None:
@@ -20,7 +19,7 @@ async def main():
 
     service = gspread_client()
     try:
-        spreadsheet = service.open(spreadsheet_name) if spreadsheet_name is not None else service.open_by_key(
+        spreadsheet = service.open_by_key(
             spreadsheet_id)
 
         if sheet_name is None:
