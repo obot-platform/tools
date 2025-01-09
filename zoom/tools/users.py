@@ -15,4 +15,3 @@ def get_user():
         raise Exception(f"Error fetching user info: {response.json()}")
 
     return response.json()
-

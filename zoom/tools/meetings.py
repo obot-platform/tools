@@ -7,6 +7,7 @@ import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
     try:
         # Parse ISO 8601 string into a naive datetime object
@@ -19,7 +20,9 @@ def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
         local_time = utc_time.astimezone(ZoneInfo(timezone))
 
         # Format the local time as needed
-        output_gmt_format = local_time.strftime("%Y-%m-%dT%H:%M:%S")  # Customize format as necessary
+        output_gmt_format = local_time.strftime(
+            "%Y-%m-%dT%H:%M:%S"
+        )  # Customize format as necessary
         return output_gmt_format
     except Exception as e:
         raise ValueError(f"Error converting time: {e}")
@@ -28,22 +31,22 @@ def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
 def _validate_meeting_start_time(input_time: str) -> bool:
     """
     Validates the input time format for a meeting's start time.
-    
+
     - GMT Format: yyyy-MM-ddTHH:mm:ssZ (e.g., 2020-03-31T12:02:00Z)
     - Local Timezone Format: yyyy-MM-ddTHH:mm:ss (e.g., 2020-03-31T12:02:00)
-    
+
     Args:
         input_time (str): The input string to validate.
-        
+
     Returns:
         bool: True if the input matches one of the valid formats, False otherwise.
     """
     # Regular expression for GMT format (e.g., 2020-03-31T12:02:00Z)
     gmt_format = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
-    
+
     # Regular expression for Local Timezone format (e.g., 2020-03-31T12:02:00)
     local_format = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
-    
+
     # Validate against both formats
     return bool(re.match(gmt_format, input_time) or re.match(local_format, input_time))
 
@@ -51,16 +54,16 @@ def _validate_meeting_start_time(input_time: str) -> bool:
 def _validate_invitees(invitees: list) -> bool:
     """
     Validates a list of meeting invitees to ensure all are valid email addresses.
-    
+
     Args:
         invitees (list): A list of strings to validate as email addresses.
-        
+
     Returns:
         bool: True if all strings in the list are valid emails, False otherwise.
     """
     # Regular expression for validating email addresses
     email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    
+
     # Validate each email in the list
     return all(re.match(email_regex, email) for email in invitees)
 
@@ -68,31 +71,36 @@ def _validate_invitees(invitees: list) -> bool:
 def _generate_password():
     """
     Generates a random 8-character password containing letters and digits.
-    
+
     Returns:
         str: An 8-character random password.
     """
-    characters = string.ascii_letters + string.digits  # Include uppercase, lowercase, and digits
-    password = ''.join(random.choices(characters, k=8))  # Generate 8 random characters
+    characters = (
+        string.ascii_letters + string.digits
+    )  # Include uppercase, lowercase, and digits
+    password = "".join(random.choices(characters, k=8))  # Generate 8 random characters
     return password
 
 
-    
 _meeting_types = {
     1: "An instant meeting",
     2: "A scheduled meeting",
     3: "A recurring meeting with no fixed time",
     8: "A recurring meeting with fixed time",
-    10: "A screen share only meeting"
+    10: "A screen share only meeting",
 }
 
 
 @tool_registry.decorator("CreateMeeting")
 def create_meeting():
     url = f"{ZOOM_API_URL}/users/me/meetings"
-    meeting_invitees = os.getenv("MEETING_INVITEES", "") # a list of emails separated by commas
+    meeting_invitees = os.getenv(
+        "MEETING_INVITEES", ""
+    )  # a list of emails separated by commas
     if meeting_invitees != "" and not _validate_invitees(meeting_invitees.split(",")):
-        raise ValueError(f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas.")
+        raise ValueError(
+            f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
+        )
     agenda = os.getenv("AGENDA", "My Meeting")
     default_password = str_to_bool(os.getenv("DEFAULT_PASSWORD", "false"))
     duration = int(os.getenv("DURATION", 60))
@@ -107,14 +115,18 @@ def create_meeting():
     private_meeting = str_to_bool(os.getenv("PRIVATE_MEETING", "false"))
     start_time = os.getenv("START_TIME", "")
     if start_time != "" and not _validate_meeting_start_time(start_time):
-        raise ValueError(f"Invalid start time format: {start_time}. Must be in GMT or local timezone format.")
+        raise ValueError(
+            f"Invalid start time format: {start_time}. Must be in GMT or local timezone format."
+        )
     meeting_template_id = os.getenv("MEETING_TEMPLATE_ID", "")
     timezone = os.getenv("TIMEZONE", "")
     topic = os.getenv("TOPIC", "")
 
     meeting_type = int(os.getenv("MEETING_TYPE", 2))
     if meeting_type not in _meeting_types:
-        raise ValueError(f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}")
+        raise ValueError(
+            f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}"
+        )
     # TODO: support recurrence and more settings in the future
     payload = {
         "agenda": agenda,
@@ -146,10 +158,12 @@ def create_meeting():
                 "allow_anonymous_questions": True,
                 "question_visibility": "all",
                 "attendees_can_comment": True,
-                "attendees_can_upvote": True
+                "attendees_can_upvote": True,
             },
             "meeting_authentication": False,
-            "meeting_invitees": [{"email": invitee} for invitee in meeting_invitees.split(",")],
+            "meeting_invitees": [
+                {"email": invitee} for invitee in meeting_invitees.split(",")
+            ],
             "mute_upon_entry": True,
             "participant_video": False,
             "private_meeting": private_meeting,
@@ -166,28 +180,28 @@ def create_meeting():
             "continuous_meeting_chat": {
                 "enable": True,
                 "auto_add_invited_external_users": True,
-                "auto_add_meeting_participants": True
+                "auto_add_meeting_participants": True,
             },
             "participant_focused_meeting": False,
             "push_change_to_calendar": False,
             "auto_start_meeting_summary": False,
             "auto_start_ai_companion_questions": False,
-            "device_testing": False
+            "device_testing": False,
         },
         "start_time": start_time,
         "template_id": meeting_template_id,
         "timezone": timezone,
         "topic": topic,
-        "type": meeting_type
+        "type": meeting_type,
     }
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {ACCESS_TOKEN}"
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
 
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 201:
-        return {"message": f"Error creating meeting: {response.text}"}   
+        return {"message": f"Error creating meeting: {response.text}"}
     return response.json()
 
 
@@ -200,14 +214,22 @@ def _get_meeting():
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         raise ValueError(f"Error getting meeting: {response.text}")
-    
+
     return response.json()
+
 
 @tool_registry.decorator("GetMeeting")
 def get_meeting():
     res_json = _get_meeting()
-    if "start_time" in res_json and "timezone" in res_json and res_json["timezone"] != "UTC" and res_json["timezone"] != "":
-        res_json["start_time_local"] = _convert_utc_to_local_time(res_json["start_time"], res_json["timezone"])
+    if (
+        "start_time" in res_json
+        and "timezone" in res_json
+        and res_json["timezone"] != "UTC"
+        and res_json["timezone"] != ""
+    ):
+        res_json["start_time_local"] = _convert_utc_to_local_time(
+            res_json["start_time"], res_json["timezone"]
+        )
         res_json["start_time_utc"] = res_json.pop("start_time")
     return res_json
 
@@ -222,7 +244,7 @@ def delete_meeting():
     response = requests.delete(url, headers=headers)
     if response.status_code != 204:
         return {"message": f"Error deleting meeting: {response.text}"}
-    
+
     return {"message": f"successfully deleted meeting, ID: {meeting_id}"}
 
 
@@ -235,11 +257,18 @@ def list_meetings():
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return {"message": f"Error listing meetings: {response.text}"}
-    
+
     res_json = response.json()
     for meeting in res_json["meetings"]:
-        if "start_time" in meeting and "timezone" in meeting and meeting["timezone"] != "UTC" and meeting["timezone"] != "":
-            meeting["start_time_local"] = _convert_utc_to_local_time(meeting["start_time"], meeting["timezone"])
+        if (
+            "start_time" in meeting
+            and "timezone" in meeting
+            and meeting["timezone"] != "UTC"
+            and meeting["timezone"] != ""
+        ):
+            meeting["start_time_local"] = _convert_utc_to_local_time(
+                meeting["start_time"], meeting["timezone"]
+            )
             meeting["start_time_utc"] = meeting.pop("start_time")
     return res_json
 
@@ -253,11 +282,18 @@ def list_upcoming_meetings():
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return {"message": f"Error listing upcoming meetings: {response.text}"}
-    
+
     res_json = response.json()
     for meeting in res_json["meetings"]:
-        if "start_time" in meeting and "timezone" in meeting and meeting["timezone"] != "UTC" and meeting["timezone"] != "":
-            meeting["start_time_local"] = _convert_utc_to_local_time(meeting["start_time"], meeting["timezone"])
+        if (
+            "start_time" in meeting
+            and "timezone" in meeting
+            and meeting["timezone"] != "UTC"
+            and meeting["timezone"] != ""
+        ):
+            meeting["start_time_local"] = _convert_utc_to_local_time(
+                meeting["start_time"], meeting["timezone"]
+            )
             meeting["start_time_utc"] = meeting.pop("start_time")
     return res_json
 
@@ -280,18 +316,28 @@ def update_meeting():
     meeting_id = os.environ["MEETING_ID"]
     previous_meeting_payload = _get_meeting()
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
-    
+
     payload = {}
     settings = {}
     if "MEETING_INVITEES" in os.environ:
-        meeting_invitees = os.environ["MEETING_INVITEES"] # a list of emails separated by commas
-        if meeting_invitees != "" and not _validate_invitees(meeting_invitees.split(",")):
-            raise ValueError(f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas.")
-        meeting_invitees_list = [{"email": invitee} for invitee in meeting_invitees.split(",")]
-        if meeting_invitees_list != previous_meeting_payload["settings"]["meeting_invitees"]:
+        meeting_invitees = os.environ[
+            "MEETING_INVITEES"
+        ]  # a list of emails separated by commas
+        if meeting_invitees != "" and not _validate_invitees(
+            meeting_invitees.split(",")
+        ):
+            raise ValueError(
+                f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
+            )
+        meeting_invitees_list = [
+            {"email": invitee} for invitee in meeting_invitees.split(",")
+        ]
+        if (
+            meeting_invitees_list
+            != previous_meeting_payload["settings"]["meeting_invitees"]
+        ):
             settings["meeting_invitees"] = meeting_invitees_list
-    
-    
+
     if "AGENDA" in os.environ:
         agenda = os.environ["AGENDA"]
         if agenda != previous_meeting_payload["agenda"]:
@@ -334,7 +380,9 @@ def update_meeting():
     if "START_TIME" in os.environ:
         start_time = os.environ["START_TIME"]
         if start_time != "" and not _validate_meeting_start_time(start_time):
-            raise ValueError(f"Invalid start time format: {start_time}. Must be in GMT or local timezone format.")
+            raise ValueError(
+                f"Invalid start time format: {start_time}. Must be in GMT or local timezone format."
+            )
         if start_time != previous_meeting_payload["start_time"]:
             payload["start_time"] = start_time
     if "MEETING_TEMPLATE_ID" in os.environ:
@@ -353,21 +401,23 @@ def update_meeting():
     if "MEETING_TYPE" in os.environ:
         meeting_type = int(os.environ["MEETING_TYPE"])
         if meeting_type not in _meeting_types:
-            raise ValueError(f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}")
+            raise ValueError(
+                f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}"
+            )
         if meeting_type != previous_meeting_payload["type"]:
             payload["type"] = meeting_type
-            
+
     if settings:
         payload["settings"] = settings
-        
+
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {ACCESS_TOKEN}"
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
 
     response = requests.patch(url, json=payload, headers=headers)
     if response.status_code != 204:
-        return {"message": f"Error updating meeting: {response.text}"}   
+        return {"message": f"Error updating meeting: {response.text}"}
     return {"message": "successfully updated meeting"}
 
 
@@ -380,4 +430,17 @@ def list_meeting_templates():
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return {"message": f"Error listing meeting templates: {response.text}"}
+    return response.json()
+
+
+@tool_registry.decorator("GetMeetingSummary")
+def get_metting_summary():
+    meeting_id = os.environ["MEETING_ID"]
+    url = f"{ZOOM_API_URL}/meetings/{meeting_id}/meeting_summary"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {"message": f"Error getting meeting summary: {response.text}"}
     return response.json()

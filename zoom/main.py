@@ -7,6 +7,7 @@ import pkgutil
 import importlib
 from tools.helper import tool_registry
 
+
 def auto_import_tools():
     """
     Dynamically import all modules in the 'tools' package.
@@ -21,9 +22,11 @@ def auto_import_tools():
 
 def main():
     auto_import_tools()
-    
+
     if len(sys.argv) != 2:
-        print(f"Error running command: {' '.join(sys.argv)} \nUsage: python3 main.py <command>")
+        print(
+            f"Error running command: {' '.join(sys.argv)} \nUsage: python3 main.py <command>"
+        )
         sys.exit(1)
 
     command = sys.argv[1]
@@ -33,8 +36,6 @@ def main():
     except Exception as e:
         print(f"Error running command: {' '.join(sys.argv)} \nError: {e}")
         sys.exit(1)
-
-    
 
 
 if __name__ == "__main__":

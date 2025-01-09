@@ -1,9 +1,10 @@
 from tools.helper import tool_registry
 
+
 # reference: https://developers.zoom.us/docs/api/references/abbreviations/#timezones
 @tool_registry.decorator("ListAvailableTimezones")
 def list_available_timezones():
-    return {    
+    return {
         "Pacific/Midway": "(GMT-11:00) Midway Island, Samoa",
         "Pacific/Pago_Pago": "(GMT-11:00) Pago Pago",
         "Pacific/Honolulu": "(GMT-10:00) Hawaii",
@@ -146,5 +147,5 @@ def list_available_timezones():
         "Asia/Kamchatka": "(GMT+12:00) Kamchatka",
         "Pacific/Fiji": "(GMT+12:00) Fiji Islands, Marshall Islands",
         "Pacific/Auckland": "(GMT+12:00) Auckland, Wellington",
-        "Pacific/Apia": "(GMT+13:00) Independent State of Samoa"
+        "Pacific/Apia": "(GMT+13:00) Independent State of Samoa",
     }

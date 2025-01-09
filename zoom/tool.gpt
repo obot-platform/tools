@@ -137,6 +137,15 @@ Share Context: Zoom Context
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListAvailableTimezones
 
 ---
+Name: Get Meeting Summary
+Description: Get the Zoom AI summary of a meeting.
+Credential: ./credential
+Share Context: Zoom Context
+Param: meeting_id: The ID of the meeting to get the summary for
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingSummary
+
+---
 Name: Zoom Context
 Type: context
 Share Context: ../time

@@ -3,6 +3,7 @@ import requests
 import os
 import re
 
+
 @tool_registry.decorator("GetMeetingRecordings")
 def get_meeting_recordings():
     meeting_id = os.environ["MEETING_ID"]

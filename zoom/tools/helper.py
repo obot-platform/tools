@@ -9,9 +9,10 @@ if ACCESS_TOKEN is None or ACCESS_TOKEN == "":
 
 ZOOM_API_URL = "https://api.zoom.us/v2"
 
+
 def str_to_bool(value):
     """Convert a string to a boolean."""
-    return str(value).lower() in ('true', '1', 'yes')
+    return str(value).lower() in ("true", "1", "yes")
 
 
 class ToolRegistry:
@@ -47,9 +48,12 @@ class ToolRegistry:
         A decorator that automatically registers the decorated function
         under the specified 'name' in the ToolRegistry.
         """
+
         def wrapper(func):
             self.register(name, func)
             return func
+
         return wrapper
+
 
 tool_registry = ToolRegistry()
