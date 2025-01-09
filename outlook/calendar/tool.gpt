@@ -136,7 +136,7 @@ Credential: ./credential
 ---
 Name: Outlook Calendar Context
 Type: context
-Share Context: ../../time
+Share Context: Current Date and Time from ../../time
 Share Tools: Get Default Timezone
 
 #!sys.echo
@@ -152,6 +152,8 @@ If creating a date/time in the UTC timezone, it must end with 'Z' to properly de
 If the user asks you to show, create, or modify events, use their default timezone unless otherwise stated. If the user's default timezone isn't defined, ask them for clarification.
 
 Ensure dates and times are converted properly to the user's default timezone when displaying them to the user.
+
+When listing events from different calendars and/or groups, show them grouped together and labeled using the name of the calender owner so that the user knows which calendar or group the event is from.
 
 ## End of instructions for using the Microsoft Outlook Calendar tools
 

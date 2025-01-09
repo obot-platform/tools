@@ -31,6 +31,10 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	sb.WriteString("  Start: " + util.Deref(event.GetStart().GetDateTime()) + startTZ + "\n")
 	sb.WriteString("  End: " + util.Deref(event.GetEnd().GetDateTime()) + endTZ + "\n")
 	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
+	if calendar.Calendar.GetOwner() != nil {
+		fmt.Printf("  Owner: %s (%s)\n", util.Deref(calendar.Calendar.GetOwner().GetName()), util.Deref(calendar.Calendar.GetOwner().GetAddress()))
+		fmt.Printf("  Owner Type: %s\n", string(calendar.Owner))
+	}
 	return sb.String()
 }
 

@@ -21,7 +21,7 @@ const APP_CACHE_DIR = (() => {
   }
 })()
 
-async function clearAppCacheDir(): Promise<void> {
+async function clearAppCacheDir (): Promise<void> {
   try {
     await fs.rm(APP_CACHE_DIR, { recursive: true, force: true })
     console.log(`Cleared APP_CACHE_DIR at startup: ${APP_CACHE_DIR}`)
@@ -44,15 +44,17 @@ export class SessionManager {
   private readonly sessions = new Map<string, ManagedSession>()
   private readonly sessionsLock: Mutex = new Mutex()
 
-  private constructor () {
-  }
+  private constructor () {}
 
   static async create (): Promise<SessionManager> {
     sessionManager ??= new SessionManager()
     return sessionManager
   }
 
-  async withSession (sessionId: string, fn: (browserContext: BrowserContext, openPages: Map<string, Page>) => Promise<void>): Promise<void> {
+  async withSession (
+    sessionId: string,
+    fn: (browserContext: BrowserContext, openPages: Map<string, Page>) => Promise<void>
+  ): Promise<void> {
     let managedSession: ManagedSession | undefined
     await this.sessionsLock.runExclusive(async () => {
       managedSession = this.sessions.get(sessionId)
@@ -84,6 +86,16 @@ export class SessionManager {
       }
     })
   }
+
+  async cleanup (): Promise<void> {
+    console.log('Cleaning up all sessions...')
+    await this.sessionsLock.runExclusive(async () => {
+      for (const [sessionId, managedSession] of this.sessions.entries()) {
+        await managedSession.session.close()
+        this.sessions.delete(sessionId)
+      }
+    })
+  }
 }
 
 const SESSION_TTL = 5 * 60 * 1000 // 5 minutes
@@ -107,8 +119,10 @@ class Session {
   }
 
   async close (): Promise<void> {
+    console.log(`Closing session: ${this.sessionId}`)
     await this.browserContext?.close()
-    await fs.rm(this.sessionDir, { recursive: true })
+    this.openPages.clear()
+    await fs.rm(this.sessionDir, { recursive: true, force: true })
   }
 }
 
@@ -134,15 +148,11 @@ export function getGPTScriptEnv (headers: IncomingHttpHeaders, envKey: string): 
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
 
   for (const env of envArray) {
-    if (env == null) {
-      continue
-    }
+    if (env == null) continue
 
     for (const pair of env.split(',')) {
-      const [key, value] = pair.split('=').map(part => part.trim())
-      if (key === envKey) {
-        return value
-      }
+      const [key, value] = pair.split('=').map((part) => part.trim())
+      if (key === envKey) return value
     }
   }
 

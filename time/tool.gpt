@@ -1,3 +1,10 @@
+---
+Name: Time
+Description: Context tools that expose information about the current time, date, and timezone for the user.
+Metadata: bundle: true
+Share Contexts: Current Date and Time, User Timezone
+
+---
 Name: Current Date and Time
 Description: Context that provides the current date and time in ISO 8601 format.
 Type: context
@@ -6,6 +13,18 @@ Type: context
 from datetime import datetime, timezone
 
 print("The current date and time is ", datetime.now(timezone.utc).isoformat())
+
+---
+Name: User Timezone
+Description: Context that provides the IANA Time Zone ID for the user's preferred time zone.
+Type: context
+
+#!python3
+
+import os
+
+timezone = os.getenv('OBOT_USER_TIMEZONE', 'UTC')
+print(f"The user's preferred time zone is {timezone}")
 
 ---
 !metadata:*:category

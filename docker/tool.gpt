@@ -1,0 +1,48 @@
+name: Docker Container
+description: Runs a docker container with the specified image.
+Params: obot_tool_type: The tool type
+Params: obot_tool_image: The docker image to use
+Params: obot_tool_envs: Comma separated list of env vars
+
+#!/bin/bash
+set -e
+
+DATADIR=$(echo "$GPTSCRIPT_WORKSPACE_ID" | sed 's!directory://!!')
+if [ -d "$DATADIR" ]; then
+    OBOT_TOOL_RUN_ARGS="${OBOT_TOOL_RUN_ARGS} -v ${DATADIR}/files:/mnt/data"
+fi
+
+if [ -n "$OBOT_TOOL_ENVS" ]; then
+    for env in $(echo $OBOT_TOOL_ENVS | tr "," "\n"); do
+        OBOT_TOOL_RUN_ARGS="${OBOT_TOOL_RUN_ARGS} -e $env"
+    done
+fi
+
+#TEMPFILE=$(mktemp -p $GPTSCRIPT_WORKSPACE_DIR -t obot-tool-XXXXXX)
+TEMPFILE=/tmp/foo
+echo "$TOOL_CALL_BODY" > $TEMPFILE
+#trap "rm -f $TEMPFILE" EXIT
+chmod 777 $TEMPFILE
+
+TARGET_FILE=
+INTERPRETER=
+
+if [ "$OBOT_TOOL_TYPE" == "bash" ]; then
+    INTERPRETER=bash
+    TARGET_FILE=/mnt/tool/run.sh
+elif [ "$OBOT_TOOL_TYPE" == "python" ]; then
+    INTERPRETER=python
+    TARGET_FILE=/mnt/tool/run.py
+elif [ "$OBOT_TOOL_TYPE" == "javascript" ]; then
+    if [ -z "$OBOT_TOOL_IMAGE" ]; then
+        OBOT_TOOL_IMAGE=node
+    fi
+    INTERPRETER=node
+    TARGET_FILE=/mnt/tool/run.js
+fi
+
+if [ -n "$TARGET_FILE" ]; then
+    OBOT_TOOL_RUN_ARGS="${OBOT_TOOL_RUN_ARGS} -v $TEMPFILE:$TARGET_FILE"
+fi
+
+docker run -q --rm --label tool.thread.obot.ai="$OBOT_THREAD_ID" ${OBOT_TOOL_RUN_ARGS} ${OBOT_TOOL_IMAGE} ${INTERPRETER} ${TARGET_FILE}

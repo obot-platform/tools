@@ -1,4 +1,7 @@
 tools:
+  sendgrid:
+    reference: ./sendgrid
+    all: true
   database:
     reference: ./database
   zoom:
@@ -51,12 +54,15 @@ tools:
     all: true
   time:
     reference: ./time
+    all: true
   workspace-files:
     reference: ./workspace-files
   tasks:
     reference: ./tasks
   knowledge:
     reference: ./knowledge
+  shell:
+    reference: ./shell
 
 knowledgeDataSources:
   notion-data-source:
@@ -85,6 +91,12 @@ system:
     reference: ./result-formatter
   obot-model-provider:
     reference: ./obot-model-provider
+  existing-credential:
+    reference: ./existing-credential
+  docker-shell-id:
+    reference: ./docker-shell-id
+  docker:
+    reference: ./docker
 
 modelProviders:
   openai-model-provider:
@@ -103,3 +115,5 @@ modelProviders:
     reference: ./vllm-model-provider
   anthropic-bedrock-model-provider:
     reference: ./anthropic-bedrock-model-provider
+  xai-model-provider:
+    reference: ./xai-model-provider

@@ -113,7 +113,7 @@ Credential: ./credential
 ---
 Name: Outlook Mail Context
 Type: context
-Share Context: ../../time
+Share Context: Current Date and Time from ../../time
 Share Tools: Get Default Timezone
 
 #!sys.echo
