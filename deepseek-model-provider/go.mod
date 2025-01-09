@@ -1,4 +1,4 @@
-module github.com/obot-platform/tools/xai-model-provider
+module github.com/obot-platform/tools/deepseek-model-provider
 
 go 1.23.4
 

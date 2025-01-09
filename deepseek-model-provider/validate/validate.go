@@ -1,4 +1,4 @@
-package main
+package validate
 
 import (
 	"encoding/json"
@@ -8,6 +8,15 @@ import (
 	"net/http"
 	"os"
 )
+
+// Run performs the validation of the DeepSeek API key
+func Run(apiKey string) error {
+	if err := validateAPIKey(apiKey); err != nil {
+		return err
+	}
+	fmt.Println("Credentials are valid")
+	return nil
+}
 
 type ErrorResponse struct {
 	Error struct {
@@ -23,22 +32,6 @@ type ModelsResponse struct {
 		Object  string `json:"object"`
 		OwnedBy string `json:"owned_by"`
 	} `json:"data"`
-}
-
-func main() {
-	apiKey := os.Getenv("OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY")
-	if apiKey == "" {
-		printError("OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY environment variable not set")
-		return
-	}
-
-	if err := validateAPIKey(apiKey); err != nil {
-		printError(fmt.Sprintf("Invalid DeepSeek Credentials: %s", err.Error()))
-		return
-	}
-
-	// Print success message
-	fmt.Println("Credentials are valid")
 }
 
 func validateAPIKey(apiKey string) error {
