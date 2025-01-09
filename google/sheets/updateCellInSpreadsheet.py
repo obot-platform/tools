@@ -22,10 +22,11 @@ def main():
             spreadsheet_id)
         sheet = spreadsheet.sheet1
         sheet.update_acell(cell, data)
+        print("Data written successfully")
     except Exception as err:
         print(err)
 
-    print("Data written successfully")
+
 
 
 if __name__ == "__main__":

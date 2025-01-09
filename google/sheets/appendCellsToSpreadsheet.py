@@ -28,10 +28,10 @@ def main():
             spreadsheet_id)
         sheet = spreadsheet.sheet1
         sheet.append_rows(data, value_input_option=ValueInputOption.user_entered)
+        print("Data written successfully")
     except APIError as err:
         print(err)
 
-    print("Data written successfully")
 
 
 if __name__ == "__main__":
