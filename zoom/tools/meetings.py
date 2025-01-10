@@ -435,12 +435,25 @@ def list_meeting_templates():
 
 @tool_registry.decorator("GetMeetingSummary")
 def get_metting_summary():
-    meeting_id = os.environ["MEETING_ID"]
-    url = f"{ZOOM_API_URL}/meetings/{meeting_id}/meeting_summary"
+    meeting_uuid = os.environ["MEETING_UUID"]
+    url = f"{ZOOM_API_URL}/meetings/{meeting_uuid}/meeting_summary"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return {"message": f"Error getting meeting summary: {response.text}"}
+    return response.json()
+
+
+@tool_registry.decorator("GetPastMeetingDetails")
+def get_past_meeting_details():
+    meeting_id = os.environ["MEETING_ID"]
+    url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {"message": f"Error getting past meeting details: {response.text}"}
     return response.json()
