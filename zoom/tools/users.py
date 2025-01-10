@@ -15,3 +15,8 @@ def get_user():
         raise Exception(f"Error fetching user info: {response.json()}")
 
     return response.json()
+
+
+def get_user_type() -> int:
+    user_info = get_user()
+    return user_info["type"]

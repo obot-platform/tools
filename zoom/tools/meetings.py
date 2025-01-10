@@ -1,4 +1,5 @@
 from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool, tool_registry
+from tools.users import get_user_type
 import requests
 import os
 import re
@@ -6,6 +7,7 @@ import string
 import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import json
 
 
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
@@ -94,6 +96,7 @@ _meeting_types = {
 @tool_registry.decorator("CreateMeeting")
 def create_meeting():
     url = f"{ZOOM_API_URL}/users/me/meetings"
+    user_type = get_user_type()
     meeting_invitees = os.getenv(
         "MEETING_INVITEES", ""
     )  # a list of emails separated by commas
@@ -118,16 +121,18 @@ def create_meeting():
         raise ValueError(
             f"Invalid start time format: {start_time}. Must be in GMT or local timezone format."
         )
+
     meeting_template_id = os.getenv("MEETING_TEMPLATE_ID", "")
     timezone = os.getenv("TIMEZONE", "")
     topic = os.getenv("TOPIC", "")
 
     meeting_type = int(os.getenv("MEETING_TYPE", 2))
+    recurrence = os.getenv("RECURRENCE", "")
+
     if meeting_type not in _meeting_types:
         raise ValueError(
             f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}"
         )
-    # TODO: support recurrence and more settings in the future
     payload = {
         "agenda": agenda,
         "default_password": default_password,
@@ -147,7 +152,6 @@ def create_meeting():
             "email_notification": True,
             "encryption_type": "enhanced_encryption",
             "focus_mode": True,
-            # "global_dial_in_countries": ["US"], # Only supported for non-basic accounts
             "host_video": True,
             "in_meeting": False,
             "jbh_time": 0,
@@ -194,6 +198,19 @@ def create_meeting():
         "topic": topic,
         "type": meeting_type,
     }
+
+    if recurrence != "":
+        try:
+            recurrence_object = json.loads(recurrence)
+            payload["recurrence"] = recurrence_object
+        except Exception as e:
+            raise ValueError(
+                f"Invalid recurrence: {recurrence}. Must be a valid JSON object."
+            )
+    # features for licensed users
+    if user_type == 2:
+        payload["settings"]["global_dial_in_countries"] = ["US"]
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -314,7 +331,6 @@ def get_meeting_invitation():
 @tool_registry.decorator("UpdateMeeting")
 def update_meeting():
     meeting_id = os.environ["MEETING_ID"]
-    previous_meeting_payload = _get_meeting()
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
 
     payload = {}
@@ -332,71 +348,65 @@ def update_meeting():
         meeting_invitees_list = [
             {"email": invitee} for invitee in meeting_invitees.split(",")
         ]
-        if (
-            meeting_invitees_list
-            != previous_meeting_payload["settings"]["meeting_invitees"]
-        ):
-            settings["meeting_invitees"] = meeting_invitees_list
+        settings["meeting_invitees"] = meeting_invitees_list
 
     if "AGENDA" in os.environ:
         agenda = os.environ["AGENDA"]
-        if agenda != previous_meeting_payload["agenda"]:
-            payload["agenda"] = agenda
+        payload["agenda"] = agenda
     if "DEFAULT_PASSWORD" in os.environ:
         default_password = str_to_bool(os.environ["DEFAULT_PASSWORD"])
-        if default_password != previous_meeting_payload["default_password"]:
-            payload["default_password"] = default_password
+        payload["default_password"] = default_password
     if "DURATION" in os.environ:
         duration = int(os.environ["DURATION"])
-        if duration != previous_meeting_payload["duration"]:
-            payload["duration"] = duration
+        payload["duration"] = duration
     if "PASSWORD" in os.environ:
         password = os.environ["PASSWORD"]
         if password == "":
             password = _generate_password()
-        if password != previous_meeting_payload["password"]:
-            payload["password"] = password
+        payload["password"] = password
+
+    if "RECURRENCE" in os.environ:
+        recurrence = os.environ["RECURRENCE"]
+        try:
+            recurrence_object = json.loads(recurrence)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid recurrence: {recurrence}. Must be a valid JSON object."
+            )
+        payload["recurrence"] = recurrence_object
+
     if "PRE_SCHEDULE" in os.environ:
         pre_schedule = str_to_bool(os.environ["PRE_SCHEDULE"])
-        if pre_schedule != previous_meeting_payload["pre_schedule"]:
-            payload["pre_schedule"] = pre_schedule
-    # schedule_for = os.environ["SCHEDULE_FOR"] # only for account level app
+        payload["pre_schedule"] = pre_schedule
     if "AUDIO_RECORDING" in os.environ:
         audio_recording = os.environ["AUDIO_RECORDING"]
-        if audio_recording != previous_meeting_payload["settings"]["auto_recording"]:
-            settings["auto_recording"] = audio_recording
+        settings["auto_recording"] = audio_recording
     if "CONTACT_EMAIL" in os.environ:
         contact_email = os.environ["CONTACT_EMAIL"]
-        if contact_email != previous_meeting_payload["settings"]["contact_email"]:
-            settings["contact_email"] = contact_email
+        settings["contact_email"] = contact_email
     if "CONTACT_NAME" in os.environ:
         contact_name = os.environ["CONTACT_NAME"]
-        if contact_name != previous_meeting_payload["settings"]["contact_name"]:
-            settings["contact_name"] = contact_name
+        settings["contact_name"] = contact_name
     if "PRIVATE_MEETING" in os.environ:
         private_meeting = str_to_bool(os.environ["PRIVATE_MEETING"])
-        if private_meeting != previous_meeting_payload["settings"]["private_meeting"]:
-            settings["private_meeting"] = private_meeting
+        settings["private_meeting"] = private_meeting
     if "START_TIME" in os.environ:
         start_time = os.environ["START_TIME"]
         if start_time != "" and not _validate_meeting_start_time(start_time):
             raise ValueError(
                 f"Invalid start time format: {start_time}. Must be in GMT or local timezone format."
             )
-        if start_time != previous_meeting_payload["start_time"]:
-            payload["start_time"] = start_time
+        payload["start_time"] = start_time
+
     if "MEETING_TEMPLATE_ID" in os.environ:
         meeting_template_id = os.environ["MEETING_TEMPLATE_ID"]
-        if meeting_template_id != previous_meeting_payload["template_id"]:
-            payload["template_id"] = meeting_template_id
+        payload["template_id"] = meeting_template_id
     if "TIMEZONE" in os.environ:
         timezone = os.environ["TIMEZONE"]
-        if timezone != previous_meeting_payload["timezone"]:
-            payload["timezone"] = timezone
+        payload["timezone"] = timezone
     if "TOPIC" in os.environ:
         topic = os.environ["TOPIC"]
-        if topic != previous_meeting_payload["topic"]:
-            payload["topic"] = topic
+        payload["topic"] = topic
 
     if "MEETING_TYPE" in os.environ:
         meeting_type = int(os.environ["MEETING_TYPE"])
@@ -404,8 +414,7 @@ def update_meeting():
             raise ValueError(
                 f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}"
             )
-        if meeting_type != previous_meeting_payload["type"]:
-            payload["type"] = meeting_type
+        payload["type"] = meeting_type
 
     if settings:
         payload["settings"] = settings
@@ -434,7 +443,12 @@ def list_meeting_templates():
 
 
 @tool_registry.decorator("GetMeetingSummary")
-def get_metting_summary():
+def get_meeting_summary():
+    user_type = get_user_type()
+    if user_type != 2:
+        raise ValueError(
+            "The `Get Meeting Summary` feature is only available for licensed users."
+        )
     meeting_uuid = os.environ["MEETING_UUID"]
     url = f"{ZOOM_API_URL}/meetings/{meeting_uuid}/meeting_summary"
     headers = {

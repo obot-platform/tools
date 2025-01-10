@@ -13,9 +13,8 @@ def auto_import_tools():
     Dynamically import all modules in the 'tools' package.
     This will trigger @tool_registry.decorator decorator in those modules and populate 'tool_registry'.
     """
-    package_path = tools.__path__  # Path to the tools package
+    package_path = tools.__path__
     for _, module_name, is_pkg in pkgutil.iter_modules(package_path):
-        # Skip sub-packages if needed, or handle them recursively if your structure is deeper
         if not is_pkg:
             importlib.import_module(f"tools.{module_name}")
 
