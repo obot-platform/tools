@@ -23,17 +23,14 @@ import (
 
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
 	visited := make(map[string]struct{})
-	if output.State.WebsiteCrawlingState.VisitedURLs != nil {
-		for url := range output.State.WebsiteCrawlingState.VisitedURLs {
-			filePath, err := convertUrlToFilePath(url)
-			if err != nil {
-				logOut.Errorf("Failed to convert URL to file path: %v", err)
-				continue
-			}
-			visited[filePath] = struct{}{}
+	for url := range output.State.WebsiteCrawlingState.VisitedURLs {
+		filePath, err := convertUrlToFilePath(url)
+		if err != nil {
+			logOut.Errorf("Failed to convert URL to file path: %v", err)
+			continue
 		}
+		visited[filePath] = struct{}{}
 	}
-
 	for _, url := range input.WebsiteCrawlingConfig.URLs {
 		if err := scrape(ctx, logOut, output, gptscript, visited, url, output.State.WebsiteCrawlingState.CurrentURL, input.Limit); err != nil {
 			return fmt.Errorf("failed to scrape %s: %w", url, err)
@@ -51,10 +48,7 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	}
 
 	output.Status = ""
-	output.State.WebsiteCrawlingState = WebsiteCrawlingState{
-		CurrentURL:  "",
-		VisitedURLs: nil,
-	}
+	output.State.WebsiteCrawlingState = WebsiteCrawlingState{}
 	return writeMetadata(ctx, output, gptscript)
 }
 
@@ -148,7 +142,7 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 		}
 
 		output.State.WebsiteCrawlingState.CurrentURL = e.Request.URL.String()
-		output.State.WebsiteCrawlingState.VisitedURLs[e.Request.URL.String()] = struct{}{}
+		output.State.WebsiteCrawlingState.VisitedURLs[output.State.WebsiteCrawlingState.CurrentURL] = struct{}{}
 
 		output.Status = fmt.Sprintf("Scraped %v", e.Request.URL.String())
 	})
