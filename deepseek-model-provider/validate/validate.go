@@ -58,8 +58,7 @@ func validateAPIKey(apiKey string) error {
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		logError("Failed to make request", fmt.Sprintf("error=%q", err))
 		return fmt.Errorf("failed to connect to DeepSeek API")

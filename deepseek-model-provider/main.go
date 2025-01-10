@@ -18,6 +18,7 @@ func main() {
 	if len(args) == 1 && args[0] == "validate" {
 		if err := validate.Run(apiKey); err != nil {
 			validate.PrintError(err.Error())
+			os.Exit(1)
 		}
 		os.Exit(0)
 	}
