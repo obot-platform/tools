@@ -19,7 +19,7 @@ func main() {
 		if err := validate(ctx); err != nil {
 			fmt.Printf("{\"error\": \"%s\"}\n", err)
 		}
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	c, err := configure(ctx)
@@ -56,7 +56,7 @@ func configure(ctx context.Context) (*genai.Client, error) {
 		return nil, fmt.Errorf("failed to parse google application credentials json: %w", err)
 	}
 
-	gcreds, err := google.CredentialsFromJSON(ctx, []byte(credsJSON))
+	gcreds, err := google.CredentialsFromJSON(ctx, []byte(credsJSON), "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse google credentials JSON: %w", err)
 	}
@@ -77,7 +77,7 @@ func configure(ctx context.Context) (*genai.Client, error) {
 	if l, ok := creds["location"]; ok {
 		loc = l.(string)
 	} else {
-		pid = os.Getenv("OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_LOCATION")
+		loc = os.Getenv("OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CLOUD_LOCATION")
 	}
 	if loc == "" {
 		return nil, fmt.Errorf("google cloud location is required")

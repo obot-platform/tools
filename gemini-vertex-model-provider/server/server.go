@@ -1,9 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -531,6 +533,123 @@ func mapFunctionDefinitionFromOpenAI(funcDef *openai.FunctionDefinition) ([]*gen
 	return functions, nil
 }
 
+// openAIEmbeddingRequest - not (yet) provided by the Chat Completion Client package
+type openAIEmbeddingRequest struct {
+	Input          string `json:"input"`
+	Model          string `json:"model"`
+	EncodingFormat string `json:"encoding_format,omitempty"`
+	Dimensions     *int   `json:"dimensions,omitempty"`
+}
+
+type openAIResponse struct {
+	Data []openAIResponseData `json:"data"`
+}
+
+type openAIResponseData struct {
+	Embedding []float32 `json:"embedding"`
+}
+
+type vertexEmbeddingResponse struct {
+	Predictions []vertexPrediction `json:"predictions"`
+}
+
+type vertexPrediction struct {
+	Embeddings vertexEmbeddings `json:"embeddings"`
+}
+
+type vertexEmbeddings struct {
+	Values []float32 `json:"values"`
+	// leaving out what we don't need just yet
+}
+
+// embeddings - not (yet) provided by the Google GenAI package
 func (s *server) embeddings(w http.ResponseWriter, r *http.Request) {
+
+	var er openAIEmbeddingRequest
+	if err := json.NewDecoder(r.Body).Decode(&er); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/publishers/google/models/%s:predict", s.client.ClientConfig().Location, s.client.ClientConfig().Project, s.client.ClientConfig().Location, er.Model)
+
+	payload := map[string]any{
+		"instances": []map[string]any{
+			{
+				"tast_type":  "QUESTION_ANSWERING",
+				"content":    er.Input,
+				"parameters": map[string]any{},
+			},
+		},
+	}
+
+	if er.Dimensions != nil {
+		payload["parameters"] = map[string]any{
+			"outputDimensionality": *er.Dimensions,
+		}
+	}
+
+	reqBody, err := json.Marshal(payload)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't marshal request body: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	req, err := http.NewRequestWithContext(r.Context(), "POST", url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't create request: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.client.ClientConfig().HTTPClient.Do(req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't make request: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		http.Error(w, fmt.Sprintf("unexpected status code: %d", resp.StatusCode), http.StatusInternalServerError)
+		return
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't read response body: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var embeddingResponse vertexEmbeddingResponse
+	err = json.Unmarshal(body, &embeddingResponse)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("couldn't unmarshal response body: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if len(embeddingResponse.Predictions) == 0 || len(embeddingResponse.Predictions[0].Embeddings.Values) == 0 {
+		http.Error(w, "no embeddings found in the response", http.StatusInternalServerError)
+		return
+	}
+
+	if len(embeddingResponse.Predictions) > 1 {
+		fmt.Println("Info: multiple predictions found in the response - using only the first one")
+	}
+
+	oaiResp := openAIResponse{
+		Data: []openAIResponseData{
+			{
+				Embedding: embeddingResponse.Predictions[0].Embeddings.Values,
+			},
+		},
+	}
+
+	if err := json.NewEncoder(w).Encode(oaiResp); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't encode response: %v", err), http.StatusInternalServerError)
+		return
+	}
+
 	return
 }
