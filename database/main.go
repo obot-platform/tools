@@ -76,17 +76,17 @@ func main() {
 	// Run the requested command
 	var result string
 	switch command {
-	case "listTables":
-		result, err = cmd.ListTables(ctx, db)
-	case "exec":
-		result, err = cmd.Exec(ctx, db, os.Getenv("STATEMENT"))
+	case "listDatabaseTables":
+		result, err = cmd.ListDatabaseTables(ctx, db)
+	case "execDatabaseStatement":
+		result, err = cmd.ExecDatabaseStatement(ctx, db, os.Getenv("STATEMENT"))
 		if err == nil {
 			err = saveWorkspaceDB(ctx, g, dbWorkspacePath, dbFile, initialDBData)
 		}
-	case "query":
-		result, err = cmd.Query(ctx, db, os.Getenv("QUERY"))
-	case "context":
-		result, err = cmd.Context(ctx, db)
+	case "runDatabaseQuery":
+		result, err = cmd.RunDatabaseQuery(ctx, db, os.Getenv("QUERY"))
+	case "databaseContext":
+		result, err = cmd.DatabaseContext(ctx, db)
 	default:
 		err = fmt.Errorf("unknown command: %s", command)
 	}

@@ -12,8 +12,8 @@ type Output struct {
 	Rows    []map[string]any `json:"rows"`
 }
 
-// Query executes a SQL query (e.g., SELECT) and returns the result formatted in JSON
-func Query(ctx context.Context, db *sql.DB, query string) (string, error) {
+// RunDatabaseQuery executes a SQL query (e.g. SELECT) and returns a JSON object containing the results.
+func RunDatabaseQuery(ctx context.Context, db *sql.DB, query string) (string, error) {
 	if query == "" {
 		return "", fmt.Errorf("empty query")
 	}

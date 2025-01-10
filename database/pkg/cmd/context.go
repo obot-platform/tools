@@ -7,16 +7,17 @@ import (
 	"strings"
 )
 
-// Context returns the context text for the SQLite tools.
+// DatabaseContext returns the context text for the SQLite tools.
 // The resulting string contains all of schemas in the database.
-func Context(ctx context.Context, db *sql.DB) (string, error) {
+func DatabaseContext(ctx context.Context, db *sql.DB) (string, error) {
 	// Build the markdown output
 	var out strings.Builder
 	out.WriteString(`# START INSTRUCTIONS: Database Tools
 
 You have access to tools for interacting with a SQLite database.
-The Exec tool only accepts valid SQLite3 statements.
-The Query tool only accepts valid SQLite3 queries.
+The "List Database Tables" tool returns a list of tables in the database.
+The "Exec Database Statement" tool only accepts valid SQLite3 statements.
+The "Run Database Query" tool only accepts valid SQLite3 queries.
 Display all results from these tools and their schemas in markdown format.
 If the user refers to creating or modifying tables assume they mean a SQLite3 table and not writing a table
 in a markdown file.
