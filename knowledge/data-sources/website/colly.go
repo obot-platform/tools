@@ -103,8 +103,14 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			logOut.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
 			return
 		}
+		data := []byte(html)
 
-		checksum, err := getChecksum([]byte(html))
+		if len(data) > 1024*1024*100 {
+			logOut.Infof("skipping %s because it is larger than 100 MB", e.Request.URL.String())
+			return
+		}
+
+		checksum, err := getChecksum(data)
 		if err != nil {
 			logOut.Errorf("Failed to get checksum for %s: %v", e.Request.URL.String(), err)
 			return
@@ -115,7 +121,7 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			return
 		}
 
-		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, []byte(html)); err != nil {
+		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, data); err != nil {
 			logOut.Errorf("Failed to write file %s: %v", filePath, err)
 			return
 		}
@@ -127,7 +133,7 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			URL:         e.Request.URL.String(),
 			UpdatedAt:   updatedAt,
 			Checksum:    checksum,
-			SizeInBytes: int64(len([]byte(html))),
+			SizeInBytes: int64(len(data)),
 		}
 
 		folders[hostname] = struct{}{}
