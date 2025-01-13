@@ -73,7 +73,7 @@ func (s *Datastore) Retrieve(ctx context.Context, datasetIDs []string, query str
 }
 
 func (s *Datastore) SimilaritySearch(ctx context.Context, query string, numDocuments int, datasetID string, where map[string]string, whereDocument []chromem.WhereDocument) ([]types2.Document, error) {
-	ds, err := s.GetDataset(ctx, datasetID)
+	ds, err := s.GetDataset(ctx, datasetID, nil)
 	if err != nil {
 		return nil, err
 	}

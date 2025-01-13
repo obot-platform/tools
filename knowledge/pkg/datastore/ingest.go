@@ -39,7 +39,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 	statusLog := log.FromCtx(ctx).With("phase", "store")
 
 	// Get dataset
-	ds, err := s.GetDataset(ctx, datasetID)
+	ds, err := s.GetDataset(ctx, datasetID, nil)
 	if err != nil {
 		return nil, err
 	}

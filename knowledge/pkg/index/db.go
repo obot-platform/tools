@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -15,6 +16,18 @@ import (
 )
 
 func New(ctx context.Context, dsn string, autoMigrate bool) (Index, error) {
+	gormLogLevel := logger.Silent
+	switch os.Getenv("GORM_LOG_LEVEL") {
+	case "silent":
+		gormLogLevel = logger.Silent
+	case "error":
+		gormLogLevel = logger.Error
+	case "warn":
+		gormLogLevel = logger.Warn
+	case "info":
+		gormLogLevel = logger.Info
+	}
+
 	var (
 		indexDB Index
 		err     error
@@ -22,7 +35,7 @@ func New(ctx context.Context, dsn string, autoMigrate bool) (Index, error) {
 			Logger: logger.New(log.Default(), logger.Config{
 				SlowThreshold: 200 * time.Millisecond,
 				Colorful:      true,
-				LogLevel:      logger.Silent,
+				LogLevel:      gormLogLevel,
 			}),
 			TranslateError: true,
 		}

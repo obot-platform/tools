@@ -86,7 +86,7 @@ func (r *BasicRetriever) Retrieve(ctx context.Context, store store.Store, query 
 	for _, dataset := range datasetIDs {
 		// TODO: make configurable via RetrieveOpts
 		// silently ignore non-existent datasets
-		ds, err := store.GetDataset(ctx, dataset)
+		ds, err := store.GetDataset(ctx, dataset, nil)
 		if err != nil {
 			if strings.HasPrefix(err.Error(), "dataset not found") {
 				continue

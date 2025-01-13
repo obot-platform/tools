@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +29,7 @@ func (s *ClientGetDataset) Run(cmd *cobra.Command, args []string) error {
 
 	datasetID := args[0]
 
-	ds, err := c.GetDataset(cmd.Context(), datasetID)
+	ds, err := c.GetDataset(cmd.Context(), datasetID, &types.DatasetGetOpts{IncludeFiles: true})
 	if err != nil {
 		return fmt.Errorf("failed to get dataset: %w", err)
 	}

@@ -53,8 +53,8 @@ func (c *StandaloneClient) DeleteDataset(ctx context.Context, datasetID string) 
 	return c.Datastore.DeleteDataset(ctx, datasetID)
 }
 
-func (c *StandaloneClient) GetDataset(ctx context.Context, datasetID string) (*types2.Dataset, error) {
-	return c.Datastore.GetDataset(ctx, datasetID)
+func (c *StandaloneClient) GetDataset(ctx context.Context, datasetID string, opts *types2.DatasetGetOpts) (*types2.Dataset, error) {
+	return c.Datastore.GetDataset(ctx, datasetID, opts)
 }
 
 func (c *StandaloneClient) ListDatasets(ctx context.Context) ([]types2.Dataset, error) {

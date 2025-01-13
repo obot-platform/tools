@@ -33,7 +33,7 @@ func (s *ClientEditDataset) Run(cmd *cobra.Command, args []string) error {
 	datasetID := args[0]
 
 	// Get current dataset
-	dataset, err := c.GetDataset(cmd.Context(), datasetID)
+	dataset, err := c.GetDataset(cmd.Context(), datasetID, nil)
 	if err != nil {
 		return fmt.Errorf("failed to get dataset: %w", err)
 	}

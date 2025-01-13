@@ -44,7 +44,7 @@ func (r *BM25Retriever) Retrieve(ctx context.Context, store store.Store, query s
 	for _, datasetID := range datasetIDs {
 		// TODO: make configurable via RetrieveOpts
 		// silently ignore non-existent datasets
-		ds, err := store.GetDataset(ctx, datasetID)
+		ds, err := store.GetDataset(ctx, datasetID, nil)
 		if err != nil {
 			if strings.HasPrefix(err.Error(), "dataset not found") {
 				slog.Info("Dataset not found", "dataset", datasetID)

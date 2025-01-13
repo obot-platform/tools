@@ -10,6 +10,10 @@ type DatasetCreateOpts struct {
 	ErrOnExists bool
 }
 
+type DatasetGetOpts struct {
+	IncludeFiles bool
+}
+
 // Dataset refers to a VectorDB data space.
 // @Description Dataset refers to a VectorDB data space.
 type Dataset struct {

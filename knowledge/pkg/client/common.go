@@ -277,7 +277,7 @@ func AskDir(ctx context.Context, c Client, path string, query string, opts *Inge
 func getOrCreateDataset(ctx context.Context, c Client, datasetID string, create bool) (*types.Dataset, error) {
 	var ds *types.Dataset
 	var err error
-	ds, err = c.GetDataset(ctx, datasetID)
+	ds, err = c.GetDataset(ctx, datasetID, nil)
 	if err != nil {
 		return nil, err
 	}

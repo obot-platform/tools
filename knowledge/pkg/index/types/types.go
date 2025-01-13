@@ -81,9 +81,21 @@ func (db *DB) DeleteDataset(ctx context.Context, datasetID string) error {
 	return nil
 }
 
-func (db *DB) GetDataset(ctx context.Context, datasetID string) (*Dataset, error) {
+func (db *DB) GetDataset(ctx context.Context, datasetID string, opts *DatasetGetOpts) (*Dataset, error) {
 	dataset := &Dataset{}
-	tx := db.WithContext(ctx).Preload("Files.Documents").First(dataset, "id = ?", datasetID)
+	tx := db.WithContext(ctx)
+
+	if opts == nil {
+		opts = &DatasetGetOpts{
+			IncludeFiles: false,
+		}
+	}
+
+	if opts.IncludeFiles {
+		tx = tx.Preload("Files.Documents")
+	}
+
+	tx = tx.First(dataset, "id = ?", datasetID)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

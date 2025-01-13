@@ -35,7 +35,7 @@ type IngestPathsOpts struct {
 type Client interface {
 	CreateDataset(ctx context.Context, datasetID string, opts *types2.DatasetCreateOpts) (*types2.Dataset, error)
 	DeleteDataset(ctx context.Context, datasetID string) error
-	GetDataset(ctx context.Context, datasetID string) (*types2.Dataset, error)
+	GetDataset(ctx context.Context, datasetID string, opts *types2.DatasetGetOpts) (*types2.Dataset, error)
 	FindFile(ctx context.Context, searchFile types2.File) (*types2.File, error)
 	DeleteFile(ctx context.Context, datasetID, fileID string) error
 	ListDatasets(ctx context.Context) ([]types2.Dataset, error)
