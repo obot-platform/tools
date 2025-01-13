@@ -2,7 +2,7 @@ Name: Browser
 Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
 Credentials: github.com/gptscript-ai/credentials/model-provider
-Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download
+Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download File From URL
 
 ---
 Name: Get Page Contents
@@ -114,31 +114,29 @@ Tools: service
 #!http://service.daemon.gptscript.local/forward
 
 ---
-Name: Download
-Share Context: Download Context
+Name: Download File From URL
+Share Context: Download File From URL Context
 Tools: service
-Description: Downloads the content from an HTTP/HTTPS URL and saves it to the workspace.
-Params: url: (required) The URL of the content to download.
+Description: Downloads a binary file from an HTTP/HTTPS URL and saves it to the workspace.
+Params: url: (required) The URL of the file to download.
 Params: fileName: (required) The name of the workspace file to save the content to.
 
 #!http://service.daemon.gptscript.local/download
 
 ---
-Name: Download Context
+Name: Download File From URL Context
 Metadata: index: false
 Type: context
 
 #!sys.echo
 
-START TOOL USAGE: Download
+START TOOL USAGE: Download File From URL
 
-The `Download` tool saves the content from any HTTP or HTTPS URL to a file in the workspace. It can be used to download any well formed HTTP or HTTPS URL, including URLs to web pages, files, and API endpoints.
-
+The `Download File From URL` tool saves the content from a file at an HTTP or HTTPS URL to a file in the workspace.
 The tool returns A JSON object that contains the `url`, `resolvedUrl`, `contentType`, `workspaceFile`, and `downloadedAt` fields. The `resolvedUrl` is the final URL after any redirects.
-
 Do not attempt to link to a `workspaceFile` when displaying the results of a `Download` tool call.
 
-END TOOL USAGE: Download
+END TOOL USAGE: Download File From URL
 
 ---
 Name: Browser Context
