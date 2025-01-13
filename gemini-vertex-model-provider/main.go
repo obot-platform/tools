@@ -18,8 +18,9 @@ func main() {
 	if len(args) == 1 && args[0] == "validate" {
 		if err := validate(ctx); err != nil {
 			fmt.Printf("{\"error\": \"%s\"}\n", err)
+			os.Exit(1)
 		}
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	c, err := configure(ctx)

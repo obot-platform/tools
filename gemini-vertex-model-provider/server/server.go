@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -39,9 +38,9 @@ func Run(client *genai.Client, port string) error {
 	}
 
 	mux.HandleFunc("/{$}", s.healthz)
-	mux.HandleFunc("/v1/models", s.listModels)
-	mux.HandleFunc("/v1/chat/completions", s.chatCompletions)
-	mux.HandleFunc("/v1/embeddings", s.embeddings)
+	mux.HandleFunc("GET /v1/models", s.listModels)
+	mux.HandleFunc("POST /v1/chat/completions", s.chatCompletions)
+	mux.HandleFunc("POST /v1/embeddings", s.embeddings)
 
 	httpServer := &http.Server{
 		Addr:    "127.0.0.1:" + port,
@@ -278,10 +277,11 @@ func mapUsageToOpenAI(usage *genai.GenerateContentResponseUsageMetadata) openai.
 }
 
 func mapToOpenAIContentAndToolCalls(parts []*genai.Part) (string, []openai.ToolCall, error) {
-	var toolCalls []openai.ToolCall
-	content := ""
+	var (
+		toolCalls []openai.ToolCall
+		content   string
+	)
 	for idx, p := range parts {
-		tidx := idx
 		if p.Text != "" {
 			content += "\n" + p.Text
 		}
@@ -291,7 +291,7 @@ func mapToOpenAIContentAndToolCalls(parts []*genai.Part) (string, []openai.ToolC
 				return "", nil, fmt.Errorf("failed to marshal function arguments: %w", err)
 			}
 			toolCalls = append(toolCalls, openai.ToolCall{
-				Index: &tidx,
+				Index: &idx,
 				ID:    p.FunctionCall.ID,
 				Type:  openai.ToolTypeFunction,
 				Function: openai.FunctionCall{
@@ -305,10 +305,6 @@ func mapToOpenAIContentAndToolCalls(parts []*genai.Part) (string, []openai.ToolC
 }
 
 func mapToOpenAIStreamChoice(candidates []*genai.Candidate) ([]openai.ChatCompletionStreamChoice, error) {
-	if len(candidates) == 0 {
-		return nil, nil
-	}
-
 	var choices []openai.ChatCompletionStreamChoice
 	for i, c := range candidates {
 		content, toolCalls, err := mapToOpenAIContentAndToolCalls(c.Content.Parts)
@@ -340,10 +336,6 @@ func mapToOpenAIStreamChoice(candidates []*genai.Candidate) ([]openai.ChatComple
 }
 
 func mapToOpenAIChoice(candidates []*genai.Candidate) ([]openai.ChatCompletionChoice, error) {
-	if len(candidates) == 0 {
-		return nil, nil
-	}
-
 	var choices []openai.ChatCompletionChoice
 	for i, c := range candidates {
 		content, toolCalls, err := mapToOpenAIContentAndToolCalls(c.Content.Parts)
@@ -604,20 +596,13 @@ func (s *server) embeddings(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		http.Error(w, fmt.Sprintf("unexpected status code: %d", resp.StatusCode), http.StatusInternalServerError)
-		return
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("couldn't read response body: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("unexpected status code: %d", resp.StatusCode), resp.StatusCode)
 		return
 	}
 
 	var embeddingResponse vertexEmbeddingResponse
-	err = json.Unmarshal(body, &embeddingResponse)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("couldn't unmarshal response body: %v", err), http.StatusInternalServerError)
+	if err := json.NewDecoder(resp.Body).Decode(&embeddingResponse); err != nil {
+		http.Error(w, fmt.Sprintf("couldn't decode response: %v", err), http.StatusInternalServerError)
 		return
 	}
 
