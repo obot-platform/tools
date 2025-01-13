@@ -44,7 +44,6 @@ func validate(ctx context.Context) error {
 }
 
 func configure(ctx context.Context) (*genai.Client, error) {
-
 	// Ensure that we have some valid credentials JSON data
 	credsJSON := os.Getenv("OBOT_GEMINI_VERTEX_MODEL_PROVIDER_GOOGLE_CREDENTIALS_JSON")
 	if credsJSON == "" {

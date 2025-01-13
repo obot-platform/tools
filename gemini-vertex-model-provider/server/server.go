@@ -31,7 +31,6 @@ type server struct {
 }
 
 func Run(client *genai.Client, port string) error {
-
 	mux := http.NewServeMux()
 
 	s := &server{
@@ -235,9 +234,7 @@ func (s *server) chatCompletions(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
 		}
-
 	} else {
 		result, err := s.client.Models.GenerateContent(r.Context(), cr.Model, contents, config)
 		if err != nil {
@@ -314,7 +311,6 @@ func mapToOpenAIStreamChoice(candidates []*genai.Candidate) ([]openai.ChatComple
 
 	var choices []openai.ChatCompletionStreamChoice
 	for i, c := range candidates {
-
 		content, toolCalls, err := mapToOpenAIContentAndToolCalls(c.Content.Parts)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map content and tool calls: %w", err)
@@ -350,7 +346,6 @@ func mapToOpenAIChoice(candidates []*genai.Candidate) ([]openai.ChatCompletionCh
 
 	var choices []openai.ChatCompletionChoice
 	for i, c := range candidates {
-
 		content, toolCalls, err := mapToOpenAIContentAndToolCalls(c.Content.Parts)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map content and tool calls: %w", err)
@@ -423,7 +418,6 @@ func mapRoleToOpenAI(role string) string {
 }
 
 func mapMessagesFromOpenAI(messages []openai.ChatCompletionMessage) ([]*genai.Content, error) {
-
 	var contents []*genai.Content
 	if len(messages) > 0 {
 		contents = append(contents, &genai.Content{
@@ -472,7 +466,6 @@ func mapMessagesFromOpenAI(messages []openai.ChatCompletionMessage) ([]*genai.Co
 					},
 				})
 			}
-
 		} else if m.Content != "" {
 			// Pure text content
 			content.Parts = append(content.Parts, &genai.Part{
@@ -564,7 +557,6 @@ type vertexEmbeddings struct {
 
 // embeddings - not (yet) provided by the Google GenAI package
 func (s *server) embeddings(w http.ResponseWriter, r *http.Request) {
-
 	var er openAIEmbeddingRequest
 	if err := json.NewDecoder(r.Body).Decode(&er); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
