@@ -10,3 +10,10 @@ Credential: ../model-provider-credential as anthropic-bedrock-model-provider
 ---
 !metadata:*:icon
 /admin/assets/anthropic_bedrock_icon.svg
+
+---
+Name: validate
+Description: Validate Anthropic on Bedrock credentials
+Metadata: envVars: OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION,OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/validate.py

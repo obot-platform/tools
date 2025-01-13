@@ -1,45 +1,37 @@
 import json
 import os
-import sys
-
-import boto3
+from validate import configure, validate
 import claude3_provider_common
 from anthropic import AsyncAnthropicBedrock
 from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse, StreamingResponse
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
+
+
 def log(*args):
     if debug:
         print(*args)
 
 
-os.environ["AWS_ACCESS_KEY_ID"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID")
-os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY")
-os.environ["AWS_SESSION_TOKEN"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN")
-os.environ["AWS_REGION"] = os.environ["AWS_DEFAULT_REGION"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION")
-
-# Check if any is empty
-if not all([os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION"]]):
-    print("Please set OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION", file=sys.stderr)
-    sys.exit(1)
+client: AsyncAnthropicBedrock | None = None
 
 
-# Check authentication
-try:
-    client = boto3.client("sts")
-    response = client.get_caller_identity()
-except Exception as e:
-    print("Please authenticate with AWS - ", e, file=sys.stderr)
-    sys.exit(1)
+@asynccontextmanager
+async def lifespan(a: FastAPI):
+    try:
+        configure()
+        validate()
+        global client
+        client = AsyncAnthropicBedrock()
+    except Exception as ex:
+        raise ex
+    yield  # App shutdown
+    await client.close()
 
 
-
-# Setup Client
-client = AsyncAnthropicBedrock()
-
-app = FastAPI()
-
+app = FastAPI(lifespan=lifespan)
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
 
@@ -64,8 +56,7 @@ async def list_models() -> JSONResponse:
 @app.post("/v1/chat/completions")
 async def completions(request: Request) -> StreamingResponse:
     data = await request.body()
-    input = json.loads(data)
-    return await claude3_provider_common.completions(client, input)
+    return await claude3_provider_common.completions(client, json.loads(data))
 
 
 if __name__ == "__main__":
