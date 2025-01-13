@@ -21,6 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const maxFileSize = 1024 * 1024 * 100
+
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
 	visited := make(map[string]struct{})
 	for url := range output.State.WebsiteCrawlingState.VisitedURLs {
@@ -116,8 +118,8 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 		}
 		data := []byte(html)
 
-		if len(data) > 1024*1024*100 {
-			logOut.Infof("skipping %s because it is larger than 100 MB", e.Request.URL.String())
+		if len(data) > maxFileSize {
+			logOut.Infof("skipping %s because it is larger than %d MB", e.Request.URL.String(), maxFileSize/(1024*1024))
 			return
 		}
 
@@ -311,6 +313,11 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read PDF %s: %v", linkURL.String(), err)
+	}
+
+	if len(data) > maxFileSize {
+		logOut.Infof("skipping %s because it is larger than 100 MB", linkURL.String())
+		return nil
 	}
 
 	newChecksum, err := getChecksum(data)
