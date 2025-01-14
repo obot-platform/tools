@@ -1,6 +1,7 @@
 import json
 import os
 
+import anthropic.pagination
 import claude3_provider_common
 from anthropic import AsyncAnthropic
 from fastapi import FastAPI, Request
@@ -33,7 +34,10 @@ async def get_root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     try:
-        return JSONResponse(content={"object":"list","data": [set_model_usage(m) for m in json.loads((await claude3_provider_common.list_models(client)).body)["data"]]})
+        resp: anthropic.pagination.AsyncPage[anthropic.types.ModelInfo] = await client.models.list(limit=20)
+        return JSONResponse(content={"object":"list","data": [
+            set_model_usage(model.model_dump(exclude={"created_at"})) for model in resp.data
+        ]})
     except Exception as e:
         return JSONResponse(content={"error": e}, status_code=500)
 

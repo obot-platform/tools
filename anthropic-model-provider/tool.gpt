@@ -9,3 +9,10 @@ Credential: ../model-provider-credential as anthropic-model-provider
 ---
 !metadata:*:icon
 /admin/assets/anthropic_icon.svg
+
+---
+Name: validate
+Description: Validate Anthropic credentials
+Metadata: envVars: OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/validate.py
