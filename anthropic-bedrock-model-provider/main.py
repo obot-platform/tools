@@ -1,11 +1,14 @@
 import json
 import os
-from validate import configure, validate
+from contextlib import asynccontextmanager
+
+import boto3
 import claude3_provider_common
 from anthropic import AsyncAnthropicBedrock
 from fastapi import FastAPI, Request
-from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse, StreamingResponse
+
+from validate import configure, validate
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
@@ -47,10 +50,36 @@ async def log_body(request: Request, call_next):
 async def get_root():
     return uri
 
-
+# https://docs.anthropic.com/en/api/claude-on-amazon-bedrock#list-available-models
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return await claude3_provider_common.list_models(client)
+    try:
+        bedrock = boto3.client(service_name="bedrock")
+        response = bedrock.list_foundation_models(byProvider="anthropic")
+    except Exception as e:
+        return JSONResponse(content={"error": f"Failed to list models - bedrock client error: {e}"}, status_code=500)
+    try:
+        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            log(f"Failed to list models: {response}")
+            return JSONResponse(content={"error": f"Failed to list models - unexpected status code: {response}"},
+                                status_code=response["ReponseMetadata"]["HTTPStatusCode"])
+    except KeyError as e:
+        return JSONResponse(content={"error": f"Failed to list models - bad response: {e}"}, status_code=500)
+
+    try:
+        models = []
+        for model in response["modelSummaries"]:
+            if model["modelLifecycle"]["status"] != "ACTIVE" or "PROVISIONED" not in model["inferenceTypesSupported"]:
+                continue
+            models.append({
+                "id": model["modelId"],
+                "name": f"AWS Bedrock Anthropic {model['modelName']}",
+                "metadata": {"usage": "llm"},
+            })
+        return JSONResponse(content={"object": "list", "data": models})
+    except KeyError as e:
+        log(f"Bad model list: {e}")
+        return JSONResponse(content={"error": f"Failed to list models - bad model list: {e}"}, status_code=500)
 
 
 @app.post("/v1/chat/completions")

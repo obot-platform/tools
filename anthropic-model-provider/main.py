@@ -46,8 +46,7 @@ def set_model_usage(model: dict) -> dict:
 @app.post("/v1/chat/completions")
 async def completions(request: Request) -> StreamingResponse:
     data = await request.body()
-    input = json.loads(data)
-    return await claude3_provider_common.completions(client, input)
+    return await claude3_provider_common.completions(client, json.loads(data))
 
 
 if __name__ == "__main__":
