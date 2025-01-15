@@ -1,26 +1,10 @@
-import requests
-import os
 import sys
 import json
-import tools
-import pkgutil
-import importlib
+from tools import meetings, recordings, users
 from tools.helper import tool_registry
 
 
-def auto_import_tools():
-    """
-    Dynamically import all modules in the 'tools' package.
-    This will trigger @tool_registry.decorator decorator in those modules and populate 'tool_registry'.
-    """
-    package_path = tools.__path__
-    for _, module_name, is_pkg in pkgutil.iter_modules(package_path):
-        if not is_pkg:
-            importlib.import_module(f"tools.{module_name}")
-
-
 def main():
-    auto_import_tools()
 
     if len(sys.argv) != 2:
         print(

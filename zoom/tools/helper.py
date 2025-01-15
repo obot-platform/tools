@@ -1,4 +1,3 @@
-from typing import Dict, Any
 import os
 
 ACCESS_TOKEN = os.getenv("ZOOM_OAUTH_TOKEN")
