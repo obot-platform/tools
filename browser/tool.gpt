@@ -3,6 +3,7 @@ Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
 Credentials: github.com/gptscript-ai/credentials/model-provider
 Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download File From URL
+Metadata: noUserAuth: sys.model.provider.credential
 
 ---
 Name: Get Page Contents

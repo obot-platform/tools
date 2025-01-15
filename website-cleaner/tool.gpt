@@ -3,5 +3,6 @@ Description: Removes unwanted tags from website HTML, converts it to Markdown an
 Params: Input: input file name (HTML)
 Params: Output: output file name (Markdown)
 Credential: github.com/gptscript-ai/credentials/model-provider
+Metadata: noUserAuth: sys.model.provider.credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

@@ -3,6 +3,7 @@ Description: Model Provider for OpenAI
 Metadata: envVars: OBOT_OPENAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as openai-model-provider
+Metadata: noUserAuth: openai-model-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 

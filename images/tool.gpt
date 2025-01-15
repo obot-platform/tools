@@ -8,6 +8,7 @@ Share Tools: Analyze Images, Generate Images
 Name: Analyze Images
 Description: Analyze images using a given prompt and return relevant information about the images
 Credential: github.com/gptscript-ai/credentials/model-provider
+Metadata: noUserAuth: sys.model.provider.credential
 Share Context: Analyze Images Context
 Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
 Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpeg, png, and webp.
@@ -18,6 +19,7 @@ Param: images: (required) A JSON array containing one or more URLs or file paths
 Name: Generate Images
 Description: Generate images based on a given prompt
 Credential: github.com/gptscript-ai/credentials/model-provider
+Metadata: noUserAuth: sys.model.provider.credential
 Share Context: Generate Images Context
 Param: prompt: (required) Text describing the images to generate
 Param: size: (optional) Dimensions of the images to generate in. One of [1024x1024, 256x256, 512x512, 1792x1024, 1024x1792] (default 1024x1024)

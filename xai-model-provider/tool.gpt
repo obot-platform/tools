@@ -3,6 +3,7 @@ Description: Model Provider for xAI
 Metadata: envVars: OBOT_XAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as xai-model-provider
+Metadata: noUserAuth: xai-model-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 

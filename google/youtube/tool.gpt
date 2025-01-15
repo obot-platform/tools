@@ -11,6 +11,7 @@ Credential: github.com/gptscript-ai/credentials/model-provider
 Tool: github.com/gptscript-ai/datasets/filter
 Param: video_url: The URL of a YouTube video. (e.g. URLs in the form https://www.youtube.com/watch?v=<VIDEO_ID>, https://youtu.be/<VIDEO_ID>, or https://www.youtube.com/live/<VIDEO_ID>).
 Param: model: (Optional) The name of the model to use when cleaning up and summarizing the transcript. Defaults to "gpt-4o".
+Metadata: noUserAuth: sys.model.provider.credential
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/transcriber.py
 

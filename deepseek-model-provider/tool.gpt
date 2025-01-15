@@ -3,6 +3,7 @@ Description: Model Provider for DeepSeek
 Metadata: envVars: OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as deepseek-model-provider
+Metadata: noUserAuth: deepseek-model-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 

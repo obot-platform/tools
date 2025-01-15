@@ -3,6 +3,7 @@ Description: Model provider for Voyage Embeddings
 Metadata: envVars: OBOT_VOYAGE_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../model-provider-credential as voyage-model-provider
+Metadata: noUserAuth: voyage-model-provider
 
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
 

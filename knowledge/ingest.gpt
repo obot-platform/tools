@@ -4,5 +4,6 @@ Credential: github.com/gptscript-ai/credentials/model-provider
 Credential: ../existing-credential as knowledge
 Params: Input: Input File
 Params: Dataset: Dataset ID
+Metadata: noUserAuth: sys.model.provider.credential,knowledge
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool ingest --flows-file=blueprint:obot --dataset ${DATASET} "ws://${INPUT}"
