@@ -11,13 +11,28 @@ client = AsyncClient(api_key=os.environ.get("OBOT_VOYAGE_MODEL_PROVIDER_API_KEY"
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
+# Voyage doesn't have an API for this, so we need to update this list from here: https://docs.voyageai.com/docs/embeddings
 voyage_models = [
-    {"id": "voyage-3","metadata":{"usage":"text-embedding"},"object":"model"},
-    {"id": "voyage-3-lite","metadata":{"usage":"text-embedding"},"object":"model"},
-    {"id": "voyage-finance-2","metadata":{"usage":"text-embedding"},"object":"model"},
-    {"id": "voyage-multilingual-2","metadata":{"usage":"text-embedding"},"object":"model"},
-    {"id": "voyage-law-2","metadata":{"usage":"text-embedding"},"object":"model"},
-    {"id": "voyage-code-2","metadata":{"usage":"text-embedding"},"object":"model"},
+    {
+        "id": "voyage-3-large",
+        "metadata": {"usage": "text-embedding"},
+        "object": "model",
+    },
+    {"id": "voyage-3", "metadata": {"usage": "text-embedding"}, "object": "model"},
+    {"id": "voyage-3-lite", "metadata": {"usage": "text-embedding"}, "object": "model"},
+    {"id": "voyage-code-3", "metadata": {"usage": "text-embedding"}, "object": "model"},
+    {
+        "id": "voyage-finance-2",
+        "metadata": {"usage": "text-embedding"},
+        "object": "model",
+    },
+    {
+        "id": "voyage-multilingual-2",
+        "metadata": {"usage": "text-embedding"},
+        "object": "model",
+    },
+    {"id": "voyage-law-2", "metadata": {"usage": "text-embedding"}, "object": "model"},
+    {"id": "voyage-code-2", "metadata": {"usage": "text-embedding"}, "object": "model"},
 ]
 
 
@@ -41,7 +56,7 @@ async def root():
 
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return JSONResponse({"object":"list","data": voyage_models}, status_code=200)
+    return JSONResponse({"object": "list", "data": voyage_models}, status_code=200)
 
 
 @app.post("/v1/embeddings")
@@ -49,7 +64,11 @@ async def embeddings(request: Request) -> JSONResponse:
     try:
         data = json.loads(await request.body())
         resp = await client.embed([data["input"]], model=data["model"])
-        return JSONResponse(content=jsonable_encoder({"data": [{"embedding": e} for e in resp.embeddings]}))
+        return JSONResponse(
+            content=jsonable_encoder(
+                {"data": [{"embedding": e} for e in resp.embeddings]}
+            )
+        )
     except Exception as e:
         try:
             log("Error occurred: ", e.__dict__)
@@ -58,7 +77,9 @@ async def embeddings(request: Request) -> JSONResponse:
         except:
             error_code = 500
             error_message = str(e)
-        raise HTTPException(status_code=error_code, detail=f"Error occurred: {error_message}")
+        raise HTTPException(
+            status_code=error_code, detail=f"Error occurred: {error_message}"
+        )
 
 
 if __name__ == "__main__":
@@ -66,7 +87,12 @@ if __name__ == "__main__":
     import asyncio
 
     try:
-        uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
-                    log_level="debug" if debug else "critical", access_log=debug)
+        uvicorn.run(
+            "main:app",
+            host="127.0.0.1",
+            port=int(os.environ.get("PORT", "8000")),
+            log_level="debug" if debug else "critical",
+            access_log=debug,
+        )
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
