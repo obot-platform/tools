@@ -261,8 +261,6 @@ func (s *server) chatCompletions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	return
 }
 
 func mapUsageToOpenAI(usage *genai.GenerateContentResponseUsageMetadata) openai.Usage {
