@@ -6,12 +6,15 @@ from anthropic import Anthropic
 
 
 def validate():
-    client = Anthropic(api_key=os.environ.get("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY", ""))
+    client = Anthropic(
+        api_key=os.environ.get("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY", "")
+    )
     try:
         _ = client.models.list(limit=1)
         return True
     except Exception as e:
         raise Exception(f"Anthropic API Key validation failed: {e}")
+
 
 if __name__ == "__main__":
     try:

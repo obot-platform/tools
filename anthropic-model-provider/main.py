@@ -2,13 +2,16 @@ import json
 import os
 
 import anthropic.pagination
-import claude3_provider_common
 from anthropic import AsyncAnthropic
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
+import anthropic_common
+
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
-client = AsyncAnthropic(api_key=os.environ.get("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY", ""))
+client = AsyncAnthropic(
+    api_key=os.environ.get("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY", "")
+)
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
@@ -34,23 +37,31 @@ async def get_root():
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     try:
-        resp: anthropic.pagination.AsyncPage[anthropic.types.ModelInfo] = await client.models.list(limit=20)
-        return JSONResponse(content={"object":"list","data": [
-            set_model_usage(model.model_dump(exclude={"created_at"})) for model in resp.data
-        ]})
+        resp: anthropic.pagination.AsyncPage[
+            anthropic.types.ModelInfo
+        ] = await client.models.list(limit=20)
+        return JSONResponse(
+            content={
+                "object": "list",
+                "data": [
+                    set_model_usage(model.model_dump(exclude={"created_at"}))
+                    for model in resp.data
+                ],
+            }
+        )
     except Exception as e:
         return JSONResponse(content={"error": e}, status_code=500)
 
 
 def set_model_usage(model: dict) -> dict:
-    model["metadata"] = {"usage":"llm"}
+    model["metadata"] = {"usage": "llm"}
     return model
 
 
 @app.post("/v1/chat/completions")
 async def completions(request: Request) -> StreamingResponse:
     data = await request.body()
-    return await claude3_provider_common.completions(client, json.loads(data))
+    return await anthropic_common.completions(client, json.loads(data))
 
 
 if __name__ == "__main__":
@@ -58,7 +69,13 @@ if __name__ == "__main__":
     import asyncio
 
     try:
-        uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")), workers=4,
-                log_level="debug" if debug else "critical", access_log=debug)
+        uvicorn.run(
+            "main:app",
+            host="127.0.0.1",
+            port=int(os.environ.get("PORT", "8000")),
+            workers=4,
+            log_level="debug" if debug else "critical",
+            access_log=debug,
+        )
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
