@@ -625,6 +625,4 @@ func (s *server) embeddings(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("couldn't encode response: %v", err), http.StatusInternalServerError)
 		return
 	}
-
-	return
 }
