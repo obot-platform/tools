@@ -21,3 +21,7 @@ YouTube
 ---
 !metadata:*:icon
 /admin/assets/youtube_icon_small.png
+
+---
+!metadata:*:oauth
+google

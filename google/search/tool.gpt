@@ -28,3 +28,7 @@ Google Search
 ---
 !metadata:*:icon
 /admin/assets/google_icon_small.png
+
+---
+!metadata:*:oauth
+google

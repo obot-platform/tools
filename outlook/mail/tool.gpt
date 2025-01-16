@@ -10,7 +10,7 @@ Description: Lists all available mail folders.
 Share Context: Outlook Mail Context
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
-Credential: Outlook Mail OAuth Read Credential from ./credential
+Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
 
@@ -20,11 +20,11 @@ Description: Lists messages in a folder.
 Share Context: Outlook Mail Context
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
-Credential: Outlook Mail OAuth Read Credential from ./credential
+Credential: ./credential
 Share Tools: List Mail Folders
 Param: folder_id: The ID of the folder to list messages in.
-Param: start: (Optional) The start date and time of the time frame to list messages within, in RFC 3339 format.
-Param: end: (Optional) The end date and time of the time frame to list messages within, in RFC 3339 format.
+Param: start: The RFC3339 formatted start date and time of the time frame to list messages within.
+Param: end: The RFC3339 formatted end date and time of the time frame to list messages within.
 Param: limit: (Optional) The maximum number of messages to return. If unset, returns up to 100 messages.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages
@@ -33,7 +33,7 @@ Param: limit: (Optional) The maximum number of messages to return. If unset, ret
 Name: Get Message Details
 Description: Get the details of a message.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Read Credential from ./credential
+Credential: ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to get details for.
 
@@ -43,7 +43,7 @@ Param: message_id: The ID of the message to get details for.
 Name: Search Messages
 Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Read Credential from ./credential
+Credential: ./credential
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Share Tools: List Mail Folders
@@ -61,7 +61,7 @@ Param: limit: (Optional, default 10) The maximum number of messages to return.
 Name: Create Draft
 Description: Create (but do not send) a draft message.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Write Credential from ./credential
+Credential: ./credential
 Share Tools: Send Draft
 Param: subject: The subject of the message.
 Param: body: The body of the message in markdown format.
@@ -76,7 +76,7 @@ Param: attachments: (Optional) A comma separated list of workspace file paths to
 Name: Send Draft
 Description: Send an existing draft message.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Write Credential from ./credential
+Credential: ./credential
 Share Tools: Create Draft
 Param: draft_id: The ID of the draft to send.
 
@@ -86,7 +86,7 @@ Param: draft_id: The ID of the draft to send.
 Name: Delete Message
 Description: Delete a message.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Write Credential from ./credential
+Credential: ./credential
 Share Tools: List Messages, Search Messages
 Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
 
@@ -96,7 +96,7 @@ Param: message_id: The ID of the message to delete. This is NOT a mail folder ID
 Name: Move Message
 Description: Moves a message to a folder.
 Share Context: Outlook Mail Context
-Credential: Outlook Mail OAuth Write Credential from ./credential
+Credential: ./credential
 Share Tools: List Mail Folders, List Messages, Search Messages
 Param: message_id: The ID of the message to move.
 Param: destination_folder_id: The ID of the folder to move the message into.
@@ -104,17 +104,9 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
 
 ---
-Name: Get Default Timezone
-Description: Get the default timezone for the user.
-Credential: ./credential
-
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDefaultTimezone
-
----
 Name: Outlook Mail Context
 Type: context
-Share Context: Current Date and Time from ../../time
-Share Tools: Get Default Timezone
+Share Context: ../../time
 
 #!sys.echo
 
@@ -122,7 +114,9 @@ Share Tools: Get Default Timezone
 
 You have access to tools for the Microsoft Outlook Mail API.
 
-Before calling any other Outlook tools, call Get Default Timezone tool, so that you know the user's timezone.
+Display all dates and times in the user's preferred timezone.
+When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
+When the user uses relative terms like "today", "tomorrow", or "last week", assume the date is the current day in the user's preferred timezone.
 
 Do not output mail folder IDs or message IDs because they are not helpful for the user. The message IDs are needed for getting message details, deleting a message, or moving a message.
 When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
@@ -140,3 +134,7 @@ Outlook Mail
 ---
 !metadata:*:icon
 /admin/assets/outlook_icon_small.svg
+
+---
+!metadata:*:oauth
+microsoft365

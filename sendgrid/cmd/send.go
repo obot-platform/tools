@@ -3,29 +3,33 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-func Send(ctx context.Context, to, subject, textBody, htmlBody string) (string, error) {
-	// Retrieve and trim environment variables
-	sendGridAPIKey := strings.TrimSpace(os.Getenv("SENDGRID_API_KEY"))
-	if sendGridAPIKey == "" {
-		return "", fmt.Errorf("SENDGRID_API_KEY is not set")
-	}
-
-	fromEmail := strings.TrimSpace(os.Getenv("OBOT_NO_REPLY_EMAIL"))
-	if fromEmail == "" {
-		return "", fmt.Errorf("OBOT_NO_REPLY_EMAIL is not set")
-	}
-
+func Send(ctx context.Context, apiKey, from, fromName, to, subject, textBody, htmlBody string) (string, error) {
+	apiKey = strings.TrimSpace(apiKey)
+	from = strings.TrimSpace(from)
+	fromName = strings.TrimSpace(fromName)
 	to = strings.TrimSpace(to)
 	subject = strings.TrimSpace(subject)
 	textBody = strings.TrimSpace(textBody)
 	htmlBody = strings.TrimSpace(htmlBody)
+
+	if apiKey == "" {
+		return "", fmt.Errorf("api key is required")
+	}
+
+	if from == "" {
+		return "", fmt.Errorf("from email is required")
+	}
+
+	if fromName == "" {
+		// Default to "Obot"
+		fromName = "Obot"
+	}
 
 	if to == "" {
 		return "", fmt.Errorf("recipient email (to) is required")
@@ -57,16 +61,14 @@ func Send(ctx context.Context, to, subject, textBody, htmlBody string) (string, 
 		return "", fmt.Errorf("either textBody or htmlBody is required")
 	}
 
-	from := mail.NewEmail("Obot", fromEmail)
 	personalization := mail.NewPersonalization()
-
 	for _, email := range validEmails {
 		personalization.AddTos(mail.NewEmail("", email))
 	}
 
 	// Create email message
 	message := mail.NewV3Mail()
-	message.SetFrom(from)
+	message.SetFrom(mail.NewEmail(fromName, from))
 	message.Subject = subject
 	message.AddPersonalizations(personalization)
 	if textBody != "" {
@@ -76,7 +78,7 @@ func Send(ctx context.Context, to, subject, textBody, htmlBody string) (string, 
 		message.AddContent(mail.NewContent("text/html", htmlBody))
 	}
 
-	client := sendgrid.NewSendClient(sendGridAPIKey)
+	client := sendgrid.NewSendClient(apiKey)
 	response, err := client.SendWithContext(ctx, message)
 	if err != nil {
 		return "", fmt.Errorf("failed to send email: %w", err)

@@ -24,6 +24,12 @@ if [ -n "$CID" ]; then
     exit 0
 fi
 
+if [ -n "$OBOT_THREAD_ENVS" ]; then
+    for env in $(echo $OBOT_THREAD_ENVS | tr "," "\n"); do
+        OBOT_SHELL_RUN_ARGS="${OBOT_SHELL_RUN_ARGS} -e $env"
+    done
+fi
+
 DATADIR=$(echo "$GPTSCRIPT_WORKSPACE_ID" | sed 's!directory://!!')
 if [ -d "$DATADIR" ]; then
     OBOT_SHELL_RUN_ARGS="${OBOT_SHELL_RUN_ARGS} -v ${DATADIR}/files:/mnt/data"
@@ -34,4 +40,4 @@ if [ "${START}" = "false" ]; then
     CMD=create
 fi
 
-docker $CMD --label thread.obot.ai="$ID" --name "obot-shell-$ID" -q -it ${OBOT_SHELL_RUN_ARGS} ${OBOT_SHELL_IMAGE:-alpine}
+docker $CMD --rm --label thread.obot.ai="$ID" --name "obot-shell-$ID" -q -it ${OBOT_SHELL_RUN_ARGS} ${OBOT_SHELL_IMAGE:-alpine}

@@ -4,5 +4,6 @@ Params: Input: Input File
 Params: Output: Output File
 Params: know_load_metadata: Comma-delimited key=value pairs to be added to the metadata of the loaded document.
 Credential: github.com/gptscript-ai/credentials/model-provider
+Credential: ../existing-credential as knowledge
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool load --flows-file=blueprint:obot --flow=obotload "ws://${INPUT}" "ws://${OUTPUT}"

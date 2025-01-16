@@ -41,8 +41,8 @@ func (s *Datastore) DeleteDataset(ctx context.Context, datasetID string) error {
 	return nil
 }
 
-func (s *Datastore) GetDataset(ctx context.Context, datasetID string) (*types.Dataset, error) {
-	return s.Index.GetDataset(ctx, datasetID)
+func (s *Datastore) GetDataset(ctx context.Context, datasetID string, opts *types.DatasetGetOpts) (*types.Dataset, error) {
+	return s.Index.GetDataset(ctx, datasetID, opts)
 }
 
 func (s *Datastore) ListDatasets(ctx context.Context) ([]types.Dataset, error) {
@@ -61,7 +61,7 @@ func (s *Datastore) UpdateDataset(ctx context.Context, updatedDataset types.Data
 		return origDS, fmt.Errorf("dataset ID is required")
 	}
 
-	origDS, err = s.GetDataset(ctx, updatedDataset.ID)
+	origDS, err = s.GetDataset(ctx, updatedDataset.ID, nil)
 	if err != nil {
 		return origDS, err
 	}

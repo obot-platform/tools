@@ -23,24 +23,18 @@ func main() {
 	)
 	switch command {
 	case "sendEmail":
-		// Retrieve environment variables for sending email
-		to := os.Getenv("TO")
-		subject := os.Getenv("SUBJECT")
-		textBody := os.Getenv("TEXT_BODY")
-		htmlBody := os.Getenv("HTML_BODY")
-
-		// Validate required fields
-		if to == "" || subject == "" || (textBody == "" && htmlBody == "") {
-			fmt.Println("Missing required environment variables: TO, SUBJECT, and at least one of TEXT_BODY or HTML_BODY")
-			os.Exit(1)
-		}
-
-		// Call the Send function
-		result, err = cmd.Send(ctx, to, subject, textBody, htmlBody)
+		result, err = cmd.Send(ctx,
+			os.Getenv("SENDGRID_API_KEY"),
+			os.Getenv("SENDGRID_EMAIL_ADDRESS"),
+			os.Getenv("FROM_NAME"),
+			os.Getenv("TO"),
+			os.Getenv("SUBJECT"),
+			os.Getenv("TEXT_BODY"),
+			os.Getenv("HTML_BODY"),
+		)
 
 	default:
-		fmt.Printf("Unknown command: %s\n", command)
-		os.Exit(1)
+		err = fmt.Errorf("unknown command: %s", command)
 	}
 
 	if err != nil {

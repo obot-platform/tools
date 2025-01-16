@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"net/http"
 	url2 "net/url"
@@ -15,16 +16,25 @@ import (
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/storage"
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/sirupsen/logrus"
 )
 
+const maxFileSize = 1024 * 1024 * 100
+
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
 	visited := make(map[string]struct{})
-	folders := make(map[string]struct{})
-
+	for url := range output.State.WebsiteCrawlingState.VisitedURLs {
+		filePath, err := convertUrlToFilePath(url)
+		if err != nil {
+			logOut.Errorf("Failed to convert URL to file path: %v", err)
+			continue
+		}
+		visited[filePath] = struct{}{}
+	}
 	for _, url := range input.WebsiteCrawlingConfig.URLs {
-		if err := scrape(ctx, logOut, output, gptscript, visited, folders, url, input.Limit); err != nil {
+		if err := scrape(ctx, logOut, output, gptscript, visited, url, output.State.WebsiteCrawlingState.CurrentURL, input.Limit); err != nil {
 			return fmt.Errorf("failed to scrape %s: %w", url, err)
 		}
 	}
@@ -40,35 +50,38 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	}
 
 	output.Status = ""
+	output.State.WebsiteCrawlingState = WebsiteCrawlingState{}
 	return writeMetadata(ctx, output, gptscript)
 }
 
-func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, folders map[string]struct{}, url string, limit int) error {
+func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, url, urlToResume string, limit int) error {
 	collector := colly.NewCollector()
+
+	inMemoryStore := &storage.InMemoryStorage{}
+	inMemoryStore.Init()
+
+	for url := range visited {
+		if url == urlToResume {
+			continue
+		}
+		h := fnv.New64a()
+		h.Write([]byte(url))
+		urlHash := h.Sum64()
+		inMemoryStore.Visited(urlHash)
+	}
+
+	collector.SetStorage(inMemoryStore)
+
 	collector.OnHTML("body", func(e *colly.HTMLElement) {
 		html, err := e.DOM.Html()
 		if err != nil {
 			logOut.Errorf("Failed to grab HTML: %v", err)
 			return
 		}
-		hostname := e.Request.URL.Hostname()
-		urlPathWithQuery := e.Request.URL.Path
-		if e.Request.URL.RawQuery != "" {
-			urlPathWithQuery += "?" + url2.QueryEscape(e.Request.URL.RawQuery)
-		}
-
-		var filePath string
-		if urlPathWithQuery == "" {
-			filePath = path.Join(hostname, "index.html")
-		} else {
-			trimmedPath := strings.Trim(urlPathWithQuery, "/")
-			if trimmedPath == "" {
-				filePath = path.Join(hostname, "index.html")
-			} else {
-				segments := strings.Split(trimmedPath, "/")
-				fileName := segments[len(segments)-1] + ".html"
-				filePath = path.Join(hostname, strings.Join(segments[:len(segments)-1], "/"), fileName)
-			}
+		filePath, err := convertUrlToFilePath(e.Request.URL.String())
+		if err != nil {
+			logOut.Errorf("Failed to convert URL to file path: %v", err)
+			return
 		}
 		if _, ok := visited[filePath]; ok {
 			return
@@ -103,8 +116,14 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			logOut.Infof("skipping %s because it has not changed for etag/last-modified: %s/%s", e.Request.URL.String(), etag, lastModified)
 			return
 		}
+		data := []byte(html)
 
-		checksum, err := getChecksum([]byte(html))
+		if len(data) > maxFileSize {
+			logOut.Infof("skipping %s because it is larger than %d MB", e.Request.URL.String(), maxFileSize/(1024*1024))
+			return
+		}
+
+		checksum, err := getChecksum(data)
 		if err != nil {
 			logOut.Errorf("Failed to get checksum for %s: %v", e.Request.URL.String(), err)
 			return
@@ -115,7 +134,7 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			return
 		}
 
-		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, []byte(html)); err != nil {
+		if err := gptscriptClient.WriteFileInWorkspace(ctx, filePath, data); err != nil {
 			logOut.Errorf("Failed to write file %s: %v", filePath, err)
 			return
 		}
@@ -127,17 +146,18 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			URL:         e.Request.URL.String(),
 			UpdatedAt:   updatedAt,
 			Checksum:    checksum,
-			SizeInBytes: int64(len([]byte(html))),
+			SizeInBytes: int64(len(data)),
 		}
 
-		folders[hostname] = struct{}{}
-		output.State.WebsiteCrawlingState.Folders = folders
+		output.State.WebsiteCrawlingState.CurrentURL = e.Request.URL.String()
+		output.State.WebsiteCrawlingState.VisitedURLs[output.State.WebsiteCrawlingState.CurrentURL] = struct{}{}
+
 		output.Status = fmt.Sprintf("Scraped %v", e.Request.URL.String())
 	})
 
 	collector.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		if len(visited) == limit {
+		if len(visited) >= limit {
 			return
 		}
 
@@ -195,7 +215,40 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			e.Request.Visit(linkURL.String())
 		}
 	})
+
+	if urlToResume != "" {
+		return collector.Visit(urlToResume)
+	}
 	return collector.Visit(url)
+}
+
+func convertUrlToFilePath(url string) (string, error) {
+	parsedUrl, err := url2.Parse(url)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL %s: %v", url, err)
+	}
+
+	hostname := parsedUrl.Hostname()
+	urlPathWithQuery := parsedUrl.Path
+	if parsedUrl.RawQuery != "" {
+		urlPathWithQuery += "?" + url2.QueryEscape(parsedUrl.RawQuery)
+	}
+
+	var filePath string
+	if urlPathWithQuery == "" {
+		filePath = path.Join(hostname, "index.html")
+	} else {
+		trimmedPath := strings.Trim(urlPathWithQuery, "/")
+		if trimmedPath == "" {
+			filePath = path.Join(hostname, "index.html")
+		} else {
+			segments := strings.Split(trimmedPath, "/")
+			fileName := segments[len(segments)-1] + ".html"
+			filePath = path.Join(hostname, strings.Join(segments[:len(segments)-1], "/"), fileName)
+		}
+	}
+
+	return filePath, nil
 }
 
 func isSameDomainOrSubdomain(linkHostname, baseHostname string) bool {
@@ -260,6 +313,11 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read PDF %s: %v", linkURL.String(), err)
+	}
+
+	if len(data) > maxFileSize {
+		logOut.Infof("skipping %s because it is larger than 100 MB", linkURL.String())
+		return nil
 	}
 
 	newChecksum, err := getChecksum(data)

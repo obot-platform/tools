@@ -1,6 +1,6 @@
 import json
 import os
-import sys
+from contextlib import asynccontextmanager
 
 import boto3
 import claude3_provider_common
@@ -8,38 +8,33 @@ from anthropic import AsyncAnthropicBedrock
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
+from validate import configure, validate
+
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
+
+
 def log(*args):
     if debug:
         print(*args)
 
 
-os.environ["AWS_ACCESS_KEY_ID"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID")
-os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY")
-os.environ["AWS_SESSION_TOKEN"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN")
-os.environ["AWS_REGION"] = os.environ["AWS_DEFAULT_REGION"] = os.environ.get("OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION")
-
-# Check if any is empty
-if not all([os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN"], os.environ["OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION"]]):
-    print("Please set OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_ACCESS_KEY_ID, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SECRET_ACCESS_KEY, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_SESSION_TOKEN, OBOT_ANTHROPIC_BEDROCK_MODEL_PROVIDER_REGION", file=sys.stderr)
-    sys.exit(1)
+client: AsyncAnthropicBedrock | None = None
 
 
-# Check authentication
-try:
-    client = boto3.client("sts")
-    response = client.get_caller_identity()
-except Exception as e:
-    print("Please authenticate with AWS - ", e, file=sys.stderr)
-    sys.exit(1)
+@asynccontextmanager
+async def lifespan(a: FastAPI):
+    try:
+        configure()
+        validate()
+        global client
+        client = AsyncAnthropicBedrock()
+    except Exception as ex:
+        raise ex
+    yield  # App shutdown
+    await client.close()
 
 
-
-# Setup Client
-client = AsyncAnthropicBedrock()
-
-app = FastAPI()
-
+app = FastAPI(lifespan=lifespan)
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
 
 
@@ -55,17 +50,42 @@ async def log_body(request: Request, call_next):
 async def get_root():
     return uri
 
-
+# https://docs.anthropic.com/en/api/claude-on-amazon-bedrock#list-available-models
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return await claude3_provider_common.list_models(client)
+    try:
+        bedrock = boto3.client(service_name="bedrock")
+        response = bedrock.list_foundation_models(byProvider="anthropic")
+    except Exception as e:
+        return JSONResponse(content={"error": f"Failed to list models - bedrock client error: {e}"}, status_code=500)
+    try:
+        if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+            log(f"Failed to list models: {response}")
+            return JSONResponse(content={"error": f"Failed to list models - unexpected status code: {response}"},
+                                status_code=response["ReponseMetadata"]["HTTPStatusCode"])
+    except KeyError as e:
+        return JSONResponse(content={"error": f"Failed to list models - bad response: {e}"}, status_code=500)
+
+    try:
+        models = []
+        for model in response["modelSummaries"]:
+            if model["modelLifecycle"]["status"] != "ACTIVE" or "PROVISIONED" not in model["inferenceTypesSupported"]:
+                continue
+            models.append({
+                "id": model["modelId"],
+                "name": f"AWS Bedrock Anthropic {model['modelName']}",
+                "metadata": {"usage": "llm"},
+            })
+        return JSONResponse(content={"object": "list", "data": models})
+    except KeyError as e:
+        log(f"Bad model list: {e}")
+        return JSONResponse(content={"error": f"Failed to list models - bad model list: {e}"}, status_code=500)
 
 
 @app.post("/v1/chat/completions")
 async def completions(request: Request) -> StreamingResponse:
     data = await request.body()
-    input = json.loads(data)
-    return await claude3_provider_common.completions(client, input)
+    return await claude3_provider_common.completions(client, json.loads(data))
 
 
 if __name__ == "__main__":

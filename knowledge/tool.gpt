@@ -1,6 +1,7 @@
 Name: Knowledge
 Description: Obtain search result from the knowledge set
 Credential: github.com/gptscript-ai/credentials/model-provider
+Credential: ../existing-credential as knowledge
 Output Filter: ../result-formatter
 Share Context: context
 Params: Query: A search query that will be evaluated against the knowledge set

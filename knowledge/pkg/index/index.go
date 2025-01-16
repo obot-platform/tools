@@ -12,7 +12,7 @@ type Index interface {
 
 	// Fundamental Dataset Operations
 	CreateDataset(ctx context.Context, dataset types.Dataset, opts *types.DatasetCreateOpts) error
-	GetDataset(ctx context.Context, datasetID string) (*types.Dataset, error)
+	GetDataset(ctx context.Context, datasetID string, opts *types.DatasetGetOpts) (*types.Dataset, error)
 	ListDatasets(ctx context.Context) ([]types.Dataset, error)
 	DeleteDataset(ctx context.Context, datasetID string) error
 

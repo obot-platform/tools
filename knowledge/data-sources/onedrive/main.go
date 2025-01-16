@@ -208,8 +208,8 @@ func writeMetadata(ctx context.Context, output *MetadataOutput, gptscript *gptsc
 
 func syncChildrenFileForItem(ctx context.Context, client *msgraphsdk.GraphServiceClient, gptscriptClient *gptscript.GPTScript, item models.DriveItemable, output *MetadataOutput, root string, logErr *logrus.Logger) ([]models.DriveItemable, error) {
 	if item.GetFile() != nil {
-		// We only sync item that is less than 50 MB, as most of the bigger files won't be supported from knowledge
-		if item.GetSize() != nil && *item.GetSize() >= 1024*1024*50 {
+		// We only sync item that is less than 100 MB, as most of the bigger files won't be supported from knowledge
+		if item.GetSize() != nil && *item.GetSize() >= 1024*1024*100 {
 			return nil, nil
 		}
 		if err := saveToMetadata(ctx, logErr, output, client, gptscriptClient, item, root); err != nil {

@@ -69,7 +69,7 @@ func (r *RoutingRetriever) Retrieve(ctx context.Context, store store.Store, quer
 
 	datasets := map[string]map[string]any{}
 	for _, dsID := range r.AvailableDatasets {
-		dataset, err := store.GetDataset(ctx, dsID)
+		dataset, err := store.GetDataset(ctx, dsID, nil)
 		if err != nil {
 			return nil, err
 		}

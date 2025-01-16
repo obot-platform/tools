@@ -7,7 +7,8 @@ import (
 	"fmt"
 )
 
-func ListTables(ctx context.Context, db *sql.DB) (string, error) {
+// ListDatabaseTables returns a JSON object containing the list of tables in the database.
+func ListDatabaseTables(ctx context.Context, db *sql.DB) (string, error) {
 	tables, err := listTables(ctx, db)
 	if err != nil {
 		return "", fmt.Errorf("failed to list tables: %w", err)

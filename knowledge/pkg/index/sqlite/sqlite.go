@@ -143,8 +143,8 @@ func (i *Index) CreateDataset(ctx context.Context, dataset types.Dataset, opts *
 	return i.DB.CreateDataset(ctx, dataset, opts)
 }
 
-func (i *Index) GetDataset(ctx context.Context, datasetID string) (*types.Dataset, error) {
-	return i.DB.GetDataset(ctx, datasetID)
+func (i *Index) GetDataset(ctx context.Context, datasetID string, opts *types.DatasetGetOpts) (*types.Dataset, error) {
+	return i.DB.GetDataset(ctx, datasetID, opts)
 }
 
 func (i *Index) ListDatasets(ctx context.Context) ([]types.Dataset, error) {

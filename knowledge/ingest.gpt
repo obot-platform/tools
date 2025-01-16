@@ -1,6 +1,7 @@
 Name: Knowledge Ingestion
 Description: Ingest content into a dataset.
 Credential: github.com/gptscript-ai/credentials/model-provider
+Credential: ../existing-credential as knowledge
 Params: Input: Input File
 Params: Dataset: Dataset ID
 

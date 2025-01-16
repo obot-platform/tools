@@ -188,3 +188,7 @@ Jira
 ---
 !metadata:*:icon
 /admin/assets/jira_icon.svg
+
+---
+!metadata:*:oauth
+atlassian

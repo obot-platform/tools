@@ -157,3 +157,7 @@ Gmail
 ---
 !metadata:*:icon
 /admin/assets/gmail_icon_small.png
+
+---
+!metadata:*:oauth
+google

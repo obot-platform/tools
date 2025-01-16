@@ -10,9 +10,8 @@ from auth import gspread_client
 
 def main():
     spreadsheet_id = os.getenv('SPREADSHEET_ID')
-    spreadsheet_name = os.getenv('SPREADSHEET_NAME')
-    if spreadsheet_id is None and spreadsheet_name is None:
-        raise ValueError("Either spreadsheet_id or spreadsheet_name must be set")
+    if spreadsheet_id is None:
+        raise ValueError("spreadsheet_id must be set")
 
     raw_data = os.getenv('DATA')
     if raw_data is None:
@@ -24,14 +23,14 @@ def main():
 
     service = gspread_client()
     try:
-        spreadsheet = service.open(spreadsheet_name) if spreadsheet_name is not None else service.open_by_key(
+        spreadsheet = service.open_by_key(
             spreadsheet_id)
         sheet = spreadsheet.sheet1
         sheet.append_rows(data, value_input_option=ValueInputOption.user_entered)
+        print("Data written successfully")
     except APIError as err:
         print(err)
 
-    print("Data written successfully")
 
 
 if __name__ == "__main__":
