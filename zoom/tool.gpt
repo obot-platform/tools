@@ -175,3 +175,7 @@ You can use this tool to interact with Zoom with Zoom APIs.
 !metadata:*:category
 Zoom
 
+---
+!metadata:*:oauth
+zoom
+
