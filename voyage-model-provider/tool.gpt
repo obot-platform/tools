@@ -14,6 +14,5 @@ https://www.voyageai.com/logo.svg
 ---
 Name: validate
 Description: Validate Voyage credentials
-Metadata: envVars: OBOT_VOYAGE_MODEL_PROVIDER_API_KEY
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/validate.py
