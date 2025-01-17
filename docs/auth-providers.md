@@ -56,8 +56,9 @@ The auth provider must implement the following URL paths:
     from the `/oauth2/start` request.
 - `/oauth2/sign_out`: This path should sign the user out by clearing the `obot_access_token` cookie and redirecting the user to
   the URL in the `rd` query parameter.
-- `/obot-get-icon-url`: This path should take the user's access token from the authorization header and use it to get
+- `/obot-get-icon-url`: This path should take the user's access token from the `Authorization` header and use it to get
   the user's profile picture URL. It should return a JSON object with the URL in the `iconURL` field.
+  The `Authorization` header will be in the format `Bearer <access token>`.
 - `/obot-get-state`: More details in the next section.
 
 ##### Obot-Get-State
