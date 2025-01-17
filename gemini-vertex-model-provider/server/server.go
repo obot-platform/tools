@@ -58,68 +58,81 @@ func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte("http://127.0.0.1:" + s.port))
 }
 
+func addUsageMetadata(models []map[string]any) []map[string]any {
+	for _, m := range models {
+		usage := "llm"
+		if strings.Contains(m["id"].(string), "embedding") {
+			usage = "text-embedding"
+		}
+		m["metadata"] = map[string]any{"usage": usage}
+	}
+	return models
+}
+
 func (s *server) listModels(w http.ResponseWriter, r *http.Request) {
 	content := map[string]any{
-		"data": []map[string]any{
-			// LLMs: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference#supported-models
-			{
-				"id":   "gemini-1.5-flash-001",
-				"name": "Gemini 1.5 Flash (001)",
+		"data": addUsageMetadata(
+			[]map[string]any{
+				// LLMs: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference#supported-models
+				{
+					"id":   "gemini-1.5-flash-001",
+					"name": "Gemini 1.5 Flash (001)",
+				},
+				{
+					"id":   "gemini-1.5-flash-002",
+					"name": "Gemini 1.5 Flash (002)",
+				},
+				{
+					"id":   "gemini-1.5-pro-001",
+					"name": "Gemini 1.5 Pro (001)",
+				},
+				{
+					"id":   "gemini-1.5-pro-002",
+					"name": "Gemini 1.5 Pro (002)",
+				},
+				{
+					"id":   "gemini-1.0-pro-vision-001",
+					"name": "Gemini 1.0 Pro Vision (001)",
+				},
+				{
+					"id":   "gemini-1.0-pro",
+					"name": "Gemini 1.0 Pro",
+				},
+				{
+					"id":   "gemini-1.0-pro-001",
+					"name": "Gemini 1.0 Pro (001)",
+				},
+				{
+					"id":   "gemini-1.0-pro-002",
+					"name": "Gemini 1.0 Pro (002)",
+				},
+				// Embedding Models: https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported-models
+				{
+					"id":   "textembedding-gecko@001",
+					"name": "Text Embedding Gecko (001) [EN]",
+				},
+				{
+					"id":   "textembedding-gecko@003",
+					"name": "Text Embedding Gecko (003) [EN]",
+				},
+				{
+					"id":   "text-embedding-004",
+					"name": "Text Embedding 004 [EN]",
+				},
+				{
+					"id":   "text-embedding-005",
+					"name": "Text Embedding 005 [EN]",
+				},
+				{
+					"id":   "textembedding-gecko-multilingual@001",
+					"name": "Text Embedding Gecko Multilingual (001)",
+				},
+				{
+					"id":   "text-multilingual-embedding-002",
+					"name": "Text Multilingual Embedding 002",
+				},
 			},
-			{
-				"id":   "gemini-1.5-flash-002",
-				"name": "Gemini 1.5 Flash (002)",
-			},
-			{
-				"id":   "gemini-1.5-pro-001",
-				"name": "Gemini 1.5 Pro (001)",
-			},
-			{
-				"id":   "gemini-1.5-pro-002",
-				"name": "Gemini 1.5 Pro (002)",
-			},
-			{
-				"id":   "gemini-1.0-pro-vision-001",
-				"name": "Gemini 1.0 Pro Vision (001)",
-			},
-			{
-				"id":   "gemini-1.0-pro",
-				"name": "Gemini 1.0 Pro",
-			},
-			{
-				"id":   "gemini-1.0-pro-001",
-				"name": "Gemini 1.0 Pro (001)",
-			},
-			{
-				"id":   "gemini-1.0-pro-002",
-				"name": "Gemini 1.0 Pro (002)",
-			},
-			// Embedding Models: https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported-models
-			{
-				"id":   "textembedding-gecko@001",
-				"name": "Text Embedding Gecko (001) [EN]",
-			},
-			{
-				"id":   "textembedding-gecko@003",
-				"name": "Text Embedding Gecko (003) [EN]",
-			},
-			{
-				"id":   "text-embedding-004",
-				"name": "Text Embedding 004 [EN]",
-			},
-			{
-				"id":   "text-embedding-005",
-				"name": "Text Embedding 005 [EN]",
-			},
-			{
-				"id":   "textembedding-gecko-multilingual@001",
-				"name": "Text Embedding Gecko Multilingual (001)",
-			},
-			{
-				"id":   "text-multilingual-embedding-002",
-				"name": "Text Multilingual Embedding 002",
-			},
-		},
+		),
 	}
 	if err := json.NewEncoder(w).Encode(content); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
