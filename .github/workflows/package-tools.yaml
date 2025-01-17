@@ -1,0 +1,23 @@
+name: Build Docker Image
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - docs/**
+
+jobs:
+  build:
+    runs-on: depot-ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: github.com/obot-platform/obot
+
+      - name: Make packages
+        run: make package-tools
+        env:
+          TOOL_REGISTRY_REPOS: github.com/${{ github.repository }}@${{ github.sha }}
