@@ -9,7 +9,7 @@ type ImageQuality = 'standard' | 'hd';
 
 const threadId = process.env.OBOT_THREAD_ID
 const obotServerUrl = process.env.OBOT_SERVER_URL
-const downloadBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/file` : null
+const downloadBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/files` : null
 
 export async function generateImages(
   prompt: string = '',
