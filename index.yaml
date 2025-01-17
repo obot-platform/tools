@@ -19,9 +19,6 @@ tools:
   bluesky:
     reference: ./bluesky
     all: true
-  salesforce:
-    reference: ./salesforce
-    all: true
   slack:
     reference: ./slack
     all: true
@@ -105,8 +102,6 @@ modelProviders:
     reference: ./openai-model-provider
   anthropic-model-provider:
     reference: ./anthropic-model-provider
-  azure-openai-model-provider:
-    reference: ./azure-openai-model-provider
   ollama-model-provider:
     reference: ./ollama-model-provider
   groq-model-provider:
@@ -115,11 +110,7 @@ modelProviders:
     reference: ./voyage-model-provider
   vllm-model-provider:
     reference: ./vllm-model-provider
-  anthropic-bedrock-model-provider:
-    reference: ./anthropic-bedrock-model-provider
   xai-model-provider:
     reference: ./xai-model-provider
   deepseek-model-provider:
     reference: ./deepseek-model-provider
-  gemini-vertex-model-provider:
-    reference: ./gemini-vertex-model-provider
