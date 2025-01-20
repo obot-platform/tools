@@ -60,12 +60,12 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 	inMemoryStore := &storage.InMemoryStorage{}
 	inMemoryStore.Init()
 
-	for url := range visited {
-		if url == urlToResume {
+	for u := range output.State.WebsiteCrawlingState.VisitedURLs {
+		if u == urlToResume {
 			continue
 		}
 		h := fnv.New64a()
-		h.Write([]byte(url))
+		h.Write([]byte(u))
 		urlHash := h.Sum64()
 		inMemoryStore.Visited(urlHash)
 	}
@@ -346,6 +346,7 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 		Checksum:    newChecksum,
 		SizeInBytes: int64(len(data)),
 	}
+	output.State.WebsiteCrawlingState.VisitedURLs[linkURL.String()] = struct{}{}
 
 	if err := writeMetadata(ctx, output, gptscript); err != nil {
 		return fmt.Errorf("failed to write metadata: %v", err)
