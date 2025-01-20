@@ -2,7 +2,7 @@ Name: GitHub
 Description: Auth provider for GitHub
 Metadata: envVars: OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID,OBOT_GITHUB_AUTH_PROVIDER_CLIENT_SECRET,OBOT_AUTH_PROVIDER_COOKIE_SECRET,OBOT_AUTH_PROVIDER_EMAIL_DOMAINS
 Metadata: optionalEnvVars: OBOT_GITHUB_AUTH_PROVIDER_TEAMS,OBOT_GITHUB_AUTH_PROVIDER_ORG,OBOT_GITHUB_AUTH_PROVIDER_REPO,OBOT_GITHUB_AUTH_PROVIDER_TOKEN,OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS
-Metadata: noUserAuth
+Metadata: noUserAuth: github-auth-provider
 Credential: ../placeholder-credential as github-auth-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
