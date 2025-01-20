@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,6 +14,7 @@ import (
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
+	"github.com/obot-platform/tools/auth-providers-common/pkg/icon"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/google-auth-provider/pkg/profile"
 )
@@ -53,22 +54,12 @@ func main() {
 
 	oauthProxyOpts.Server.BindAddress = ""
 	oauthProxyOpts.MetricsServer.BindAddress = ""
+	oauthProxyOpts.Cookie.Expire = 24 * time.Hour
 	oauthProxyOpts.Cookie.Refresh = time.Hour
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
-	oauthProxyOpts.Cookie.Secret = string(cookieSecret)
+	oauthProxyOpts.Cookie.Secret = string(bytes.TrimSpace(cookieSecret))
 	oauthProxyOpts.Cookie.Secure = strings.HasPrefix(opts.ObotServerURL, "https://")
-	oauthProxyOpts.UpstreamServers = options.UpstreamConfig{
-		Upstreams: []options.Upstream{
-			{
-				ID:            "default",
-				URI:           "http://localhost:8080/",
-				Path:          "(.*)",
-				RewriteTarget: "$1",
-			},
-		},
-	}
 	oauthProxyOpts.RawRedirectURL = opts.ObotServerURL + "/oauth2/callback"
-	oauthProxyOpts.ReverseProxy = true
 	if opts.AuthEmailDomains != "" {
 		oauthProxyOpts.EmailDomains = strings.Split(opts.AuthEmailDomains, ",")
 	}
@@ -94,41 +85,12 @@ func main() {
 		w.Write([]byte(fmt.Sprintf("http://127.0.0.1:%s", port)))
 	})
 	mux.HandleFunc("/obot-get-state", state.ObotGetState(oauthProxy))
-	mux.HandleFunc("/obot-get-icon-url", obotGetIconURL)
+	mux.HandleFunc("/obot-get-icon-url", icon.ObotGetIconURL(profile.FetchGoogleProfileIconURL))
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
 	if err := http.ListenAndServe("127.0.0.1:"+port, mux); !errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("failed to listen and serve: %v\n", err)
 		os.Exit(1)
-	}
-}
-
-func obotGetIconURL(w http.ResponseWriter, r *http.Request) {
-	auth := r.Header.Get("Authorization")
-	if auth == "" {
-		http.Error(w, "missing Authorization header", http.StatusBadRequest)
-		return
-	}
-
-	accessToken := strings.TrimPrefix(auth, "Bearer ")
-	if accessToken == "" {
-		http.Error(w, "missing access token", http.StatusBadRequest)
-		return
-	}
-
-	iconURL, err := profile.FetchGoogleProfileIconURL(r.Context(), accessToken)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to fetch profile icon URL: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	type response struct {
-		IconURL string `json:"iconURL"`
-	}
-
-	if err := json.NewEncoder(w).Encode(response{IconURL: iconURL}); err != nil {
-		http.Error(w, fmt.Sprintf("failed to encode response: %v", err), http.StatusInternalServerError)
-		return
 	}
 }
