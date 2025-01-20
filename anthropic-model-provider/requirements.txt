@@ -1,4 +1,4 @@
 fastapi
 uvicorn[standard]
 anthropic==0.43.0
-openai==1.35.7
+openai>=1.54.3
