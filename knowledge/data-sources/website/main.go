@@ -32,8 +32,7 @@ type State struct {
 }
 
 type WebsiteCrawlingState struct {
-	CurrentURL  string              `json:"currentURL"`
-	VisitedURLs map[string]struct{} `json:"visitedURLs"`
+	VisitedURLs map[string]string `json:"visitedURLs"`
 }
 
 type FileDetails struct {
@@ -88,7 +87,7 @@ func main() {
 	}
 
 	if output.State.WebsiteCrawlingState.VisitedURLs == nil {
-		output.State.WebsiteCrawlingState.VisitedURLs = make(map[string]struct{})
+		output.State.WebsiteCrawlingState.VisitedURLs = make(map[string]string)
 	}
 
 	if err := crawlColly(ctx, &input, &output, logErr, gptscriptClient); err != nil {

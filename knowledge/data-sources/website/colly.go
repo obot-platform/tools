@@ -25,16 +25,11 @@ const maxFileSize = 1024 * 1024 * 100
 
 func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutput, logOut *logrus.Logger, gptscript *gptscript.GPTScript) error {
 	visited := make(map[string]struct{})
-	for url := range output.State.WebsiteCrawlingState.VisitedURLs {
-		filePath, err := convertUrlToFilePath(url)
-		if err != nil {
-			logOut.Errorf("Failed to convert URL to file path: %v", err)
-			continue
-		}
+	for _, filePath := range output.State.WebsiteCrawlingState.VisitedURLs {
 		visited[filePath] = struct{}{}
 	}
 	for _, url := range input.WebsiteCrawlingConfig.URLs {
-		if err := scrape(ctx, logOut, output, gptscript, visited, url, output.State.WebsiteCrawlingState.CurrentURL, input.Limit); err != nil {
+		if err := scrape(ctx, logOut, output, gptscript, visited, url, input.Limit); err != nil {
 			return fmt.Errorf("failed to scrape %s: %w", url, err)
 		}
 	}
@@ -54,14 +49,14 @@ func crawlColly(ctx context.Context, input *MetadataInput, output *MetadataOutpu
 	return writeMetadata(ctx, output, gptscript)
 }
 
-func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, url, urlToResume string, limit int) error {
+func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, gptscriptClient *gptscript.GPTScript, visited map[string]struct{}, url string, limit int) error {
 	collector := colly.NewCollector()
 
 	inMemoryStore := &storage.InMemoryStorage{}
 	inMemoryStore.Init()
 
 	for u := range output.State.WebsiteCrawlingState.VisitedURLs {
-		if u == urlToResume {
+		if u == url {
 			continue
 		}
 		h := fnv.New64a()
@@ -149,9 +144,6 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 			SizeInBytes: int64(len(data)),
 		}
 
-		output.State.WebsiteCrawlingState.CurrentURL = e.Request.URL.String()
-		output.State.WebsiteCrawlingState.VisitedURLs[output.State.WebsiteCrawlingState.CurrentURL] = struct{}{}
-
 		output.Status = fmt.Sprintf("Scraped %v", e.Request.URL.String())
 	})
 
@@ -212,13 +204,25 @@ func scrape(ctx context.Context, logOut *logrus.Logger, output *MetadataOutput, 
 				}
 				linkURL = parsedLink
 			}
-			e.Request.Visit(linkURL.String())
+
+			if err := e.Request.Visit(linkURL.String()); err == nil {
+				filePath, err := convertUrlToFilePath(linkURL.String())
+				if err != nil {
+					logOut.Errorf("Failed to convert URL to file path: %v", err)
+					return
+				}
+
+				output.State.WebsiteCrawlingState.VisitedURLs[linkURL.String()] = filePath
+
+				if err := writeMetadata(ctx, output, gptscriptClient); err != nil {
+					logOut.Infof("Failed to write metadata: %v", err)
+					return
+				}
+			}
+
 		}
 	})
 
-	if urlToResume != "" {
-		return collector.Visit(urlToResume)
-	}
 	return collector.Visit(url)
 }
 
@@ -346,7 +350,7 @@ func scrapePDF(ctx context.Context, logOut *logrus.Logger, output *MetadataOutpu
 		Checksum:    newChecksum,
 		SizeInBytes: int64(len(data)),
 	}
-	output.State.WebsiteCrawlingState.VisitedURLs[linkURL.String()] = struct{}{}
+	output.State.WebsiteCrawlingState.VisitedURLs[linkURL.String()] = filePath
 
 	if err := writeMetadata(ctx, output, gptscript); err != nil {
 		return fmt.Errorf("failed to write metadata: %v", err)
