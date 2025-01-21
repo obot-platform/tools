@@ -54,7 +54,6 @@ func main() {
 
 	oauthProxyOpts.Server.BindAddress = ""
 	oauthProxyOpts.MetricsServer.BindAddress = ""
-	oauthProxyOpts.Cookie.Expire = 24 * time.Hour
 	oauthProxyOpts.Cookie.Refresh = time.Hour
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
 	oauthProxyOpts.Cookie.Secret = string(bytes.TrimSpace(cookieSecret))
