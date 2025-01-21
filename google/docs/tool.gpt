@@ -1,17 +1,37 @@
 ---
-Name: Google Docs 
+Name: Google Docs
 Metadata: bundle: true
 Description: Tools for managing Google Docs
-Share Tools: Read Doc
+Share Tools: Read Google Doc, Create Google Doc, Update Google Doc
 
 ---
-Name: Read Doc
-Description: Returns the content of a Google Doc in markdown format
+Name: Read Google Doc
+Description: Returns the content of a Google Doc in markdown format.
 Share Context: Google Docs Context
 Credential: ../credential
 Param: doc_ref: Google Docs ID or share link of the document to read
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/read_doc.py
+
+---
+Name: Update Google Doc
+Description: Updates a Google Doc
+Share Tools: Create Google Doc
+Share Context: Google Docs Context, Update Google Doc Context
+Credential: ../credential
+Param: doc_ref: Google Docs ID or share link of the document to read
+Param: new_doc_content: Markdown formatted content to replace the existing content of the document with
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/update_doc.py
+
+---
+Name: Create Google Doc
+Description: Creates a blank Google Doc
+Share Context: Google Docs Context
+Credential: ../credential
+Param: doc_title: The title of the document to create
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/create_doc.py
 
 ---
 Name: Google Docs Context
@@ -27,6 +47,21 @@ Google Docs share links match the following regex: (?:https?://(?:drive|docs)\.g
 If the user does not provide a URL for the Google Doc they want to work with, ask them to provide it.
 
 ## End of instructions for using Google Docs tools
+
+
+---
+Name: Update Google Doc Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using the Update Google Doc tool
+
+When calling the Update Google Doc tool, provide the entire modified document as a markdown formatted
+string using the new_doc_content parameter. The entire document is replaced by the content of the new_doc_content
+argument.
+
+## End of instructions for using the Update Google Doc tool
 
 ---
 !metadata:*:category
