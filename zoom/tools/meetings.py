@@ -430,7 +430,7 @@ def update_meeting():
     return {"message": "successfully updated meeting"}
 
 
-@tool_registry.decorator("ListMeetingTe mplates")
+@tool_registry.decorator("ListMeetingTemplates")
 def list_meeting_templates():
     url = f"{ZOOM_API_URL}/users/me/meeting_templates"
     headers = {
