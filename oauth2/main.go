@@ -322,7 +322,7 @@ func promptForPAT(integration string) error {
 	defer g.Close()
 
 	run, err := g.Run(context.Background(), "sys.prompt", gptscript.Options{
-		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter your personal access token for %s.","fields":"Token","sensative": true}`, b, integration),
+		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter your personal access token for %s.","fields":"Token","sensitive": "true"}`, b, integration),
 	})
 	if err != nil {
 		return fmt.Errorf("promptForPAT: failed to run sys.prompt: %w", err)
