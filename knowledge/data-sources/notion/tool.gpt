@@ -4,4 +4,6 @@ Credential: ./credential
 
 #!/usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} --silent run start
 
-
+---
+!metadata:*:oauth
+notion

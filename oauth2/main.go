@@ -6,17 +6,15 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
-	"github.com/adrg/xdg"
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/pkg/browser"
 )
@@ -37,16 +35,6 @@ type cred struct {
 	RefreshToken string            `json:"refreshToken"`
 }
 
-type oauthConfig struct {
-	ServerURL string `json:"serverURL,omitempty"`
-	ToName    string `json:"toName,omitempty"`
-}
-
-type cliConfig struct {
-	ServerURL string                 `json:"serverURL,omitempty"`
-	Mappings  map[string]oauthConfig `json:"mappings,omitempty"`
-}
-
 var (
 	integration   = os.Getenv("INTEGRATION")
 	token         = os.Getenv("TOKEN")
@@ -54,66 +42,38 @@ var (
 	optionalScope = os.Getenv("OPTIONAL_SCOPE")
 )
 
-const publicGatewayURL = "https://gateway-api.gptscript.ai"
-
 func normalizeForEnv(appName string) string {
 	return strings.ToUpper(strings.ReplaceAll(appName, "-", "_"))
 }
 
-func getURLs(appName string) (string, string, string, error) {
+func getURLs(appName string) (string, string, string) {
 	var (
-		authorizeURL = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_AUTH_URL", normalizeForEnv(appName)))
-		refreshURL   = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_REFRESH_URL", normalizeForEnv(appName)))
-		tokenURL     = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_TOKEN_URL", normalizeForEnv(appName)))
-		err          error
+		normalizedAppName = normalizeForEnv(appName)
+		authorizeURL      = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_AUTH_URL", normalizedAppName))
+		refreshURL        = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_REFRESH_URL", normalizedAppName))
+		tokenURL          = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_TOKEN_URL", normalizedAppName))
 	)
-
-	if authorizeURL != "" && refreshURL != "" && tokenURL != "" {
-		return authorizeURL, refreshURL, tokenURL, nil
-	}
-
-	configPath := os.Getenv("GPTSCRIPT_OAUTH_CONFIG")
-	if configPath == "" {
-		configPath, err = xdg.ConfigFile("gptscript/oauth.json")
-		if err != nil {
-			return "", "", "", fmt.Errorf("getURLs: failed to get config file: %w", err)
-		}
-	}
-
-	var cfg cliConfig
-	if cfgBytes, err := os.ReadFile(configPath); errors.Is(err, fs.ErrNotExist) {
-	} else if err != nil {
-		return "", "", "", fmt.Errorf("getURLs: failed to read config file: %w", err)
-	} else {
-		if err := json.Unmarshal(cfgBytes, &cfg); err != nil {
-			return "", "", "", fmt.Errorf("getURLs: failed to unmarshal config: %w", err)
-		}
-	}
-
-	mapping := cfg.Mappings[integration]
-	if mapping.ServerURL == "" {
-		mapping.ServerURL = cfg.ServerURL
-	}
-	if mapping.ServerURL == "" {
-		mapping.ServerURL = publicGatewayURL
-	}
-
-	if mapping.ToName == "" {
-		mapping.ToName = integration
-	}
-
-	authorizeURL = fmt.Sprintf("%s/oauth-apps/%s/authorize", mapping.ServerURL, mapping.ToName)
-	refreshURL = fmt.Sprintf("%s/oauth-apps/%s/refresh", mapping.ServerURL, mapping.ToName)
-	tokenURL = fmt.Sprintf("%s/api/oauth-apps/get-token", mapping.ServerURL)
-
-	return authorizeURL, refreshURL, tokenURL, nil
+	return authorizeURL, refreshURL, tokenURL
 }
 
 func main() {
-	authorizeURL, refreshURL, tokenURL, err := getURLs(integration)
-	if err != nil {
-		fmt.Printf("main: failed to get URLs: %v\n", err)
+	if err := mainErr(); err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
+	}
+}
+
+func mainErr() error {
+	authorizeURL, refreshURL, tokenURL := getURLs(integration)
+	if authorizeURL == "" || refreshURL == "" || tokenURL == "" {
+		// The URLs aren't set for this credential. Check to see if we should prompt the user for a PAT
+		if !slices.Contains(strings.Split(strings.ToLower(os.Getenv("GPTSCRIPT_OAUTH_PAT_INTEGRATIONS")), ","), strings.ToLower(integration)) {
+			fmt.Printf("All the following environment variables must be set: GPTSCRIPT_OAUTH_%s_AUTH_URL, GPTSCRIPT_OAUTH_%[1]s_REFRESH_URL, GPTSCRIPT_OAUTH_%[1]s_TOKEN_URL", normalizeForEnv(integration))
+			fmt.Printf("Or include %s in GPTSCRIPT_OAUTH_PAT_INTEGRATIONS to allow prompting for a personal access token\n", integration)
+			os.Exit(1)
+		}
+
+		return promptForPAT(integration)
 	}
 
 	// Refresh existing credential if there is one.
@@ -121,14 +81,12 @@ func main() {
 	if existing != "" {
 		var c cred
 		if err := json.Unmarshal([]byte(existing), &c); err != nil {
-			fmt.Printf("main: failed to unmarshal existing credential: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to unmarshal existing credential: %w", err)
 		}
 
 		u, err := url.Parse(refreshURL)
 		if err != nil {
-			fmt.Printf("main: failed to parse refresh URL: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to parse refresh URL: %w", err)
 		}
 
 		q := u.Query()
@@ -143,26 +101,22 @@ func main() {
 
 		req, err := http.NewRequest("GET", u.String(), nil)
 		if err != nil {
-			fmt.Printf("main: failed to create refresh request: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to create refresh request: %w", err)
 		}
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			fmt.Printf("main: failed to send refresh request: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to send refresh request: %w", err)
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			fmt.Printf("main: unexpected status code from refresh request: %d\n", resp.StatusCode)
-			os.Exit(1)
+			return fmt.Errorf("main: unexpected status code from refresh request: %d", resp.StatusCode)
 		}
 
 		var oauthResp oauthResponse
 		if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
-			fmt.Printf("main: failed to decode refresh response JSON: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to decode refresh response JSON: %w", err)
 		}
 
 		envVars := map[string]string{
@@ -185,24 +139,21 @@ func main() {
 
 		credJSON, err := json.Marshal(out)
 		if err != nil {
-			fmt.Printf("main: failed to marshal refreshed credential: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
 		}
 
 		fmt.Print(string(credJSON))
-		return
+		return nil
 	}
 
 	state, err := generateString()
 	if err != nil {
-		fmt.Printf("main: failed to generate state: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to generate state: %w", err)
 	}
 
 	verifier, err := generateString()
 	if err != nil {
-		fmt.Printf("main: failed to generate verifier: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to generate verifier: %w", err)
 	}
 
 	h := sha256.New()
@@ -211,8 +162,7 @@ func main() {
 
 	u, err := url.Parse(authorizeURL)
 	if err != nil {
-		fmt.Printf("main: failed to parse authorize URL: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to parse authorize URL: %w", err)
 	}
 
 	q := u.Query()
@@ -228,8 +178,7 @@ func main() {
 
 	gs, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
 	if err != nil {
-		fmt.Printf("main: failed to create GPTScript: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to create GPTScript: %w", err)
 	}
 
 	metadata := map[string]string{
@@ -241,22 +190,19 @@ func main() {
 
 	b, err := json.Marshal(metadata)
 	if err != nil {
-		fmt.Printf("main: failed to marshal metadata: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to marshal metadata: %w", err)
 	}
 
 	run, err := gs.Run(context.Background(), "sys.prompt", gptscript.Options{
 		Input: fmt.Sprintf(`{"metadata":%s,"message":%q}`, b, fmt.Sprintf("To authenticate please open your browser to %s.", u.String())),
 	})
 	if err != nil {
-		fmt.Printf("main: failed to run sys.prompt: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("main: failed to run sys.prompt: %w", err)
 	}
 
 	out, err := run.Text()
 	if err != nil {
-		fmt.Printf("main: failed to get text from sys.prompt: %v\n", err)
-		//os.Exit(1)
+		return fmt.Errorf("main: failed to get text from sys.prompt: %w", err)
 	}
 
 	var m map[string]string
@@ -272,39 +218,15 @@ func main() {
 
 	t := time.NewTicker(2 * time.Second)
 	for range t.C {
-		// Construct the request to get the token from the gateway.
-		req, err := http.NewRequest("GET", tokenURL, nil)
-		if err != nil {
-			fmt.Printf("main: failed to create token request: %v\n", err)
-			os.Exit(1)
-		}
-
-		q = req.URL.Query()
-		q.Set("state", state)
-		q.Set("verifier", verifier)
-		req.URL.RawQuery = q.Encode()
-
-		// Send the request to the gateway.
 		now := time.Now()
-		resp, err := http.DefaultClient.Do(req)
+		oauthResp, retry, err := makeTokenRequest(tokenURL, state, verifier)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "main: failed to send token request: %v\n", err)
+			if !retry {
+				return err
+			}
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 			continue
 		}
-
-		if resp.StatusCode != http.StatusOK {
-			_, _ = fmt.Fprintf(os.Stderr, "main: unexpected status code from token request: %d\n", resp.StatusCode)
-			continue
-		}
-
-		// Parse the response from the gateway.
-		var oauthResp oauthResponse
-		if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
-			fmt.Printf("main: failed to decode token response JSON: %v\n", err)
-			_ = resp.Body.Close()
-			os.Exit(1)
-		}
-		_ = resp.Body.Close()
 
 		envVars := map[string]string{
 			token: oauthResp.AccessToken,
@@ -326,13 +248,46 @@ func main() {
 
 		credJSON, err := json.Marshal(out)
 		if err != nil {
-			fmt.Printf("main: failed to marshal token credential: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("main: failed to marshal token credential: %w", err)
 		}
 
 		fmt.Print(string(credJSON))
-		os.Exit(0)
+		break
 	}
+
+	return nil
+}
+
+func makeTokenRequest(tokenURL, state, verifier string) (*oauthResponse, bool, error) {
+	// Construct the request to get the token from the gateway.
+	req, err := http.NewRequest("GET", tokenURL, nil)
+	if err != nil {
+		return nil, false, fmt.Errorf("makeTokenRequest: failed to create token request: %w", err)
+	}
+
+	q := req.URL.Query()
+	q.Set("state", state)
+	q.Set("verifier", verifier)
+	req.URL.RawQuery = q.Encode()
+
+	// Send the request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, true, fmt.Errorf("makeTokenRequest: failed to send token request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, true, fmt.Errorf("makeTokenRequest: unexpected status code from token request: %d", resp.StatusCode)
+	}
+
+	// Parse the response from the gateway.
+	var oauthResp oauthResponse
+	if err = json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
+		return nil, false, fmt.Errorf("makeTokenRequest: failed to decode token response JSON: %w", err)
+	}
+
+	return &oauthResp, false, nil
 }
 
 func generateString() (string, error) {
@@ -346,4 +301,43 @@ func generateString() (string, error) {
 		b[i] = charset[b[i]%byte(len(charset))]
 	}
 	return string(b), nil
+}
+
+func promptForPAT(integration string) error {
+	metadata := map[string]string{
+		"authType":        "pat",
+		"toolContext":     "credential",
+		"toolDisplayName": fmt.Sprintf("%s%s Integration", strings.ToTitle(integration[:1]), integration[1:]),
+	}
+
+	b, err := json.Marshal(metadata)
+	if err != nil {
+		return fmt.Errorf("promptForPAT: failed to marshal metadata: %w", err)
+	}
+
+	g, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
+	if err != nil {
+		return fmt.Errorf("promptForPAT: failed to create GPTScript client: %w", err)
+	}
+	defer g.Close()
+
+	run, err := g.Run(context.Background(), "sys.prompt", gptscript.Options{
+		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter your personal access token for %s.","fields":"Token","sensative": true}`, b, integration),
+	})
+	if err != nil {
+		return fmt.Errorf("promptForPAT: failed to run sys.prompt: %w", err)
+	}
+
+	out, err := run.Text()
+	if err != nil {
+		return fmt.Errorf("promptForPAT: failed to get prompt response: %w", err)
+	}
+
+	var m map[string]string
+	if err = json.Unmarshal([]byte(out), &m); err != nil {
+		return fmt.Errorf("promptForPAT: failed to unmarshal prompt response: %w", err)
+	}
+
+	fmt.Printf(`{"env": {"%s": "%s"}}`, token, m["Token"])
+	return nil
 }
