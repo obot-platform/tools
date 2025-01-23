@@ -44,6 +44,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if len(cookieSecret) == 31 {
+		// The cookie secret is supposed to be 32 bytes.
+		// One time we had one come through that was only 31, for an unknown reason.
+		// For now, just pad it with an extra byte to make it 32.
+		cookieSecret = append(cookieSecret, cookieSecret[0])
+	}
+
 	legacyOpts := options.NewLegacyOptions()
 	legacyOpts.LegacyProvider.ProviderType = "github"
 	legacyOpts.LegacyProvider.ProviderName = "github"
