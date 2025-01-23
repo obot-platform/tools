@@ -16,7 +16,9 @@ import {
     listRepos,
     getStarCount,
     listAssignedIssues,
-    listPRsForReview
+    listPRsForReview,
+    addIssueLabels,
+    removeIssueLabels
 } from './src/tools.js';
 
 if (process.argv.length !== 3) {
@@ -86,6 +88,12 @@ try {
             break;
         case 'listPRsForReview':
             await listPRsForReview(octokit);
+            break;
+        case 'addIssueLabels':
+            await addIssueLabels(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.LABELS);
+            break;
+        case 'removeIssueLabels':
+            await removeIssueLabels(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.LABELS);
             break;
         default:
             throw new Error(`Unknown command: ${command}`);

@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels
 
 ---
 Name: Search Issues and PRs
@@ -213,6 +213,32 @@ Share Context: GitHub Context
 Tools: github.com/gptscript-ai/datasets/filter
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listPRsForReview
+
+---
+Name: Add Issue Labels
+Description: Add labels to an existing issue or pull request in the specified GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: issueNumber: the number of the issue or pull request to add labels to
+Param: labels: comma-separated list of labels to add
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js addIssueLabels
+
+---
+Name: Remove Issue Labels
+Description: Remove labels from an existing issue or pull request in the specified GitHub repository. If no labels are specified, removes all labels.
+Credential: ./credential
+Share Context: GitHub Context
+Share Tools: Search Issues and PRs
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: issueNumber: the number of the issue or pull request to remove labels from
+Param: labels: (optional) comma-separated list of labels to remove. If not provided, all labels will be removed.
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js removeIssueLabels
 
 ---
 Name: GitHub Context

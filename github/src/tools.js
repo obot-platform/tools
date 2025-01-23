@@ -1,4 +1,4 @@
-import {GPTScript} from "@gptscript-ai/gptscript";
+import { GPTScript } from "@gptscript-ai/gptscript";
 
 export async function searchIssuesAndPRs(octokit, owner, repo, query, perPage = 100, page = 1) {
     let q = '';
@@ -304,4 +304,40 @@ export async function listPRsForReview(octokit) {
     } catch (e) {
         console.log('Failed to create dataset:', e);
     }
+}
+
+export async function addIssueLabels(octokit, owner, repo, issueNumber, labels) {
+    const response = await octokit.issues.addLabels({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        labels: labels.split(',').map(label => label.trim())
+    });
+
+    console.log(`Added labels to issue #${issueNumber}: ${response.data.map(label => label.name).join(', ')} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
+}
+
+export async function removeIssueLabels(octokit, owner, repo, issueNumber, labels) {
+    // If labels is empty or undefined, remove all labels
+    if (!labels) {
+        await octokit.issues.removeAllLabels({
+            owner,
+            repo,
+            issue_number: issueNumber
+        });
+        console.log(`Removed all labels from issue #${issueNumber} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
+        return;
+    }
+
+    // Remove specific labels
+    const labelArray = labels.split(',').map(label => label.trim());
+    for (const label of labelArray) {
+        await octokit.issues.removeLabel({
+            owner,
+            repo,
+            issue_number: issueNumber,
+            name: label
+        });
+    }
+    console.log(`Removed labels from issue #${issueNumber}: ${labelArray.join(', ')} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
 }
