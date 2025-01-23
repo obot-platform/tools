@@ -4,6 +4,7 @@ go 1.23.1
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
+	github.com/getkin/kin-openapi v0.124.0
 	github.com/gptscript-ai/go-gptscript v0.9.5
 	github.com/microsoft/kiota-abstractions-go v1.7.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.51.0
@@ -13,7 +14,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/cjlapao/common-go v0.0.41 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/getkin/kin-openapi v0.124.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
