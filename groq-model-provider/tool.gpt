@@ -2,7 +2,7 @@ Name: Groq
 Description: Model provider for models running on Groq
 Metadata: envVars: OBOT_GROQ_MODEL_PROVIDER_API_KEY
 Model Provider: true
-Credential: ../placeholder-credential as groq-model-provider
+Credential: ../placeholder-credential as groq-model-provider with OBOT_GROQ_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: groq-model-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
@@ -14,6 +14,5 @@ https://www.groq.com/logo.svg
 ---
 Name: validate
 Description: Validate the Groq API key
-Metadata: envVars: OBOT_GROQ_MODEL_PROVIDER_API_KEY
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate

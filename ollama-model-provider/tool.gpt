@@ -2,7 +2,7 @@ Name: Ollama
 Description: Model provider for models running on Ollama
 Metadata: envVars: OBOT_OLLAMA_MODEL_PROVIDER_HOST
 Model Provider: true
-Credential: ../placeholder-credential as ollama-model-provider
+Credential: ../placeholder-credential as ollama-model-provider with OBOT_OLLAMA_MODEL_PROVIDER_HOST as env_vars
 Metadata: noUserAuth: ollama-model-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
@@ -14,6 +14,5 @@ https://ollama.com/public/ollama.png
 ---
 Name: validate
 Description: Validate the Ollama host connection
-Metadata: envVars: OBOT_OLLAMA_MODEL_PROVIDER_HOST
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate
