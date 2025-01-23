@@ -17,6 +17,7 @@ Param: issue_query: A JSON formatted string that conforms to the API spec for Gi
 Name: List Project Issues
 Description: List GitLab Issues inside a Project.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: issue_query: A JSON formatted string that conforms to the API spec for GitLab's Issue Search
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -43,6 +44,7 @@ Credential: ./credential
 Name: Get Issue Details
 Description: Show detailed information about a single Issue.
 Share Context: GitLab Context
+Share Tools: Search Issues
 Credential: ./credential
 Param: issue_iid: The numeric IID (Internal ID) of an issue.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -53,6 +55,7 @@ Param: project_id: The numeric ID or name of a project in the format `namespace/
 Name: Create Issue
 Description: Create a new Issue.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
 Param: issue_name: The new issue title.
@@ -64,6 +67,7 @@ Param: issue_description: The new issue description.
 Name: Update Issue
 Description: Update values in an existing Issue.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: issue_iid: The numeric IID (Internal ID) of an issue.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -74,6 +78,7 @@ Param: updates: A JSON-formatted string that conforms to the GitLab API, contain
 ---
 Name: Delete Issue
 Description: Deletes an Issue.
+Share Tools: Get Current UserName
 Share Context: GitLab Context
 Credential: ./credential
 Param: issue_iid: The numeric IID (Internal ID) of an issue.
@@ -85,6 +90,7 @@ Param: project_id: The numeric ID or name of a project in the format `namespace/
 Name: Add Issue Comment
 Description: Adds a new comment on an existing Issue.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: issue_iid: The numeric IID (Internal ID) of an issue.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -105,6 +111,7 @@ Param: mr_query: A JSON formatted string that conforms to the API spec for GitLa
 Name: List Project Merge Requests
 Description: List GitLab Merge Requests inside a Project.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: mr_query: A JSON formatted string that conforms to the API spec for GitLab's Merge Request Search
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -131,6 +138,7 @@ Credential: ./credential
 Name: Get Merge Request Details
 Description: Show detailed information about a single Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: issue_iid: The numeric internal ID of a Merge Request.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -141,6 +149,7 @@ Param: project_id: The numeric ID or name of a project in the format `namespace/
 Name: Create Merge Request
 Description: Create a new Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
 Param: mr_name: The new Merge Request title.
@@ -154,6 +163,7 @@ Param: mr_target_branch: The target git branch.
 Name: Update Merge Request
 Description: Update values in an existing Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: issue_iid: The numeric internal ID of a Merge Request.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -165,6 +175,7 @@ Param: updates: A JSON-formatted string that conforms to the GitLab API, contain
 Name: Delete Merge Request
 Description: Deletes a Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: mr_id: The numeric internal ID of a Merge Request.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -175,6 +186,7 @@ Param: project_id: The numeric ID or name of a project in the format `namespace/
 Name: Add Merge Request Comment
 Description: Adds a new comment on an existing Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: mr_id: The numeric internal ID of a Merge Request.
 Param: project_id: The numeric ID or name of a project in the format `namespace/project_name`.
@@ -186,6 +198,7 @@ Param: comment: The text to use as the body of the comment. Can contain markdown
 Name: Approve Merge Request
 Description: Approves a Merge Request.
 Share Context: GitLab Context
+Share Tools: Get Current UserName
 Credential: ./credential
 Param: mr_id: The numeric internal ID of a Merge Request.
 Param: project_id: The numeric ID or url-escaped name of a Project.
@@ -201,6 +214,13 @@ Param: gitlab_username: A GitLab username.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool lookupUserID
 
+---
+Name: Get Current UserName
+Description: Gets the username of the currently authenticated user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool myUserName
 
 ---
 Name: GitLab Context
@@ -214,6 +234,9 @@ Do not show IDs to the user, they are not helpful.
 Do show them 'IIDs' - these are very useful.
 
 Do not guess at the correct spelling of projects, usernames, etc. Report to the user that there may be a typo if the resource they requested cannot be found.
+
+A `project_id` must be in the format of `namespace/project_name`, where `namespace` can be a path including `/` characters.
+If the namespace is not specified, assume the namespace should be the current user's username unless context suggests otherwise.
 
 
 ## End of instructions for using the GitLab tools

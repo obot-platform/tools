@@ -28,6 +28,8 @@ func main() {
 	}
 
 	switch command {
+	case "myUserName":
+		fmt.Printf("Current username is %s\n", user.Username)
 	// Issues
 	case "queryIssues":
 		rawQuery := os.Getenv("ISSUE_QUERY")
