@@ -124,8 +124,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25 h1:9bCMuD3TcnjeqjPT2gSlha4asp8NvgcFRYExCaikCxk=
 github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25/go.mod h1:eDjgYHYDJbPLBLsyZ6qRaugP0mX8vePOhZ5id1fdzJw=
-github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20241008204315-265dabe17f43 h1:mlwIf3/uOo0ISweKuyFHhvPzSut4oQeWWpTkzsmTPgE=
-github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20241008204315-265dabe17f43/go.mod h1:lxQ1wbphpjECcCoy8gfsrDHQVenNKgm+p6Oskdkl97g=
+github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250124171719-bb98e29a2903 h1:841WyBEdj+kxeAX0y3o2qnDkSiyPpuZpHadMRreEsro=
+github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250124171719-bb98e29a2903/go.mod h1:lxQ1wbphpjECcCoy8gfsrDHQVenNKgm+p6Oskdkl97g=
 github.com/ohler55/ojg v1.24.1 h1:PaVLelrNgT5/0ppPaUtey54tOVp245z33fkhL2jljjY=
 github.com/ohler55/ojg v1.24.1/go.mod h1:gQhDVpQLqrmnd2eqGAvJtn+NfKoYJbe/A4Sj3/Vro4o=
 github.com/onsi/ginkgo v1.16.5 h1:8xi0RTUf59SOSfEtZMvwTvXYMzG4gV23XVHOZiXNtnE=
