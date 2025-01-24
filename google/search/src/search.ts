@@ -24,23 +24,13 @@ export async function search (
 
   const encodedQuery = encodeURIComponent(query)
   const searchUrl = `https://www.google.com/search?q=${encodedQuery}&udm=14`
-  
+
   const foundURLs = new Set<string>()
   const results: Array<Promise<SearchResult | null>> = []
 
   const page = await context.newPage()
-  const noJSPages = await Promise.all(
-    Array.from({ length: maxResults }, async () => {
-      const page = await context.newPage()
-      await page.addInitScript(() => {
-        // Disable JavaScript for the page
-        Object.defineProperty(navigator, 'javaScriptEnabled', { value: false })
-        Object.defineProperty(window, 'Function', { value: () => { } })
-        Object.defineProperty(window, 'eval', { value: () => { } })
-      })
-
-      return page
-    })
+  const pages = await Promise.all(
+    Array.from({ length: maxResults }, () => context.newPage())
   )
 
   try {
@@ -55,7 +45,7 @@ export async function search (
       const url = $(element).attr('href') ?? ''
       if ((url !== '') && !url.includes('youtube.com/watch?v') && !foundURLs.has(url)) {
         foundURLs.add(url)
-        results.push(getMarkdown(noJSPages[results.length], url).then(content => {
+        results.push(getMarkdown(pages[results.length], url).then(content => {
           return (content !== '') ? { url, content } : null
         }))
       }
@@ -68,13 +58,14 @@ export async function search (
   } finally {
     // Fire and forget page close so we can move on
     void page.close()
-    void Promise.all(noJSPages.map(async p => { await p.close() }))
+    void Promise.all(pages.map(async p => { await p.close() }))
   }
 }
 
 export async function getMarkdown (page: Page, url: string): Promise<string> {
   try {
     await page.goto(url, { timeout: 1000 })
+    await page.waitForLoadState('networkidle', { timeout: 1000 })
   } catch (e) {
     console.warn('slow page:', url)
   }
@@ -83,7 +74,7 @@ export async function getMarkdown (page: Page, url: string): Promise<string> {
   while (content === '') {
     let fails = 0
     try {
-      content = await page.content()
+      content = await page.evaluate(() => document.documentElement.outerHTML)
     } catch (e) {
       fails++
       if (fails > 2) {
@@ -115,6 +106,7 @@ export async function getMarkdown (page: Page, url: string): Promise<string> {
     if ($(selector).first().length < 1) {
       continue;
     }
+
 
     $(selector).each(function () {
       resp += turndownService.turndown($.html(this))
