@@ -95,6 +95,8 @@ system:
     reference: ./obot-model-provider
   existing-credential:
     reference: ./existing-credential
+  database-ui:
+    reference: ./database/ui.gpt
   docker-shell-id:
     reference: ./docker-shell-id
   docker:

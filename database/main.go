@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -65,28 +64,20 @@ func main() {
 		}
 	}
 
-	// Open the SQLite database
-	db, err := sql.Open("sqlite3", dbFile.Name())
-	if err != nil {
-		fmt.Printf("Error opening DB: %v\n", err)
-		os.Exit(1)
-	}
-	defer db.Close()
-
 	// Run the requested command
 	var result string
 	switch command {
 	case "listDatabaseTables":
-		result, err = cmd.ListDatabaseTables(ctx, db)
-	case "execDatabaseStatement":
-		result, err = cmd.ExecDatabaseStatement(ctx, db, os.Getenv("STATEMENT"))
+		result, err = cmd.ListDatabaseTables(ctx, dbFile)
+	case "listDatabaseTableRows":
+		result, err = cmd.ListDatabaseTableRows(ctx, dbFile, os.Getenv("TABLE"))
+	case "runDatabaseCommand":
+		result, err = cmd.RunDatabaseCommand(ctx, dbFile, os.Getenv("SQLITE3_ARGS"))
 		if err == nil {
 			err = saveWorkspaceDB(ctx, g, dbWorkspacePath, dbFile, initialDBData)
 		}
-	case "runDatabaseQuery":
-		result, err = cmd.RunDatabaseQuery(ctx, db, os.Getenv("QUERY"))
 	case "databaseContext":
-		result, err = cmd.DatabaseContext(ctx, db)
+		result, err = cmd.DatabaseContext(ctx, dbFile)
 	default:
 		err = fmt.Errorf("unknown command: %s", command)
 	}
