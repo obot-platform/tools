@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+var (
+	openaiBaseHostName = "api.openai.com"
+
+	chatCompletionsPath = "/v1/chat/completions"
+)
+
 type Config struct {
 	url *url.URL
 
@@ -66,6 +72,25 @@ func Run(cfg *Config) error {
 	if err := cfg.ensureURL(); err != nil {
 		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
+<<<<<<< HEAD
+=======
+	if cfg.UpstreamHost == "" {
+		cfg.UpstreamHost = openaiBaseHostName
+		cfg.UseTLS = true
+	}
+
+	// Remove any scheme prefix from UpstreamHost if present
+	if strings.HasPrefix(cfg.UpstreamHost, "http://") {
+		cfg.UpstreamHost = strings.TrimPrefix(cfg.UpstreamHost, "http://")
+		cfg.UseTLS = false
+	} else if strings.HasPrefix(cfg.UpstreamHost, "https://") {
+		cfg.UpstreamHost = strings.TrimPrefix(cfg.UpstreamHost, "https://")
+		cfg.UseTLS = true
+	}
+
+	// Remove any trailing slashes from UpstreamHost
+	cfg.UpstreamHost = strings.TrimRight(cfg.UpstreamHost, "/")
+>>>>>>> 5a2759d (Add proxy change to return o1 response as SSE events)
 
 	if cfg.RewriteModelsFn == nil {
 		cfg.RewriteModelsFn = DefaultRewriteModelsResponse
