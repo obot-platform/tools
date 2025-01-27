@@ -1,7 +1,5 @@
 import sys
 import os
-import json
-
 import markdown
 from bs4 import BeautifulSoup
 
@@ -11,30 +9,20 @@ from id import extract_file_id
 def markdown_to_google_doc_requests(markdown_content):
     # Convert markdown content to HTML
     html_content = markdown.markdown(markdown_content)
-
-    # Parse the HTML content using BeautifulSoup
     soup = BeautifulSoup(html_content, 'html.parser')
 
     requests = []
-
-    # Track the current index for insertion
     current_index = 1
-
-    # Helper to add text with styles
     def add_text_request(text, bold=False, italic=False, underline=False, link=None):
         nonlocal current_index
-        text_style = {}
-        # Add styles only if explicitly specified
-        if bold:
-            text_style['bold'] = True
-        if italic:
-            text_style['italic'] = True
-        if underline:
-            text_style['underline'] = True
+        text_style = {
+            "bold": bold,
+            "italic": italic,
+            "underline": underline,
+        }
         if link:
-            text_style['link'] = {"url": link}
+            text_style["link"] = {"url": link}
 
-        # Add text insertion request
         text_length = len(text)
         requests.append({
             "insertText": {
@@ -43,8 +31,7 @@ def markdown_to_google_doc_requests(markdown_content):
             }
         })
 
-        # Add styling request only if any styles are present
-        if text_style:
+        if text_style or link:
             requests.append({
                 "updateTextStyle": {
                     "range": {
@@ -56,35 +43,48 @@ def markdown_to_google_doc_requests(markdown_content):
                 }
             })
 
-        # Update the current index to account for the added text
         current_index += text_length
 
-    # Process elements in the markdown
+        # Handle unstyled newlines
+        if text.endswith("\n"):
+            newline_length = 1
+            requests.append({
+                "updateTextStyle": {
+                    "range": {
+                        "startIndex": current_index - newline_length,
+                        "endIndex": current_index
+                    },
+                    "textStyle": {},  # Explicitly remove styles
+                    "fields": "bold,italic,underline,link"
+                }
+            })
+
     for element in soup.contents:
         if element.name in ['p']:
-            add_text_request(element.get_text() + "\n")
+            add_text_request(element.get_text())
+            add_text_request("\n")
         elif element.name in ['h1', 'h2', 'h3']:
-            # Apply bold style for headers
-            add_text_request(element.get_text() + "\n", bold=True)
+            add_text_request(element.get_text(), bold=True)
+            add_text_request("\n")
         elif element.name in ['ul']:
             for li in element.find_all('li'):
-                add_text_request("\u2022 " + li.get_text() + "\n")
+                add_text_request("\u2022 " + li.get_text())
+                add_text_request("\n")
         elif element.name in ['ol']:
             for i, li in enumerate(element.find_all('li'), start=1):
-                add_text_request(f"{i}. " + li.get_text() + "\n")
+                add_text_request(f"{i}. " + li.get_text())
+                add_text_request("\n")
         elif element.name == 'a':
-            # Add link
             add_text_request(element.get_text(), link=element['href'])
         elif element.name == 'table':
             for row in element.find_all('tr'):
                 row_text = "\t".join([cell.get_text() for cell in row.find_all(['td', 'th'])]) + "\n"
                 add_text_request(row_text)
         else:
-            # Default handling for unknown elements
-            add_text_request(element.get_text() + "\n")
+            add_text_request(element.get_text())
+            add_text_request("\n")
 
     return requests
-
 
 def main():
     try:
