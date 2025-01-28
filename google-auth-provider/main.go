@@ -68,7 +68,7 @@ func main() {
 		fmt.Printf("failed to validate options: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	oauthProxy, err := oauth2proxy.NewOAuthProxy(oauthProxyOpts, oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
 	if err != nil {
 		fmt.Printf("failed to create oauth2 proxy: %v\n", err)
