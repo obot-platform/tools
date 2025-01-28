@@ -59,6 +59,7 @@ func main() {
 	oauthProxyOpts.Cookie.Secret = string(bytes.TrimSpace(cookieSecret))
 	oauthProxyOpts.Cookie.Secure = strings.HasPrefix(opts.ObotServerURL, "https://")
 	oauthProxyOpts.RawRedirectURL = opts.ObotServerURL + "/oauth2/callback"
+	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/../auth-providers-common/templates"
 	if opts.AuthEmailDomains != "" {
 		oauthProxyOpts.EmailDomains = strings.Split(opts.AuthEmailDomains, ",")
 	}
@@ -67,8 +68,7 @@ func main() {
 		fmt.Printf("failed to validate options: %v\n", err)
 		os.Exit(1)
 	}
-
-	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/../auth-providers-common/templates"
+	
 	oauthProxy, err := oauth2proxy.NewOAuthProxy(oauthProxyOpts, oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
 	if err != nil {
 		fmt.Printf("failed to create oauth2 proxy: %v\n", err)
