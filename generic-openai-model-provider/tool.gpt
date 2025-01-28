@@ -1,0 +1,19 @@
+Name: Gerneric OpenAI
+Description: Model Provider for generic OpenAI API compatible model providers
+Metadata: envVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASEURL
+Metadata: optionalEnvVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY
+Model Provider: true
+Credential: ../placeholder-credential as generic-openai-model-provider with OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASEURL;OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY as env_vars
+Metadata: noUserAuth: generic-openai-model-provider
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:*:icon
+/admin/assets/obot_openai_antenna_icon.png
+
+---
+Name: validate
+Description: Validate the generic OpenAI API configuration
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate

@@ -124,6 +124,8 @@ modelProviders:
     reference: ./xai-model-provider
   deepseek-model-provider:
     reference: ./deepseek-model-provider
+  generic-openai-model-provider:
+    reference: ./generic-openai-model-provider
 
 authProviders:
   github-auth-provider:
