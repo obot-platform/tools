@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from auth import client
 from id import extract_file_id
+from move_doc import move_doc
+
 
 def markdown_to_google_doc_requests(markdown_content):
     # Convert markdown content to HTML
@@ -13,6 +15,7 @@ def markdown_to_google_doc_requests(markdown_content):
 
     requests = []
     current_index = 1
+
     def add_text_request(text, bold=False, italic=False, underline=False, link=None):
         nonlocal current_index
         text_style = {
@@ -86,10 +89,12 @@ def markdown_to_google_doc_requests(markdown_content):
 
     return requests
 
+
 def main():
     try:
         doc_ref = os.getenv('DOC_REF')
         new_doc_content = os.getenv('NEW_DOC_CONTENT')
+        new_drive_dir = os.getenv('NEW_DRIVE_DIR', '').strip()  # Get the optional NEW_DRIVE_DIR
 
         if not doc_ref:
             raise ValueError('DOC_REF environment variable is missing or empty')
@@ -103,10 +108,11 @@ def main():
             raise ValueError(f"Failed to parse NEW_DOC_CONTENT: {e}")
 
         file_id = extract_file_id(doc_ref)
-        service = client('docs', 'v1')
+        docs_service = client('docs', 'v1')
+        drive_service = client('drive', 'v3')
 
         # Retrieve the document to determine its length
-        document = service.documents().get(documentId=file_id).execute()
+        document = docs_service.documents().get(documentId=file_id).execute()
         content = document.get('body').get('content')
         document_length = content[-1].get('endIndex') if content and 'endIndex' in content[-1] else 1
 
@@ -124,16 +130,20 @@ def main():
             ] + requests
 
         # Issue a batch update request to clear and apply new content
-        response = service.documents().batchUpdate(
+        response = docs_service.documents().batchUpdate(
             documentId=file_id,
             body={"requests": requests}
         ).execute()
 
         print(f"Document updated successfully: {file_id}")
 
+        # Move the document to the specified folder, if NEW_DRIVE_DIR is set
+        move_doc(drive_service, file_id, new_drive_dir)
+
     except Exception as err:
         sys.stderr.write(f"Error: {err}\n")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -21,6 +21,7 @@ Share Context: Google Docs Context, Update Google Doc Context
 Credential: ../credential
 Param: doc_ref: Google Docs ID or share link of the document to read
 Param: new_doc_content: Markdown formatted content to replace the existing content of the document with
+Param: new_drive_dir: Optional folder path in Google Drive to move the document to after updating it. Use "/" to move the document back to the root folder.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/update_doc.py
 
@@ -30,6 +31,7 @@ Description: Creates a blank Google Doc
 Share Context: Google Docs Context
 Credential: ../credential
 Param: doc_title: The title of the document to create
+Param: doc_drive_dir: Optional folder path in Google Drive to move the document to after creating it. If not provided, the document will be created in the root folder.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/create_doc.py
 
@@ -45,6 +47,7 @@ Do not output Google Docs IDs because they are not helpful for the user.
 Document names are not considered Doc IDs.
 Google Docs share links match the following regex: (?:https?://(?:drive|docs)\.google\.com/(?:file/d/|document/d/|open\?id=|uc\?id=))([a-zA-Z0-9_-]{33,})
 If the user does not provide a URL for the Google Doc they want to work with, ask them to provide it.
+For the doc_drive_dir parameter, you can optionally specify folder paths directly, such as Haikus or Haikus/New, to move the document to a specific folder in Google Drive.
 
 ## End of instructions for using Google Docs tools
 
@@ -60,6 +63,7 @@ Type: context
 When calling the Update Google Doc tool, provide the entire modified document as a markdown formatted
 string using the new_doc_content parameter. The entire document is replaced by the content of the new_doc_content
 argument.
+For the new_drive_dir parameter, you can optionally specify folder paths directly, such as Haikus or Haikus/New, to move the document to a specific folder in Google Drive.
 
 ## End of instructions for using the Update Google Doc tool
 
