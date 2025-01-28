@@ -10,6 +10,11 @@ ID=$(echo $GPTSCRIPT_WORKSPACE_ID | shasum -a 256 | awk '{print $1}')
 # Find docker container from shell.obot.ai label
 CID=$(docker ps -qa --filter label=shell.obot.ai="$ID")
 
+if [ -n "$CID" ] && [ "$OBOT_THREAD_ENVS" != "$(docker inspect -f '{{ index .Config.Labels "threadenv.obot.ai" }}' $CID)" ]; then
+    docker rm -f $CID > /dev/null
+    CID=""
+fi
+
 if [ -n "$CID" ]; then
     if [ "${START}" = "false" ]; then
         echo $CID
@@ -32,4 +37,7 @@ if [ "${START}" = "false" ]; then
     CMD=create
 fi
 
-docker $CMD --rm --label shell.obot.ai="$ID" --label "user.obot.ai=${OBOT_USER_ID}" --name "obot-shell-${OBOT_USER_ID}-${RANDOM}" -q -it ${OBOT_VOLUMES} ${OBOT_SHELL_RUN_ARGS} ${OBOT_SHELL_IMAGE:-alpine}
+docker $CMD --rm --label shell.obot.ai="$ID"  \
+                --label "threadenv.obot.ai=${OBOT_THREAD_ENVS}" \
+                --label "user.obot.ai=${OBOT_USER_ID}" \
+                 --name "obot-shell-${OBOT_USER_ID}-${RANDOM}" -q -it ${OBOT_VOLUMES} ${OBOT_SHELL_RUN_ARGS} ${OBOT_SHELL_IMAGE:-alpine}

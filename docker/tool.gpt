@@ -56,4 +56,10 @@ if [ -n "$TARGET_FILE" ]; then
     OBOT_TOOL_RUN_ARGS="${OBOT_TOOL_RUN_ARGS} -v $TEMPFILE:$TARGET_FILE"
 fi
 
+if [ -n "$OBOT_THREAD_ENVS" ]; then
+    for env in $(echo $OBOT_THREAD_ENVS | tr "," "\n"); do
+        OBOT_TOOL_RUN_ARGS="${OBOT_TOOL_RUN_ARGS} -e $env"
+    done
+fi
+
 docker run -q --rm --label tool.thread.obot.ai="$OBOT_THREAD_ID" -e GPTSCRIPT_INPUT ${OBOT_TOOL_RUN_ARGS} "${OBOT_TOOL_IMAGE}" ${INTERPRETER} ${TARGET_FILE}
