@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"slices"
 	"strings"
 	"time"
 
@@ -40,6 +39,8 @@ var (
 	token         = os.Getenv("TOKEN")
 	scope         = os.Getenv("SCOPE")
 	optionalScope = os.Getenv("OPTIONAL_SCOPE")
+	promptTokens  = os.Getenv("PROMPT_TOKENS")
+	promptVars    = os.Getenv("PROMPT_VARS")
 )
 
 func normalizeForEnv(appName string) string {
@@ -66,14 +67,14 @@ func main() {
 func mainErr() error {
 	authorizeURL, refreshURL, tokenURL := getURLs(integration)
 	if authorizeURL == "" || refreshURL == "" || tokenURL == "" {
-		// The URLs aren't set for this credential. Check to see if we should prompt the user for a PAT
-		if !slices.Contains(strings.Split(strings.ToLower(os.Getenv("GPTSCRIPT_OAUTH_PAT_INTEGRATIONS")), ","), strings.ToLower(integration)) {
+		// The URLs aren't set for this credential. Check to see if we should prompt the user for other tokens
+		if promptTokens == "" {
 			fmt.Printf("All the following environment variables must be set: GPTSCRIPT_OAUTH_%s_AUTH_URL, GPTSCRIPT_OAUTH_%[1]s_REFRESH_URL, GPTSCRIPT_OAUTH_%[1]s_TOKEN_URL", normalizeForEnv(integration))
-			fmt.Printf("Or include %s in GPTSCRIPT_OAUTH_PAT_INTEGRATIONS to allow prompting for a personal access token\n", integration)
+			fmt.Printf("Or the PROMPT_TOKENS environment variable must be provied for token prompting.")
 			os.Exit(1)
 		}
 
-		return promptForPAT(integration)
+		return promptForTokens(integration, promptTokens, promptVars)
 	}
 
 	// Refresh existing credential if there is one.
@@ -303,7 +304,7 @@ func generateString() (string, error) {
 	return string(b), nil
 }
 
-func promptForPAT(integration string) error {
+func promptForTokens(integration, promptTokens, promptVars string) error {
 	metadata := map[string]string{
 		"authType":        "pat",
 		"toolContext":     "credential",
@@ -312,32 +313,55 @@ func promptForPAT(integration string) error {
 
 	b, err := json.Marshal(metadata)
 	if err != nil {
-		return fmt.Errorf("promptForPAT: failed to marshal metadata: %w", err)
+		return fmt.Errorf("promptForTokens: failed to marshal metadata: %w", err)
 	}
 
 	g, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
 	if err != nil {
-		return fmt.Errorf("promptForPAT: failed to create GPTScript client: %w", err)
+		return fmt.Errorf("promptForTokens: failed to create GPTScript client: %w", err)
 	}
 	defer g.Close()
 
 	run, err := g.Run(context.Background(), "sys.prompt", gptscript.Options{
-		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter your personal access token for %s.","fields":"Token","sensitive": "true"}`, b, integration),
+		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter token values for %s.","fields":"%s","sensitive": "true"}`, b, integration, strings.ReplaceAll(promptTokens, ";", ",")),
 	})
 	if err != nil {
-		return fmt.Errorf("promptForPAT: failed to run sys.prompt: %w", err)
+		return fmt.Errorf("promptForTokens: failed to run sys.prompt: %w", err)
 	}
 
 	out, err := run.Text()
 	if err != nil {
-		return fmt.Errorf("promptForPAT: failed to get prompt response: %w", err)
+		return fmt.Errorf("promptForTokens: failed to get prompt response: %w", err)
 	}
 
-	var m map[string]string
+	m := make(map[string]string)
 	if err = json.Unmarshal([]byte(out), &m); err != nil {
-		return fmt.Errorf("promptForPAT: failed to unmarshal prompt response: %w", err)
+		return fmt.Errorf("promptForTokens: failed to unmarshal prompt response: %w", err)
 	}
 
-	fmt.Printf(`{"env": {"%s": "%s"}}`, token, m["Token"])
+	if promptVars != "" {
+		run, err = g.Run(context.Background(), "sys.prompt", gptscript.Options{
+			Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter token values for %s.","fields":"%s","sensitive": "false"}`, b, integration, strings.ReplaceAll(promptVars, ";", ",")),
+		})
+		if err != nil {
+			return fmt.Errorf("promptForTokens: failed to run sys.prompt: %w", err)
+		}
+
+		out, err = run.Text()
+		if err != nil {
+			return fmt.Errorf("promptForTokens: failed to get prompt response: %w", err)
+		}
+
+		if err = json.Unmarshal([]byte(out), &m); err != nil {
+			return fmt.Errorf("promptForTokens: failed to unmarshal prompt response: %w", err)
+		}
+	}
+
+	b, err = json.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("promptForTokens: failed to marshal prompt response: %w", err)
+	}
+
+	fmt.Printf(`{"env": %s}`, b)
 	return nil
 }
