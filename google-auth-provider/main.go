@@ -68,6 +68,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/templates"
 	oauthProxy, err := oauth2proxy.NewOAuthProxy(oauthProxyOpts, oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
 	if err != nil {
 		fmt.Printf("failed to create oauth2 proxy: %v\n", err)
