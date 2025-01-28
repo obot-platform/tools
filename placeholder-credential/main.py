@@ -19,7 +19,7 @@ async def main():
     g = GPTScript()
     env_vars = dict()
 
-    for env in os.getenv("ENV_VARS").split(","):
+    for env in os.getenv("ENV_VARS").split(";"):
         out = await g.run("sys.prompt", Options(input=f'{{"message":"Please enter the value for {env}", "env":"{env}", "fields":"{env}","sensitive":"true"}}')).text()
         env_vars.update(json.loads(out))
 
