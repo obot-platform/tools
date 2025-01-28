@@ -16,14 +16,14 @@ func handleValidationError(loggerPath, msg string) error {
 }
 
 func (cfg *Config) Validate(toolPath string) error {
-	scheme := "https"
-	if !cfg.UseTLS {
-		scheme = "http"
+
+	if err := cfg.ensureURL(); err != nil {
+		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
 
-	url := fmt.Sprintf("%s://%s%s/v1/models", scheme, cfg.UpstreamHost, cfg.PathPrefix)
+	url := cfg.url.JoinPath("/models")
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
 		return handleValidationError(toolPath, fmt.Sprintf("Invalid %s Configuration", cfg.Name))
 	}

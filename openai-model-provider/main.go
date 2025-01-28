@@ -21,9 +21,8 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          apiKey,
-		Port:            port,
-		UpstreamHost:    "api.openai.com",
-		UseTLS:          true,
+		ListenPort:      port,
+		BaseURL:         "https://api.openai.com/v1",
 		RewriteModelsFn: proxy.DefaultRewriteModelsResponse,
 		Name:            "OpenAI",
 	}

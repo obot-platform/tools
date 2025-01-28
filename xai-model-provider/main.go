@@ -26,9 +26,8 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          apiKey,
-		Port:            os.Getenv("PORT"),
-		UpstreamHost:    "api.x.ai",
-		UseTLS:          true,
+		ListenPort:      os.Getenv("PORT"),
+		BaseURL:         "https://api.x.ai/v1",
 		RewriteModelsFn: RewriteGrokModels,
 		Name:            "xAI",
 	}

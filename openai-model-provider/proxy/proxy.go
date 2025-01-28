@@ -5,44 +5,69 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strings"
 )
 
 type Config struct {
-	APIKey          string
-	Port            string
-	UpstreamHost    string
-	UseTLS          bool
-	ValidateFn      func(cfg *Config) error
+	url *url.URL
+
+	// ListenPort is the port the proxy server listens on
+	ListenPort string
+
+	// Name is the name of the provider, used for logging
+	Name string
+
+	// BaseURL is the upstream model API URL, e.g. "https://api.openai.com/v1" - MUST include the basePath, if any (e.g. /v1)
+	BaseURL string
+
+	// APIKey will be used for Bearer Token Auth against the upstream API
+	APIKey string
+
+	// ValidateFn is a function that can be used to validate the configuration
+	ValidateFn func(cfg *Config) error
+
+	// RewriteModelsFn is a function that can be used to rewrite the response from the upstream API on the /models endpoint
 	RewriteModelsFn func(*http.Response) error
-	PathPrefix      string
-	Name            string
+
+	// CustomPathHandleFuncs is a map of paths to custom handle funcs to completely override the default reverse proxy behavior for a given path
+	CustomPathHandleFuncs map[string]http.HandlerFunc
 }
 
 type server struct {
 	cfg *Config
 }
 
+func (cfg *Config) ensureURL() error {
+
+	if cfg.url != nil {
+		return nil
+	}
+
+	// Remove any trailing slashes from BaseURL
+	cfg.BaseURL = strings.TrimRight(cfg.BaseURL, "/")
+
+	u, err := url.Parse(cfg.BaseURL)
+	if err != nil {
+		return fmt.Errorf("failed to parse BaseURL: %w", err)
+	}
+
+	if u.Scheme == "" {
+		u.Scheme = "https"
+		if u.Host == "127.0.0.1" || u.Host == "localhost" {
+			u.Scheme = "http"
+		}
+	}
+
+	cfg.url = u
+	return nil
+}
+
 func Run(cfg *Config) error {
-	if cfg.Port == "" {
-		cfg.Port = "8000"
-	}
-	if cfg.UpstreamHost == "" {
-		cfg.UpstreamHost = "api.openai.com"
-		cfg.UseTLS = true
-	}
 
-	// Remove any scheme prefix from UpstreamHost if present
-	if strings.HasPrefix(cfg.UpstreamHost, "http://") {
-		cfg.UpstreamHost = strings.TrimPrefix(cfg.UpstreamHost, "http://")
-		cfg.UseTLS = false
-	} else if strings.HasPrefix(cfg.UpstreamHost, "https://") {
-		cfg.UpstreamHost = strings.TrimPrefix(cfg.UpstreamHost, "https://")
-		cfg.UseTLS = true
+	if err := cfg.ensureURL(); err != nil {
+		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
-
-	// Remove any trailing slashes from UpstreamHost
-	cfg.UpstreamHost = strings.TrimRight(cfg.UpstreamHost, "/")
 
 	if cfg.RewriteModelsFn == nil {
 		cfg.RewriteModelsFn = DefaultRewriteModelsResponse
@@ -57,21 +82,34 @@ func Run(cfg *Config) error {
 	s := &server{cfg: cfg}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", s.healthz)
-	mux.Handle("/v1/models", &httputil.ReverseProxy{
-		Director:       s.proxyDirector,
-		ModifyResponse: cfg.RewriteModelsFn,
-	})
-	mux.Handle("/v1/", &httputil.ReverseProxy{
-		Director: s.proxyDirector,
-	})
+
+	// Register custom path handlers first
+	for path, handler := range cfg.CustomPathHandleFuncs {
+		mux.HandleFunc(path, handler)
+	}
+
+	// Register default handlers only if they are not already registered
+	if _, exists := cfg.CustomPathHandleFuncs["/{$}"]; !exists {
+		mux.HandleFunc("/{$}", s.healthz)
+	}
+	if _, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
+		mux.Handle("/v1/models", &httputil.ReverseProxy{
+			Director:       s.proxyDirector,
+			ModifyResponse: cfg.RewriteModelsFn,
+		})
+	}
+	if _, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
+		mux.Handle("/v1/", &httputil.ReverseProxy{
+			Director: s.proxyDirector,
+		})
+	}
 
 	httpServer := &http.Server{
-		Addr:    "127.0.0.1:" + cfg.Port,
+		Addr:    "127.0.0.1:" + cfg.ListenPort,
 		Handler: mux,
 	}
 
-	fmt.Printf("Starting proxy on port %s → host=%s\n", cfg.Port, cfg.UpstreamHost)
+	fmt.Printf("[model-provider: %s] Starting OpenAI-style API proxy on port %s → baseURL=%s\n", cfg.Name, cfg.ListenPort, cfg.BaseURL)
 	if err := httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
@@ -79,23 +117,17 @@ func Run(cfg *Config) error {
 }
 
 func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write([]byte("http://127.0.0.1:" + s.cfg.Port))
+	_, _ = w.Write([]byte("http://127.0.0.1:" + s.cfg.ListenPort))
 }
 
 func (s *server) proxyDirector(req *http.Request) {
-	scheme := "https"
-	if !s.cfg.UseTLS {
-		scheme = "http"
-	}
-	req.URL.Scheme = scheme
-	req.URL.Host = s.cfg.UpstreamHost
+	req.URL.Scheme = s.cfg.url.Scheme
+	req.URL.Host = s.cfg.url.Host
+	req.URL.Path = s.cfg.url.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
 
-	if s.cfg.PathPrefix != "" && !strings.HasPrefix(req.URL.Path, s.cfg.PathPrefix) {
-		req.URL.Path = s.cfg.PathPrefix + req.URL.Path
-	}
 }
 
 func Validate(cfg *Config) error {

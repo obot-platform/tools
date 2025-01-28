@@ -16,11 +16,9 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          apiKey,
-		Port:            os.Getenv("PORT"),
-		UpstreamHost:    "api.groq.com",
-		UseTLS:          true,
+		ListenPort:      os.Getenv("PORT"),
+		BaseURL:         "https://api.groq.com/openai/v1",
 		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
-		PathPrefix:      "/openai",
 		Name:            "Groq",
 	}
 

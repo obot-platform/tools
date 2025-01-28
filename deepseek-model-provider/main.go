@@ -16,9 +16,8 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          apiKey,
-		Port:            os.Getenv("PORT"),
-		UpstreamHost:    "api.deepseek.com",
-		UseTLS:          true,
+		ListenPort:      os.Getenv("PORT"),
+		BaseURL:         "https://api.deepseek.com/v1",
 		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
 		Name:            "DeepSeek",
 	}

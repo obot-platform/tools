@@ -20,9 +20,8 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          "",
-		Port:            os.Getenv("PORT"),
-		UpstreamHost:    host,
-		UseTLS:          false,
+		ListenPort:      os.Getenv("PORT"),
+		BaseURL:         "http://" + host + "/v1",
 		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
 		Name:            "Ollama",
 	}

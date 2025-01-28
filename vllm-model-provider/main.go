@@ -43,9 +43,8 @@ func main() {
 
 	cfg := &proxy.Config{
 		APIKey:          apiKey,
-		Port:            os.Getenv("PORT"),
-		UpstreamHost:    u.Host,
-		UseTLS:          u.Scheme == "https",
+		ListenPort:      os.Getenv("PORT"),
+		BaseURL:         strings.TrimSuffix(u.String(), "/v1") + "/v1", // make sure we have /v1 for vLLM
 		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
 		Name:            "vLLM",
 	}
