@@ -215,3 +215,7 @@ Slack
 ---
 !metadata:*:oauth
 slack
+
+---
+!metadata:*:supportsOAuthTokenPrompt
+true
