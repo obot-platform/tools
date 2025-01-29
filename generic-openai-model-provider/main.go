@@ -51,6 +51,7 @@ func main() {
 	}
 
 	if err := proxy.Run(cfg); err != nil {
-		panic(err)
+		fmt.Printf("failed to run generic-openai-model-provider proxy: %v\n", err)
+		os.Exit(1)
 	}
 }
