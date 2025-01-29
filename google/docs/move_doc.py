@@ -65,4 +65,4 @@ def move_doc(drive_service, document_id, folder_path):
         fields="id, parents"
     ).execute()
 
-    print(f"Document moved to folder: {folder_path}")
+    print(f"Document with ID {document_id} moved to folder: {folder_path}")

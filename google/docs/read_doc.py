@@ -1,8 +1,6 @@
 import sys
 import os
 
-from googleapiclient.http import MediaIoBaseDownload
-
 from auth import client
 from id import extract_file_id
 

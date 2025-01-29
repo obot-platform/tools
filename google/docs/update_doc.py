@@ -94,25 +94,13 @@ def markdown_to_google_doc_requests(markdown_content):
 
     return requests
 
-
-def main():
-    try:
-        doc_ref = os.getenv('DOC_REF')
-        new_doc_content = os.getenv('NEW_DOC_CONTENT')
-        new_drive_dir = os.getenv('NEW_DRIVE_DIR', '').strip()  # Get the optional NEW_DRIVE_DIR
-
-        if not doc_ref:
-            raise ValueError('DOC_REF environment variable is missing or empty')
-
-        if not new_doc_content:
-            raise ValueError('NEW_DOC_CONTENT environment variable is missing or empty')
-
+def update_doc(file_id, doc_content, drive_dir):
+    if doc_content:
         try:
-            requests = markdown_to_google_doc_requests(new_doc_content)
+            requests = markdown_to_google_doc_requests(doc_content)
         except Exception as e:
-            raise ValueError(f"Failed to parse NEW_DOC_CONTENT: {e}")
+            raise ValueError(f"Failed to parse given doc content: {e}")
 
-        file_id = extract_file_id(doc_ref)
         docs_service = client('docs', 'v1')
         drive_service = client('drive', 'v3')
 
@@ -142,8 +130,23 @@ def main():
 
         print(f"Document updated successfully: {file_id}")
 
-        # Move the document to the specified folder, if NEW_DRIVE_DIR is set
-        move_doc(drive_service, file_id, new_drive_dir)
+    # Move the document to the specified folder
+    move_doc(drive_service, file_id, drive_dir)
+
+def main():
+    try:
+        doc_ref = os.getenv('DOC_REF')
+        doc_content = os.getenv('DOC_CONTENT')
+        drive_dir = os.getenv('DOC_DRIVE_DIR', '').strip()
+
+        if not doc_ref:
+            raise ValueError('DOC_REF environment variable is missing or empty')
+
+        if not doc_content:
+            raise ValueError('DOC_CONTENT environment variable is missing or empty')
+
+        file_id = extract_file_id(doc_ref)
+        update_doc(file_id, doc_content, drive_dir)
 
     except Exception as err:
         sys.stderr.write(f"Error: {err}\n")
