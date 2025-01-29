@@ -73,12 +73,15 @@ def markdown_to_google_doc_requests(markdown_content):
             add_text_request("\n")
         elif element.name in ['h1', 'h2', 'h3']:
             add_text_request(element.get_text(), bold=True)
+            add_text_request("\n")
         elif element.name in ['ul']:
             for li in element.find_all('li'):
                 add_text_request("\u2022 " + li.get_text())
+                add_text_request("\n")
         elif element.name in ['ol']:
             for i, li in enumerate(element.find_all('li'), start=1):
                 add_text_request(f"{i}. " + li.get_text())
+                add_text_request("\n")
         elif element.name == 'a':
             add_text_request(element.get_text(), link=element['href'])
         elif element.name == 'table':
