@@ -1,4 +1,4 @@
-Name: Gerneric OpenAI
+Name: OpenAI Compatible Generic Provider
 Description: Model Provider for generic OpenAI API compatible model providers
 Metadata: envVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASEURL
 Metadata: optionalEnvVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY
