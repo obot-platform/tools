@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	isValidate := len(os.Args) > 1 && os.Args[1] == "validate"
 
 	baseURL := os.Getenv("OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASE_URL")
