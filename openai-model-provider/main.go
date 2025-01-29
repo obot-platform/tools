@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/http/httputil"
 	"os"
 
+	"github.com/obot-platform/tools/openai-model-provider/openaiproxy"
 	"github.com/obot-platform/tools/openai-model-provider/proxy"
 )
 
@@ -26,6 +28,13 @@ func main() {
 		RewriteModelsFn: proxy.DefaultRewriteModelsResponse,
 		Name:            "OpenAI",
 	}
+
+	openaiProxy := openaiproxy.NewServer(cfg)
+	reverseProxy := &httputil.ReverseProxy{
+		Director:       openaiProxy.Openaiv1ProxyRedirect,
+		ModifyResponse: openaiProxy.ModifyResponse,
+	}
+	cfg.CustomPathHandleFuncs["/v1/"] = reverseProxy.ServeHTTP
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
 		if err := cfg.Validate("/tools/openai-model-provider/validate"); err != nil {
