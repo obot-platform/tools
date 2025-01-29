@@ -87,25 +87,31 @@ func Run(cfg *Config) error {
 
 	mux := http.NewServeMux()
 
-	// Register custom path handlers first
-	for path, handler := range cfg.CustomPathHandleFuncs {
-		mux.HandleFunc(path, handler)
-	}
-
 	// Register default handlers only if they are not already registered
 	if _, exists := cfg.CustomPathHandleFuncs["/{$}"]; !exists {
 		mux.HandleFunc("/{$}", s.healthz)
 	}
-	if _, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
+	if handler, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
 		mux.Handle("/v1/models", &httputil.ReverseProxy{
 			Director:       s.proxyDirector,
 			ModifyResponse: cfg.RewriteModelsFn,
 		})
+	} else {
+		mux.HandleFunc("/v1/models", handler)
 	}
-	if _, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
+	if handler, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
 		mux.Handle("/v1/", &httputil.ReverseProxy{
 			Director: s.proxyDirector,
 		})
+	} else {
+		mux.HandleFunc("/v1/", handler)
+	}
+
+	for path, handler := range cfg.CustomPathHandleFuncs {
+		if path == "/v1/models" || path == "/v1/" {
+			continue
+		}
+		mux.HandleFunc(path, handler)
 	}
 
 	httpServer := &http.Server{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"net/http/httputil"
 	"os"
 
@@ -22,11 +23,12 @@ func main() {
 	}
 
 	cfg := &proxy.Config{
-		APIKey:          apiKey,
-		ListenPort:      port,
-		BaseURL:         "https://api.openai.com/v1",
-		RewriteModelsFn: proxy.DefaultRewriteModelsResponse,
-		Name:            "OpenAI",
+		APIKey:                apiKey,
+		ListenPort:            port,
+		BaseURL:               "https://api.openai.com/v1",
+		RewriteModelsFn:       proxy.DefaultRewriteModelsResponse,
+		Name:                  "OpenAI",
+		CustomPathHandleFuncs: map[string]http.HandlerFunc{},
 	}
 
 	openaiProxy := openaiproxy.NewServer(cfg)
