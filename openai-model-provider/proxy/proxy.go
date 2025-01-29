@@ -39,7 +39,6 @@ type server struct {
 }
 
 func (cfg *Config) ensureURL() error {
-
 	if cfg.url != nil {
 		return nil
 	}
@@ -64,7 +63,6 @@ func (cfg *Config) ensureURL() error {
 }
 
 func Run(cfg *Config) error {
-
 	if err := cfg.ensureURL(); err != nil {
 		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
@@ -127,7 +125,6 @@ func (s *server) proxyDirector(req *http.Request) {
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
-
 }
 
 func Validate(cfg *Config) error {

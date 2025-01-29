@@ -16,7 +16,6 @@ func handleValidationError(loggerPath, msg string) error {
 }
 
 func (cfg *Config) Validate(toolPath string) error {
-
 	if err := cfg.ensureURL(); err != nil {
 		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
