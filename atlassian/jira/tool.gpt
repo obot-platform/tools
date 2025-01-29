@@ -192,3 +192,7 @@ Jira
 ---
 !metadata:*:oauth
 atlassian
+
+---
+!metadata:*:supportsOAuthTokenPrompt
+true
