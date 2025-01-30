@@ -150,3 +150,7 @@ Excel
 ---
 !metadata:*:icon
 /admin/assets/excel_icon_small.svg
+
+---
+!metadata:*:oauth
+microsoft365
