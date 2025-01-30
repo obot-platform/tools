@@ -20,7 +20,7 @@ Share Tools: Create Google Doc
 Share Context: Google Docs Context
 Credential: ../credential
 Param: doc_ref: Google Docs ID or share link of the document to read.
-Param: doc_drive_dir: Optional folder path in Google Drive to move the document to after updating it. Use "/" to move the document back to the root folder.
+Param: doc_drive_dir: Optional folder path in Google Drive to move the document to after updating it. Use `/` to move the document back to the root folder.
 Param: doc_content: Markdown formatted content to replace the existing content of the document with.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/update_doc.py

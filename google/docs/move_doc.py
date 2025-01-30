@@ -14,13 +14,21 @@ def move_doc(drive_service, document_id, folder_path):
         return
 
     if folder_path.strip() == "/":
+        # Get the current parent folder(s)
+        file_metadata = drive_service.files().get(
+            fileId=document_id,
+            fields="parents"
+        ).execute()
+        current_parents = ",".join(file_metadata.get("parents", []))
+
         # Move the document back to the root folder
         drive_service.files().update(
             fileId=document_id,
-            addParents="root",  # Add to the root folder
-            removeParents="root",  # Ensure no redundant updates
+            addParents="root",
+            removeParents=current_parents,
             fields="id, parents"
         ).execute()
+
         print("Document moved back to the root folder.")
         return
 
