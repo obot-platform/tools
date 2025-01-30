@@ -21,14 +21,14 @@ func NewServer(cfg *proxy.Config) *Server {
 }
 
 func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
-	req.URL.Scheme = s.cfg.Url.Scheme
-	req.URL.Host = s.cfg.Url.Host
-	req.URL.Path = s.cfg.Url.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
+	req.URL.Scheme = s.cfg.URL.Scheme
+	req.URL.Host = s.cfg.URL.Host
+	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
 
-	if req.Body == nil || s.cfg.Url.Host != proxy.OpenaiBaseHostName || req.URL.Path != proxy.ChatCompletionsPath {
+	if req.Body == nil || s.cfg.URL.Host != proxy.OpenaiBaseHostName || req.URL.Path != proxy.ChatCompletionsPath {
 		return
 	}
 

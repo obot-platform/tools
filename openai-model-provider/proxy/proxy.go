@@ -16,7 +16,7 @@ var (
 )
 
 type Config struct {
-	Url *url.URL
+	URL *url.URL
 
 	// ListenPort is the port the proxy server listens on
 	ListenPort string
@@ -45,7 +45,7 @@ type server struct {
 }
 
 func (cfg *Config) ensureURL() error {
-	if cfg.Url != nil {
+	if cfg.URL != nil {
 		return nil
 	}
 
@@ -64,7 +64,7 @@ func (cfg *Config) ensureURL() error {
 		}
 	}
 
-	cfg.Url = u
+	cfg.URL = u
 	return nil
 }
 
@@ -131,9 +131,9 @@ func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *server) proxyDirector(req *http.Request) {
-	req.URL.Scheme = s.cfg.Url.Scheme
-	req.URL.Host = s.cfg.Url.Host
-	req.URL.Path = s.cfg.Url.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
+	req.URL.Scheme = s.cfg.URL.Scheme
+	req.URL.Host = s.cfg.URL.Host
+	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
