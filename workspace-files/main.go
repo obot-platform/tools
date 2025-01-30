@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"os/signal"
 	"path"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -17,6 +19,7 @@ const FilesDir = "files"
 
 var (
 	FileEnv     = os.Getenv("FILENAME")
+	DirEnv      = os.Getenv("DIR")
 	MaxFileSize = 250_000
 )
 
@@ -42,7 +45,7 @@ Usage: go run main.go <path>\n`)
 		input(ctx)
 		return
 	case "list":
-		if err := list(ctx, FileEnv); err != nil {
+		if err := list(ctx, DirEnv); err != nil {
 			fmt.Printf("Failed to list %s: %v\n", FileEnv, err)
 			return
 		}
@@ -145,11 +148,21 @@ func list(ctx context.Context, filename string) error {
 		return err
 	}
 
+	toPrint := map[string]struct{}{}
 	for _, file := range files {
 		p := strings.TrimPrefix(file, FilesDir+"/")
 		if p != "" {
-			fmt.Println(p)
+			parts := strings.Split(p, "/")
+			if len(parts) > 1 {
+				toPrint[parts[0]+"/"] = struct{}{}
+			} else {
+				toPrint[parts[0]] = struct{}{}
+			}
 		}
+	}
+
+	if len(toPrint) > 0 {
+		fmt.Println(strings.Join(slices.Sorted(maps.Keys(toPrint)), "\n"))
 	}
 
 	return nil

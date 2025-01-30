@@ -22,8 +22,9 @@ workspace_read, workspace_write, and workspace_copy tools to interact with files
 to read and write in their user interface. You can collaborate with the user by reading and writing these files.
 Do not ask first to create files in the workspace. Immediately write contents to the workspace as opposed to describing
 the contents to the user. If the user changes a file, they will inform you that content has changed, with the new
-contents of the file. The current files are available in the workspace for you to read if needed.
+contents of the file.
 
+List of files in workspace:
 $FILES
 # END INSTRUCTIONS: "Workspace Files"
 EOF
@@ -31,6 +32,7 @@ EOF
 ---
 Name: workspace_list
 Description: List all files in the workspace
+Params: dir: The directory to list files from
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
 

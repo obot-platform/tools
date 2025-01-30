@@ -40,7 +40,7 @@ START INSTRUCTIONS: KNOWLEDGE
 Use the tool knowledge to query your knowledge set to assist in Retrieval-Augmented Generation (RAG).
 The knowledge set contains data described as:
 
-${KNOW_DATASET_DESCRIPTION}
+${KNOW_DATASET_DESCRIPTIONS}
 
 END INSTRUCTIONS: KNOWLEDGE
 EOF
