@@ -8,8 +8,25 @@ Metadata: noUserAuth: vllm-model-provider
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:*:icon
-/admin/assets/vllm-logo.svg
+!metadata:vLLM:providerMeta
+{
+    "icon": "/admin/assets/vllm-logo.svg",
+    "link": "https://docs.vllm.ai/",
+    "envVars": [
+        {
+            "name": "OBOT_VLLM_MODEL_PROVIDER_ENDPOINT",
+            "friendlyName": "Endpoint",
+            "description": "Endpoint for the vLLM OpenAI service (eg. http://localhost:8000)",
+            "sensitive": false
+        },
+        {
+            "name": "OBOT_VLLM_MODEL_PROVIDER_API_KEY",
+            "friendlyName": "API Key",
+            "description": "VLLM API Key set when starting the vLLM server",
+            "sensitive": true
+        }
+    ]
+}
 
 ---
 Name: validate

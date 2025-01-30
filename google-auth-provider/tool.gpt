@@ -9,3 +9,4 @@ Credential: ../placeholder-credential as google-auth-provider
 ---
 !metadata:*:icon
 /admin/assets/google_icon_small.png
+
