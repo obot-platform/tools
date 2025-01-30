@@ -59,10 +59,10 @@ func getCredentials(ctx context.Context, in input) (string, string, error) {
 	}
 	defer client.Close()
 
-	sysPromptIn, err := json.Marshal(sysPromptInput{
+	sysUsernamePromptIn, err := json.Marshal(sysPromptInput{
 		Message:   in.Message,
-		Fields:    strings.Join([]string{in.UsernameField, in.PasswordField}, ","),
-		Sensitive: strconv.FormatBool(true),
+		Fields:    in.UsernameField,
+		Sensitive: strconv.FormatBool(false),
 		Metadata:  in.Metadata,
 	})
 	if err != nil {
@@ -70,7 +70,7 @@ func getCredentials(ctx context.Context, in input) (string, string, error) {
 	}
 
 	run, err := client.Run(ctx, "sys.prompt", gptscript.Options{
-		Input: string(sysPromptIn),
+		Input: string(sysUsernamePromptIn),
 	})
 	if err != nil {
 		return "", "", fmt.Errorf("Error running GPTScript prompt: %w", err)
@@ -82,6 +82,29 @@ func getCredentials(ctx context.Context, in input) (string, string, error) {
 	}
 
 	username := gjson.Get(res, in.UsernameField).String()
+
+	sysPassPromptIn, err := json.Marshal(sysPromptInput{
+		Message:   in.Message,
+		Fields:    in.PasswordField,
+		Sensitive: strconv.FormatBool(true),
+		Metadata:  in.Metadata,
+	})
+	if err != nil {
+		return "", "", fmt.Errorf("Error marshalling sys prompt input: %w", err)
+	}
+
+	run, err = client.Run(ctx, "sys.prompt", gptscript.Options{
+		Input: string(sysPassPromptIn),
+	})
+	if err != nil {
+		return "", "", fmt.Errorf("Error running GPTScript prompt: %w", err)
+	}
+
+	res, err = run.Text()
+	if err != nil {
+		return "", "", fmt.Errorf("Error getting GPTScript response: %w", err)
+	}
+
 	password := gjson.Get(res, in.PasswordField).String()
 
 	return username, password, nil
