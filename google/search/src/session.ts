@@ -1,8 +1,6 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { type IncomingHttpHeaders } from 'node:http'
-import { createHash } from 'node:crypto'
 import { type BrowserContext } from 'playwright'
 import { newBrowserContext } from './context.ts'
 import TTLCache from '@isaacs/ttlcache'
@@ -171,27 +169,3 @@ export class SessionManager {
   }
 }
 
-export function getSessionId(headers: IncomingHttpHeaders): string {
-  const workspaceId = getGPTScriptEnv(headers, 'GPTSCRIPT_WORKSPACE_ID')
-  if (workspaceId == null) throw new Error('No GPTScript workspace ID provided')
-
-  return createHash('sha256').update(workspaceId).digest('hex').substring(0, 16)
-}
-
-export function getWorkspaceId(headers: IncomingHttpHeaders): string | undefined {
-  return getGPTScriptEnv(headers, 'GPTSCRIPT_WORKSPACE_ID')
-}
-
-export function getGPTScriptEnv(headers: IncomingHttpHeaders, envKey: string): string | undefined {
-  const envHeader = headers?.['x-gptscript-env']
-  const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
-
-  for (const env of envArray) {
-    if (env == null) continue
-    for (const pair of env.split(',')) {
-      const [key, value] = pair.split('=').map((part) => part.trim())
-      if (key === envKey) return value
-    }
-  }
-  return undefined
-}
