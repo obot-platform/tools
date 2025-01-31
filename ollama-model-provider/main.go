@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -18,10 +20,28 @@ func main() {
 	}
 	host = cleanHost(host)
 
+	u, err := url.Parse(cleanHost(host))
+	if err != nil {
+		fmt.Printf("{\"error\": \"Invalid BaseURL: %v\"}\n", err)
+		os.Exit(1)
+	}
+
+	if u.Scheme == "" {
+		if u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
+			u.Scheme = "http"
+		} else {
+			u.Scheme = "https"
+		}
+	}
+
+	if u.Path == "" {
+		u.Path = "/v1"
+	}
+
 	cfg := &proxy.Config{
 		APIKey:          "",
 		ListenPort:      os.Getenv("PORT"),
-		BaseURL:         "http://" + host + "/v1",
+		BaseURL:         u.String(),
 		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
 		Name:            "Ollama",
 	}
