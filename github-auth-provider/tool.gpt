@@ -1,12 +1,71 @@
 Name: GitHub
 Description: Auth provider for GitHub
-Metadata: envVars: OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID,OBOT_GITHUB_AUTH_PROVIDER_CLIENT_SECRET,OBOT_AUTH_PROVIDER_COOKIE_SECRET,OBOT_AUTH_PROVIDER_EMAIL_DOMAINS
-Metadata: optionalEnvVars: OBOT_GITHUB_AUTH_PROVIDER_TEAMS,OBOT_GITHUB_AUTH_PROVIDER_ORG,OBOT_GITHUB_AUTH_PROVIDER_REPO,OBOT_GITHUB_AUTH_PROVIDER_TOKEN,OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS
 Metadata: noUserAuth: github-auth-provider
 Credential: ../placeholder-credential as github-auth-provider
 
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:*:icon
-https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg
+!metadata:GitHub:providerMeta
+{
+    "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg",
+    "link": "https://github.com/",
+    "envVars": [
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID",
+            "friendlyName": "Client ID",
+            "description": "Client ID for your GitHub OAuth app. Can be found in GitHub Developer Settings > OAuth Apps",
+            "sensitive": false
+        },
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_CLIENT_SECRET",
+            "friendlyName": "Client Secret",
+            "description": "Client secret for your GitHub OAuth app. Can be found in GitHub Developer Settings > OAuth Apps",
+            "sensitive": true
+        },
+        {
+            "name": "OBOT_AUTH_PROVIDER_COOKIE_SECRET",
+            "friendlyName": "Cookie Secret",
+            "description": "Secret used to encrypt cookies. Must be a random string of length 16, 24, or 32.",
+            "sensitive": true
+        },
+        {
+            "name": "OBOT_AUTH_PROVIDER_EMAIL_DOMAINS",
+            "friendlyName": "Allowed E-Mail Domains",
+            "description": "Comma separated list of email domains that are allowed to authenticate with this provider. * is a special value that allows all domains.",
+            "sensitive": false
+        }
+    ],
+    "optionalEnvVars": [
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_TEAMS",
+            "friendlyName": "Allowed GitHub Teams",
+            "description": "Restrict logins to members of any of these GitHub teams (comma-separated list).",
+            "sensitive": false
+        },
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_ORG",
+            "friendlyName": "Allowed GitHub Organization",
+            "description": "Restrict logins to members of this GitHub organization.",
+            "sensitive": false
+        },
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_REPO",
+            "friendlyName": "Allowed GitHub Repository",
+            "description": "Restrict logins to collaborators on this GitHub repository (formatted orgname/repo).",
+            "sensitive": false
+        },
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_TOKEN",
+            "friendlyName": "Repository Token",
+            "description": "The token to use when verifying repository collaborators (must have push access to the repository).",
+            "sensitive": true
+        },
+        {
+            "name": "OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS",
+            "friendlyName": "Allowed GitHub Users",
+            "description": "Users allowed to log in, even if they do not belong to the specified org and team or collaborators.",
+            "sensitive": false
+        }
+    ]
+}
