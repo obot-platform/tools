@@ -10,6 +10,7 @@ Metadata: noUserAuth: deepseek-model-provider
 !metadata:DeepSeek:providerMeta
 {
     "icon": "/admin/assets/deepseek-logo.svg",
+    "iconNoInvert": true,
     "link": "https://www.deepseek.com/",
     "envVars": [
         {
