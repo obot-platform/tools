@@ -16,21 +16,38 @@ const command = process.argv[2]
 async function main() {
 
     try {
-        if (!process.env.ATLASSIAN_OAUTH_TOKEN) {
-            throw new Error("ATLASSIAN_OAUTH_TOKEN is required")
+        if (!process.env.ATLASSIAN_OAUTH_TOKEN && (!process.env.ATLASSIAN_API_TOKEN || !process.env.ATLASSIAN_EMAIL || !process.env.ATLASSIAN_SITE_URL)) {
+            throw new Error("ATLASSIAN_OAUTH_TOKEN or all of ATLASSIAN_API_TOKEN, ATLASSIAN_EMAIL, and ATLASSIAN_SITE_URL are required")
+        }
+
+        let authType = "Bearer"
+        let authToken = process.env.ATLASSIAN_OAUTH_TOKEN
+        if (process.env.ATLASSIAN_API_TOKEN) {
+            authType = "Basic"
+            authToken = Buffer.from(`${process.env.ATLASSIAN_EMAIL}:${process.env.ATLASSIAN_API_TOKEN.trim()}`).toString("base64")
         }
 
         let baseUrl
         if (command !== 'listJiraSites') {
-            if (!process.env.SITE_ID) {
+            if (process.env.ATLASSIAN_SITE_URL) {
+                baseUrl = process.env.ATLASSIAN_SITE_URL
+                if (baseUrl.endsWith('/')) {
+                    baseUrl = baseUrl.slice(0, -1)
+                }
+                if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+                    baseUrl = `https://${baseUrl}`
+                }
+                baseUrl = `${baseUrl}/rest/api/3`
+            } else if (process.env.SITE_ID) {
+                baseUrl = `https://api.atlassian.com/ex/jira/${process.env.SITE_ID}/rest/api/3`
+            } else {
                 throw new Error('site_id argument not provided')
             }
-            baseUrl = `https://api.atlassian.com/ex/jira/${process.env.SITE_ID}/rest/api/3`
         }
         const client = axios.create({
             baseURL: baseUrl,
             headers: {
-                'Authorization': `Bearer ${process.env.ATLASSIAN_OAUTH_TOKEN}`,
+                'Authorization': `${authType} ${authToken}`,
                 'Accept': 'application/json',
             },
         })
@@ -38,6 +55,10 @@ async function main() {
         let result = null
         switch (command) {
             case "listJiraSites":
+                if (process.env.ATLASSIAN_SITE_URL) {
+                    console.log("listJiraSites is not needed when ATLASSIAN_SITE_URL is set, so you can continue without needing the site_id argument")
+                    break
+                }
                 result = await listJiraSites(client)
                 break
             case "createIssue":
