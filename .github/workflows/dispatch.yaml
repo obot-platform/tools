@@ -1,0 +1,19 @@
+name: Tag Release of tools
+on:
+  repository_dispatch:
+    types: release
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          skipIfReleaseExists: true
+          tag: ${{ github.event.client_payload.tag }}
+          commit: main
+          name: Release ${{ github.event.client_payload.tag }}
+          generateReleaseNotes: true
+          prerelease: ${{ contains(github.event.client_payload.tag, '-rc') }}
