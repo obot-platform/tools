@@ -10,7 +10,7 @@ Credential: ../placeholder-credential as google-auth-provider
 !metadata:Google:providerMeta
 {
     "icon": "/admin/assets/google_icon_small.png",
-    "iconNoInvert": true,
+    "iconDark": "/admin/assets/google_icon_small.png",
     "link": "https://google.com/",
     "envVars": [
         {

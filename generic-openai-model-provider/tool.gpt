@@ -10,7 +10,7 @@ Metadata: noUserAuth: generic-openai-model-provider
 !metadata:OpenAI Compatible Generic Provider:providerMeta
 {
     "icon": "/admin/assets/obot_openai_antenna_icon.png",
-    "iconNoInvert": true,
+    "iconDark": "/admin/assets/obot_openai_antenna_icon.png",
     "link": "https://platform.openai.com/docs/api-reference/introduction",
     "description": "Model Provider for generic [OpenAI API compatible](https://platform.openai.com/docs/api-reference/introduction) model providers, like LM-Studio, Ollama, vLLM, etc.",
     "envVars": [
