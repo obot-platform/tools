@@ -21,7 +21,7 @@ type SerializableState struct {
 	PreferredUsername string     `json:"preferredUsername"`
 	User              string     `json:"user"`
 	Email             string     `json:"email"`
-	SetCookie         string     `json:"setCookie"`
+	SetCookies        []string   `json:"setCookies"`
 }
 
 func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
@@ -51,9 +51,9 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			return
 		}
 
-		var setCookie string
+		var setCookies []string
 		if state.IsExpired() {
-			setCookie, err = refreshToken(p, reqObj)
+			setCookies, err = refreshToken(p, reqObj)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("failed to refresh token: %v", err), http.StatusForbidden)
 				return
@@ -66,7 +66,7 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			PreferredUsername: state.PreferredUsername,
 			User:              state.User,
 			Email:             state.Email,
-			SetCookie:         setCookie,
+			SetCookies:        setCookies,
 		}
 
 		if err = json.NewEncoder(w).Encode(ss); err != nil {
@@ -76,14 +76,14 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 	}
 }
 
-func refreshToken(p *oauth2proxy.OAuthProxy, r *http.Request) (string, error) {
+func refreshToken(p *oauth2proxy.OAuthProxy, r *http.Request) ([]string, error) {
 	w := &response{
 		headers: make(http.Header),
 	}
 
 	req, err := http.NewRequest(r.Method, "/oauth2/auth", nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to create refresh request object: %v", err)
+		return nil, fmt.Errorf("failed to create refresh request object: %v", err)
 	}
 
 	req.Header = r.Header
@@ -91,11 +91,15 @@ func refreshToken(p *oauth2proxy.OAuthProxy, r *http.Request) (string, error) {
 
 	switch w.status {
 	case http.StatusOK, http.StatusAccepted:
-		return w.headers.Get("Set-Cookie"), nil
+		var headers []string
+		for _, v := range w.Header().Values("Set-Cookie") {
+			headers = append(headers, v)
+		}
+		return headers, nil
 	case http.StatusUnauthorized, http.StatusForbidden:
-		return "", fmt.Errorf("refreshing token returned %d: %s", w.status, w.body)
+		return nil, fmt.Errorf("refreshing token returned %d: %s", w.status, w.body)
 	default:
-		return "", fmt.Errorf("refreshing token returned unexpected status %d: %s", w.status, w.body)
+		return nil, fmt.Errorf("refreshing token returned unexpected status %d: %s", w.status, w.body)
 	}
 }
 
