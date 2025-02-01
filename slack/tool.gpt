@@ -1,7 +1,6 @@
 ---
 Name: Slack
 Description: Tools for interacting with Slack
-Metadata: bundle: true
 Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History
 
 ---
@@ -221,10 +220,6 @@ The following search modifiers can be used in search-messages `query` arguments:
 - `is:<type>`: Matches messages of the specified type. Valid types are `dm`, `thread`. Example: `is:thread`
 
 ## End of instructions for using Slack tools
-
----
-!metadata:*:category
-Slack
 
 ---
 !metadata:*:icon

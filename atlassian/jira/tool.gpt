@@ -1,7 +1,6 @@
 ---
 Name: Jira
 Description: Tools for interacting with Jira
-Metadata: bundle: true
 Share Tools: List Jira Sites, List Projects, Get Project, List Users, Get User, Get Current User, Search Issues, List Issues, Get Issue, Create Issue, Edit Issue, Add Comment, List Comments
 
 ---
@@ -181,10 +180,6 @@ Issue descriptions are always in ADF (Atlassian Document Format) and must be pas
 The List Issues tool can be used to search for issues in a Jira instance. The jql_query argument provided to this tool must be valid JQL (Jira Query Language) query.
 
 # END INSTRUCTIONS: Jira Tools
-
----
-!metadata:*:category
-Jira
 
 ---
 !metadata:*:icon

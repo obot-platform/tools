@@ -1,7 +1,6 @@
 ---
 Name: Zoom
 Description: Tools for interacting with Zoom
-Metadata: bundle: true
 Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, Get Past Meeting Details, List Available Timezones
 
 ---
@@ -170,10 +169,6 @@ Share Context: ../time
 You can use this tool to interact with Zoom with Zoom APIs.
 
 # End of instructions for using Zoom tools
-
----
-!metadata:*:category
-Zoom
 
 ---
 !metadata:*:icon

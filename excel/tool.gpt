@@ -140,14 +140,6 @@ If the user asks for a calculation or a formula, use an excel formula if possibl
 ## End of instructions for using Excel tools
 
 ---
-!metadata:Excel:bundle
-true
-
----
-!metadata:*:category
-Excel
-
----
 !metadata:*:icon
 /admin/assets/excel_icon_small.svg
 

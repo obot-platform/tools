@@ -1,7 +1,6 @@
 ---
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
-Metadata: bundle: true
 Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Send Draft, Delete Message, Move Message
 
 ---
@@ -126,10 +125,6 @@ When creating a draft message, ensure the body is valid markdown and there are n
 Do not attempt to forward emails. Email forwarding is not supported.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
-
----
-!metadata:*:category
-Outlook Mail
 
 ---
 !metadata:*:icon

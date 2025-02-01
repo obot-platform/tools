@@ -1,7 +1,6 @@
 ---
 Name: LinkedIn Publishing
 Description: Tools for publishing content to LinkedIn with the LinkedIn APIs
-Metadata: bundle: true
 Share Tools: Get Current LinkedIn User, Create LinkedIn Post
 
 ---
@@ -40,10 +39,6 @@ Share Context: ../time
 You have tools to help with publishing content to LinkedIn with the LinkedIn API.
 
 # End of instructions for using LinkedIn Publishing tools
-
----
-!metadata:*:category
-LinkedIn
 
 ---
 !metadata:*:icon

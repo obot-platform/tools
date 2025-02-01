@@ -1,7 +1,6 @@
 ---
 Name: GitHub
 Description: Tools for interacting with GitHub
-Metadata: bundle: true
 Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels
 
 ---
@@ -252,10 +251,6 @@ If you are unable to access resources because of a permissions issue, inform the
 Refer them to this link for more information on how the OAuth permissions work in GitHub - https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions.
 
 ## End of instructions for using GitHub tools
-
----
-!metadata:*:category
-GitHub
 
 ---
 !metadata:*:icon
