@@ -1,7 +1,7 @@
 Name: File Reader
-Description: This tool read any supported type of non-text file in the workspace and convert the content to markdown format and save to the output file in the workspace.
-Params: Input: the workspace file to be read.
-Params: Output: the workspace file to save the markdown content. It should end with ".md" suffix.
+Description: This tool reads any supported type of non-text file in the workspace, converts its content to markdown format, and saves it as an output file within the workspace.
+Params: Input: The workspace file to be read. This file can be of any supported non-text type.
+Params: Output: The workspace file where the converted markdown content will be saved. The file should have a ".md" extension.
 Params: know_load_metadata: Comma-delimited key=value pairs to be added to the metadata of the loaded document.
 Credential: github.com/gptscript-ai/credentials/model-provider
 Credential: ../existing-credential as knowledge
