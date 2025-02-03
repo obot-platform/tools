@@ -25,8 +25,8 @@ tools:
   slack:
     reference: ./slack
     all: true
-  linkedin:
-    reference: ./linkedin
+  linkedin-publishing:
+    reference: ./linkedin-publishing
     all: true
   notion:
     reference: ./notion

@@ -1,22 +1,22 @@
 ---
-Name: LinkedIn
-Description: Tools for interacting with LinkedIn APIs
+Name: LinkedIn Publishing
+Description: Tools for publishing content to LinkedIn with the LinkedIn APIs
 Metadata: bundle: true
-Share Tools: Get Current User, Create Post
+Share Tools: Get Current LinkedIn User, Create LinkedIn Post
 
 ---
-Name: Get Current User
+Name: Get Current LinkedIn User
 Description: Get the current user of the LinkedIn account
 Credential: ./credential
-Share Context: LinkedIn Context
+Share Context: LinkedIn Publishing Context
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetCurrentUser
 
 ---
-Name: Create Post
-Description: Create a share on LinkedIn. 
+Name: Create LinkedIn Post
+Description: Create a share on LinkedIn.
 Credential: ./credential
-Share Context: LinkedIn Context
+Share Context: LinkedIn Publishing Context
 Param: content: the text content of the share.
 Param: share_media_category: (optional) the category of the share media. Must be one of [NONE, IMAGE, VIDEO, ARTICLE]. NONE for text share, IMAGE for image, VIDEO for video, ARTICLE for article and urllink. Default is NONE.
 Param: visibility: (optional) the visibility of the share. Must be one of [PUBLIC, CONNECTIONS]. Default is PUBLIC.
@@ -29,17 +29,17 @@ Param: share_media_file_path: (optional) the workspace file path for the share m
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreatePost
 
 ---
-Name: LinkedIn Context
+Name: LinkedIn Publishing Context
 Type: context
 Share Context: ../time
 
 #!sys.echo
 
-# Instructions for using LinkedIn tools
+# Instructions for using LinkedIn Publishing tools
 
-You can use this tool to interact with LinkedIn with LinkedIn APIs.
+You have tools to help with publishing content to LinkedIn with the LinkedIn API.
 
-# End of instructions for using LinkedIn tools
+# End of instructions for using LinkedIn Publishing tools
 
 ---
 !metadata:*:category
