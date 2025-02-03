@@ -15,7 +15,7 @@ Metadata: noUserAuth: ollama-model-provider
         {
             "name": "OBOT_OLLAMA_MODEL_PROVIDER_HOST",
             "friendlyName": "Host",
-            "description": "IP Address for the Ollama server (eg. 127.0.0.1:1234)",
+            "description": "Ollama Server Address (e.g. my.ollama.local:11434)",
             "sensitive": false
         }
     ]
