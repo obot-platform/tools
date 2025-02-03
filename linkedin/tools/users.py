@@ -4,7 +4,7 @@ import time
 import sys
 
 
-def get_user(client: RestliClient):
+def get_user(client: RestliClient) -> dict:
 
     MAX_RETRIES = 3
     DELAY = 1  # seconds between retries
