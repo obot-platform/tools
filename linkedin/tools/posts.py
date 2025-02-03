@@ -1,11 +1,10 @@
-from tools.helper import tool_registry, ACCESS_TOKEN, load_from_gptscript_workspace
+from tools.helper import ACCESS_TOKEN, load_from_gptscript_workspace
 from linkedin_api.clients.restli.client import RestliClient
 from tools.users import get_user
 import os
 import requests
 
 
-@tool_registry.register_tool("CreatePost")
 async def create_post(client: RestliClient):
     r = get_user(client)
     user_id = r["sub"]
