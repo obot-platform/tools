@@ -175,7 +175,7 @@ Param: limit: the number of messages to return
 
 ---
 Name: User Context
-Description: Get information about the logged in user and default time zone.
+Description: Get information about the logged in user.
 Credential: ./credential
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js userContext

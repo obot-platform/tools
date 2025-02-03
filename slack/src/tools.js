@@ -8,7 +8,6 @@ export async function userContext(webClient) {
     console.log(`Real Name: ${userResult.user.profile.real_name}`)
     console.log(`Display Name: ${userResult.user.profile.display_name}`)
     console.log(`User ID: ${result.user_id}`)
-    console.log(`Default time zone: ${userResult.user.tz_label} (UTC offset ${userResult.user.tz_offset / 3600} hours)`)
 }
 
 export async function listChannels(webClient) {
@@ -403,6 +402,20 @@ function userToString(user) {
     return str
 }
 
+const userTimezone = (() => {
+    const envTz = (process.env.OBOT_USER_TIMEZONE ?? 'UTC').trim();
+
+    // Verify the time zone or default to UTC
+    let timeZone = envTz;
+    try {
+        new Intl.DateTimeFormat(undefined, { timeZone }).format();
+    } catch {
+        timeZone = 'UTC';
+    }
+
+    return timeZone;
+})()
+
 async function messageToString(webClient, message) {
     const time = new Date(parseFloat(message.ts) * 1000)
     let userName = message.user
@@ -420,7 +433,8 @@ async function messageToString(webClient, message) {
         } catch (e) {}
     }
 
-    let str = `${time.toLocaleString()}: ${userName}: ${message.text}\n`
+
+    let str = `${time.toLocaleString('en-US', { timeZone: userTimezone, timeZoneName: 'short' })}: ${userName}: ${message.text}\n`
     str += `  message ID: ${message.ts}\n`
     if (message.blocks && message.blocks.length > 0) {
         str += `  message blocks: ${JSON.stringify(message.blocks)}\n`
