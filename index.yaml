@@ -71,6 +71,9 @@ tools:
     reference: ./knowledge
   shell:
     reference: ./shell
+  word:
+    reference: ./word
+    all: true
 
 knowledgeDataSources:
   notion-data-source:
