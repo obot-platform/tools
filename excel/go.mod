@@ -5,7 +5,7 @@ go 1.23.1
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
 	github.com/getkin/kin-openapi v0.124.0
-	github.com/gptscript-ai/go-gptscript v0.9.5
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 	github.com/microsoft/kiota-abstractions-go v1.7.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.51.0
 )

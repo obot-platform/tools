@@ -1,4 +1,4 @@
-Name: basic-auth
+Name: generic-credential
 Param: tool_display_name: The tool name to display to the user when prompting for credentials
 Param: message: The message to display the when prompting for this credential
 Param: username_field: The name of the username field
