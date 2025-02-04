@@ -23,7 +23,7 @@ func ListDatabaseTableRows(ctx context.Context, dbFile *os.File, table string) (
 	query := fmt.Sprintf("SELECT * FROM %q;", table)
 
 	// Execute the query using RunDatabaseCommand
-	rawOutput, err := RunDatabaseCommand(ctx, dbFile, fmt.Sprintf("%q", query))
+	rawOutput, err := RunDatabaseCommand(ctx, dbFile, fmt.Sprintf("-header %q", query))
 	if err != nil {
 		return "", fmt.Errorf("error executing query for table %q: %w", table, err)
 	}
