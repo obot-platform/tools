@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/gptscript-ai/go-gptscript"
 )
 
 type input struct {
-	PromptInfo promptInfo `json:"promptInfo"`
+	PromptInfo     promptInfo `json:"promptInfo"`
+	ValidationTool string     `json:"validationTool"`
 }
 
 type promptInfo struct {
@@ -51,7 +54,13 @@ func mainErr() error {
 		return fmt.Errorf("input error: %w", err)
 	}
 
-	credentialValues, err := getCredentials(ctx, in)
+	client, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("error creating GPTScript client: %w", err)
+	}
+	defer client.Close()
+
+	credentialValues, err := getCredentials(ctx, client, in)
 	if err != nil {
 		return fmt.Errorf("error getting credentials: %w", err)
 	}
@@ -59,6 +68,10 @@ func mainErr() error {
 	envs := make(map[string]string, len(credentialValues))
 	for _, field := range in.PromptInfo.Fields {
 		envs[field.Env] = credentialValues[field.Name]
+	}
+
+	if err = validateCredential(ctx, client, in.ValidationTool, envs); err != nil {
+		return fmt.Errorf("error validating credentials: %w", err)
 	}
 
 	b, err := json.Marshal(map[string]any{"env": envs})
@@ -70,14 +83,7 @@ func mainErr() error {
 	return nil
 }
 
-func getCredentials(ctx context.Context, in input) (map[string]string, error) {
-	client, err := gptscript.NewGPTScript()
-	if err != nil {
-		fmt.Println("Error creating GPTScript client:", err)
-		return nil, fmt.Errorf("error creating GPTScript client: %w", err)
-	}
-	defer client.Close()
-
+func getCredentials(ctx context.Context, client *gptscript.GPTScript, in input) (map[string]string, error) {
 	promptFields := make([]gptscript.Field, 0, len(in.PromptInfo.Fields))
 	for _, field := range in.PromptInfo.Fields {
 		promptFields = append(promptFields, field.Field)
@@ -135,4 +141,32 @@ func getInput() (input, error) {
 	in.PromptInfo.Metadata["toolDisplayName"] = in.PromptInfo.ToolDisplayName
 
 	return in, nil
+}
+
+func validateCredential(ctx context.Context, client *gptscript.GPTScript, tool string, envMap map[string]string) error {
+	if tool == "" {
+		return nil
+	}
+
+	env := make([]string, 0, len(envMap))
+	for k, v := range envMap {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	run, err := client.Run(ctx, tool, gptscript.Options{
+		GlobalOptions: gptscript.GlobalOptions{
+			Env: env,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("error running tool: %w", err)
+	}
+
+	_, err = run.Text()
+	if err != nil {
+		errStr, _, _ := strings.Cut(err.Error(), ": exit status ")
+		return errors.New(errStr)
+	}
+
+	return nil
 }

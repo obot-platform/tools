@@ -31,6 +31,9 @@ try {
   })
 
   switch (command) {
+      case 'getProfile':
+          await agent.getProfile({ actor: BLUESKY_HANDLE })
+          break
       case 'createPost':
           await createPost(
               agent,

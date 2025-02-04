@@ -1,0 +1,5 @@
+Name: bluesky-cred-validate
+Description: Validate Bluesky credentials
+Metadata: index: false
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- getProfile
