@@ -112,7 +112,7 @@ func ensureFolderExists(ctx context.Context, client *msgraphsdkgo.GraphServiceCl
 }
 
 // uploadFileContent uploads file content as a new drive item under the specified parent folder.
-func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, driveID, parentID, filename, content string) (graphmodels.DriveItemable, error) {
+func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, driveID string, parentID string, filename string, content []byte) (graphmodels.DriveItemable, error) {
 	if parentID == "" {
 		parentID = "root"
 	}
@@ -132,7 +132,7 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 		"baseurl": client.RequestAdapter.GetBaseUrl(), // for some weird reason, this is deprecated, but also the only way to get it working
 	}
 	requestInfo.Method = kiota.PUT
-	requestInfo.SetStreamContentAndContentType([]byte(content), "text/plain")
+	requestInfo.SetStreamContentAndContentType(content, "text/plain")
 
 	if doc == nil {
 		slog.Info("File does not exist. Creating.", "name", filename)
@@ -175,7 +175,7 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 
 // CreateDoc creates (or uploads) a new document with the given name and content
 // into the specified directory (dir) in the user's OneDrive.
-func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, dir, name, content string) (string, string, error) {
+func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, dir string, name string, content []byte) (string, string, error) {
 	// Get the user's drive.
 	drive, err := client.Me().Drive().Get(ctx, nil)
 	if err != nil {
