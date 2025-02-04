@@ -198,9 +198,27 @@ When mentioning a user in a message you create, use the format <@USERID>, includ
 The user ID can be obtained from the List Users or Search Users tool.
 
 Do not provide channel, thread, or message IDs in the output, as these are not helpful for the user.
-When you use the search_messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the list_users or search_users tools.
+When you use the search-messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the search-users or list-users tools.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
+
+Use the following guidelines when constructing `query` arguments for the search-messages tool:
+- `*` (Wildcard): Matches any number of characters in a term. Example: `dev*` matches "developer", "development", etc.
+- `-` (Negation): Excludes a term or modifier by prepending a dash. Example: `-in:#random` excludes results from `#random`, `-update` excludes messages containing "update".
+- Boolean Operators: Use `AND`, `OR`, and `NOT` to refine searches.
+  Examples:
+  - `project AND update` finds messages containing both "project" and "update".
+  - `project OR update` finds messages containing either "project" or "update".
+  - `project NOT update` finds messages containing "project" but excluding "update".
+- Combining multiple modifiers: Separate each modifier and search term with spaces (order does not matter). Example: `update from:@alice in:#general after:2025-01-01 -in:#random`
+
+The following search modifiers can be used in search-messages `query` arguments:
+- `after:<date>`: Matches messages sent after the specified date (exclusive, so excludes messages from the given date). Must be in `YYYY-MM-DD` format (no time/timezone). Example: `after:2025-01-01`
+- `before:<date>`: Matches messages sent before the specified date (exclusive, so excludes messages from the given date). Example: `before:2025-01-01`
+- `with:<user>`: Matches messages from threads/DMs that include the specified user. Example: `with:@bob`
+- `from:<user>`: Matches messages sent by the specified user. Example: `from:@alice`
+- `in:<channel>`: Matches messages from the specified channel. Example: `in:#general`
+- `is:<type>`: Matches messages of the specified type. Valid types are `dm`, `thread`. Example: `is:thread`
 
 ## End of instructions for using Slack tools
 
