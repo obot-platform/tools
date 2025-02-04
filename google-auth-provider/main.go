@@ -63,6 +63,9 @@ func main() {
 	if opts.AuthEmailDomains != "" {
 		oauthProxyOpts.EmailDomains = strings.Split(opts.AuthEmailDomains, ",")
 	}
+	oauthProxyOpts.Logging.RequestEnabled = false
+	oauthProxyOpts.Logging.AuthEnabled = false
+	oauthProxyOpts.Logging.StandardEnabled = false
 
 	if err = validation.Validate(oauthProxyOpts); err != nil {
 		fmt.Printf("failed to validate options: %v\n", err)
