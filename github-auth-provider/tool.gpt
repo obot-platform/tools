@@ -27,7 +27,8 @@ Credential: ../placeholder-credential as github-auth-provider
             "name": "OBOT_AUTH_PROVIDER_COOKIE_SECRET",
             "friendlyName": "Cookie Secret",
             "description": "Secret used to encrypt cookies. Must be a random string of length 16, 24, or 32.",
-            "sensitive": true
+            "sensitive": true,
+            "hidden": true
         },
         {
             "name": "OBOT_AUTH_PROVIDER_EMAIL_DOMAINS",
