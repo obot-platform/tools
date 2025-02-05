@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"strings"
 
 	"code.sajari.com/docconv/v2"
@@ -117,11 +118,19 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 		parentID = "root"
 	}
 
-	// Check if file exists
-	doc, err := getItemByPath(ctx, client, driveID, filename)
-	if err != nil {
-		if !strings.Contains(err.Error(), "item not found") {
-			return nil, fmt.Errorf("failed to get item by path %q: %w", parentID+"/"+filename, err)
+	var doc graphmodels.DriveItemable
+	var err error
+
+	// Check if the file exists by path or ID
+	if strings.ContainsAny(filename, "/.:_-") {
+		doc, err = getItemByPath(ctx, client, driveID, filename)
+		if err != nil {
+			slog.Info("Failed to get item by path. It may not exist so we create it.", "path", filename, "error", err)
+		}
+	} else {
+		doc, err = client.Drives().ByDriveId(driveID).Items().ByDriveItemId(filename).Get(ctx, nil)
+		if err != nil {
+			slog.Info("Failed to get item by ID. It may not exist so we create it.", "name", filename, "error", err)
 		}
 	}
 
@@ -175,7 +184,14 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 
 // CreateDoc creates (or uploads) a new document with the given name and content
 // into the specified directory (dir) in the user's OneDrive.
-func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, dir string, name string, content []byte) (string, string, error) {
+func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, name string, content []byte) (string, string, error) {
+	name = filepath.Clean(name)
+	if name == "" {
+		return "", "", fmt.Errorf("name cannot be empty")
+	}
+	dir := filepath.Dir(name)
+	name = filepath.Base(name)
+
 	// Get the user's drive.
 	drive, err := client.Me().Drive().Get(ctx, nil)
 	if err != nil {

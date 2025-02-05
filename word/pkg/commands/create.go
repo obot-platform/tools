@@ -13,13 +13,13 @@ import (
 	"github.com/gptscript-ai/tools/word/pkg/graph"
 )
 
-func CreateDoc(ctx context.Context, dir string, name string, content string) error {
+func WriteDoc(ctx context.Context, name string, content string) error {
 	c, err := client.NewClient(global.ReadWriteScopes)
 	if err != nil {
 		return err
 	}
 
-	slog.Info("Creating new Word Document in OneDrive", "dir", dir, "name", name)
+	slog.Info("Creating new Word Document in OneDrive", "name", name)
 
 	contentBytes, err := convert.MarkdownToDocx(content)
 	if err != nil {
@@ -27,10 +27,12 @@ func CreateDoc(ctx context.Context, dir string, name string, content string) err
 	}
 
 	name = strings.TrimSuffix(name, filepath.Ext(name)) + ".docx"
-	_, _, err = graph.CreateDoc(ctx, c, dir, name, contentBytes)
+	name, id, err := graph.CreateDoc(ctx, c, name, contentBytes)
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Wrote content to document with name=%q and id=%q\n", name, id)
 
 	return nil
 }

@@ -26,6 +26,7 @@ func MarkdownToDocx(in string) ([]byte, error) {
 		return nil, err
 	}
 	_ = tempfile.Close()
+	defer os.Remove(p)
 
 	var cmd *exec.Cmd
 	var outputFile string
@@ -43,7 +44,6 @@ func MarkdownToDocx(in string) ([]byte, error) {
 	} else {
 		return nil, fmt.Errorf("neither pandoc nor soffice binary found")
 	}
-	_ = os.Remove(p)
 
 	// capture stdout and stderr in a buffer
 	var outb, errb strings.Builder
@@ -120,5 +120,4 @@ func markdownToHTML(p string) (string, error) {
 		return "", err
 	}
 	return outFile, nil
-
 }

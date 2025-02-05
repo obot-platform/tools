@@ -2,7 +2,7 @@
 Name: Word
 Description: Tools for interacting with Microsoft Word documents in OneDrive
 Metadata: bundle: true
-Share Tools: List Docs, Read Doc, Create Doc
+Share Tools: List Docs, Read Doc, Write Doc
 
 ---
 Name: List Docs
@@ -24,15 +24,14 @@ Param: doc_id: ID or Path of the Microsoft Word document to get. Prefer ID if av
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDoc
 
 ---
-Name: Create Doc
-Description: Create a Microsoft Word document in OneDrive with the specified title and optional content.
+Name: Write Doc
+Description: Write a Microsoft Word document in OneDrive with the specified title and optional content. The file will be created if it doesn't exist.
 Share Context: Word Context
 Credential: ./credential
-Param: doc_title: The title of the document to create.
-Param: doc_drive_dir: Optional folder path in OneDrive to move the document to after creating it. If not provided, the document will be created in the root folder.
-Param: doc_content: Optional markdown formatted content to add to the document after creating it.
+Param: doc_name: The name of the document to write to. This might be the OneDrive ID of an existing document or a filepath in OneDrive.
+Param: doc_content: Optional markdown formatted content to write to the document.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDoc
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool writeDoc
 
 ---
 Name: Word Context
