@@ -11,7 +11,7 @@ Metadata: noUserAuth: vllm-model-provider
 !metadata:vLLM:providerMeta
 {
     "icon": "/admin/assets/vllm-logo.svg",
-    "iconDark": "/admin/assets/vllm-logo.svg"
+    "iconDark": "/admin/assets/vllm-logo.svg",
     "link": "https://docs.vllm.ai/",
     "envVars": [
         {
