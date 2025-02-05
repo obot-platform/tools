@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gptscript-ai/tools/gitlab/pkg/commands"
-	gitlab "gitlab.com/gitlab-org/api/client-go"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/gptscript-ai/tools/gitlab/pkg/commands"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 func main() {
@@ -18,7 +19,12 @@ func main() {
 
 	command := os.Args[1]
 
-	git, err := gitlab.NewClient(os.Getenv("GITLAB_TOKEN"))
+	baseURL := os.Getenv("GITLAB_BASE_URL")
+	if baseURL == "" {
+		baseURL = "https://gitlab.com/api/v4"
+	}
+
+	git, err := gitlab.NewClient(os.Getenv("GITLAB_TOKEN"), gitlab.WithBaseURL(baseURL))
 	if err != nil {
 		exit("Failed to create gitlab client", err)
 	}
