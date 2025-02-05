@@ -1,6 +1,6 @@
 ---
 Name: Wordpress
-Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth.
+Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
 Share Tools: List Users, Get User, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, Get Site Settings
 
