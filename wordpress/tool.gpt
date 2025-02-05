@@ -1,7 +1,6 @@
 ---
 Name: Wordpress
 Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
-Metadata: bundle: true
 Share Tools: List Users, Get User, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, Get Site Settings
 
 ---
@@ -136,10 +135,6 @@ WordPress posts support the following formats:
 - chat: A chat transcript.
 
 ## End of instructions for using Wordpress tools
-
----
-!metadata:*:category
-WordPress
 
 ---
 !metadata:*:icon
