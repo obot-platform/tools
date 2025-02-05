@@ -138,6 +138,7 @@ func getInput() (input, error) {
 		in.PromptInfo.Metadata = make(map[string]string)
 	}
 	in.PromptInfo.Metadata["toolContext"] = "credential"
+	in.PromptInfo.Metadata["authType"] = "generic"
 	in.PromptInfo.Metadata["toolDisplayName"] = in.PromptInfo.ToolDisplayName
 
 	return in, nil
