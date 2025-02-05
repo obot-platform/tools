@@ -1,5 +1,6 @@
 import { GPTScript } from "@gptscript-ai/gptscript"
 import { Mutex } from "async-mutex"
+import Fuse from "fuse.js"
 
 export async function userContext(webClient) {
     const result = await webClient.auth.test({})
@@ -11,43 +12,52 @@ export async function userContext(webClient) {
 }
 
 export async function listChannels(webClient) {
-    const publicChannels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
-    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+    const result = await webClient.conversations.list({limit: 100, types: 'public_channel,private_channel'})
+    const channels = result.channels
+
+    if (!channels || channels.length === 0) {
+        console.log('No channels found')
+        return
+    }
+
+    console.log(`Found ${channels.length} channels`)
 
     try {
         const gptscriptClient = new GPTScript()
-        const elements = [...publicChannels.channels, ...privateChannels.channels].map(channel => {
+        const elements = channels.map(channel => {
             return {
                 name: `${channel.name}`,
-                description: `${channel.purpose.value || ''}`,
+                description: `${channel.name} (ID: ${channel.id})`,
                 contents: channelToString(channel)
             }
         })
-
         const datasetID = await gptscriptClient.addDatasetElements(elements, {
-            name: "slack_channels"
+            name: 'slack_channels',
         })
-        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
+        console.log(`Created dataset with ID ${datasetID} with ${channels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
 }
 
 export async function searchChannels(webClient, query) {
-    const publicResult = await webClient.conversations.list({limit: 100, types: 'public_channel'})
-    const privateResult = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+    const result = await webClient.conversations.list({limit: 100, types: 'public_channel,private_channel'})
+    const channels = (new Fuse(
+        result?.channels ?? [],
+        {
+            keys: ['name'],
+            threshold: 0.4
+        }
+    )).search(query).map(result => result.item)
 
-    const publicChannels = publicResult.channels.filter(channel => channel.name.includes(query))
-    const privateChannels = privateResult.channels.filter(channel => channel.name.includes(query))
-
-    if (publicChannels.length + privateChannels.length === 0) {
+    if (!channels || channels.length === 0) {
         console.log('No channels found')
         return
     }
 
     try {
         const gptscriptClient = new GPTScript()
-        const elements = [...publicChannels, ...privateChannels].map(channel => {
+        const elements = channels.map(channel => {
             return {
                 name: `${channel.name}`,
                 description: `${channel.name} (ID: ${channel.id})`,
@@ -58,7 +68,7 @@ export async function searchChannels(webClient, query) {
             name: `${query}_slack_channels`,
             description: `list of slack channels matching search query "${query}"`
         })
-        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.length + privateChannels.length} channels`)
+        console.log(`Created dataset with ID ${datasetID} with ${channels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
