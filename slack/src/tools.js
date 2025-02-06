@@ -46,7 +46,8 @@ export async function searchChannels(webClient, query) {
         result?.channels ?? [],
         {
             keys: ['name'],
-            threshold: 0.4
+            threshold: 0.4,
+            findAllMatches: true
         }
     )).search(query).map(result => result.item)
 
@@ -216,12 +217,14 @@ export async function listUsers(webClient) {
 
 export async function searchUsers(webClient, query) {
     const users = await webClient.users.list()
-    const matchingUsers = users.members.filter(user => {
-        return user.name.includes(query) ||
-            user.profile.real_name.includes(query) ||
-            user.profile.display_name.includes(query)
+    const fuse = new Fuse(users.members, {
+        keys: ['name', 'profile.real_name', 'profile.display_name'],
+        threshold: 0.5,
+        findAllMatches: true
     })
-    if (matchingUsers.length === 0) {
+    const matchingUsers = fuse.search(query).map(result => result.item)
+
+    if (!matchingUsers || matchingUsers.length === 0) {
         console.log('No users found')
         return
     }
