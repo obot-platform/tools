@@ -25,7 +25,7 @@ Param: doc_id: ID or Path of the Microsoft Word document to get. Prefer ID if av
 
 ---
 Name: Write Doc
-Description: Write a Microsoft Word document in OneDrive with the specified title and optional content. The file will be created if it doesn't exist.
+Description: Write a Microsoft Word document in OneDrive with the specified title and optional content. The file will be created if it doesn't exist. It will be overwritten if it already exists.
 Share Context: Word Context
 Credential: ./credential
 Param: doc_name: The name of the document to write to. This might be the OneDrive ID of an existing document or a filepath in OneDrive.
