@@ -43,7 +43,7 @@ Credential: ../placeholder-credential as google-auth-provider
 		{
 			"name": "OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION",
 			"friendlyName": "Token Refresh Duration",
-			"description": "Time to wait before attempting to refresh auth tokens. Default: 1h",
+			"description": "Time to wait before attempting to refresh auth tokens. Should by in a format like 1h1m1s. Default: 1h",
 			"sensitive": false
 		}
 	]
