@@ -157,7 +157,7 @@ def create_post(client):
     content = os.getenv("CONTENT", "")
     if title == "" and content == "":
         raise ValueError("Error: At least one of title or content must be provided.")
-    status = os.getenv("STATUS", "publish").lower()
+    status = os.getenv("STATUS", "draft").lower()
     status_enum = ["publish", "future", "draft", "pending", "private"]
     if status not in status_enum:
         raise ValueError(

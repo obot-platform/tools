@@ -61,12 +61,12 @@ Share Context: Wordpress Context
 
 ---
 Name: Create Post
-Description: Create a post in user'swordpress site. Wordpress post does NOT render markdown syntax. Make sure use html like tags to format the content.
+Description: Create a post in user'swordpress site. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: title: the title of the post
 Param: content: the content of the post.
-Param: status: (optional) the status of the post, must be one of: publish, future, draft, pending, private, default is publish
+Param: status: (optional) the status of the post, must be one of: publish, future, draft, pending, private, default is draft.
 Param: comment_status: (optional) the comment status of the post, must be one of: open, closed. default is open
 Param: sticky: (optional) whether the post is sticky to the top of the page, default is false
 Param: password: (optional) the password of the post, default is None
@@ -81,7 +81,7 @@ Param: ping_status: (optional) the ping status of the post, must be one of: open
 
 ---
 Name: Update Post
-Description: Update a post in user's wordpress site. Only the fields that are provided will be updated. Wordpress post does NOT render markdown syntax. Make sure use html like tags to format the content.
+Description: Update a post in user's wordpress site. Only the fields that are provided will be updated. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: post_id: the id of the post to update
@@ -122,8 +122,8 @@ Share Context: ../time
 You have access to a set of tools to interact with a Wordpress workspace.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
-Wordpress post doesn't render markdown syntax, use html like tags to format the content.
-Wordpress post supports a list of different formats, here are the definitions:
+You MUST use HTML tags to format the content, WordPress posts do NOT render markdown syntax.
+WordPress posts support a list of different formats, here are the definitions:
 - standard: The default post format.
 - aside: Typically styled without a title. Similar to a Facebook note update.
 - gallery: A gallery of images. Post will likely contain a gallery shortcode and will have image attachments.
