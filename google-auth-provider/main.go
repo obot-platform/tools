@@ -20,17 +20,24 @@ import (
 )
 
 type Options struct {
-	ClientID         string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID"`
-	ClientSecret     string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_SECRET"`
-	ObotServerURL    string `env:"OBOT_SERVER_URL"`
-	AuthCookieSecret string `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
-	AuthEmailDomains string `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
+	ClientID                 string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID"`
+	ClientSecret             string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_SECRET"`
+	ObotServerURL            string `env:"OBOT_SERVER_URL"`
+	AuthCookieSecret         string `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
+	AuthEmailDomains         string `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
+	AuthTokenRefreshDuration string `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
 }
 
 func main() {
 	var opts Options
 	if err := env.LoadEnvForStruct(&opts); err != nil {
 		fmt.Printf("failed to load options: %v\n", err)
+		os.Exit(1)
+	}
+
+	refreshDuration, err := time.ParseDuration(opts.AuthTokenRefreshDuration)
+	if err != nil {
+		fmt.Printf("failed to parse token refresh duration: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -54,7 +61,7 @@ func main() {
 
 	oauthProxyOpts.Server.BindAddress = ""
 	oauthProxyOpts.MetricsServer.BindAddress = ""
-	oauthProxyOpts.Cookie.Refresh = time.Hour
+	oauthProxyOpts.Cookie.Refresh = refreshDuration
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
 	oauthProxyOpts.Cookie.Secret = string(bytes.TrimSpace(cookieSecret))
 	oauthProxyOpts.Cookie.Secure = strings.HasPrefix(opts.ObotServerURL, "https://")

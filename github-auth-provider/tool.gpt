@@ -38,6 +38,12 @@ Credential: ../placeholder-credential as github-auth-provider
         }
     ],
     "optionalEnvVars": [
+    	{
+    		"name": "OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION",
+    		"friendlyName": "Token Refresh Duration",
+    		"description": "Time to wait before attempting to refresh auth tokens. Default: 1h",
+    		"sensitive": false
+		},
         {
             "name": "OBOT_GITHUB_AUTH_PROVIDER_TEAMS",
             "friendlyName": "Allowed GitHub Teams",
