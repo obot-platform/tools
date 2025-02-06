@@ -125,7 +125,7 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	if strings.ContainsAny(filename, "/.:_-") {
 		doc, err = getItemByPath(ctx, client, driveID, filename)
 		if err != nil {
-			slog.Info("Failed to get item by path. It may not exist so we create it.", "path", filename, "error", err)
+			slog.Info("Failed to get item by path. It may not exist so we will create it.", "path", filename, "error", err)
 		}
 	} else {
 		doc, err = client.Drives().ByDriveId(driveID).Items().ByDriveItemId(filename).Get(ctx, nil)
