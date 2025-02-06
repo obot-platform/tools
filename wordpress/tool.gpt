@@ -61,7 +61,7 @@ Share Context: Wordpress Context
 
 ---
 Name: Create Post
-Description: Create a post in user'swordpress site. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
+Description: Create a post in user'swordpress site. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text. By default, the post will be created as a draft, do NOT set status to publish unless it is confirmed by the user.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: title: the title of the post
