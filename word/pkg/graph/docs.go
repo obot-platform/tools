@@ -130,7 +130,7 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	} else {
 		doc, err = client.Drives().ByDriveId(driveID).Items().ByDriveItemId(filename).Get(ctx, nil)
 		if err != nil {
-			slog.Info("Failed to get item by ID. It may not exist so we create it.", "name", filename, "error", err)
+			slog.Info("Failed to get item by ID. It may not exist so we will create it.", "name", filename, "error", err)
 		}
 	}
 
