@@ -232,7 +232,6 @@ func ListDocs(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]DocInf
 			// Request that these fields are returned in the response.
 			Select: []string{"id", "name", "parentReference"},
 		},
-		// You can also set headers or options if needed.
 	}
 	docs, err := c.Drives().
 		ByDriveId(deref(drive.GetId())).
