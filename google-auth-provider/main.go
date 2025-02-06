@@ -31,19 +31,24 @@ type Options struct {
 func main() {
 	var opts Options
 	if err := env.LoadEnvForStruct(&opts); err != nil {
-		fmt.Printf("failed to load options: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to load options: %v\n", err)
 		os.Exit(1)
 	}
 
 	refreshDuration, err := time.ParseDuration(opts.AuthTokenRefreshDuration)
 	if err != nil {
-		fmt.Printf("failed to parse token refresh duration: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to parse token refresh duration: %v\n", err)
+		os.Exit(1)
+	}
+
+	if refreshDuration < 0 {
+		fmt.Printf("ERROR: google-auth-provider: token refresh duration must be greater than 0\n")
 		os.Exit(1)
 	}
 
 	cookieSecret, err := base64.StdEncoding.DecodeString(opts.AuthCookieSecret)
 	if err != nil {
-		fmt.Printf("failed to decode cookie secret: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to decode cookie secret: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -55,7 +60,7 @@ func main() {
 
 	oauthProxyOpts, err := legacyOpts.ToOptions()
 	if err != nil {
-		fmt.Printf("failed to convert legacy options to new options: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to convert legacy options to new options: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -75,13 +80,13 @@ func main() {
 	oauthProxyOpts.Logging.StandardEnabled = false
 
 	if err = validation.Validate(oauthProxyOpts); err != nil {
-		fmt.Printf("failed to validate options: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to validate options: %v\n", err)
 		os.Exit(1)
 	}
 
 	oauthProxy, err := oauth2proxy.NewOAuthProxy(oauthProxyOpts, oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
 	if err != nil {
-		fmt.Printf("failed to create oauth2 proxy: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to create oauth2 proxy: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -100,7 +105,7 @@ func main() {
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
 	if err := http.ListenAndServe("127.0.0.1:"+port, mux); !errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("failed to listen and serve: %v\n", err)
+		fmt.Printf("ERROR: google-auth-provider: failed to listen and serve: %v\n", err)
 		os.Exit(1)
 	}
 }

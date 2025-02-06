@@ -45,6 +45,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if refreshDuration < 0 {
+		fmt.Printf("ERROR: github-auth-provider: token refresh duration must be greater than 0\n")
+		os.Exit(1)
+	}
+
 	cookieSecret, err := base64.StdEncoding.DecodeString(opts.AuthCookieSecret)
 	if err != nil {
 		fmt.Printf("ERROR: github-auth-provider: failed to decode cookie secret: %v\n", err)
