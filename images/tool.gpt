@@ -1,6 +1,7 @@
 ---
 Name: Images
 Description: Tools for analyzing and generating images
+Metadata: bundle: true
 Share Tools: Analyze Images, Generate Images
 
 ---

@@ -1,6 +1,7 @@
 ---
 Name: Bluesky
 Description: Tools for interacting with Bluesky (bsky.app)
+Metadata: bundle: true
 Share Tools: Create Post, Delete Post, Search Posts, Search Users
 
 ---

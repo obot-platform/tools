@@ -1,6 +1,7 @@
 ---
 Name: Google Docs
 Description: Tools for managing Google Docs
+Metadata: bundle: true
 Share Tools: Read Google Doc, Create Google Doc, Update Google Doc
 
 ---

@@ -1,6 +1,7 @@
 ---
 Name: Jira
 Description: Tools for interacting with Jira
+Metadata: bundle: true
 Share Tools: List Jira Sites, List Projects, Get Project, List Users, Get User, Get Current User, Search Issues, List Issues, Get Issue, Create Issue, Edit Issue, Add Comment, List Comments
 
 ---

@@ -1,6 +1,7 @@
 ---
 Name: SendGrid
 Description: Tools for interacting with SendGrid.
+Metadata: bundle: true
 Share Tools: Send Email
 
 ---

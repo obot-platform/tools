@@ -1,6 +1,7 @@
 ---
 Name: Gmail
 Description: Tools for interacting with a user's Gmail account
+Metadata: bundle: true
 Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
 
 ---

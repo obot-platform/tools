@@ -1,6 +1,7 @@
 ---
 Name: Google Sheets
 Description: Tools for accessing, creating, and modifying Google Sheets
+Metadata: bundle: true
 Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
 
 ---

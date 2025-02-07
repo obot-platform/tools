@@ -1,6 +1,7 @@
 ---
 Name: Google Search
 Description: Tools for using Google Search
+Metadata: bundle: true
 Share Tools: Search
 
 ---

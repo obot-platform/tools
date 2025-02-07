@@ -1,6 +1,7 @@
 ---
 Name: YouTube
 Description: Tools for interacting with YouTube
+Metadata: bundle: true
 Share Tools: Transcribe YouTube Video
 
 ---

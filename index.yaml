@@ -43,7 +43,6 @@ tools:
     reference: ./github
   time:
     reference: ./time
-    nameOverride: time
   workspace-files:
     reference: ./workspace-files
   tasks:
@@ -54,7 +53,6 @@ tools:
     reference: ./shell
   word:
     reference: ./word
-    all: true
 
 knowledgeDataSources:
   notion-data-source:

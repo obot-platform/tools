@@ -1,6 +1,7 @@
 ---
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
+Metadata: bundle: true
 Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Send Draft, Delete Message, Move Message
 
 ---
