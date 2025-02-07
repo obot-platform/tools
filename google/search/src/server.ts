@@ -1,8 +1,7 @@
 import bodyParser from 'body-parser'
-import { getSessionId, getModelProviderCredentials } from './headers.ts'
-import { SessionManager } from './session.ts'
+import { getSessionId, SessionManager } from './session.ts'
 import express, { type Request, type Response, type RequestHandler } from 'express'
-import { search, SearchResults } from './search.ts'
+import { search } from './search.ts'
 import { refine } from './refine.ts'
 
 async function main (): Promise<void> {
@@ -33,34 +32,29 @@ async function main (): Promise<void> {
       const maxResults = Number.isInteger(Number(data.maxResults)) ? parseInt(data.maxResults as string, 10) : 3
       const query: string = data.query ?? ''
       const sessionID = getSessionId(req.headers)
-      let searchResults: SearchResults
-      let searchEnd: number
 
       await sessionManager.withSession(sessionID, async (browserContext) => {
         // Query Google and get the result pages as markdown
-        searchResults = await search(
+        const searchResults = await search(
           browserContext,
           query,
           maxResults
         )
-        searchEnd = performance.now()
+        const searchEnd = performance.now()
+
+        // Extract the relevant citations from the content of each page
+        const refinedResults = await refine(searchResults)
+        const refineEnd = performance.now()
+
+        res.status(200).send(JSON.stringify({
+          duration: {
+            search: (searchEnd - responseStart) / 1000,
+            refine: (refineEnd - searchEnd) / 1000,
+            response: (refineEnd - responseStart) / 1000
+          },
+          ...refinedResults
+        }))
       })
-
-      // Extract the relevant citations from the content of each page
-      const refinedResults = await refine(
-        getModelProviderCredentials(req.headers),
-        searchResults!
-      )
-      const refineEnd = performance.now()
-
-      res.status(200).send(JSON.stringify({
-        duration: {
-          search: (searchEnd! - responseStart) / 1000,
-          refine: (refineEnd - searchEnd!) / 1000,
-          response: (refineEnd - responseStart) / 1000
-        },
-        ...refinedResults
-      }))
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error)
       // Send a 200 status code GPTScript will pass the error to the LLM
