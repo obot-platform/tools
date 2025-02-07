@@ -81,7 +81,7 @@ Param: ping_status: (optional) the ping status of the post, must be one of: open
 
 ---
 Name: Update Post
-Description: Update a post in user's wordpress site. Only the fields that are provided will be updated. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
+Description: Update a post in user's Wordpress site. Only the fields that are provided will be updated. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: post_id: the id of the post to update
