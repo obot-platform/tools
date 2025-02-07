@@ -20,6 +20,8 @@ def _format_posts_response(response_json: dict):
         "content",
         "excerpt",
         "author",
+        "featured_media",
+        "format",
     ]
     for key in keys:
         new_response_json[key] = response_json[key]
@@ -190,6 +192,10 @@ def create_post(client):
             )
         post_data["date"] = date
 
+    featured_media = os.getenv("FEATURED_MEDIA", None)
+    if featured_media:
+        post_data["featured_media"] = featured_media
+
     format = os.getenv("FORMAT", "").lower()
     format_enum = [
         "standard",
@@ -303,6 +309,10 @@ def update_post(client):
                 f"Error: Invalid date: {date}. date must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
         post_data["date"] = date
+
+    if "FEATURED_MEDIA" in os.environ:
+        featured_media = os.environ["FEATURED_MEDIA"]
+        post_data["featured_media"] = featured_media
 
     if "FORMAT" in os.environ:
         format = os.environ["FORMAT"].lower()
