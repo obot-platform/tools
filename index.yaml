@@ -74,6 +74,9 @@ tools:
   word:
     reference: ./word
     all: true
+  tavily-search:
+    reference: ./search/tavily
+    all: true
 
 knowledgeDataSources:
   notion-data-source:
