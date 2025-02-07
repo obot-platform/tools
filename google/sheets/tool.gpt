@@ -1,7 +1,7 @@
 ---
 Name: Google Sheets
-Metadata: bundle: true
 Description: Tools for accessing, creating, and modifying Google Sheets
+Metadata: bundle: true
 Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
 
 ---
@@ -89,10 +89,6 @@ Write the query such that it returns the minimum number of columns and rows nece
 Do your best to always return the complete data that the user asked for, even if it is a large dataset.
 
 ## End of instructions for using Google Sheets tools
-
----
-!metadata:*:category
-Google Sheets
 
 ---
 !metadata:*:icon

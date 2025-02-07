@@ -223,10 +223,6 @@ The following search modifiers can be used in search-messages `query` arguments:
 ## End of instructions for using Slack tools
 
 ---
-!metadata:*:category
-Slack
-
----
 !metadata:*:icon
 /admin/assets/slack_icon_small.svg
 

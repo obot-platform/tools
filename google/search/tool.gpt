@@ -1,7 +1,7 @@
 ---
 Name: Google Search
-Metadata: bundle: true
 Description: Tools for using Google Search
+Metadata: bundle: true
 Share Tools: Search
 
 ---
@@ -20,10 +20,6 @@ Name: service
 Metadata: index: false
 
 #!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run server
-
----
-!metadata:*:category
-Google Search
 
 ---
 !metadata:*:icon

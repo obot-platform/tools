@@ -6,7 +6,6 @@ Params: output_file: (Optional) Name of the file to save the summary, default to
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/summarize.py
 
-
 ---
 !metadata:*:category
 Utilities

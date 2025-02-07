@@ -4,6 +4,7 @@ Model Provider: true
 Credential: ../placeholder-credential as anthropic-model-provider with OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: anthropic-model-provider
 
+
 #!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
 
 ---

@@ -1,7 +1,7 @@
 ---
 Name: Google Docs
-Metadata: bundle: true
 Description: Tools for managing Google Docs
+Metadata: bundle: true
 Share Tools: Read Google Doc, Create Google Doc, Update Google Doc
 
 ---
@@ -54,10 +54,6 @@ When calling the `Update Google Doc` tool, you must provide the entire modified 
 For the `drive_dir` parameter, you can optionally specify folder paths directly, such as `Haikus` or `Haikus/New`, to move the document to a specific folder in Google Drive. If you do not provide a `drive_dir`, the new documents will be created in the root Google Drive folder, and updated documents will remain in their current folder.
 
 ## End of instructions for using Google Docs tools
-
----
-!metadata:*:category
-Google Docs
 
 ---
 !metadata:*:icon
