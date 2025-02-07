@@ -1,1 +1,2 @@
 requests
+git+https://github.com/gptscript-ai/py-gptscript.git@0cebee3afa51b8c56006e479a990c262bd693ba6#egg=gptscript
