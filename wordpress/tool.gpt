@@ -123,7 +123,7 @@ You have access to a set of tools to interact with a Wordpress workspace.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
 You MUST use HTML tags to format the content. WordPress posts do NOT render markdown syntax.
-WordPress posts support a list of different formats, here are the definitions:
+WordPress posts support the following formats:
 - standard: The default post format.
 - aside: Typically styled without a title. Similar to a Facebook note update.
 - gallery: A gallery of images. Post will likely contain a gallery shortcode and will have image attachments.
