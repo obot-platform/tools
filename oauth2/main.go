@@ -199,7 +199,6 @@ func mainErr() (err error) {
 			return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
 		}
 
-		fmt.Print(string(credJSON))
 		return nil
 	}
 
