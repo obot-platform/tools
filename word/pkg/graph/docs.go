@@ -30,7 +30,6 @@ func getItemByPath(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	// GET /drives/{drive-id}/root:/{item-path}
 	requestInfo := kiota.NewRequestInformation()
 	requestInfo.UrlTemplate = "{+baseurl}/drives/{driveid}/root:/{itempath}"
-	// Note: URL-encode the path as needed.
 	requestInfo.PathParameters = map[string]string{
 		"baseurl": client.RequestAdapter.GetBaseUrl(),
 	}
@@ -149,7 +148,6 @@ func uploadFileContent(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 		requestInfo.PathParametersAny = map[string]any{
 			"driveid":  driveID,
 			"parentid": parentID,
-			// URL-encode the filename if necessary.
 			"filename": filename,
 		}
 	} else {
