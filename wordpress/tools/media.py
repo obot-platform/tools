@@ -154,22 +154,22 @@ def upload_media(client):
     """
     upload_url = f"{WORDPRESS_API_URL}/media"
 
-    file_path = os.getenv("FILE_PATH", "")
-    if file_path == "":
-        raise ValueError("Error: File path is required to upload media file.")
+    media_file_path = os.getenv("MEDIA_FILE_PATH", "")
+    if media_file_path == "":
+        raise ValueError("Error: Media file path is required to upload media file.")
 
     try:
-        data = load_from_gptscript_workspace(file_path)
+        data = load_from_gptscript_workspace(media_file_path)
     except Exception as e:
         raise Exception(
-            f"Failed to load file {file_path} from GPTScript workspace. Exception: {e}"
+            f"Failed to load file {media_file_path} from GPTScript workspace. Exception: {e}"
         )
 
     # with open(file_path, "rb") as file:
     #     data = file.read()
 
     file_obj = io.BytesIO(data)
-    file_name = os.path.basename(file_path)
+    file_name = os.path.basename(media_file_path)
     mime_type = mimetypes.guess_type(file_name)[0] or "application/octet-stream"
     files = {"file": (file_name, file_obj, mime_type)}
 

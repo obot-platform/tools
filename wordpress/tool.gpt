@@ -115,10 +115,10 @@ Param: force: (optional) whether to force delete the post, default is false. If 
 
 ---
 Name: Upload Media
-Description: Upload a media file in the workspace to user's wordpress site.
+Description: Upload a media file(image, video, audio, etc.) in the workspace to user's wordpress site.
 Credential: ./credential
 Share Context: Wordpress Context
-Param: file_path: the file path of the media file in the workspace.
+Param: media_file_path: the file path of the media file in the workspace.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UploadMedia
 
@@ -190,6 +190,8 @@ WordPress posts support the following formats:
 - video: A single video or video playlist. The first <video> tag or object/embed in the post content could be considered the video. Alternatively, if the post consists only of a URL, that will be the video URL. May also contain the video as an attachment to the post, if video support is enabled on the blog (like via a plugin).
 - audio: An audio file or playlist. Could be used for Podcasting.
 - chat: A chat transcript.
+
+Before using the Create Post Tool, you MUST confirm the post title and content with the user.
 
 ## End of instructions for using Wordpress tools
 
