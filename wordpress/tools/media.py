@@ -2,7 +2,6 @@ from tools.helper import (
     WORDPRESS_API_URL,
     tool_registry,
     is_valid_iso8601,
-    str_to_bool,
     load_from_gptscript_workspace,
 )
 import os
@@ -17,7 +16,6 @@ def _format_media_response(response_json: dict):
         "id",
         "date",
         "date_gmt",
-        "guid",
         "modified",
         "modified_gmt",
         "slug",
@@ -163,8 +161,8 @@ def upload_media(client):
     try:
         data = load_from_gptscript_workspace(file_path)
     except Exception as e:
-        raise ValueError(
-            f"Failed to load file {file_path} from GPTScript workspace. Error: {e}"
+        raise Exception(
+            f"Failed to load file {file_path} from GPTScript workspace. Exception: {e}"
         )
 
     # with open(file_path, "rb") as file:

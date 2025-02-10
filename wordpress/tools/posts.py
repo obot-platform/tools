@@ -9,7 +9,6 @@ def _format_posts_response(response_json: dict):
         "id",
         "date",
         "date_gmt",
-        "guid",
         "modified",
         "modified_gmt",
         "slug",

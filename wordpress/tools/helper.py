@@ -3,6 +3,8 @@ import os
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import gptscript
+import asyncio
+
 
 if "WORDPRESS_USERNAME" not in os.environ:
     raise ValueError("WORDPRESS_USERNAME is not set")
