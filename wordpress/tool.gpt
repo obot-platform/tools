@@ -23,7 +23,7 @@ Param: user_id: the id of the user to get
 
 ---
 Name: List Posts
-Description: List posts in wordpress site. Date to filter posts must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
+Description: List posts in wordpress site and get basic information of each post. Date to filter posts must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: context: (optional) the context of the posts to list, must be one of: view, embed, edit, default is view
@@ -42,7 +42,7 @@ Param: order: (optional) the order to sort posts, must be one of: asc, desc, def
 
 ---
 Name: Retrieve Post
-Description: Retrieve a post in wordpress site
+Description: Retrieve all the metadata of a post in wordpress site.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: post_id: the id of the post
@@ -138,7 +138,7 @@ Param: author_id: (optional) the author id of the media file.
 
 ---
 Name: List Media
-Description: List media files in user's wordpress site. Date to filter media files must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
+Description: List media files in user's wordpress site and get basic information of each media file. Date to filter media files must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: context: (optional) the context of the media files to list, must be one of: view, embed, edit, default is view.
