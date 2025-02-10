@@ -20,7 +20,20 @@ def main():
             if not query:
                 print("No search query provided")
                 sys.exit(1)
-            response = client.search(query)
+
+            include_domains = os.getenv("INCLUDE_DOMAINS").strip().split(",")
+            response = client.search(
+                query=query,
+                include_answer=False,  # no LLM-generated answer needed - we'll do that
+                include_raw_content=True,
+                max_results=20
+                if len(include_domains) == 0
+                else 5
+                * len(
+                    include_domains
+                ),  # broader search if general, more narrow if scoped to specific sites
+                include_domains=include_domains,
+            )
         case "extract":
             url = parse_url(os.getenv("URL").strip())
 

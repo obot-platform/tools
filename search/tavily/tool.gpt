@@ -10,6 +10,7 @@ Description: Search the Web with Tavily. This returns a list of search results s
 Credential: ./credential
 Share Context: Tavily Context
 Param: query: The search query
+Param: includeDomains: A comma-separated list of domains to specifically include in the search
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py search
 
