@@ -1,0 +1,50 @@
+---
+Name: Google Search Console
+Description: Tools for working with Google Search Console
+Metadata: bundle: true
+Share Tools: Get GSC Properties, Inspect URL, Get Top Keywords, Get URLs for Property
+
+---
+Name: Get GSC Properties
+Description: Returns the list of site URLs (properties) from the GSC console
+Credential: ../credential
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js fetchGSCProperties
+
+---
+Name: Inspect URL
+Description: Inspects a specific URL in Google Search Console
+Credential: ../credential
+Params: property: The GSC property id
+Params: url: The URL under the property to analyze
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js inspectUrl
+
+---
+Name: Get Top Keywords
+Description: Retrieves the top performing keywords for a specific URL
+Credential: ../credential
+Params: property: The GSC property id
+Params: url: The URL under the property to analyze
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getTopKeywordsForUrl
+
+---
+Name: Get URLs for Property
+Description: Returns all URLs for a specific GSC property
+Credential: ../credential
+Params: property: The GSC property id
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getUrlsForProperty
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googlesearchconsole.svg
+
+---
+!metadata:*:category
+Google Search Console
+
+---
+!metadata:*:oauth
+google
