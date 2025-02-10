@@ -26,14 +26,6 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-	case "listEventsToday":
-		now := time.Now()
-		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
-		if err := commands.ListEvents(context.Background(), start, end); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
 	case "listEvents":
 		start, end, err := parseStartEnd(os.Getenv("START"), os.Getenv("END"), false)
 		if err != nil {
