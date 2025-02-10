@@ -20,10 +20,10 @@ func ListDatabaseTableRows(ctx context.Context, dbFile *os.File, table string) (
 	}
 
 	// Build the query to fetch all rows from the table
-	query := fmt.Sprintf("SELECT * FROM %q;", table)
+	query := fmt.Sprintf("SELECT group_concat(name, '|') FROM pragma_table_info(%q); SELECT * FROM %q;", table, table)
 
 	// Execute the query using RunDatabaseCommand
-	rawOutput, err := RunDatabaseCommand(ctx, dbFile, fmt.Sprintf("-header %q", query))
+	rawOutput, err := RunDatabaseCommand(ctx, dbFile, fmt.Sprintf("%q", query))
 	if err != nil {
 		return "", fmt.Errorf("error executing query for table %q: %w", table, err)
 	}
