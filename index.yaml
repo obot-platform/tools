@@ -2,6 +2,8 @@ tools:
   sendgrid:
     reference: ./sendgrid
     all: true
+  file-reader:
+    reference: ./knowledge/file-reader.gpt
   file-summarizer:
     reference: ./file-summarizer
     all: true
