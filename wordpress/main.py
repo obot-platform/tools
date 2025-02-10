@@ -1,4 +1,4 @@
-from tools import posts, users, site # import to register tools
+from tools import posts, users, site, media  # import tool registry
 from tools.helper import tool_registry, create_session
 import json
 import sys
@@ -16,7 +16,7 @@ def main():
         json_response = tool_registry.get(command)(client)
         print(json.dumps(json_response, indent=4))
     except Exception as e:
-        print(f"Running command: {' '.join(sys.argv)} yielded error: {e}")
+        print(f"Running command: {' '.join(sys.argv)} failed. Error: {e}")
         sys.exit(1)
 
 

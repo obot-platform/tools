@@ -1,6 +1,7 @@
 import urllib.parse
 import os
 from tools.helper import WORDPRESS_API_URL, tool_registry, str_to_bool, is_valid_iso8601
+import urllib.parse
 
 
 def _format_posts_response(response_json: dict):
@@ -9,7 +10,6 @@ def _format_posts_response(response_json: dict):
         "id",
         "date",
         "date_gmt",
-        "guid",
         "modified",
         "modified_gmt",
         "slug",
@@ -20,6 +20,8 @@ def _format_posts_response(response_json: dict):
         "content",
         "excerpt",
         "author",
+        "featured_media",
+        "format",
     ]
     for key in keys:
         new_response_json[key] = response_json[key]
@@ -31,18 +33,19 @@ def retrieve_post(client):
     post_id = os.environ["POST_ID"]
     url = f"{WORDPRESS_API_URL}/posts/{post_id}"
 
+    query_params = {}
     context = os.getenv("CONTEXT", "view").lower()
     context_enum = {"view", "embed", "edit"}
     if context not in context_enum:
         raise ValueError(
             f"Error: Invalid context: {context}. context must be one of: {context_enum}."
         )
-    url += f"?context={context}"
+    query_params["context"] = context
     password = os.getenv("PASSWORD", None)
     if password:
-        url += f"&password={password}"
+        query_params["password"] = password
 
-    response = client.get(url)
+    response = client.get(url, params=query_params)
     if response.status_code == 200:
         return response.json()
     else:
@@ -55,18 +58,18 @@ def retrieve_post(client):
 def list_posts(client):
     url = f"{WORDPRESS_API_URL}/posts/"
 
-    suffix = ""
+    query_params = {}
     context = os.getenv("CONTEXT", "view").lower()
     context_enum = {"view", "embed", "edit"}
     if context not in context_enum:
         raise ValueError(
             f"Invalid context. Valid context must be one of: {context_enum}"
         )
-    suffix += f"?context={context}"
+    query_params["context"] = context
     page = os.getenv("PAGE", 1)
-    suffix += f"&page={page}"
+    query_params["page"] = page
     per_page = os.getenv("PER_PAGE", 10)
-    suffix += f"&per_page={per_page}"
+    query_params["per_page"] = per_page
     author_ids = os.getenv("AUTHOR_IDS", None)  # a list of comma separated author ids
     if author_ids:
         for author_id in author_ids.split(","):
@@ -74,10 +77,10 @@ def list_posts(client):
                 raise ValueError(
                     f"Error: Invalid author_ids: {author_id}. Author_ids must be a list of integers separated by commas."
                 )
-        suffix += f"&author={author_ids}"
+        query_params["author"] = author_ids
     search_query = os.getenv("SEARCH_QUERY", None)
     if search_query:
-        suffix += f"&search={search_query}"
+        query_params["search"] = search_query
     statuses = os.getenv(
         "STATUSES", "publish"
     ).lower()  # a list of comma separated statuses
@@ -100,7 +103,7 @@ def list_posts(client):
             raise ValueError(
                 f"Error: Invalid status: {s}. status must be a comma separated list of valid statuses: {status_enum}."
             )
-    suffix += f"&status={statuses}"
+    query_params["status"] = statuses
 
     publish_after = os.getenv("PUBLISH_AFTER", None)
     if publish_after:
@@ -108,14 +111,14 @@ def list_posts(client):
             raise ValueError(
                 f"Error: Invalid publish_after: {publish_after}. publish_after must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
-        suffix += f"&after={urllib.parse.quote(publish_after)}"
+        query_params["after"] = urllib.parse.quote(publish_after)
     publish_before = os.getenv("PUBLISH_BEFORE", None)
     if publish_before:
         if not is_valid_iso8601(publish_before):
             raise ValueError(
                 f"Error: Invalid publish_before: {publish_before}. publish_before must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
-        suffix += f"&before={urllib.parse.quote(publish_before)}"
+        query_params["before"] = urllib.parse.quote(publish_before)
 
     modified_after = os.getenv("MODIFIED_AFTER", None)
     if modified_after:
@@ -123,7 +126,7 @@ def list_posts(client):
             raise ValueError(
                 f"Error: Invalid modified_after: {modified_after}. modified_after must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
-        suffix += f"&modified_after={urllib.parse.quote(modified_after)}"
+        query_params["modified_after"] = urllib.parse.quote(modified_after)
 
     modified_before = os.getenv("MODIFIED_BEFORE", None)
     if modified_before:
@@ -131,17 +134,16 @@ def list_posts(client):
             raise ValueError(
                 f"Error: Invalid modified_before: {modified_before}. modified_before must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
-        suffix += f"&modified_before={urllib.parse.quote(modified_before)}"
+        query_params["modified_before"] = urllib.parse.quote(modified_before)
     order = os.getenv("ORDER", "desc").lower()
     order_enum = ["asc", "desc"]
     if order not in order_enum:
         raise ValueError(
             f"Error: Invalid order: {order}. order must be one of: {order_enum}."
         )
-    suffix += f"&order={order}"
-    url += suffix
+    query_params["order"] = order
 
-    response = client.get(url)
+    response = client.get(url, params=query_params)
     if response.status_code >= 200 and response.status_code < 300:
         return [_format_posts_response(post) for post in response.json()]
     else:
@@ -189,6 +191,10 @@ def create_post(client):
                 f"Error: Invalid date: {date}. date must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
         post_data["date"] = date
+
+    featured_media = os.getenv("FEATURED_MEDIA", None)
+    if featured_media:
+        post_data["featured_media"] = featured_media
 
     format = os.getenv("FORMAT", "").lower()
     format_enum = [
@@ -245,10 +251,11 @@ def delete_post(client):
     post_id = os.environ["POST_ID"]
     force_delete = str_to_bool(os.getenv("FORCE_DELETE", "false"))
     url = f"{WORDPRESS_API_URL}/posts/{post_id}"
+    query_params = {}
     if force_delete:
-        url += "?force=true"
+        query_params["force"] = "true"
 
-    response = client.delete(url)
+    response = client.delete(url, params=query_params)
     if response.status_code >= 200 and response.status_code < 300:
         return {"message": "Post deleted successfully"}
     else:
@@ -303,6 +310,10 @@ def update_post(client):
                 f"Error: Invalid date: {date}. date must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM."
             )
         post_data["date"] = date
+
+    if "FEATURED_MEDIA" in os.environ:
+        featured_media = os.environ["FEATURED_MEDIA"]
+        post_data["featured_media"] = featured_media
 
     if "FORMAT" in os.environ:
         format = os.environ["FORMAT"].lower()

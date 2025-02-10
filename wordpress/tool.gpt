@@ -2,7 +2,7 @@
 Name: Wordpress
 Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
-Share Tools: List Users, Get User, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, Get Site Settings
+Share Tools: List Users, Get User, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
 
 ---
 Name: List Users
@@ -23,26 +23,26 @@ Param: user_id: the id of the user to get
 
 ---
 Name: List Posts
-Description: List posts in wordpress site
+Description: List posts in wordpress site and get basic information of each post. Date to filter posts must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: context: (optional) the context of the posts to list, must be one of: view, embed, edit, default is view
 Param: page: (optional) the page number to list, default is 1
 Param: per_page: (optional) the number of posts per page to list, default is 10
 Param: author_ids: (optional) a list of comma separated author ids, default is None
-Param: search_query: (optional) the search query to filter posts, default is None
+Param: search_query: (optional) limit results to those matching a string, default is None
 Param: statuses: (optional) a comma separated list of statuses to filter posts, default is publish. Valid statuses are: publish, future, draft, pending, private, trash, auto-draft, inherit, request-pending, request-confirmed, request-failed, request-completed
-Param: publish_after: (optional) the date and time to filter posts published after, default is None
-Param: publish_before: (optional) the date and time to filter posts published before, default is None
-Param: modified_after: (optional) the date and time to filter posts modified after, default is None
-Param: modified_before: (optional) the date and time to filter posts modified before, default is None
+Param: publish_after: (optional) the date to filter posts published after, default is None
+Param: publish_before: (optional) the date to filter posts published before, default is None
+Param: modified_after: (optional) the date to filter posts modified after, default is None
+Param: modified_before: (optional) the date to filter posts modified before, default is None
 Param: order: (optional) the order to sort posts, must be one of: asc, desc, default is desc.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListPosts
 
 ---
 Name: Retrieve Post
-Description: Retrieve a post in wordpress site
+Description: Retrieve all the metadata of a post in wordpress site.
 Credential: ./credential
 Share Context: Wordpress Context
 Param: post_id: the id of the post
@@ -67,15 +67,16 @@ Share Context: Wordpress Context
 Param: title: the title of the post
 Param: content: the content of the post.
 Param: status: (optional) the status of the post, must be one of: publish, future, draft, pending, private, default is draft.
-Param: comment_status: (optional) the comment status of the post, must be one of: open, closed. default is open
+Param: comment_status: (optional) the comment status of the post, must be one of: open, closed. Default is open
 Param: sticky: (optional) whether the post is sticky to the top of the page, default is false
 Param: password: (optional) the password of the post, default is None
-Param: slug: (optional) the slug of the post, default is None
+Param: slug: (optional) An alphanumeric identifier for the post unique to its type. Default is None
 Param: date: (optional) the date of the post, default is None. Must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date. If the date is a future date, the post will be scheduled to be published at that time.
-Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio. default is standard
-Param: author_id: (optional) the id of the author of the post. If not provided, the current user will be used.
+Param: featured_media: (optional) the ID of the featured media for the post. Default is None. Get the Id by List Media Tool.
+Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio. Default is standard
+Param: author_id: (optional) the ID for the author of the post. If not provided, the current user will be used.
 Param: excerpt: (optional) the excerpt of the post, default is None
-Param: ping_status: (optional) the ping status of the post, must be one of: open, closed. default is open
+Param: ping_status: (optional) the ping status of the post, must be one of: open, closed. Default is open
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreatePost
 
@@ -84,19 +85,20 @@ Name: Update Post
 Description: Update a post in user's Wordpress site. Only the fields that are provided will be updated. Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
 Credential: ./credential
 Share Context: Wordpress Context
-Param: post_id: the id of the post to update
+Param: post_id: (required) the id of the post to update
 Param: title: (optional) the title of the post
 Param: content: (optional) the content of the post
-Param: status: (optional) the status of the post, must be one of: publish, future, draft, pending, private, default is publish
-Param: comment_status: (optional) the comment status of the post, must be one of: open, closed, default is open
-Param: sticky: (optional) whether the post is sticky to the top of the page, default is false
-Param: password: (optional) the password of the post, default is None
-Param: slug: (optional) the slug of the post, default is None
-Param: date: (optional) the date of the post, default is None. Must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date. If the date is a future date, the post will be scheduled to be published at that time.
-Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio. default is standard
-Param: author_id: (optional) the id of the author of the post, default is None
-Param: excerpt: (optional) the excerpt of the post, default is None
-Param: ping_status: (optional) the ping status of the post, must be one of: open, closed, default is open
+Param: status: (optional) the status of the post, must be one of: publish, future, draft, pending, private.
+Param: comment_status: (optional) the comment status of the post, must be one of: open, closed.
+Param: sticky: (optional) whether the post is sticky to the top of the page
+Param: password: (optional) the password of the post
+Param: slug: (optional) the slug of the post
+Param: date: (optional) the date of the post. Must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date. If the date is a future date, the post will be scheduled to be published at that time.
+Param: featured_media: (optional) the ID of the featured media for the post. Get the Id by List Media Tool.
+Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio.
+Param: author_id: (optional) the id of the author of the post
+Param: excerpt: (optional) the excerpt of the post
+Param: ping_status: (optional) the ping status of the post, must be one of: open, closed
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdatePost
 
@@ -109,6 +111,60 @@ Param: post_id: the id of the post to delete
 Param: force: (optional) whether to force delete the post, default is false. If true, the post will be deleted permanently, instead of being moved to trash.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeletePost
+
+
+---
+Name: Upload Media
+Description: Upload a media file(image, video, audio, etc.) in the workspace to user's wordpress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: media_file_path: the file path of the media file in the workspace.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UploadMedia
+
+
+---
+Name: Update Media
+Description: Use this tool to update the metadata of a media file in user's wordpress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: media_id: (required) the id of the media file.
+Param: title: (optional) the title to update.
+Param: slug: (optional) the slug to update.
+Param: author_id: (optional) the author id of the media file.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdateMedia
+
+
+---
+Name: List Media
+Description: List media files in user's wordpress site and get basic information of each media file. Date to filter media files must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: context: (optional) the context of the media files to list, must be one of: view, embed, edit, default is view.
+Param: page: (optional) the page number to list, default is 1
+Param: per_page: (optional) the number of media files per page to list, default is 10
+Param: media_type: (optional) Default is None. Limit result set to attachments of a particular media type. If provided, must be one of: image, video, text, application, audio.
+Param: author_ids: (optional) a list of comma separated author ids, default is None
+Param: search_query: (optional) limit results to those matching a string, default is None
+Param: publish_after: (optional) the date to filter media files uploaded after, default is None
+Param: publish_before: (optional) the date to filter media files uploaded before, default is None
+Param: modified_after: (optional) the date to filter media files modified after, default is None
+Param: modified_before: (optional) the date to filter media files modified before, default is None
+Param: order: (optional) the order to sort media files, must be one of: asc, desc, default is desc
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListMedia
+
+
+---
+Name: Delete Media
+Description: Delete a media file in user's wordpress site
+Credential: ./credential
+Share Context: Wordpress Context
+Param: media_id: the id of the media file
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeleteMedia
+
 
 ---
 Name: Wordpress Context
@@ -134,6 +190,8 @@ WordPress posts support the following formats:
 - video: A single video or video playlist. The first <video> tag or object/embed in the post content could be considered the video. Alternatively, if the post consists only of a URL, that will be the video URL. May also contain the video as an attachment to the post, if video support is enabled on the blog (like via a plugin).
 - audio: An audio file or playlist. Could be used for Podcasting.
 - chat: A chat transcript.
+
+Before using the Create Post Tool, you MUST confirm the post title and content with the user.
 
 ## End of instructions for using Wordpress tools
 
