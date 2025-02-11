@@ -16,12 +16,15 @@ def main():
 
     match command:
         case "search":
-            query = os.getenv("QUERY").strip()
+            query = os.getenv("QUERY", "").strip()
             if not query:
                 print("No search query provided")
                 sys.exit(1)
 
-            include_domains = os.getenv("INCLUDE_DOMAINS").strip().split(",")
+            domains_str = os.getenv("INCLUDE_DOMAINS", "")
+            include_domains = [
+                domain.strip() for domain in domains_str.split(",") if domain.strip()
+            ]
             response = client.search(
                 query=query,
                 include_answer=False,  # no LLM-generated answer needed - we'll do that
