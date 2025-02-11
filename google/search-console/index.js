@@ -7,7 +7,6 @@ const oauthToken = process.env.GOOGLE_SEARCH_OAUTH_TOKEN;
 
 async function main() {
     const command = process.argv[2];
-    console.log(command);
     if (!oauthToken) {
         console.error('Error: OAUTH_TOKEN environment variable is not set.');
         return;
