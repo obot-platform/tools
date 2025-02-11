@@ -3,12 +3,12 @@ import { getUrlsForProperty } from './src/urlsForProperty.js';
 import { inspectUrl } from './src/urlInspection.js';
 import { getTopKeywordsForUrl } from './src/keywords.js';
 
-const oauthToken = process.env.GOOGLE_SEARCH_OAUTH_TOKEN;
+const oauthToken = process.env.GOOGLE_OAUTH_TOKEN;
 
 async function main() {
     const command = process.argv[2];
     if (!oauthToken) {
-        console.error('Error: OAUTH_TOKEN environment variable is not set.');
+        console.error('Error: GOOGLE_OAUTH_TOKEN environment variable is not set.');
         return;
     }
 
@@ -19,7 +19,7 @@ async function main() {
         case 'getUrlsForProperty':
             if (!propertyUrl) {
                 console.error('Error: PROPERTY environment variable is not set.');
-                return;
+                process.exit(1);
             }
             await handleGetUrlsForProperty(propertyUrl, oauthToken);
             break;
@@ -31,11 +31,11 @@ async function main() {
         case 'inspectUrl':
             if (!propertyUrl) {
                 console.error('Error: PROPERTY environment variable is not set.');
-                return;
+                process.exit(1);
             }
             if (!url) {
                 console.error('Error: URL environment variable is not set.');
-                return;
+                process.exit(1);
             }
             await handleInspectUrl(propertyUrl, url, oauthToken);
             break;
@@ -43,12 +43,12 @@ async function main() {
         case 'getTopKeywordsForUrl':
             if (!propertyUrl) {
                 console.error('Error: PROPERTY environment variable is not set.');
-                return;
+                process.exit(1);
             }
 
             if (!url) {
                 console.error('Error: URL environment variable is not set.');
-                return;
+                process.exit(1);
             }
 
             await handleGetTopKeywordsForUrl(propertyUrl, url, oauthToken);
@@ -56,6 +56,7 @@ async function main() {
 
         default:
             console.error('Error: Unknown command. Use "getUrlsForProperty, fetchGSCProperties, or inspectUrl".');
+            process.exit(1);
     }
 }
 

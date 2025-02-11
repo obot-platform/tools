@@ -1,6 +1,12 @@
 // keywords.js
 import fetch from 'node-fetch';
 
+const USER_TIMEZONE = process.env.OBOT_USER_TIMEZONE || 'UTC';
+
+function formatDateInUserTimezone(date) {
+    return date.toLocaleDateString('en-CA', { timeZone: USER_TIMEZONE });
+}
+
 /**
  * Fetches the top keywords for a given URL from Google Search Console.
  * @param {string} property - The GSC property URL.
@@ -68,12 +74,13 @@ export async function getTopKeywordsForUrl(property, url, oauthToken) {
 }
 
 function getToday() {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
+    return formatDateInUserTimezone(new Date());
 }
 
 function getThreeMonthsAgo() {
     const date = new Date();
-    date.setMonth(date.getMonth() - 3);
-    return date.toISOString().split("T")[0];
+    // Create date in user's timezone
+    const localDate = new Date(date.toLocaleString('en-US', { timeZone: USER_TIMEZONE }));
+    localDate.setMonth(localDate.getMonth() - 3);
+    return formatDateInUserTimezone(localDate);
 }
