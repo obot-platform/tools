@@ -1,0 +1,37 @@
+Name: tavily-safe-search
+Description: Search the Web with Tavily. This returns a list of search results scored by relevance to the query and summarized. Search is limited to a set of allowed domains.
+Credential: ./credential
+Share Context: tavily-safe-search-context
+Metadata: category: Capability
+Metadata: icon: /admin/assets/tavily_icon.svg
+Param: query: The search query
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py safe-search
+
+---
+Name: tavily-safe-search-context
+Type: context
+Share Context: ../../time
+
+#!/bin/bash
+
+if [ -z "${TAVILY_ALLOWED_DOMAINS}" ]; then
+  echo "No allowed domains provided - do not use the tavily-safe-search tool"
+  exit 0
+else
+
+  if [ -z "${TAVILY_ALLOWED_DOMAINS_DESCRIPTION}" ]; then
+    TAVILY_ALLOWED_DOMAINS_DESCRIPTION="No description provided, but you have access to search across the following domains: ${TAVILY_ALLOWED_DOMAINS}"
+  fi
+
+  cat <<EOF
+# Start of instructions for using the tavily-safe-search tool
+
+You have access to the tavily-safe-search tool which allows you to search for information across a set of allowed domains.
+Below is a JSON document describing the allowed domains that you can search against and what they may contain:
+
+${TAVILY_ALLOWED_DOMAINS_DESCRIPTION}
+
+# End of instructions for using the tavily-safe-search tool
+EOF
+fi

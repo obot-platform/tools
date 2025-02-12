@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from typing import List
 
 from tavily import TavilyClient
 from urllib3.util import parse_url
@@ -15,7 +16,7 @@ def main():
     client = TavilyClient()  # env TAVILY_API_KEY required
 
     match command:
-        case "search":
+        case "search" | "safe-search":
             query = os.getenv("QUERY", "").strip()
             if not query:
                 print("No search query provided")
@@ -26,19 +27,10 @@ def main():
                 domain.strip() for domain in domains_str.split(",") if domain.strip()
             ]
 
-            # TAVILY_ALLOWED_DOMAINS has the TAVILY_ prefix as it will be set by Obot directly in the env,
-            # while e.g. INCLUDE_DOMAINS is a tool parameter
-            allowed_domains_str = os.getenv("TAVILY_ALLOWED_DOMAINS", "")
-            allowed_domains = [
-                domain.strip()
-                for domain in allowed_domains_str.split(",")
-                if domain.strip()
-            ]
-
-            if len(allowed_domains) > 0:
-                include_domains = [
-                    domain for domain in include_domains if domain in allowed_domains
-                ]
+            # safe-search is a special case where we only allow certain domains
+            # this is a different command so that we can use the same code for different tool implementations
+            if command == "safe-search":
+                include_domains = check_allowed_include_domains(include_domains)
 
             max_results = 20  # broader search if general,
             if len(include_domains) > 0:
@@ -81,6 +73,45 @@ def main():
         sys.exit(1)
     logging.info(f"Tavily - response:\n{response}")
     print(response)
+
+
+def check_allowed_include_domains(include_domains: List[str]) -> List[str]:
+    # TAVILY_ALLOWED_DOMAINS has the TAVILY_ prefix as it will be set by Obot directly in the env,
+    # while e.g. INCLUDE_DOMAINS is a tool parameter
+    allowed_domains_str = os.getenv("TAVILY_ALLOWED_DOMAINS", "")
+    allowed_domains = [
+        domain.strip() for domain in allowed_domains_str.split(",") if domain.strip()
+    ]
+
+    if len(allowed_domains) == 0:
+        print("No allowed domains provided")
+        sys.exit(1)
+
+    # allow not setting INCLUDE_DOMAINS -  fallback to all allowed domains
+    if len(include_domains) == 0:
+        include_domains = allowed_domains
+
+    if len(allowed_domains) > 0:
+        allowed_include_domains = []
+        disallowed_include_domains = []
+
+        for domain in include_domains:
+            if domain in allowed_domains:
+                allowed_include_domains.append(domain)
+            else:
+                disallowed_include_domains.append(domain)
+
+        if len(disallowed_include_domains) > 0:
+            if os.getenv("TAVILY_ALLOWED_DOMAINS_STRICT", "").lower() == "true":
+                print(
+                    f"Tried to access domains {disallowed_include_domains} which are not listed in allowed domains {allowed_domains}"
+                )
+                sys.exit(1)
+            logging.warning(
+                f"Filtered out {disallowed_include_domains} as they are not listed in allowed domains {allowed_domains}. Continuing with {allowed_include_domains}"
+            )
+        include_domains = allowed_include_domains
+    return include_domains
 
 
 if __name__ == "__main__":
