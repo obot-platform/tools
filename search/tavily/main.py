@@ -25,16 +25,36 @@ def main():
             include_domains = [
                 domain.strip() for domain in domains_str.split(",") if domain.strip()
             ]
+
+            # TAVILY_ALLOWED_DOMAINS has the TAVILY_ prefix as it will be set by Obot directly in the env,
+            # while e.g. INCLUDE_DOMAINS is a tool parameter
+            allowed_domains_str = os.getenv("TAVILY_ALLOWED_DOMAINS", "")
+            allowed_domains = [
+                domain.strip()
+                for domain in allowed_domains_str.split(",")
+                if domain.strip()
+            ]
+
+            if len(allowed_domains) > 0:
+                include_domains = [
+                    domain for domain in include_domains if domain in allowed_domains
+                ]
+
+            max_results = 20  # broader search if general,
+            if len(include_domains) > 0:
+                max_results = 5 * len(
+                    include_domains
+                )  # more narrow  search if scoped to specific sites
+            if os.getenv("MAX_RESULTS", "").strip():
+                max_results = int(os.getenv("MAX_RESULTS"))  # override with env var
+
             response = client.search(
                 query=query,
-                include_answer=False,  # no LLM-generated answer needed - we'll do that
-                include_raw_content=True,
-                max_results=20
-                if len(include_domains) == 0
-                else 5
-                * len(
-                    include_domains
-                ),  # broader search if general, more narrow if scoped to specific sites
+                include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
+                == "true",  # no LLM-generated answer needed by default - we'll do that
+                include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
+                != "false",  # include raw content by default
+                max_results=max_results,
                 include_domains=include_domains,
             )
         case "extract":
