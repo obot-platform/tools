@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 
 	"obot-platform/database/pkg/cmd"
 
@@ -32,15 +33,17 @@ func main() {
 	defer g.Close()
 
 	var (
-		ctx             = context.Background()
-		dbFileName      = "acorn.db"
-		dbWorkspacePath = "/databases/" + dbFileName
+		ctx                    = context.Background()
+		dbFileName             = "acorn.db"
+		dbWorkspacePath        = "/databases/" + dbFileName
+		revisionID      string = "-1"
+		initialDBData   []byte
 	)
 
-	// Read the database file from the workspace
-	initialDBData, err := g.ReadFileInWorkspace(ctx, dbWorkspacePath, gptscript.ReadFileInWorkspaceOptions{
+	workspaceDB, err := g.ReadFileWithRevisionInWorkspace(ctx, dbWorkspacePath, gptscript.ReadFileInWorkspaceOptions{
 		WorkspaceID: workspaceID,
 	})
+
 	var notFoundErr *gptscript.NotFoundInWorkspaceError
 	if err != nil && !errors.As(err, &notFoundErr) {
 		fmt.Printf("Error reading DB file: %v\n", err)
@@ -57,10 +60,14 @@ func main() {
 	defer os.Remove(dbFile.Name())
 
 	// Write the data to the temporary file
-	if initialDBData != nil {
+	if workspaceDB != nil && workspaceDB.Content != nil {
+		initialDBData = workspaceDB.Content
 		if err := os.WriteFile(dbFile.Name(), initialDBData, 0644); err != nil {
 			fmt.Printf("Error writing to temp file: %v\n", err)
 			os.Exit(1)
+		}
+		if workspaceDB.RevisionID != "" {
+			revisionID = workspaceDB.RevisionID
 		}
 	}
 
@@ -74,7 +81,7 @@ func main() {
 	case "runDatabaseSQL":
 		result, err = cmd.RunDatabaseCommand(ctx, dbFile, os.Getenv("SQL"), "-header")
 		if err == nil {
-			err = saveWorkspaceDB(ctx, g, dbWorkspacePath, dbFile, initialDBData)
+			err = saveWorkspaceDB(ctx, g, dbWorkspacePath, revisionID, dbFile, initialDBData)
 		}
 	case "databaseContext":
 		result, err = cmd.DatabaseContext(ctx, dbFile)
@@ -95,6 +102,7 @@ func saveWorkspaceDB(
 	ctx context.Context,
 	g *gptscript.GPTScript,
 	dbWorkspacePath string,
+	revisionID string,
 	dbFile *os.File,
 	initialDBData []byte,
 ) error {
@@ -108,9 +116,36 @@ func saveWorkspaceDB(
 	}
 
 	if err := g.WriteFileInWorkspace(ctx, dbWorkspacePath, updatedDBData, gptscript.WriteFileInWorkspaceOptions{
-		WorkspaceID: workspaceID,
+		WorkspaceID:      workspaceID,
+		CreateRevision:   &([]bool{true}[0]),
+		LatestRevisionID: revisionID,
 	}); err != nil {
 		return fmt.Errorf("Error writing updated DB file to workspace: %v", err)
+	}
+
+	// Delete old revisions after successfully writing the new revision
+	revisions, err := g.ListRevisionsForFileInWorkspace(ctx, dbWorkspacePath, gptscript.ListRevisionsForFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error listing revisions: %v\n", err)
+		return nil
+	}
+
+	lastRevisionIndex := slices.IndexFunc(revisions, func(rev gptscript.FileInfo) bool {
+		return rev.RevisionID == revisionID
+	})
+
+	if lastRevisionIndex < 0 {
+		return nil
+	}
+
+	for _, rev := range revisions[:lastRevisionIndex+1] {
+		if err := g.DeleteRevisionForFileInWorkspace(ctx, dbWorkspacePath, rev.RevisionID, gptscript.DeleteRevisionForFileInWorkspaceOptions{
+			WorkspaceID: workspaceID,
+		}); err != nil {
+			fmt.Fprintf(os.Stderr, "Error deleting revision %s: %v\n", rev.RevisionID, err)
+		}
 	}
 
 	return nil
