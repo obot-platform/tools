@@ -8,28 +8,33 @@ import os
 import urllib.parse
 import io
 import mimetypes
+from typing import Union
 
 
-def _format_media_response(response_json: dict):
-    new_response_json = {}
-    keys = [
-        "id",
-        "date",
-        "date_gmt",
-        "modified",
-        "modified_gmt",
-        "slug",
-        "status",
-        "type",
-        "link",
-        "title",
-        "author",
-        "media_type",
-        "mime_type",
-    ]
-    for key in keys:
-        new_response_json[key] = response_json[key]
-    return new_response_json
+def _format_media_response(response_json: Union[dict, list]) -> Union[dict, list]:
+    # response is either a list of dict or a single dict
+    if isinstance(response_json, list):
+        return [_format_media_response(media) for media in response_json]
+    else:
+        new_response_json = {}
+        keys = [
+            "id",
+            "date",
+            "date_gmt",
+            "modified",
+            "modified_gmt",
+            "slug",
+            "status",
+            "type",
+            "link",
+            "title",
+            "author",
+            "media_type",
+            "mime_type",
+        ]
+        for key in keys:
+            new_response_json[key] = response_json[key]
+        return new_response_json
 
 
 @tool_registry.register("RetrieveMedia")
@@ -39,7 +44,7 @@ def retrieve_media(client):
 
     context = os.getenv("CONTEXT", "view").lower()
     context_enum = {"view", "embed", "edit"}
-    
+
     query_params = {}
     if context not in context_enum:
         raise ValueError(
@@ -135,7 +140,7 @@ def list_media(client):
 
     response = client.get(url, params=query_params)
     if response.status_code >= 200 and response.status_code < 300:
-        return [_format_media_response(media) for media in response.json()]
+        return _format_media_response(response.json())
     else:
         print(f"Failed to list posts. Error: {response.status_code}, {response.text}")
 

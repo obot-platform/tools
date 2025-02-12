@@ -2,30 +2,35 @@ import urllib.parse
 import os
 from tools.helper import WORDPRESS_API_URL, tool_registry, str_to_bool, is_valid_iso8601
 import urllib.parse
+import mistune
+from typing import Union
 
 
-def _format_posts_response(response_json: dict):
-    new_response_json = {}
-    keys = [
-        "id",
-        "date",
-        "date_gmt",
-        "modified",
-        "modified_gmt",
-        "slug",
-        "status",
-        "type",
-        "link",
-        "title",
-        "content",
-        "excerpt",
-        "author",
-        "featured_media",
-        "format",
-    ]
-    for key in keys:
-        new_response_json[key] = response_json[key]
-    return new_response_json
+def _format_posts_response(response_json: Union[dict, list]) -> Union[dict, list]:
+    # response is either a list of dict or a single dict
+    if isinstance(response_json, list):
+        return [_format_posts_response(post) for post in response_json]
+    else:
+        new_response_json = {}
+        keys = [
+            "id",
+            "date",
+            "date_gmt",
+            "modified",
+            "modified_gmt",
+            "slug",
+            "status",
+            "type",
+            "link",
+            "title",
+            "excerpt",
+            "author",
+            "featured_media",
+            "format",
+        ]
+        for key in keys:
+            new_response_json[key] = response_json[key]
+        return new_response_json
 
 
 @tool_registry.register("RetrievePost")
@@ -145,9 +150,21 @@ def list_posts(client):
 
     response = client.get(url, params=query_params)
     if response.status_code >= 200 and response.status_code < 300:
-        return [_format_posts_response(post) for post in response.json()]
+        return _format_posts_response(response.json())
     else:
         print(f"Failed to list posts. Error: {response.status_code}, {response.text}")
+
+
+def _content_formatter(content: str) -> str:
+    """Use Mistune to convert markdown content to HTML.
+
+    Args:
+        content (str): The markdown content to convert to HTML.
+
+    Returns:
+        str: The HTML content.
+    """
+    return mistune.html(content)
 
 
 @tool_registry.register("CreatePost")
@@ -159,6 +176,8 @@ def create_post(client):
     content = os.getenv("CONTENT", "")
     if title == "" and content == "":
         raise ValueError("Error: At least one of title or content must be provided.")
+    content = _content_formatter(content)
+
     status = os.getenv("STATUS", "draft").lower()
     status_enum = ["publish", "future", "draft", "pending", "private"]
     if status not in status_enum:
@@ -278,6 +297,7 @@ def update_post(client):
         content = os.environ["CONTENT"]
         if content == "":
             raise ValueError("Error: Content to update cannot be empty.")
+        content = _content_formatter(content)
         post_data["content"] = content
     if "STATUS" in os.environ:
         status = os.environ["STATUS"].lower()

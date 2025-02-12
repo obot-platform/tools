@@ -1,10 +1,14 @@
 import os
 from tools.helper import WORDPRESS_API_URL, tool_registry
+from typing import Union
 
-
-def _format_users_response(response_json: dict):
-    keys = ["id", "name", "url", "description", "link", "slug", "avatar_urls"]
-    return {key: response_json[key] for key in keys}
+def _format_users_response(response_json: Union[dict, list]) -> Union[dict, list]:
+    # response is either a list of dict or a single dict
+    if isinstance(response_json, list):
+        return [_format_users_response(user) for user in response_json]
+    else:
+        keys = ["id", "name", "url", "description", "link", "slug", "avatar_urls"]
+        return {key: response_json[key] for key in keys}
 
 
 @tool_registry.register("GetUser")
@@ -23,6 +27,6 @@ def list_users(client):
     url = f"{WORDPRESS_API_URL}/users"
     response = client.get(url)
     if response.status_code >= 200 and response.status_code < 300:
-        return [_format_users_response(user) for user in response.json()]
+        return _format_users_response(response.json())
     else:
         print(f"Error: {response.status_code}, {response.text}")
