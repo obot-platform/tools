@@ -89,28 +89,27 @@ def check_allowed_include_domains(include_domains: List[str]) -> List[str]:
 
     # allow not setting INCLUDE_DOMAINS -  fallback to all allowed domains
     if len(include_domains) == 0:
-        include_domains = allowed_domains
+        return allowed_domains
 
-    if len(allowed_domains) > 0:
-        allowed_include_domains = []
-        disallowed_include_domains = []
+    allowed_include_domains = []
+    disallowed_include_domains = []
 
-        for domain in include_domains:
-            if domain in allowed_domains:
-                allowed_include_domains.append(domain)
-            else:
-                disallowed_include_domains.append(domain)
+    for domain in include_domains:
+        if domain in allowed_domains:
+            allowed_include_domains.append(domain)
+        else:
+            disallowed_include_domains.append(domain)
 
-        if len(disallowed_include_domains) > 0:
-            if os.getenv("TAVILY_ALLOWED_DOMAINS_STRICT", "").lower() == "true":
-                print(
-                    f"Tried to access domains {disallowed_include_domains} which are not listed in allowed domains {allowed_domains}"
-                )
-                sys.exit(1)
-            logging.warning(
-                f"Filtered out {disallowed_include_domains} as they are not listed in allowed domains {allowed_domains}. Continuing with {allowed_include_domains}"
+    if len(disallowed_include_domains) > 0:
+        if os.getenv("TAVILY_ALLOWED_DOMAINS_STRICT", "").lower() == "true":
+            print(
+                f"Tried to access domains {disallowed_include_domains} which are not listed in allowed domains {allowed_domains}"
             )
-        include_domains = allowed_include_domains
+            sys.exit(1)
+        logging.warning(
+            f"Filtered out {disallowed_include_domains} as they are not listed in allowed domains {allowed_domains}. Continuing with {allowed_include_domains}"
+        )
+    include_domains = allowed_include_domains
     return include_domains
 
 
