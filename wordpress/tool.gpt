@@ -2,7 +2,7 @@
 Name: Wordpress
 Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
-Share Tools: List Users, Get User, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
+Share Tools: List Users, Get User, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
 
 ---
 Name: List Users
@@ -20,6 +20,14 @@ Share Context: Wordpress Context
 Param: user_id: the id of the user to get
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetUser
+
+---
+Name: Get Me
+Description: Get the metadata of the current user in wordpress site
+Credential: ./credential
+Share Context: Wordpress Context
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMe
 
 ---
 Name: List Posts

@@ -22,6 +22,14 @@ def get_user(client):
         print(f"Error: {response.status_code}, {response.text}")
 
 
+@tool_registry.register("GetMe")
+def get_me(client):
+    url = f"{WORDPRESS_API_URL}/users/me"
+    query_param = {"context": "edit"}
+    response = client.get(url, params=query_param)
+    return response.json()
+
+
 @tool_registry.register("ListUsers")
 def list_users(client):
     url = f"{WORDPRESS_API_URL}/users"

@@ -259,10 +259,10 @@ def create_post(client):
     post_data["ping_status"] = ping_status
 
     response = client.post(url, json=post_data)
-    if response.status_code >= 200 and response.status_code < 300:
+    if response.status_code == 201:
         return _format_posts_response(response.json())
     else:
-        print(f"Failed to create post. Error: {response.status_code}, {response.text}")
+        print(f"Failed to create post. Error: {response.status_code}")
 
 
 @tool_registry.register("DeletePost")
@@ -278,8 +278,7 @@ def delete_post(client):
     if response.status_code >= 200 and response.status_code < 300:
         return {"message": "Post deleted successfully"}
     else:
-        print(f"Failed to delete post. Error: {response.status_code}, {response.text}")
-
+        print(f"Failed to delete post. Error status code: {response.status_code}")
 
 @tool_registry.register("UpdatePost")
 def update_post(client):
@@ -384,4 +383,4 @@ def update_post(client):
     if response.status_code >= 200 and response.status_code < 300:
         return _format_posts_response(response.json())
     else:
-        print(f"Failed to update post. Error: {response.status_code}, {response.text}")
+        print(f"Failed to update post. Error status code: {response.status_code}")
