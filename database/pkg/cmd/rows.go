@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 )
 
 type Output struct {
@@ -13,53 +12,57 @@ type Output struct {
 	Rows    []map[string]any `json:"rows"`
 }
 
-// ListDatabaseTableRows lists all rows from the specified table using RunDatabaseCommand and returns a JSON object containing the results.
+// ListDatabaseTableRows lists all rows from the specified table using RunDatabaseCommand and returns the JSON output directly.
 func ListDatabaseTableRows(ctx context.Context, dbFile *os.File, table string) (string, error) {
 	if table == "" {
 		return "", fmt.Errorf("table name cannot be empty")
 	}
 
-	// Build the query to fetch all rows from the table
-	query := fmt.Sprintf("SELECT group_concat(name, '|') FROM pragma_table_info(%q); SELECT * FROM %q;", table, table)
+	// Get column names using PRAGMA
+	columnsQuery := fmt.Sprintf("PRAGMA table_info(%q);", table)
+	columnsOutput, err := RunDatabaseCommand(ctx, dbFile, columnsQuery, "-json")
+	if err != nil {
+		return "", fmt.Errorf("error getting columns for table %q: %w", table, err)
+	}
 
-	// Execute the query using RunDatabaseCommand
-	rawOutput, err := RunDatabaseCommand(ctx, dbFile, fmt.Sprintf("%q", query))
+	// Parse column information
+	var columnInfo []struct {
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal([]byte(columnsOutput), &columnInfo); err != nil {
+		return "", fmt.Errorf("error parsing column information: %w", err)
+	}
+
+	columns := make([]string, len(columnInfo))
+	for i, col := range columnInfo {
+		columns[i] = col.Name
+	}
+
+	// Get all rows
+	rowsQuery := fmt.Sprintf("SELECT * FROM %q;", table)
+	rowsOutput, err := RunDatabaseCommand(ctx, dbFile, rowsQuery, "-json")
 	if err != nil {
 		return "", fmt.Errorf("error executing query for table %q: %w", table, err)
 	}
 
-	// Split raw output into rows
-	lines := strings.Split(strings.TrimSpace(rawOutput), "\n")
-	if len(lines) == 0 {
-		return "", fmt.Errorf("no output from query for table %q", table)
+	// Parse rows
+	var rows []map[string]any
+	if rowsOutput != "" {
+		if err := json.Unmarshal([]byte(rowsOutput), &rows); err != nil {
+			return "", fmt.Errorf("error parsing JSON output: %w", err)
+		}
 	}
 
-	// The first line contains column names
-	columns := strings.Split(lines[0], "|")
+	// Create and marshal output
 	output := Output{
 		Columns: columns,
-		Rows:    []map[string]any{},
+		Rows:    rows,
 	}
 
-	// Process the remaining lines as rows
-	for _, line := range lines[1:] {
-		values := strings.Split(line, "|")
-		rowData := map[string]any{}
-		for i, col := range columns {
-			if i < len(values) {
-				rowData[col] = values[i]
-			} else {
-				rowData[col] = nil
-			}
-		}
-		output.Rows = append(output.Rows, rowData)
-	}
-
-	// Marshal the result to JSON
-	content, err := json.Marshal(output)
+	result, err := json.Marshal(output)
 	if err != nil {
-		return "", fmt.Errorf("error marshalling output to JSON: %w", err)
+		return "", fmt.Errorf("error marshaling output: %w", err)
 	}
 
-	return string(content), nil
+	return string(result), nil
 }

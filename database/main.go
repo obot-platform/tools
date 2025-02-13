@@ -71,8 +71,8 @@ func main() {
 		result, err = cmd.ListDatabaseTables(ctx, dbFile)
 	case "listDatabaseTableRows":
 		result, err = cmd.ListDatabaseTableRows(ctx, dbFile, os.Getenv("TABLE"))
-	case "runDatabaseCommand":
-		result, err = cmd.RunDatabaseCommand(ctx, dbFile, os.Getenv("SQLITE3_ARGS"))
+	case "runDatabaseSQL":
+		result, err = cmd.RunDatabaseCommand(ctx, dbFile, os.Getenv("SQL"), "-header")
 		if err == nil {
 			err = saveWorkspaceDB(ctx, g, dbWorkspacePath, dbFile, initialDBData)
 		}
