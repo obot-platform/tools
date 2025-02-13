@@ -43,6 +43,9 @@ tools:
   google-search:
     reference: ./google/search
     all: true
+  google-search-console:
+    reference: ./google/search-console
+    all: true
   google-sheets:
     reference: ./google/sheets
     all: true
