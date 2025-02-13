@@ -40,33 +40,10 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 
 		reqObj.Header = sr.Header
 
-		state, err := p.LoadCookiedSession(reqObj)
+		ss, err := GetSerializableState(p, reqObj)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to load cookied session: %v", err), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("failed to get state: %v", err), http.StatusInternalServerError)
 			return
-		}
-
-		if state == nil {
-			http.Error(w, "state is nil", http.StatusInternalServerError)
-			return
-		}
-
-		var setCookies []string
-		if state.IsExpired() || (p.CookieOptions.Refresh != 0 && state.Age() > p.CookieOptions.Refresh) {
-			setCookies, err = refreshToken(p, reqObj)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("failed to refresh token: %v", err), http.StatusForbidden)
-				return
-			}
-		}
-
-		ss := SerializableState{
-			ExpiresOn:         state.ExpiresOn,
-			AccessToken:       state.AccessToken,
-			PreferredUsername: state.PreferredUsername,
-			User:              state.User,
-			Email:             state.Email,
-			SetCookies:        setCookies,
 		}
 
 		if err = json.NewEncoder(w).Encode(ss); err != nil {
@@ -74,6 +51,34 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			return
 		}
 	}
+}
+
+func GetSerializableState(p *oauth2proxy.OAuthProxy, r *http.Request) (SerializableState, error) {
+	state, err := p.LoadCookiedSession(r)
+	if err != nil {
+		return SerializableState{}, fmt.Errorf("failed to load cookied session: %v", err)
+	}
+
+	if state == nil {
+		return SerializableState{}, fmt.Errorf("state is nil")
+	}
+
+	var setCookies []string
+	if state.IsExpired() || (p.CookieOptions.Refresh != 0 && state.Age() > p.CookieOptions.Refresh) {
+		setCookies, err = refreshToken(p, r)
+		if err != nil {
+			return SerializableState{}, fmt.Errorf("failed to refresh token: %v", err)
+		}
+	}
+
+	return SerializableState{
+		ExpiresOn:         state.ExpiresOn,
+		AccessToken:       state.AccessToken,
+		PreferredUsername: state.PreferredUsername,
+		User:              state.User,
+		Email:             state.Email,
+		SetCookies:        setCookies,
+	}, nil
 }
 
 func refreshToken(p *oauth2proxy.OAuthProxy, r *http.Request) ([]string, error) {
