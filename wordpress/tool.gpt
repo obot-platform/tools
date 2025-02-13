@@ -2,30 +2,24 @@
 Name: Wordpress
 Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
-Share Tools: List Users, Get User, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
+Share Tools: List Users, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
 
 ---
 Name: List Users
-Description: List users in wordpress site
+Description: List users in wordpress site. Only admin users have permission to do this. 
 Credential: ./credential
 Share Context: Wordpress Context
+Param: context: (optional) the context of the users to list, must be one of: view, embed, edit, default is view. Set to edit if you want to reveal more metadata.
+Param: has_published_posts: (optional) whether to show users who haven't published posts, default is false. must be one of: true, false.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListUsers
 
 ---
-Name: Get User
-Description: Get the metadata of a user in wordpress site
-Credential: ./credential
-Share Context: Wordpress Context
-Param: user_id: the id of the user to get
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetUser
-
----
 Name: Get Me
-Description: Get the metadata of the current user in wordpress site
+Description: Get the all metadata of the current user in wordpress site, including the user's role and capabilities. Failed to get user info indicates that the user is not authenticated correctly.
 Credential: ./credential
 Share Context: Wordpress Context
+Param: context: (optional) the context of the user, must be one of: view, embed, edit, default is edit. Set to view if you want to validate authentication.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMe
 
@@ -61,7 +55,7 @@ Param: password: (optional) the password of the post, default is None
 
 ---
 Name: Get Site Settings
-Description: Get the settings of the wordpress site
+Description: Get the settings of the wordpress site, only admin users have permission to do this.
 Credential: ./credential
 Share Context: Wordpress Context
 

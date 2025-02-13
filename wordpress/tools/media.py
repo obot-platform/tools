@@ -16,7 +16,6 @@ def _format_media_response(response_json: Union[dict, list]) -> Union[dict, list
     if isinstance(response_json, list):
         return [_format_media_response(media) for media in response_json]
     else:
-        new_response_json = {}
         keys = [
             "id",
             "date",
@@ -32,10 +31,7 @@ def _format_media_response(response_json: Union[dict, list]) -> Union[dict, list
             "media_type",
             "mime_type",
         ]
-        for key in keys:
-            new_response_json[key] = response_json[key]
-        return new_response_json
-
+        return {key: response_json[key] for key in keys if key in response_json}
 
 @tool_registry.register("RetrieveMedia")
 def retrieve_media(client):
@@ -142,7 +138,7 @@ def list_media(client):
     if response.status_code >= 200 and response.status_code < 300:
         return _format_media_response(response.json())
     else:
-        print(f"Failed to list posts. Error: {response.status_code}, {response.text}")
+        print(f"Failed to list posts. Error code: {response.status_code}")
 
 
 @tool_registry.register("UploadMedia")
@@ -181,11 +177,14 @@ def upload_media(client):
 
     response = client.post(upload_url, files=files)
 
-    if response.status_code >= 200 and response.status_code < 300:
+    if response.status_code == 201:
         return _format_media_response(response.json())
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
-        print(f"Failed to create media. Error: {response.status_code}, {response.text}")
-
+        print(f"Failed to create media. Error code: {response.status_code}")
 
 @tool_registry.register("UpdateMedia")
 def update_media(client):
@@ -223,8 +222,12 @@ def update_media(client):
         media_data["author"] = int(author_id)
 
     response = client.post(url, json=media_data)
-    if response.status_code >= 200 and response.status_code < 300:
+    if response.status_code == 200:
         return _format_media_response(response.json())
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to update media. Error: {response.status_code}, {response.text}")
 
@@ -237,7 +240,11 @@ def delete_media(client):
     url = f"{WORDPRESS_API_URL}/media/{media_id}"  # not allowed to put media to trash thru rest api
 
     response = client.delete(url, params=query_params)
-    if response.status_code >= 200 and response.status_code < 300:
-        return {"message": "Media deleted successfully"}
+    if response.status_code == 200:
+        return {"message": f"{response.status_code}. Media {media_id} deleted successfully"}
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to delete media. Error: {response.status_code}, {response.text}")

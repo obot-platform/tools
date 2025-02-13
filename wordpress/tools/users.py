@@ -7,9 +7,8 @@ def _format_users_response(response_json: Union[dict, list]) -> Union[dict, list
     if isinstance(response_json, list):
         return [_format_users_response(user) for user in response_json]
     else:
-        keys = ["id", "name", "url", "description", "link", "slug", "avatar_urls"]
-        return {key: response_json[key] for key in keys}
-
+        keys = ["id", "name", "url", "description", "link", "slug", "locale", "avatar_urls", "roles", "capabilities","extra_capabilities", "registered_date"]
+        return {key: response_json[key] for key in keys if key in response_json}
 
 @tool_registry.register("GetUser")
 def get_user(client):
@@ -25,16 +24,38 @@ def get_user(client):
 @tool_registry.register("GetMe")
 def get_me(client):
     url = f"{WORDPRESS_API_URL}/users/me"
-    query_param = {"context": "edit"}
+    query_param = {}
+    context = os.getenv("CONTEXT", "edit").lower()
+    context_enum = {"view", "embed", "edit"}
+    if context not in context_enum:
+        raise ValueError(
+            f"Error: Invalid context: {context}. context must be one of: {context_enum}."
+        )
+    query_param["context"] = context
     response = client.get(url, params=query_param)
-    return response.json()
-
+    if response.status_code == 200:
+        return _format_users_response(response.json())
+    else:
+        print(f"Error Get Me: {response.status_code}, {response.text}")
 
 @tool_registry.register("ListUsers")
 def list_users(client):
     url = f"{WORDPRESS_API_URL}/users"
-    response = client.get(url)
-    if response.status_code >= 200 and response.status_code < 300:
+    context = os.getenv("CONTEXT", "view").lower()
+    context_enum = {"view", "embed", "edit"}
+    if context not in context_enum:
+        raise ValueError(
+            f"Error: Invalid context: {context}. context must be one of: {context_enum}."
+        )
+    query_param = {"context": context}
+    has_published_posts = os.getenv("HAS_PUBLISHED_POSTS", "true").lower()
+    query_param["has_published_posts"] = False if has_published_posts == "false" else True
+    response = client.get(url, params=query_param)
+    if response.status_code == 200:
         return _format_users_response(response.json())
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
     else:
         print(f"Error: {response.status_code}, {response.text}")

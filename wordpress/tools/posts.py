@@ -11,7 +11,6 @@ def _format_posts_response(response_json: Union[dict, list]) -> Union[dict, list
     if isinstance(response_json, list):
         return [_format_posts_response(post) for post in response_json]
     else:
-        new_response_json = {}
         keys = [
             "id",
             "date",
@@ -28,10 +27,7 @@ def _format_posts_response(response_json: Union[dict, list]) -> Union[dict, list
             "featured_media",
             "format",
         ]
-        for key in keys:
-            new_response_json[key] = response_json[key]
-        return new_response_json
-
+        return {key: response_json[key] for key in keys if key in response_json}
 
 @tool_registry.register("RetrievePost")
 def retrieve_post(client):
@@ -53,9 +49,13 @@ def retrieve_post(client):
     response = client.get(url, params=query_params)
     if response.status_code == 200:
         return response.json()
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(
-            f"Failed to retrieve post. Error: {response.status_code}, {response.text}"
+            f"Failed to retrieve post. Error code: {response.status_code}"
         )
 
 
@@ -149,11 +149,14 @@ def list_posts(client):
     query_params["order"] = order
 
     response = client.get(url, params=query_params)
-    if response.status_code >= 200 and response.status_code < 300:
+    if response.status_code == 200:
         return _format_posts_response(response.json())
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 400 or response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to list posts. Error: {response.status_code}, {response.text}")
-
 
 def _content_formatter(content: str) -> str:
     """Use Mistune to convert markdown content to HTML.
@@ -261,6 +264,10 @@ def create_post(client):
     response = client.post(url, json=post_data)
     if response.status_code == 201:
         return _format_posts_response(response.json())
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to create post. Error: {response.status_code}")
 
@@ -275,8 +282,12 @@ def delete_post(client):
         query_params["force"] = "true"
 
     response = client.delete(url, params=query_params)
-    if response.status_code >= 200 and response.status_code < 300:
-        return {"message": "Post deleted successfully"}
+    if response.status_code == 200:
+        return {"message": f"{response.status_code}. Post {post_id} deleted successfully"}
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to delete post. Error status code: {response.status_code}")
 
@@ -380,7 +391,11 @@ def update_post(client):
         post_data["ping_status"] = ping_status
 
     response = client.post(url, json=post_data)
-    if response.status_code >= 200 and response.status_code < 300:
+    if response.status_code == 200:
         return _format_posts_response(response.json())
+    elif response.status_code == 401:
+        print(f"Authentication failed: {response.status_code}, {response.text}")
+    elif response.status_code == 403:
+        print(f"Permission denied: {response.status_code}, {response.text}")
     else:
         print(f"Failed to update post. Error status code: {response.status_code}")
