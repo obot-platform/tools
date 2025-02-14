@@ -42,9 +42,5 @@ Params: property: The GSC property id
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googlesearchconsole.svg
 
 ---
-!metadata:*:category
-Google Search Console
-
----
 !metadata:*:oauth
 google
