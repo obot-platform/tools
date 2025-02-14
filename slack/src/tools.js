@@ -132,6 +132,21 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
     }
 }
 
+export async function getThreadHistoryFromLink(webClient, messageLink, limit) {
+    // Extract channel ID and message timestamp from the link
+    // Example link format: https://team.slack.com/archives/CHANNEL_ID/p1234567890123456
+    const matches = messageLink.match(/archives\/([A-Z0-9]+)\/p(\d+)/)
+    if (!matches) {
+        console.log('Invalid message link format')
+        process.exit(1)
+    }
+
+    const channelId = matches[1]
+    // Convert the timestamp to Slack's format (with decimal point)
+    const threadId = (matches[2].slice(0, -6) + '.' + matches[2].slice(-6))
+
+    await getThreadHistory(webClient, channelId, threadId, limit)
+}
 
 export async function search(webClient, query) {
     const result = await webClient.search.all({

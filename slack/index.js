@@ -6,6 +6,7 @@ import {
   getDMThreadHistory,
   getMessageLink,
   getThreadHistory,
+  getThreadHistoryFromLink,
   listChannels,
   listUsers,
   search,
@@ -43,6 +44,9 @@ switch (command) {
     break
   case "getThreadHistory":
     await getThreadHistory(webClient, process.env.CHANNELID, process.env.THREADID, process.env.LIMIT)
+    break
+  case "getThreadHistoryFromLink":
+    await getThreadHistoryFromLink(webClient, process.env.MESSAGELINK, process.env.LIMIT)
     break
   case "searchMessages":
     await search(webClient, process.env.QUERY)
