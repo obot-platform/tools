@@ -1,6 +1,7 @@
 import os
 from tools.helper import WORDPRESS_API_URL, tool_registry
 from typing import Union
+import sys
 
 def _format_users_response(response_json: Union[dict, list]) -> Union[dict, list]:
     # response is either a list of dict or a single dict
@@ -21,8 +22,8 @@ def get_user(client):
         print(f"Error: {response.status_code}, {response.text}")
 
 
-@tool_registry.register("GetMe")
-def get_me(client):
+
+def _get_current_user_profile(client):
     url = f"{WORDPRESS_API_URL}/users/me"
     query_param = {}
     context = os.getenv("CONTEXT", "edit").lower()
@@ -33,10 +34,26 @@ def get_me(client):
         )
     query_param["context"] = context
     response = client.get(url, params=query_param)
+    return response
+
+
+@tool_registry.register("GetMe")
+def get_me(client):
+    response = _get_current_user_profile(client)
     if response.status_code == 200:
         return _format_users_response(response.json())
     else:
         print(f"Error Get Me: {response.status_code}, {response.text}")
+
+
+@tool_registry.register("ValidateCredential")
+def validate_credential(client):
+    response = _get_current_user_profile(client)
+    if response.status_code == 200:
+        sys.exit(0)
+    else:
+        print(f"Error: Invalid Credential: {response.status_code}, {response.text}")
+        sys.exit(1)
 
 @tool_registry.register("ListUsers")
 def list_users(client):

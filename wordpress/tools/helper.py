@@ -1,10 +1,10 @@
 import requests
 import os
+import sys
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import gptscript
 import asyncio
-
 
 if "WORDPRESS_USERNAME" not in os.environ:
     raise ValueError("WORDPRESS_USERNAME is not set")
@@ -28,9 +28,8 @@ WORDPRESS_API_PATH = "/wp-json/wp/v2"
 def clean_wordpress_site_url(site_url):
 
     if not site_url.startswith("https://") and not site_url.startswith("http://"):
-        raise ValueError(
-            f"Error: Invalid site URL: {site_url}. No scheme supplied, must start with protocol, e.g. https:// or http://"
-        )
+        print(f"Error: Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://")
+        sys.exit(1)
 
     site_url = site_url.rstrip("/")
     if site_url.endswith("/wp-json"):
