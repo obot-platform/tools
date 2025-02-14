@@ -70,6 +70,7 @@ type VectorStore struct {
 	collectionTableName  string
 	vectorDimensions     int
 	hnswIndex            *HNSWIndex
+	reuseEmbeddings      bool
 }
 
 // HNSWIndex lets you specify the HNSW index parameters.
@@ -99,6 +100,7 @@ func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*Vect
 		embeddingFunc:        embeddingFunc,
 		embeddingConcurrency: env.GetIntFromEnvOrDefault(VsPgvectorEmbeddingConcurrency, 100),
 		hnswIndex:            nil,
+		reuseEmbeddings:      true,
 	}
 
 	var err error
@@ -302,6 +304,9 @@ func (v VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, colle
 		}
 	}
 
+	// Check if doc with same content exists
+	reuseEmbeddingsSQL := fmt.Sprintf(`SELECT embedding FROM %s WHERE document = $1`, v.embeddingTableName)
+
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, collection_id)
 		VALUES($1, $2, $3, $4, $5)`, v.embeddingTableName)
 
@@ -324,6 +329,17 @@ func (v VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, colle
 			// Wait here while $concurrency other goroutines are creating documents.
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
+
+			// Check if we can re-use embeddings
+			if v.reuseEmbeddings {
+				var embedding pgvector.Vector
+				err := v.conn.QueryRow(ctx, reuseEmbeddingsSQL, []byte(doc.Content)).Scan(&embedding)
+				if err == nil && len(embedding.Slice()) > 0 {
+					b.Queue(sql, doc.ID, []byte(doc.Content), embedding, doc.Metadata, cid)
+					slog.Debug("Reusing embedding", "docID", doc.ID)
+					return
+				}
+			}
 
 			vec, err := v.embeddingFunc(ctx, doc.Content)
 			if err != nil {
