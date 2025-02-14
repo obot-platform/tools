@@ -1,69 +1,48 @@
 tools:
   sendgrid:
     reference: ./sendgrid
-    all: true
   file-summarizer:
     reference: ./file-summarizer
-    all: true
   database:
     reference: ./database
   zoom:
     reference: ./zoom
-    all: true
   atlassian-jira:
     reference: ./atlassian/jira
-    all: true
   wordpress:
     reference: ./wordpress
-    all: true
   excel:
     reference: ./excel
-    all: true
   browser:
     reference: ./browser
-    all: true
   bluesky:
     reference: ./bluesky
-    all: true
   slack:
     reference: ./slack
-    all: true
   linkedin-publishing:
     reference: ./linkedin-publishing
-    all: true
   notion:
     reference: ./notion
-    all: true
   google-docs:
     reference: ./google/docs
-    all: true
   google-gmail:
     reference: ./google/gmail
-    all: true
   google-search:
     reference: ./google/search
-    all: true
   google-search-console:
     reference: ./google/search-console
-    all: true
   google-sheets:
     reference: ./google/sheets
-    all: true
   gitlab:
     reference: ./gitlab
-    all: true
   images:
     reference: ./images
-    all: true
   outlook-mail:
     reference: ./outlook/mail
-    all: true
   outlook-calender:
     reference: ./outlook/calendar
-    all: true
   github:
     reference: ./github
-    all: true
   time:
     reference: ./time
   workspace-files:
@@ -76,6 +55,8 @@ tools:
     reference: ./shell
   word:
     reference: ./word
+  tavily:
+    reference: ./search/tavily
 
 knowledgeDataSources:
   notion-data-source:
