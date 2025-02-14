@@ -5,6 +5,38 @@ from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import gptscript
 import asyncio
+import logging
+
+
+def setup_logger(name):
+    """Setup a logger that writes to sys.stderr. This will eventually show up in GPTScript's debugging logs.
+
+    Args:
+        name (str): The name of the logger.
+
+    Returns:
+        logging.Logger: The logger.
+    """
+    # Create a logger
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)  # Set the logging level
+
+    # Create a stream handler that writes to sys.stderr
+    stderr_handler = logging.StreamHandler(sys.stderr)
+
+    # Create a log formatter
+    formatter = logging.Formatter(
+        "[WordPress Tool Debugging Log]: %(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    stderr_handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(stderr_handler)
+
+    return logger
+
+
+logger = setup_logger(__name__)
 
 if "WORDPRESS_USERNAME" not in os.environ:
     raise ValueError("WORDPRESS_USERNAME is not set")
@@ -28,7 +60,9 @@ WORDPRESS_API_PATH = "/wp-json/wp/v2"
 def clean_wordpress_site_url(site_url):
 
     if not site_url.startswith("https://") and not site_url.startswith("http://"):
-        print(f"Error: Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://")
+        print(
+            f"Error: Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://"
+        )
         sys.exit(1)
 
     site_url = site_url.rstrip("/")
@@ -47,6 +81,7 @@ def is_valid_iso8601(date_string):
         datetime.fromisoformat(date_string)
         return True
     except ValueError:
+        logger.error(f"Invalid ISO 8601 date string: {date_string}")
         return False
 
 
@@ -92,15 +127,23 @@ def _prepend_base_path(base_path: str, file_path: str):
 
 
 def load_from_gptscript_workspace(filepath: str) -> bytes:
-    gptscript_client = gptscript.GPTScript()
-    wksp_file_path = _prepend_base_path("files", filepath)
-
     try:
-        return asyncio.run(gptscript_client.read_file_in_workspace(wksp_file_path))
-    except RuntimeError:  # If there's already an event loop running
-        loop = asyncio.get_running_loop()
-        return loop.run_until_complete(
-            gptscript_client.read_file_in_workspace(wksp_file_path)
+        gptscript_client = gptscript.GPTScript()
+        wksp_file_path = _prepend_base_path("files", filepath)
+
+        try:
+            return asyncio.run(gptscript_client.read_file_in_workspace(wksp_file_path))
+        except RuntimeError:  # If there's already an event loop running
+            loop = asyncio.get_running_loop()
+            return loop.run_until_complete(
+                gptscript_client.read_file_in_workspace(wksp_file_path)
+            )
+    except Exception as e:
+        logger.error(
+            f"Failed to load file {filepath} from GPTScript workspace. Exception: {e}"
+        )
+        raise Exception(
+            f"Failed to load file {filepath} from GPTScript workspace. Exception: {e}"
         )
 
 
