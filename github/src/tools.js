@@ -341,3 +341,7 @@ export async function removeIssueLabels(octokit, owner, repo, issueNumber, label
     }
     console.log(`Removed labels from issue #${issueNumber}: ${labelArray.join(', ')} - https://github.com/${owner}/${repo}/issues/${issueNumber}`);
 }
+
+export async function getUser(octokit) {
+    await octokit.users.getAuthenticated();
+}

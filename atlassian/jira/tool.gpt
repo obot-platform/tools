@@ -183,10 +183,6 @@ The List Issues tool can be used to search for issues in a Jira instance. The jq
 # END INSTRUCTIONS: Jira Tools
 
 ---
-!metadata:*:category
-Jira
-
----
 !metadata:*:icon
 /admin/assets/jira_icon.svg
 

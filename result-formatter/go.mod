@@ -2,7 +2,7 @@ module github.com/obot-platform/tools/result-formatter
 
 go 1.23.2
 
-require github.com/gptscript-ai/go-gptscript v0.9.6-0.20241028114905-1fce3cceae35
+require github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 
 require (
 	github.com/getkin/kin-openapi v0.124.0 // indirect

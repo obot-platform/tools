@@ -6,24 +6,23 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
-
-	"github.com/google/shlex"
 )
 
 // RunDatabaseCommand runs a sqlite3 command against the database and returns the output from the sqlite3 CLI.
-func RunDatabaseCommand(ctx context.Context, dbFile *os.File, sqlite3Args string) (string, error) {
+func RunDatabaseCommand(ctx context.Context, dbFile *os.File, sql string, opts ...string) (string, error) {
 	// Remove the "sqlite3" prefix and trim whitespace
-	sqlite3Args = strings.TrimPrefix(strings.TrimSpace(sqlite3Args), "sqlite3")
-
-	// Split the arguments using shlex
-	args, err := shlex.Split(sqlite3Args)
-	if err != nil {
-		return "", fmt.Errorf("error parsing sqlite3 args: %w", err)
+	args := append(opts, dbFile.Name())
+	if arg := strings.TrimSpace(sql); arg != "" {
+		// Use strconv.Unquote to safely handle quotes and escape sequences
+		unquoted, err := strconv.Unquote(arg)
+		if err != nil {
+			// If unquoting fails (e.g. string wasn't quoted), use original
+			unquoted = arg
+		}
+		args = append(args, unquoted)
 	}
-
-	// Append the database file name as the first argument
-	args = append([]string{dbFile.Name()}, args...)
 
 	// Build the sqlite3 command
 	cmd := exec.CommandContext(ctx, "sqlite3", args...)

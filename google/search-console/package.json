@@ -1,0 +1,15 @@
+{
+  "name": "search-console",
+  "version": "0.0.1",
+  "description": "Work with the google search console apis",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

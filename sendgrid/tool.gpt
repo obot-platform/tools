@@ -1,7 +1,7 @@
 ---
 Name: SendGrid
-Metadata: bundle: true
 Description: Tools for interacting with SendGrid.
+Metadata: bundle: true
 Share Tools: Send Email
 
 ---
@@ -34,10 +34,6 @@ When calling the Send Email tool:
 - Before sending every email, check the body for placeholder or template text and, when found, prompt the user to resolve them. Afterwards, send the email using the resolved values in the body
 
 # END INSTRUCTIONS: Send Email tool
-
----
-!metadata:*:category
-SendGrid
 
 ---
 !metadata:*:icon

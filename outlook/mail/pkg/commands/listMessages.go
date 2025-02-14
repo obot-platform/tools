@@ -90,6 +90,10 @@ func ListMessages(ctx context.Context, folderID, start, end, limit string) error
 		})
 	}
 
+	if len(elements) == 0 {
+		return nil
+	}
+
 	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
 		Name:        fmt.Sprintf("%s_outlook_mail", folderID),
 		Description: "Outlook mail messages in folder " + folderID,

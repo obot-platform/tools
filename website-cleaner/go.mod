@@ -5,7 +5,7 @@ go 1.23.3
 require (
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.2.1
 	github.com/PuerkitoBio/goquery v1.10.0
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241122154251-2ddfb8e12f34
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 	github.com/sirupsen/logrus v1.9.3
 )
 

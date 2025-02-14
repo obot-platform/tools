@@ -1,5 +1,6 @@
 import { GPTScript } from "@gptscript-ai/gptscript"
 import { Mutex } from "async-mutex"
+import Fuse from "fuse.js"
 
 export async function userContext(webClient) {
     const result = await webClient.auth.test({})
@@ -8,47 +9,56 @@ export async function userContext(webClient) {
     console.log(`Real Name: ${userResult.user.profile.real_name}`)
     console.log(`Display Name: ${userResult.user.profile.display_name}`)
     console.log(`User ID: ${result.user_id}`)
-    console.log(`Default time zone: ${userResult.user.tz_label} (UTC offset ${userResult.user.tz_offset / 3600} hours)`)
 }
 
 export async function listChannels(webClient) {
-    const publicChannels = await webClient.conversations.list({limit: 100, types: 'public_channel'})
-    const privateChannels = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+    const result = await webClient.conversations.list({limit: 100, types: 'public_channel,private_channel'})
+    const channels = result.channels
+
+    if (!channels || channels.length === 0) {
+        console.log('No channels found')
+        return
+    }
+
+    console.log(`Found ${channels.length} channels`)
 
     try {
         const gptscriptClient = new GPTScript()
-        const elements = [...publicChannels.channels, ...privateChannels.channels].map(channel => {
+        const elements = channels.map(channel => {
             return {
                 name: `${channel.name}`,
-                description: `${channel.purpose.value || ''}`,
+                description: `${channel.name} (ID: ${channel.id})`,
                 contents: channelToString(channel)
             }
         })
-
         const datasetID = await gptscriptClient.addDatasetElements(elements, {
-            name: "slack_channels"
+            name: 'slack_channels',
         })
-        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.channels.length + privateChannels.channels.length} channels`)
+        console.log(`Created dataset with ID ${datasetID} with ${channels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
 }
 
 export async function searchChannels(webClient, query) {
-    const publicResult = await webClient.conversations.list({limit: 100, types: 'public_channel'})
-    const privateResult = await webClient.conversations.list({limit: 100, types: 'private_channel'})
+    const result = await webClient.conversations.list({limit: 100, types: 'public_channel,private_channel'})
+    const channels = (new Fuse(
+        result?.channels ?? [],
+        {
+            keys: ['name'],
+            threshold: 0.4,
+            findAllMatches: true
+        }
+    )).search(query).map(result => result.item)
 
-    const publicChannels = publicResult.channels.filter(channel => channel.name.includes(query))
-    const privateChannels = privateResult.channels.filter(channel => channel.name.includes(query))
-
-    if (publicChannels.length + privateChannels.length === 0) {
+    if (!channels || channels.length === 0) {
         console.log('No channels found')
         return
     }
 
     try {
         const gptscriptClient = new GPTScript()
-        const elements = [...publicChannels, ...privateChannels].map(channel => {
+        const elements = channels.map(channel => {
             return {
                 name: `${channel.name}`,
                 description: `${channel.name} (ID: ${channel.id})`,
@@ -59,7 +69,7 @@ export async function searchChannels(webClient, query) {
             name: `${query}_slack_channels`,
             description: `list of slack channels matching search query "${query}"`
         })
-        console.log(`Created dataset with ID ${datasetID} with ${publicChannels.length + privateChannels.length} channels`)
+        console.log(`Created dataset with ID ${datasetID} with ${channels.length} channels`)
     } catch (e) {
         console.log('Failed to create dataset:', e)
     }
@@ -122,6 +132,21 @@ export async function getThreadHistory(webClient, channelId, threadId, limit) {
     }
 }
 
+export async function getThreadHistoryFromLink(webClient, messageLink, limit) {
+    // Extract channel ID and message timestamp from the link
+    // Example link format: https://team.slack.com/archives/CHANNEL_ID/p1234567890123456
+    const matches = messageLink.match(/archives\/([A-Z0-9]+)\/p(\d+)/)
+    if (!matches) {
+        console.log('Invalid message link format')
+        process.exit(1)
+    }
+
+    const channelId = matches[1]
+    // Convert the timestamp to Slack's format (with decimal point)
+    const threadId = (matches[2].slice(0, -6) + '.' + matches[2].slice(-6))
+
+    await getThreadHistory(webClient, channelId, threadId, limit)
+}
 
 export async function search(webClient, query) {
     const result = await webClient.search.all({
@@ -207,12 +232,14 @@ export async function listUsers(webClient) {
 
 export async function searchUsers(webClient, query) {
     const users = await webClient.users.list()
-    const matchingUsers = users.members.filter(user => {
-        return user.name.includes(query) ||
-            user.profile.real_name.includes(query) ||
-            user.profile.display_name.includes(query)
+    const fuse = new Fuse(users.members, {
+        keys: ['name', 'profile.real_name', 'profile.display_name'],
+        threshold: 0.5,
+        findAllMatches: true
     })
-    if (matchingUsers.length === 0) {
+    const matchingUsers = fuse.search(query).map(result => result.item)
+
+    if (!matchingUsers || matchingUsers.length === 0) {
         console.log('No users found')
         return
     }
@@ -403,6 +430,20 @@ function userToString(user) {
     return str
 }
 
+const userTimezone = (() => {
+    const envTz = (process.env.OBOT_USER_TIMEZONE ?? 'UTC').trim();
+
+    // Verify the time zone or default to UTC
+    let timeZone = envTz;
+    try {
+        new Intl.DateTimeFormat(undefined, { timeZone }).format();
+    } catch {
+        timeZone = 'UTC';
+    }
+
+    return timeZone;
+})()
+
 async function messageToString(webClient, message) {
     const time = new Date(parseFloat(message.ts) * 1000)
     let userName = message.user
@@ -420,7 +461,8 @@ async function messageToString(webClient, message) {
         } catch (e) {}
     }
 
-    let str = `${time.toLocaleString()}: ${userName}: ${message.text}\n`
+
+    let str = `${time.toLocaleString('en-US', { timeZone: userTimezone, timeZoneName: 'short' })}: ${userName}: ${message.text}\n`
     str += `  message ID: ${message.ts}\n`
     if (message.blocks && message.blocks.length > 0) {
         str += `  message blocks: ${JSON.stringify(message.blocks)}\n`

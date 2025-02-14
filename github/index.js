@@ -18,7 +18,8 @@ import {
     listAssignedIssues,
     listPRsForReview,
     addIssueLabels,
-    removeIssueLabels
+    removeIssueLabels,
+    getUser,
 } from './src/tools.js';
 
 if (process.argv.length !== 3) {
@@ -38,6 +39,9 @@ const octokit = new Octokit({ auth: token });
 
 try {
     switch (command) {
+        case 'validateCreds':
+            await getUser(octokit);
+            break
         case 'searchIssuesAndPRs':
             await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
             break;

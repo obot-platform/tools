@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 	github.com/microsoftgraph/msgraph-sdk-go v1.47.0
 	github.com/sirupsen/logrus v1.9.3
 )

@@ -1,7 +1,7 @@
 ---
 Name: Gmail
-Metadata: bundle: true
 Description: Tools for interacting with a user's Gmail account
+Metadata: bundle: true
 Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
 
 ---
@@ -149,10 +149,6 @@ These email IDs are not useful to the user, so don't show them to the user.
 Instead, get the contents of the elements and display that to the user.
 
 ## End of instructions for getting emails from a dataset
-
----
-!metadata:*:category
-Gmail
 
 ---
 !metadata:*:icon

@@ -20,7 +20,7 @@ func (cfg *Config) Validate(toolPath string) error {
 		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
 
-	url := cfg.url.JoinPath("/models")
+	url := cfg.URL.JoinPath("/models")
 
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {

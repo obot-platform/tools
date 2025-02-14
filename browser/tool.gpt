@@ -186,9 +186,5 @@ Metadata: index: false
 #!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run server
 
 ---
-!metadata:*:category
-Browser
-
----
 !metadata:*:icon
 /admin/assets/chromium_icon.svg

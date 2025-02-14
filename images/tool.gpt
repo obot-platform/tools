@@ -1,7 +1,7 @@
 ---
 Name: Images
-Metadata: bundle: true
 Description: Tools for analyzing and generating images
+Metadata: bundle: true
 Share Tools: Analyze Images, Generate Images
 
 ---
@@ -60,10 +60,6 @@ e.g. Analyzing a single image: ["https://example.com/image2.png"]
 e.g. Analyzing multiple images: ["https://example.com/image1.webp", "cool.jpg", "cow.webp", "generated_image_defg1234.png", "https://example.com/image2.png"]
 
 # END INSTRUCTIONS: Analyze Images tool
-
----
-!metadata:*:category
-Images
 
 ---
 !metadata:*:icon

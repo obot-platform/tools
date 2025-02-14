@@ -1,0 +1,44 @@
+---
+Name: Tavily Web Search
+Description: Tools for searching the web using the Tavily API.
+Metadata: bundle: true
+Share Tools: Search, Read Site
+
+---
+Name: Search
+Description: Search the Web with Tavily. This returns a list of search results scored by relevance to the query and summarized.
+Credential: ./credential
+Share Context: Tavily Context
+Param: query: The search query
+Param: includeDomains: A comma-separated list of domains to specifically include in the search
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py search
+
+---
+Name: Read Site
+Description: Read a specific website with Tavily
+Credential: ./credential
+Share Context: Tavily Context
+Param: url: The URL of the website
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py extract
+
+---
+!metadata:*:icon
+/admin/assets/tavily_icon.svg
+
+---
+Name: Tavily Context
+Type: context
+Share Context: ../../time
+
+#!sys.echo
+
+# Instructions for using Tavily Search Tools
+
+You have tools for searching the web using the Tavily API Service.
+For any user query that doesn't contain a URL, first use the Search tool to retrieve some results.
+If the returned content for the top results doesn't satisfy you in terms of answer quality, use the Read Site tool to extract the raw content from the top results until you're satisfied with the answer.
+Add the link to the sources to all of your answers.
+
+# End of instructions for using Tavily Search Tools

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +18,38 @@ import (
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/pkg/browser"
 )
+
+type input struct {
+	OAuthInfo      oauthInfo   `json:"oauthInfo"`
+	PromptInfo     *promptInfo `json:"promptInfo,omitempty"`
+	ValidationTool string      `json:"validationTool,omitempty"`
+}
+
+type oauthInfo struct {
+	Integration   string   `json:"integration"`
+	Token         string   `json:"token"`
+	Scope         []string `json:"scope"`
+	OptionalScope []string `json:"optionalScope"`
+}
+
+type promptInfo struct {
+	Fields    []field           `json:"fields"`
+	Message   string            `json:"message"`
+	Sensitive string            `json:"sensitive"`
+	Metadata  map[string]string `json:"metadata"`
+}
+
+type field struct {
+	gptscript.Field
+	Env string `json:"env"`
+}
+
+type sysPromptInput struct {
+	Message   string            `json:"message,omitempty"`
+	Fields    gptscript.Fields  `json:"fields,omitempty"`
+	Sensitive string            `json:"sensitive,omitempty"`
+	Metadata  map[string]string `json:"metadata,omitempty"`
+}
 
 type oauthResponse struct {
 	TokenType    string            `json:"token_type"`
@@ -33,15 +66,6 @@ type cred struct {
 	ExpiresAt    *time.Time        `json:"expiresAt"`
 	RefreshToken string            `json:"refreshToken"`
 }
-
-var (
-	integration   = os.Getenv("INTEGRATION")
-	token         = os.Getenv("TOKEN")
-	scope         = os.Getenv("SCOPE")
-	optionalScope = os.Getenv("OPTIONAL_SCOPE")
-	promptTokens  = os.Getenv("PROMPT_TOKENS")
-	promptVars    = os.Getenv("PROMPT_VARS")
-)
 
 func normalizeForEnv(appName string) string {
 	return strings.ToUpper(strings.ReplaceAll(appName, "-", "_"))
@@ -64,17 +88,49 @@ func main() {
 	}
 }
 
-func mainErr() error {
-	authorizeURL, refreshURL, tokenURL := getURLs(integration)
+func mainErr() (err error) {
+	var credJSON []byte
+	inputStr := os.Getenv("TOOL_CALL_BODY")
+	if inputStr == "" {
+		return fmt.Errorf("main: TOOL_CALL_BODY environment variable not set")
+	}
+
+	var in input
+	if err = json.Unmarshal([]byte(inputStr), &in); err != nil {
+		return fmt.Errorf("main: error parsing input JSON: %w", err)
+	}
+
+	gs, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
+	if err != nil {
+		return fmt.Errorf("main: failed to create GPTScript: %w", err)
+	}
+	defer gs.Close()
+
+	ctx := context.Background()
+
+	defer func() {
+		if err == nil {
+			if err = validateCredential(ctx, gs, in.ValidationTool, credJSON); err != nil {
+				return
+			}
+			fmt.Print(string(credJSON))
+		}
+	}()
+
+	authorizeURL, refreshURL, tokenURL := getURLs(in.OAuthInfo.Integration)
 	if authorizeURL == "" || refreshURL == "" || tokenURL == "" {
 		// The URLs aren't set for this credential. Check to see if we should prompt the user for other tokens
-		if promptTokens == "" {
-			fmt.Printf("All the following environment variables must be set: GPTSCRIPT_OAUTH_%s_AUTH_URL, GPTSCRIPT_OAUTH_%[1]s_REFRESH_URL, GPTSCRIPT_OAUTH_%[1]s_TOKEN_URL", normalizeForEnv(integration))
-			fmt.Printf("Or the PROMPT_TOKENS environment variable must be provied for token prompting.")
+		if in.PromptInfo == nil {
+			fmt.Printf("All the following environment variables must be set: GPTSCRIPT_OAUTH_%s_AUTH_URL, GPTSCRIPT_OAUTH_%[1]s_REFRESH_URL, GPTSCRIPT_OAUTH_%[1]s_TOKEN_URL", normalizeForEnv(in.OAuthInfo.Integration))
+			fmt.Printf("Or the promptInfo configuration must be provided for token prompting.")
 			os.Exit(1)
 		}
 
-		return promptForTokens(integration, promptTokens, promptVars)
+		credJSON, err = promptForTokens(ctx, gs, in.OAuthInfo.Integration, in.PromptInfo)
+		if err != nil {
+			return fmt.Errorf("main: failed to prompt for tokens: %w", err)
+		}
+		return nil
 	}
 
 	// Refresh existing credential if there is one.
@@ -92,11 +148,11 @@ func mainErr() error {
 
 		q := u.Query()
 		q.Set("refresh_token", c.RefreshToken)
-		if scope != "" {
-			q.Set("scope", strings.Join(strings.Fields(scope), " "))
+		if len(in.OAuthInfo.Scope) != 0 {
+			q.Set("scope", strings.Join(in.OAuthInfo.Scope, " "))
 		}
-		if optionalScope != "" {
-			q.Set("optional_scope", optionalScope)
+		if len(in.OAuthInfo.OptionalScope) != 0 {
+			q.Set("optional_scope", strings.Join(in.OAuthInfo.OptionalScope, " "))
 		}
 		u.RawQuery = q.Encode()
 
@@ -121,7 +177,7 @@ func mainErr() error {
 		}
 
 		envVars := map[string]string{
-			token: oauthResp.AccessToken,
+			in.OAuthInfo.Token: oauthResp.AccessToken,
 		}
 
 		for k, v := range oauthResp.Extras {
@@ -138,12 +194,11 @@ func mainErr() error {
 			out.ExpiresAt = &expiresAt
 		}
 
-		credJSON, err := json.Marshal(out)
+		credJSON, err = json.Marshal(out)
 		if err != nil {
 			return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
 		}
 
-		fmt.Print(string(credJSON))
 		return nil
 	}
 
@@ -169,23 +224,18 @@ func mainErr() error {
 	q := u.Query()
 	q.Set("state", state)
 	q.Set("challenge", challenge)
-	if scope != "" {
-		q.Set("scope", strings.Join(strings.Fields(scope), " "))
+	if len(in.OAuthInfo.Scope) != 0 {
+		q.Set("scope", strings.Join(in.OAuthInfo.Scope, " "))
 	}
-	if optionalScope != "" {
-		q.Set("optional_scope", optionalScope)
+	if len(in.OAuthInfo.OptionalScope) != 0 {
+		q.Set("optional_scope", strings.Join(in.OAuthInfo.OptionalScope, " "))
 	}
 	u.RawQuery = q.Encode()
-
-	gs, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
-	if err != nil {
-		return fmt.Errorf("main: failed to create GPTScript: %w", err)
-	}
 
 	metadata := map[string]string{
 		"authType":        "oauth",
 		"toolContext":     "credential",
-		"toolDisplayName": fmt.Sprintf("%s%s Integration", strings.ToTitle(integration[:1]), integration[1:]),
+		"toolDisplayName": fmt.Sprintf("%s%s Integration", strings.ToTitle(in.OAuthInfo.Integration[:1]), in.OAuthInfo.Integration[1:]),
 		"authURL":         u.String(),
 	}
 
@@ -230,7 +280,7 @@ func mainErr() error {
 		}
 
 		envVars := map[string]string{
-			token: oauthResp.AccessToken,
+			in.OAuthInfo.Token: oauthResp.AccessToken,
 		}
 
 		for k, v := range oauthResp.Extras {
@@ -247,12 +297,11 @@ func mainErr() error {
 			out.ExpiresAt = &expiresAt
 		}
 
-		credJSON, err := json.Marshal(out)
+		credJSON, err = json.Marshal(out)
 		if err != nil {
 			return fmt.Errorf("main: failed to marshal token credential: %w", err)
 		}
 
-		fmt.Print(string(credJSON))
 		break
 	}
 
@@ -304,64 +353,88 @@ func generateString() (string, error) {
 	return string(b), nil
 }
 
-func promptForTokens(integration, promptTokens, promptVars string) error {
-	metadata := map[string]string{
-		"authType":        "pat",
-		"toolContext":     "credential",
-		"toolDisplayName": fmt.Sprintf("%s%s Integration", strings.ToTitle(integration[:1]), integration[1:]),
+func promptForTokens(ctx context.Context, g *gptscript.GPTScript, integration string, prompt *promptInfo) ([]byte, error) {
+	if prompt.Metadata == nil {
+		prompt.Metadata = make(map[string]string)
+	}
+	prompt.Metadata["authType"] = "pat"
+	prompt.Metadata["toolContext"] = "credential"
+	prompt.Metadata["toolDisplayName"] = fmt.Sprintf("%s%s Integration", strings.ToTitle(integration[:1]), integration[1:])
+
+	promptFields := make([]gptscript.Field, 0, len(prompt.Fields))
+	for _, field := range prompt.Fields {
+		promptFields = append(promptFields, field.Field)
 	}
 
-	b, err := json.Marshal(metadata)
-	if err != nil {
-		return fmt.Errorf("promptForTokens: failed to marshal metadata: %w", err)
-	}
-
-	g, err := gptscript.NewGPTScript(gptscript.GlobalOptions{})
-	if err != nil {
-		return fmt.Errorf("promptForTokens: failed to create GPTScript client: %w", err)
-	}
-	defer g.Close()
-
-	run, err := g.Run(context.Background(), "sys.prompt", gptscript.Options{
-		Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter token values for %s.","fields":"%s","sensitive": "true"}`, b, integration, strings.ReplaceAll(promptTokens, ";", ",")),
+	sysPromptIn, err := json.Marshal(sysPromptInput{
+		Message:   prompt.Message,
+		Fields:    promptFields,
+		Metadata:  prompt.Metadata,
+		Sensitive: prompt.Sensitive,
 	})
 	if err != nil {
-		return fmt.Errorf("promptForTokens: failed to run sys.prompt: %w", err)
+		return nil, fmt.Errorf("promptForTokens: error marshalling sys prompt input: %w", err)
+	}
+
+	run, err := g.Run(ctx, "sys.prompt", gptscript.Options{
+		Input: string(sysPromptIn),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("promptForTokens: failed to run sys.prompt: %w", err)
 	}
 
 	out, err := run.Text()
 	if err != nil {
-		return fmt.Errorf("promptForTokens: failed to get prompt response: %w", err)
+		return nil, fmt.Errorf("promptForTokens: failed to get prompt response: %w", err)
 	}
 
 	m := make(map[string]string)
 	if err = json.Unmarshal([]byte(out), &m); err != nil {
-		return fmt.Errorf("promptForTokens: failed to unmarshal prompt response: %w", err)
+		return nil, fmt.Errorf("promptForTokens: failed to unmarshal prompt response: %w", err)
 	}
 
-	if promptVars != "" {
-		run, err = g.Run(context.Background(), "sys.prompt", gptscript.Options{
-			Input: fmt.Sprintf(`{"metadata": %s,"message":"Please enter token values for %s.","fields":"%s","sensitive": "false"}`, b, integration, strings.ReplaceAll(promptVars, ";", ",")),
-		})
-		if err != nil {
-			return fmt.Errorf("promptForTokens: failed to run sys.prompt: %w", err)
-		}
-
-		out, err = run.Text()
-		if err != nil {
-			return fmt.Errorf("promptForTokens: failed to get prompt response: %w", err)
-		}
-
-		if err = json.Unmarshal([]byte(out), &m); err != nil {
-			return fmt.Errorf("promptForTokens: failed to unmarshal prompt response: %w", err)
-		}
+	envs := make(map[string]string, len(m))
+	for _, field := range prompt.Fields {
+		envs[field.Env] = m[field.Name]
 	}
 
-	b, err = json.Marshal(m)
+	b, err := json.Marshal(map[string]any{"env": envs})
 	if err != nil {
-		return fmt.Errorf("promptForTokens: failed to marshal prompt response: %w", err)
+		return nil, fmt.Errorf("promptForTokens: error marshalling envs: %w", err)
 	}
 
-	fmt.Printf(`{"env": %s}`, b)
+	return b, nil
+}
+
+func validateCredential(ctx context.Context, client *gptscript.GPTScript, tool string, envBytes []byte) error {
+	if tool == "" {
+		return nil
+	}
+
+	var envMap map[string]any
+	if err := json.Unmarshal(envBytes, &envMap); err != nil {
+		return err
+	}
+
+	env := make([]string, 0, len(envMap))
+	for k, v := range envMap["env"].(map[string]any) {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	run, err := client.Run(ctx, tool, gptscript.Options{
+		GlobalOptions: gptscript.GlobalOptions{
+			Env: env,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("error running tool: %w", err)
+	}
+
+	_, err = run.Text()
+	if err != nil {
+		errStr, _, _ := strings.Cut(err.Error(), ": exit status ")
+		return errors.New(errStr)
+	}
+
 	return nil
 }

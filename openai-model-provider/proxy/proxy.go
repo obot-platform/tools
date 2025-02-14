@@ -9,8 +9,14 @@ import (
 	"strings"
 )
 
+var (
+	OpenaiBaseHostName = "api.openai.com"
+
+	ChatCompletionsPath = "/v1/chat/completions"
+)
+
 type Config struct {
-	url *url.URL
+	URL *url.URL
 
 	// ListenPort is the port the proxy server listens on
 	ListenPort string
@@ -39,7 +45,7 @@ type server struct {
 }
 
 func (cfg *Config) ensureURL() error {
-	if cfg.url != nil {
+	if cfg.URL != nil {
 		return nil
 	}
 
@@ -58,7 +64,7 @@ func (cfg *Config) ensureURL() error {
 		}
 	}
 
-	cfg.url = u
+	cfg.URL = u
 	return nil
 }
 
@@ -81,25 +87,31 @@ func Run(cfg *Config) error {
 
 	mux := http.NewServeMux()
 
-	// Register custom path handlers first
-	for path, handler := range cfg.CustomPathHandleFuncs {
-		mux.HandleFunc(path, handler)
-	}
-
 	// Register default handlers only if they are not already registered
 	if _, exists := cfg.CustomPathHandleFuncs["/{$}"]; !exists {
 		mux.HandleFunc("/{$}", s.healthz)
 	}
-	if _, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
+	if handler, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
 		mux.Handle("/v1/models", &httputil.ReverseProxy{
 			Director:       s.proxyDirector,
 			ModifyResponse: cfg.RewriteModelsFn,
 		})
+	} else {
+		mux.HandleFunc("/v1/models", handler)
 	}
-	if _, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
+	if handler, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
 		mux.Handle("/v1/", &httputil.ReverseProxy{
 			Director: s.proxyDirector,
 		})
+	} else {
+		mux.HandleFunc("/v1/", handler)
+	}
+
+	for path, handler := range cfg.CustomPathHandleFuncs {
+		if path == "/v1/models" || path == "/v1/" {
+			continue
+		}
+		mux.HandleFunc(path, handler)
 	}
 
 	httpServer := &http.Server{
@@ -119,9 +131,9 @@ func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *server) proxyDirector(req *http.Request) {
-	req.URL.Scheme = s.cfg.url.Scheme
-	req.URL.Host = s.cfg.url.Host
-	req.URL.Path = s.cfg.url.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
+	req.URL.Scheme = s.cfg.URL.Scheme
+	req.URL.Host = s.cfg.URL.Host
+	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)

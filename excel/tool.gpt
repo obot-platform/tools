@@ -1,6 +1,7 @@
 ---
 Name: Excel
 Description: Tools for interacting with Microsoft Excel workbooks.
+Metadata: bundle: true
 Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers, Get Worksheet Data, Get Worksheet Tables, Query Worksheet Data, Add Worksheet Row, Add Worksheet Column, Create Worksheet, Get Dates From Serials
 
 ---
@@ -138,14 +139,6 @@ An excel formula should always start with `=` - for example `=SUM(A1,A2)`.
 If the user asks for a calculation or a formula, use an excel formula if possible instead of calculating the answer directly.
 
 ## End of instructions for using Excel tools
-
----
-!metadata:Excel:bundle
-true
-
----
-!metadata:*:category
-Excel
 
 ---
 !metadata:*:icon

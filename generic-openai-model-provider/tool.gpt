@@ -1,7 +1,5 @@
 Name: OpenAI Compatible Generic Provider
 Description: Model Provider for generic OpenAI API compatible model providers
-Metadata: envVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASE_URL
-Metadata: optionalEnvVars: OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../placeholder-credential as generic-openai-model-provider with OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASE_URL;OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: generic-openai-model-provider
@@ -9,8 +7,29 @@ Metadata: noUserAuth: generic-openai-model-provider
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:*:icon
-/admin/assets/obot_openai_antenna_icon.png
+!metadata:OpenAI Compatible Generic Provider:providerMeta
+{
+    "icon": "/admin/assets/obot_openai_antenna_icon.png",
+    "iconDark": "/admin/assets/obot_openai_antenna_icon.png",
+    "link": "https://platform.openai.com/docs/api-reference/introduction",
+    "description": "Model Provider for generic [OpenAI API compatible](https://platform.openai.com/docs/api-reference/introduction) model providers, like LM-Studio, Ollama, vLLM, etc.",
+    "envVars": [
+        {
+            "name": "OBOT_GENERIC_OPENAI_MODEL_PROVIDER_BASE_URL",
+            "friendlyName": "Base URL",
+            "description": "Base URL for the OpenAI-compatible API, e.g. http://localhost:1234/v1 for LM-Studio.",
+            "sensitive": false
+        }
+    ],
+    "optionalEnvVars": [
+        {
+            "name": "OBOT_GENERIC_OPENAI_MODEL_PROVIDER_API_KEY",
+            "friendlyName": "API Key",
+            "description": "API Key for the OpenAI-compatible API. Some providers like Ollama don't enforce Authentication, so this is optional.",
+            "sensitive": true
+        }
+    ]
+}
 
 ---
 Name: validate

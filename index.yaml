@@ -1,65 +1,50 @@
 tools:
   sendgrid:
     reference: ./sendgrid
-    all: true
   file-reader:
     reference: ./knowledge/file-reader.gpt
   file-summarizer:
     reference: ./file-summarizer
-    all: true
   database:
     reference: ./database
   zoom:
     reference: ./zoom
-    all: true
   atlassian-jira:
     reference: ./atlassian/jira
-    all: true
+  wordpress:
+    reference: ./wordpress
   excel:
     reference: ./excel
-    all: true
   browser:
     reference: ./browser
-    all: true
   bluesky:
     reference: ./bluesky
-    all: true
   slack:
     reference: ./slack
-    all: true
-  linkedin:
-    reference: ./linkedin
-    all: true
+  linkedin-publishing:
+    reference: ./linkedin-publishing
   notion:
     reference: ./notion
-    all: true
   google-docs:
     reference: ./google/docs
-    all: true
   google-gmail:
     reference: ./google/gmail
-    all: true
   google-search:
     reference: ./google/search
-    all: true
+  google-search-console:
+    reference: ./google/search-console
   google-sheets:
     reference: ./google/sheets
-    all: true
   gitlab:
     reference: ./gitlab
-    all: true
   images:
     reference: ./images
-    all: true
   outlook-mail:
     reference: ./outlook/mail
-    all: true
   outlook-calender:
     reference: ./outlook/calendar
-    all: true
   github:
     reference: ./github
-    all: true
   time:
     reference: ./time
   workspace-files:
@@ -70,6 +55,10 @@ tools:
     reference: ./knowledge
   shell:
     reference: ./shell
+  word:
+    reference: ./word
+  tavily:
+    reference: ./search/tavily
 
 knowledgeDataSources:
   notion-data-source:
@@ -108,6 +97,8 @@ system:
     reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
+  safe-search:
+    reference: ./search/tavily/safesearch.gpt
 
 modelProviders:
   openai-model-provider:

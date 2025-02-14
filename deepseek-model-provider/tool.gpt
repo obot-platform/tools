@@ -1,6 +1,5 @@
 Name: DeepSeek
 Description: Model Provider for DeepSeek
-Metadata: envVars: OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../placeholder-credential as deepseek-model-provider with OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: deepseek-model-provider
@@ -8,8 +7,20 @@ Metadata: noUserAuth: deepseek-model-provider
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:*:icon
-/admin/assets/deepseek-logo.svg
+!metadata:DeepSeek:providerMeta
+{
+    "icon": "/admin/assets/deepseek-logo.svg",
+    "iconDark": "/admin/assets/deepseek-logo.svg",
+    "link": "https://www.deepseek.com/",
+    "envVars": [
+        {
+            "name": "OBOT_DEEPSEEK_MODEL_PROVIDER_API_KEY",
+            "friendlyName": "API Key",
+            "description": "DeepSeek API Key. Can be created and fetched from https://platform.deepseek.com/api_keys",
+            "sensitive": true
+        }
+    ]
+}
 
 ---
 Name: validate

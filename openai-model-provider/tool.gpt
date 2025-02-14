@@ -1,6 +1,5 @@
 Name: OpenAI
 Description: Model Provider for OpenAI
-Metadata: envVars: OBOT_OPENAI_MODEL_PROVIDER_API_KEY
 Model Provider: true
 Credential: ../placeholder-credential as openai-model-provider with OBOT_OPENAI_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: openai-model-provider
@@ -8,8 +7,19 @@ Metadata: noUserAuth: openai-model-provider
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:*:icon
-https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/open-ai-logo-duotone.svg
+!metadata:OpenAI:providerMeta
+{
+    "icon": "https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/open-ai-logo-duotone.svg",
+    "link": "https://openai.com/",
+    "envVars": [
+        {
+            "name": "OBOT_OPENAI_MODEL_PROVIDER_API_KEY",
+            "friendlyName": "API Key",
+            "description": "OpenAI API Key. Can be created and fetched from https://platform.openai.com/settings/organization/api-keys or https://platform.openai.com/api-keys",
+            "sensitive": true
+        }
+    ]
+}
 
 ---
 Name: validate

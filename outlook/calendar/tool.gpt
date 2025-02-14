@@ -1,7 +1,7 @@
 ---
 Name: Outlook Calendar
-Metadata: bundle: true
 Description: Tools for interacting with Microsoft Outlook Calendar.
+Metadata: bundle: true
 Share Tools: List Calendars, List Events Today, List Events, Get Event Details, Create Event, Invite User To Event, Delete Event, Search Events, Respond To Event
 
 ---
@@ -195,10 +195,6 @@ In most circumstances, this event will not span multiple days. Ask for confirmat
 event that spans multiple days.
 
 ## End of instructions for scheduling recurring meetings in Outlook Calendar
-
----
-!metadata:*:category
-Outlook Calendar
 
 ---
 !metadata:*:icon

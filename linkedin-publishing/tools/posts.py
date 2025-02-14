@@ -1,12 +1,11 @@
-from tools.helper import tool_registry, ACCESS_TOKEN, load_from_gptscript_workspace
+from tools.helper import ACCESS_TOKEN, load_from_gptscript_workspace
 from linkedin_api.clients.restli.client import RestliClient
 from tools.users import get_user
 import os
 import requests
 
 
-@tool_registry.register_tool("CreatePost")
-async def create_post(client: RestliClient):
+async def create_post(client: RestliClient) -> dict:
     r = get_user(client)
     user_id = r["sub"]
     content = os.getenv("CONTENT")
@@ -97,10 +96,14 @@ async def create_post(client: RestliClient):
         raise ValueError(
             f"Error: failed to create post. Status code: {response.status_code}. Response: {response.entity}"
         )
+
+    response.entity["link"] = (
+        f"https://www.linkedin.com/feed/update/{response.entity['id']}"  # craft the link manually
+    )
     return response.entity
 
 
-def _register_upload(client: RestliClient, category: str):
+def _register_upload(client: RestliClient, category: str) -> tuple[str, dict]:
     url = "https://api.linkedin.com/v2/assets?action=registerUpload"
 
     headers = {
@@ -145,7 +148,7 @@ def _register_upload(client: RestliClient, category: str):
         )
 
 
-async def _upload_registered_file(file_path, upload_url):
+async def _upload_registered_file(file_path, upload_url) -> int:
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Content-Type": "application/octet-stream",

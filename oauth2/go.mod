@@ -3,8 +3,7 @@ module gateway-oauth2
 go 1.23.0
 
 require (
-	github.com/adrg/xdg v0.4.0
-	github.com/gptscript-ai/go-gptscript v0.9.5-rc5.0.20240927213153-2af51434b93e
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 )
 

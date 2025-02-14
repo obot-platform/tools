@@ -25,6 +25,10 @@ func main() {
 		err = commands.ListDocs(ctx)
 	case "getDoc":
 		err = commands.GetDoc(ctx, os.Getenv("DOC_ID"))
+	case "getDocByPath":
+		err = commands.GetDocByPath(ctx, os.Getenv("DOC_PATH"))
+	case "writeDoc":
+		err = commands.WriteDoc(ctx, os.Getenv("DOC_NAME"), os.Getenv("DOC_CONTENT"))
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)

@@ -1,7 +1,7 @@
 ---
 Name: YouTube
-Metadata: bundle: true
 Description: Tools for interacting with YouTube
+Metadata: bundle: true
 Share Tools: Transcribe YouTube Video
 
 ---
@@ -14,10 +14,6 @@ Param: model: (Optional) The name of the model to use when cleaning up and summa
 Metadata: noUserAuth: sys.model.provider.credential
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/transcriber.py
-
----
-!metadata:*:category
-YouTube
 
 ---
 !metadata:*:icon

@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 	github.com/ncruces/go-sqlite3 v0.20.3
 )
 

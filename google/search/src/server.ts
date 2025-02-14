@@ -70,7 +70,7 @@ async function main (): Promise<void> {
     stopped = true
     console.error('Daemon shutting down...')
     try {
-      await sessionManager.cleanup() // Ensure all browsers are closed
+      await sessionManager.destroy() // Ensure all browsers are closed
     } catch (err) {
       console.error('Error during session cleanup:', err)
     }

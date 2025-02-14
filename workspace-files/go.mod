@@ -2,7 +2,7 @@ module github.com/obot-platform/tools/context
 
 go 1.23.2
 
-require github.com/gptscript-ai/go-gptscript v0.9.6-0.20241023195750-c09e0f56b39b
+require github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

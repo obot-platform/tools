@@ -1,7 +1,7 @@
 ---
 Name: GitLab
-Metadata: bundle: true
 Description: Tools for interacting with GitLab.
+Metadata: bundle: true
 Share Tools: Search Issues, List Project Issues, List My Assigned Issues, List My Created Issues, Get Issue Details, Create Issue, Update Issue, Delete Issue, Add Issue Comment, Search Merge Requests, List Project Merge Requests, List My Assigned Merge Requests, List My Opened Merge Requests, Get Merge Request Details, Create Merge Request, Update Merge Request, Delete Merge Request, Add Merge Request Comment, Approve Merge Request, Lookup User ID
 
 ---
@@ -240,10 +240,6 @@ If the namespace is not specified, assume the namespace should be the current us
 
 
 ## End of instructions for using the GitLab tools
-
----
-!metadata:*:category
-GitLab
 
 ---
 !metadata:*:icon

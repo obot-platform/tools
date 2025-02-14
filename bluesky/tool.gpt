@@ -1,7 +1,7 @@
 ---
 Name: Bluesky
-Metadata: bundle: true
 Description: Tools for interacting with Bluesky (bsky.app)
+Metadata: bundle: true
 Share Tools: Create Post, Delete Post, Search Posts, Search Users
 
 ---
@@ -50,10 +50,6 @@ Share Context: Current Date and Time from ../time
 Param: post_uri: The URI of the post to delete.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- deletePost
-
----
-!metadata:*:category
-Bluesky
 
 ---
 !metadata:*:icon
