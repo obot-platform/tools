@@ -7,12 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/env"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -390,7 +392,7 @@ func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocu
 	}
 	dims := len(queryEmbedding)
 
-	whereClause, args, err := buildWhereClause([]any{dims, pgvector.NewVector(queryEmbedding), numDocuments}, where)
+	whereClause, args, err := buildWhereClause([]any{dims, pgvector.NewVector(queryEmbedding), numDocuments}, where, whereDocument)
 	if err != nil {
 		return nil, err
 	}
@@ -483,7 +485,7 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 
 	// Where clause takes precedence over documentID for consistency with chromem-go's behavior, as that was the default before
 	if len(where) > 0 {
-		whereClause, args, err := buildWhereClause([]any{cid}, where)
+		whereClause, args, err := buildWhereClause([]any{cid}, where, whereDocument)
 		if err != nil {
 			return err
 		}
@@ -507,7 +509,7 @@ func (v VectorStore) GetDocuments(ctx context.Context, collection string, where 
 		return nil, err
 	}
 
-	whereClause, args, err := buildWhereClause([]any{cid}, where)
+	whereClause, args, err := buildWhereClause([]any{cid}, where, whereDocument)
 	if err != nil {
 		return nil, err
 	}
@@ -539,8 +541,22 @@ func (v VectorStore) ExportCollectionsToFile(ctx context.Context, path string, c
 	return fmt.Errorf("function ExportCollectionsToFile not implemented for vectorstore pgvector")
 }
 
-func buildWhereClause(args []any, where map[string]string) (string, []any, error) {
-	if len(where) == 0 {
+func validateWhereDocument(whereDocument []cg.WhereDocument) error {
+	for _, wd := range whereDocument {
+		if slices.Contains([]cg.WhereDocumentOperator{cg.WhereDocumentOperatorAnd, cg.WhereDocumentOperatorOr}, wd.Operator) {
+			return fmt.Errorf("pgvector does not support whereDocument operator %s", wd.Operator)
+		}
+	}
+	return nil
+}
+
+func buildWhereClause(args []any, where map[string]string, whereDocument []cg.WhereDocument) (string, []any, error) {
+
+	if err := validateWhereDocument(whereDocument); err != nil {
+		return "", nil, err
+	}
+
+	if len(where)+len(whereDocument) == 0 {
 		return "TRUE", args, nil
 	}
 
@@ -555,6 +571,15 @@ func buildWhereClause(args []any, where map[string]string) (string, []any, error
 		args = append(args, k, v)
 		argIndex += 2
 	}
+
+	if len(whereDocument) > 0 {
+		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		if err != nil {
+			return "", nil, err
+		}
+		whereClauses = append(whereClauses, wc)
+	}
+
 	whereClause := strings.Join(whereClauses, " AND ")
 	if len(whereClause) == 0 {
 		whereClause = "TRUE"
