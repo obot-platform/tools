@@ -97,6 +97,7 @@
         line-height: 1.25rem;
         font-weight: 500;
         cursor: pointer;
+        width: 100%;
       }
 
       button:hover {
@@ -196,6 +197,14 @@
         }
       }
     </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('back-btn').addEventListener('click', function() {
+          const preAuthUrl = localStorage.getItem('preAuthRedirect');
+          window.location.href = preAuthUrl;
+        });
+      });
+    </script>
   </head>
   <body>
     <section class="centered">
@@ -227,9 +236,7 @@
         {{ if .Redirect }}
           <div class="columns">
             <div class="column">
-              <form method="GET" action="{{.Redirect}}">
-                <button type="submit" class="primary">Go Back</button>
-              </form>
+              <button id="back-btn" class="primary">Go Back</button>
             </div>
           </div>
         {{ end }}
