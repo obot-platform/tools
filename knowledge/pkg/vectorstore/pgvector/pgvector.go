@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"slices"
 	"strings"
 	"sync"
 
@@ -541,21 +540,7 @@ func (v VectorStore) ExportCollectionsToFile(ctx context.Context, path string, c
 	return fmt.Errorf("function ExportCollectionsToFile not implemented for vectorstore pgvector")
 }
 
-func validateWhereDocument(whereDocument []cg.WhereDocument) error {
-	for _, wd := range whereDocument {
-		if slices.Contains([]cg.WhereDocumentOperator{cg.WhereDocumentOperatorAnd, cg.WhereDocumentOperatorOr}, wd.Operator) {
-			return fmt.Errorf("pgvector does not support whereDocument operator %s", wd.Operator)
-		}
-	}
-	return nil
-}
-
 func buildWhereClause(args []any, where map[string]string, whereDocument []cg.WhereDocument) (string, []any, error) {
-
-	if err := validateWhereDocument(whereDocument); err != nil {
-		return "", nil, err
-	}
-
 	if len(where)+len(whereDocument) == 0 {
 		return "TRUE", args, nil
 	}

@@ -10,6 +10,7 @@ import (
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	cg "github.com/philippgille/chromem-go"
 	"gorm.io/gorm"
@@ -314,7 +315,7 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 	return nil
 }
 
-func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
+func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
 	if len(whereDocument) > 0 {
 		return nil, fmt.Errorf("sqlite-vec does not support whereDocument")
 	}
@@ -322,7 +323,7 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 	var docs []vs.Document
 
 	// Build metadata filter query
-	whereQueries := []string{}
+	var whereQueries []string
 	args := []interface{}{collection}
 
 	for k, v := range where {
@@ -333,6 +334,14 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 		args = append(args, v)
 	}
 
+	if len(whereDocument) > 0 {
+		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		if err != nil {
+			return nil, fmt.Errorf("failed to build whereDocument clause: %w", err)
+		}
+		whereQueries = append(whereQueries, wc)
+	}
+
 	whereQuery := strings.Join(whereQueries, " AND ")
 	if len(whereQuery) > 0 {
 		whereQuery = " AND " + whereQuery
@@ -341,7 +350,7 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 	query := fmt.Sprintf(`
         SELECT id, content, metadata
         FROM [%s]
-        WHERE collection_id = ?%s
+        WHERE collection_id = ?%s;
     `, v.embeddingsTableName, whereQuery)
 
 	rows, err := v.db.Raw(query, args...).Rows()
