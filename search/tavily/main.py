@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -72,7 +73,9 @@ def main():
         print("No results found")
         sys.exit(1)
     logging.info(f"Tavily - response:\n{response}")
-    print(response)
+
+    # print the response as a valid json object
+    print(json.dumps(response))
 
 
 def check_allowed_include_domains(include_domains: List[str]) -> List[str]:
