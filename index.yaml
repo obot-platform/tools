@@ -61,6 +61,8 @@ tools:
     reference: ./word
   tavily:
     reference: ./search/tavily
+  pagerduty:
+    reference: ./pagerduty
 
 knowledgeDataSources:
   notion-data-source:

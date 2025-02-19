@@ -1,0 +1,110 @@
+---
+Name: PagerDuty
+Description: A collection of tools for managing PagerDuty incidents, alerts, and notes.
+Share Context: PagerDuty Context
+Metadata: bundle: true
+Share Tools: List Incidents, Get Incident, Acknowledge Incident, Resolve Incident, Add Note To Incident, List Incident Notes, List Incident Alerts, Get Me
+
+---
+Name: List Incidents
+Description: Lists all PagerDuty incidents
+Share Context: PagerDuty Context
+Credential: ./credential
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIncidents
+
+---
+Name: Get Incident
+Description: Get a specific PagerDuty incident by ID
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to fetch
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getIncident
+
+---
+Name: Acknowledge Incident
+Description: Acknowledge a PagerDuty incident
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to update
+params: user_email: email address of the pagerduty user
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js acknowledgeIncident
+
+---
+Name: Resolve Incident
+Description: Resolve a PagerDuty incident
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to update
+params: user_email: email address of the pagerduty user
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js resolveIncident
+
+---
+Name: Add Note To Incident
+Description: Add a note (comment) to a PagerDuty incident
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to add note to
+params: note: contents of the note to add to the incident
+params: user_email: email address of the pagerduty user
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js addIncidentNote
+
+---
+Name: List Incident Notes
+Description: List all notes (comments) from a PagerDuty incident
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to add note to
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIncidentNotes
+
+---
+Name: List Incident Alerts
+Description: List all alerts from a PagerDuty incident
+Share Context: PagerDuty Context
+Credential: ./credential
+params: incident_id: ID of the incident to add note to
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIncidentAlerts
+
+---
+Name: Get Me
+Description: Get the current PagerDuty user's details
+Share Context: PagerDuty Context
+Credential: ./credential
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getMe
+
+---
+Name: PagerDuty Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using PagerDuty tools
+
+If you encounter permission issues while accessing PagerDuty resources:
+
+For OAuth applications:
+- Check with your administrator that the correct scopes have been assigned to the application
+
+For Personal Access Tokens (PAT):
+- Follow the documentation at https://support.pagerduty.com/docs/api-access-keys to create a token with the required scopes
+
+## End of instructions for using PagerDuty tools
+
+---
+!metadata:*:icon
+/admin/assets/pagerduty-icon.svg
+
+---
+!metadata:*:oauth
+pagerduty
+
+---
+!metadata:*:supportsOAuthTokenPrompt
+true
