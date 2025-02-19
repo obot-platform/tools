@@ -28,6 +28,10 @@ Param: url: The URL of the website
 /admin/assets/tavily_icon.svg
 
 ---
+!metadata:*:toolBundle
+Tavily Search
+
+---
 Name: Tavily Context
 Type: context
 Share Context: ../../time
