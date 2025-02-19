@@ -194,6 +194,7 @@ WordPress posts support the following formats:
 - chat: A chat transcript.
 
 Before using the Create Post Tool, you MUST confirm the post title and content with the user.
+When you share the link of a DRAFT post with the user, you should kindly remind the user that the post is only visible to logged in users with permission to view draft posts.
 
 ## End of instructions for using Wordpress tools
 
