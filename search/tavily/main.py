@@ -72,7 +72,6 @@ def main():
         logging.error(f"Tavily - {command} - No results found")
         print("No results found")
         sys.exit(1)
-    logging.info(f"Tavily - response:\n{response}")
 
     # print the response as a valid json object
     print(json.dumps(response))
