@@ -31,6 +31,7 @@ type Index interface {
 	PruneFiles(ctx context.Context, datasetID string, pathPrefix string, keep []string) ([]types.File, error)
 
 	// Fundamental Document Operations
+	GetDocumentByID(ctx context.Context, documentID string) (*types.Document, error)
 	DeleteDocument(ctx context.Context, documentID, datasetID string) error
 
 	Close() error

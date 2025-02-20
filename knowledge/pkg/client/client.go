@@ -17,6 +17,7 @@ type SharedIngestionOpts struct {
 	IngestionFlows      []flows.IngestionFlow
 	IsDuplicateFuncName string
 	Metadata            map[string]string
+	ReuseEmbeddings     bool
 }
 
 type IngestPathsOpts struct {

@@ -112,6 +112,7 @@ func (c *StandaloneClient) IngestFromWorkspace(ctx context.Context, datasetID st
 		IsDuplicateFuncName: opts.IsDuplicateFuncName,
 		ExtraMetadata:       meta,
 		IngestionFlows:      opts.IngestionFlows,
+		ReuseEmbeddings:     opts.ReuseEmbeddings,
 	}
 
 	_, err = c.Ingest(log.ToCtx(ctx, log.FromCtx(ctx).With("filepath", file).With("absolute_path", iopts.FileMetadata.AbsolutePath)), datasetID, finfo.Name, fileContent, iopts)
@@ -163,6 +164,7 @@ func (c *StandaloneClient) IngestPaths(ctx context.Context, datasetID string, op
 			},
 			IsDuplicateFuncName: opts.IsDuplicateFuncName,
 			ExtraMetadata:       extraMetadata,
+			ReuseEmbeddings:     opts.ReuseEmbeddings,
 		}
 
 		if opts != nil {

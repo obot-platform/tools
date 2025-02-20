@@ -213,6 +213,16 @@ func (db *DB) FindFileByMetadata(ctx context.Context, dataset string, metadata F
 	return &file, nil
 }
 
+func (db *DB) GetDocument(ctx context.Context, documentID string) (*Document, error) {
+	var document Document
+	tx := db.WithContext(ctx).First(&document, "id = ?", documentID)
+	if tx.Error != nil {
+		return nil, ErrDBDocumentNotFound
+	}
+
+	return &document, nil
+}
+
 func (db *DB) DeleteDocument(ctx context.Context, documentID, datasetID string) error {
 	// Find in Database
 	var document Document

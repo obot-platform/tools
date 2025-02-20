@@ -102,6 +102,7 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 		SharedIngestionOpts: client.SharedIngestionOpts{
 			IsDuplicateFuncName: s.DeduplicationFuncName,
 			Metadata:            metadata,
+			ReuseEmbeddings:     true,
 		},
 		IgnoreExtensions:     strings.Split(s.IgnoreExtensions, ","),
 		Concurrency:          s.Concurrency,

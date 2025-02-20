@@ -9,6 +9,7 @@ type Document struct {
 	Content         string         `json:"content"`
 	Metadata        map[string]any `json:"metadata"`
 	SimilarityScore float32        `json:"similarity_score"`
+	Embedding       []float32      `json:"embedding,omitempty"`
 }
 
 const (

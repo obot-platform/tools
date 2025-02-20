@@ -113,9 +113,15 @@ func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, coll
 			args := make([]interface{}, 0, len(docs)*2) // 2 args per doc: document_id and embedding
 
 			for i, doc := range docs {
-				emb, err := v.embeddingFunc(ctx, doc.Content)
-				if err != nil {
-					return fmt.Errorf("failed to compute embedding for document %s: %w", doc.ID, err)
+				var emb []float32
+				if len(doc.Embedding) > 0 {
+					emb = doc.Embedding
+				} else {
+					var err error
+					emb, err = v.embeddingFunc(ctx, doc.Content)
+					if err != nil {
+						return fmt.Errorf("failed to compute embedding for document %s: %w", doc.ID, err)
+					}
 				}
 
 				serializedEmb, err := sqlitevec.SerializeFloat32(emb)
@@ -259,10 +265,6 @@ func (v *VectorStore) RemoveCollection(ctx context.Context, collection string) e
 }
 
 func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error {
-	if len(whereDocument) > 0 {
-		return fmt.Errorf("sqlite-vec does not support whereDocument")
-	}
-
 	var ids []string
 
 	err := v.db.Transaction(func(tx *gorm.DB) error {
@@ -316,10 +318,6 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 }
 
 func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
-	if len(whereDocument) > 0 {
-		return nil, fmt.Errorf("sqlite-vec does not support whereDocument")
-	}
-
 	var docs []vs.Document
 
 	// Build metadata filter query

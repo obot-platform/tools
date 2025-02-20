@@ -13,6 +13,7 @@ import (
 
 	"github.com/gptscript-ai/knowledge/pkg/config"
 	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
+	"github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 
@@ -106,6 +107,20 @@ func NewDatastore(ctx context.Context, indexDSN string, automigrate bool, vector
 	}
 
 	return ds, nil
+}
+
+func (s *Datastore) GetDatasetForDocument(ctx context.Context, documentID string) (*types.Dataset, error) {
+	docIdx, err := s.Index.GetDocumentByID(ctx, documentID)
+	if err != nil {
+		return nil, err
+	}
+
+	dataset, err := s.GetDataset(ctx, docIdx.Dataset, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return dataset, nil
 }
 
 func (s *Datastore) Close() error {
