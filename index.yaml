@@ -49,6 +49,10 @@ tools:
     reference: ./workspace-files
   tasks:
     reference: ./tasks
+  threads:
+    reference: ./threads
+  projects:
+    reference: ./projects
   knowledge:
     reference: ./knowledge
   shell:
