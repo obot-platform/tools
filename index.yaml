@@ -19,6 +19,8 @@ tools:
     reference: ./bluesky
   slack:
     reference: ./slack
+  slack-bot:
+    reference: ./slack/tool-bot.gpt
   linkedin-publishing:
     reference: ./linkedin-publishing
   notion:
