@@ -20,6 +20,13 @@ import {
     addIssueLabels,
     removeIssueLabels,
     getUser,
+    listProjects,
+    getProject,
+    listCards,
+    createCard,
+    moveCard,
+    updateCard,
+    deleteCard,
 } from './src/tools.js';
 
 if (process.argv.length !== 3) {
@@ -98,6 +105,26 @@ try {
             break;
         case 'removeIssueLabels':
             await removeIssueLabels(octokit, process.env.OWNER, process.env.REPO, process.env.ISSUENUMBER, process.env.LABELS);
+        case 'listProjects':
+            await listProjects(octokit, process.env.OWNER);
+            break;
+        case 'getProject':
+            await getProject(octokit, process.env.PROJECTID);
+            break;
+        case 'listCards':
+            await listCards(octokit, process.env.PROJECTID, process.env.PERPAGE);
+            break;
+        case 'createCard':
+            await createCard(octokit, process.env.PROJECTID, process.env.CONTENTID, process.env.STATUS);
+            break;
+        case 'moveCard':
+            await moveCard(octokit, process.env.PROJECTID, process.env.ITEMID, process.env.FIELDID, process.env.OPTIONID);
+            break;
+        case 'updateCard':
+            await updateCard(octokit, process.env.PROJECTID, process.env.ITEMID, process.env.FIELDID, process.env.VALUE);
+            break;
+        case 'deleteCard':
+            await deleteCard(octokit, process.env.PROJECTID, process.env.ITEMID);
             break;
         default:
             throw new Error(`Unknown command: ${command}`);
