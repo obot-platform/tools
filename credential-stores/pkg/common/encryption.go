@@ -13,7 +13,9 @@ import (
 
 func readEncryptionConfig(ctx context.Context) (*encryptionconfig.EncryptionConfiguration, error) {
 	encryptionConfigPath := os.Getenv("GPTSCRIPT_ENCRYPTION_CONFIG_FILE")
+	var useDefault bool
 	if encryptionConfigPath == "" {
+		useDefault = true
 		var err error
 		if encryptionConfigPath, err = xdg.ConfigFile("gptscript/encryptionconfig.yaml"); err != nil {
 			return nil, fmt.Errorf("failed to read encryption config from standard location: %w", err)
@@ -22,7 +24,11 @@ func readEncryptionConfig(ctx context.Context) (*encryptionconfig.EncryptionConf
 
 	if _, err := os.Stat(encryptionConfigPath); err != nil {
 		if os.IsNotExist(err) {
-			return nil, nil
+			if useDefault {
+				fmt.Println("WARNING: credentials will be stored unencrypted")
+				return nil, nil
+			}
+			return nil, fmt.Errorf("encryption config file does not exist: %w", err)
 		}
 		return nil, fmt.Errorf("failed to stat encryption config file: %w", err)
 	}
