@@ -25,7 +25,6 @@ func readEncryptionConfig(ctx context.Context) (*encryptionconfig.EncryptionConf
 	if _, err := os.Stat(encryptionConfigPath); err != nil {
 		if os.IsNotExist(err) {
 			if useDefault {
-				fmt.Println("WARNING: credentials will be stored unencrypted")
 				return nil, nil
 			}
 			return nil, fmt.Errorf("encryption config file does not exist: %w", err)
