@@ -1,0 +1,21 @@
+---
+Name: Weather
+Description: Tools for getting the weather forecast
+Metadata: bundle: true
+Share Tools: Get Weekly Forecast, Get Hourly Forecast
+
+---
+Name: Get Weekly Forecast
+Description: Gets the weekly forecast for a given latitude and longitude
+Param: latitude: The latitude to look up the forecast for
+Param: longitude: The longitude to look up the forecast for
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getWeeklyForecast
+
+---
+Name: Get Hourly Forecast
+Description: Gets the hourly forecast for a given latitude and longitude
+Param: latitude: The latitude to look up the forecast for
+Param: longitude: The longitude to look up the forecast for
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getHourlyForecast
