@@ -87,6 +87,8 @@ tools:
     reference: ./search/tavily/obot-search.gpt
   search-combo:
     reference: ./search-combo
+  aws-s3:
+    reference: ./aws/s3
 
 knowledgeDataSources:
   notion-data-source:
