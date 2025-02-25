@@ -1,5 +1,5 @@
 Name: File Reader
-Description: This tool reads any supported type of text-heavy documents(PDF, DOCX, PPTX, HTML) in the workspace, converts its content to markdown format. The parsed content will be send back to LLM or saved to a workspace file if output_file is provided.
+Description: This tool reads any supported type of text-heavy documents(PDF, DOCX, PPTX, HTML) in the workspace, converts its content to markdown format. The parsed content will be sent back to LLM or saved to a workspace file if output_file is provided.
 Params: Input: The workspace file to be read. This file can be of any supported text-heavy documents. Supported extensions: .pdf, .docx, .pptx, .html.
 Params: Output: (Optional) Default to empty. If provided, the parsed content will be saved to this file. The file name must have a ".md" extension.
 Params: know_load_metadata: Comma-delimited key=value pairs to be added to the metadata of the loaded document.
