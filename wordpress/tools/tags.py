@@ -30,6 +30,7 @@ def _format_tag_response(response_json: Union[dict, list]) -> Union[dict, list]:
         logger.error(f"Error formatting tag response: {e}")
         return response_json
 
+
 @tool_registry.register("ListTags")
 def list_tags(client):
     url = f"{WORDPRESS_API_URL}/tags"
@@ -56,11 +57,11 @@ def list_tags(client):
             f"Error: Invalid order: {order}. order must be one of: {order_enum}."
         )
     query_params["order"] = order
-    
+
     post = os.getenv("POST_ID", None)
     if post:
         query_params["post"] = post
-    
+
     slug = os.getenv("SLUG", None)
     if slug:
         query_params["slug"] = slug
@@ -84,6 +85,7 @@ def list_tags(client):
             f"Failed to list tags. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
 
+
 @tool_registry.register("CreateTag")
 def create_tag(client):
     url = f"{WORDPRESS_API_URL}/tags"
@@ -101,7 +103,6 @@ def create_tag(client):
     slug = os.getenv("SLUG", None)
     if slug:
         tag_data["slug"] = slug
-
 
     response = client.post(url, json=tag_data)
     if response.status_code == 201:
@@ -121,7 +122,7 @@ def create_tag(client):
         logger.error(
             f"Failed to create tag. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
-    
+
 
 @tool_registry.register("UpdateTag")
 def update_tag(client):
@@ -167,6 +168,7 @@ def update_tag(client):
             f"Failed to update tag. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
 
+
 @tool_registry.register("DeleteTag")
 def delete_tag(client):
     tag_id = os.getenv("TAG_ID", None)
@@ -176,7 +178,6 @@ def delete_tag(client):
         raise ValueError("TAG_ID must be an integer.")
 
     url = f"{WORDPRESS_API_URL}/tags/{tag_id}"
-    
 
     force = str_to_bool(os.getenv("FORCE", "True"))
     params = {"force": force}
@@ -184,9 +185,7 @@ def delete_tag(client):
     # Make the DELETE request
     response = client.delete(url, params=params)
     if response.status_code == 200:
-        return {
-            "message": f"{response.status_code}. Tag {tag_id} deleted successfully"
-        }
+        return {"message": f"{response.status_code}. Tag {tag_id} deleted successfully"}
     elif response.status_code == 401:
         print(
             f"Authentication failed: {response.status_code}. Error Message: {response.text}"

@@ -31,6 +31,7 @@ def _format_category_response(response_json: Union[dict, list]) -> Union[dict, l
         logger.error(f"Error formatting category response: {e}")
         return response_json
 
+
 @tool_registry.register("ListCategories")
 def list_categories(client):
     url = f"{WORDPRESS_API_URL}/categories"
@@ -57,15 +58,15 @@ def list_categories(client):
             f"Error: Invalid order: {order}. order must be one of: {order_enum}."
         )
     query_params["order"] = order
-    
+
     parent = os.getenv("PARENT_ID", None)
     if parent:
         query_params["parent"] = parent
-    
+
     post = os.getenv("POST_ID", None)
     if post:
         query_params["post"] = post
-    
+
     slug = os.getenv("SLUG", None)
     if slug:
         query_params["slug"] = slug
@@ -133,7 +134,7 @@ def create_category(client):
         logger.error(
             f"Failed to create category. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
-    
+
 
 @tool_registry.register("UpdateCategory")
 def update_category(client):
@@ -188,6 +189,7 @@ def update_category(client):
             f"Failed to update category. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
 
+
 @tool_registry.register("DeleteCategory")
 def delete_category(client):
     # Get category ID from environment variable
@@ -198,7 +200,7 @@ def delete_category(client):
         raise ValueError("CATEGORY_ID must be an integer.")
 
     url = f"{WORDPRESS_API_URL}/categories/{category_id}"
-    
+
     # Optional force parameter to reassign posts to default category
     force = str_to_bool(os.getenv("FORCE", "True"))
     params = {"force": force}
@@ -226,5 +228,3 @@ def delete_category(client):
         logger.error(
             f"Failed to create post. Error Code: {response.status_code}. Error Message: {json.dumps(response.text)}",
         )
-
-

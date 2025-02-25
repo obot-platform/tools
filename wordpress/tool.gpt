@@ -39,6 +39,8 @@ Param: publish_before: (optional) the date to filter posts published before, def
 Param: modified_after: (optional) the date to filter posts modified after, default is None
 Param: modified_before: (optional) the date to filter posts modified before, default is None
 Param: order: (optional) the order to sort posts, must be one of: asc, desc, default is desc.
+Param: categories: (optional) a comma separated list of category ids, default is None
+Param: tags: (optional) a comma separated list of tag ids, default is None
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListPosts
 

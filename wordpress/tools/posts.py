@@ -34,6 +34,8 @@ def _format_posts_response(response_json: Union[dict, list]) -> Union[dict, list
                 "title",
                 "excerpt",
                 "author",
+                "categories",
+                "tags",
                 "featured_media",
                 "format",
             ]
@@ -184,6 +186,21 @@ def list_posts(client):
         )
     query_params["order"] = order
 
+    categories = os.getenv("CATEGORIES", None)
+    if categories:
+        if any(not c.isdigit() for c in categories.split(",")):
+            raise ValueError(
+                f"Error: Invalid categories: {categories}. categories must be a comma separated list of integer ids."
+            )
+        query_params["categories"] = categories
+    tags = os.getenv("TAGS", None)
+    if tags:
+        if any(not t.isdigit() for t in tags.split(",")):
+            raise ValueError(
+                f"Error: Invalid tags: {tags}. tags must be a comma separated list of integer ids."
+            )
+        query_params["tags"] = tags
+
     response = client.get(url, params=query_params)
     if response.status_code == 200:
         return _format_posts_response(response.json())
@@ -291,24 +308,22 @@ def create_post(client):
             f"Error: Invalid ping_status: {ping_status}. ping_status must be one of: {ping_status_enum}."
         )
     post_data["ping_status"] = ping_status
-    
+
     category_ids = os.getenv("CATEGORIES", None)
     if category_ids:
-        splitted_category_ids = category_ids.split(",")
-        if any(not c.isdigit() for c in splitted_category_ids):
+        if any(not c.isdigit() for c in category_ids.split(",")):
             raise ValueError(
                 f"Error: Invalid categories: {category_ids}. categories must be a comma separated list of integer ids."
             )
-        post_data["categories"] = splitted_category_ids
+        post_data["categories"] = category_ids
 
     tag_ids = os.getenv("TAGS", None)
     if tag_ids:
-        splitted_tag_ids = tag_ids.split(",")
-        if any(not t.isdigit() for t in splitted_tag_ids):
+        if any(not t.isdigit() for t in tag_ids.split(",")):
             raise ValueError(
                 f"Error: Invalid tags: {tag_ids}. tags must be a comma separated list of integer ids."
             )
-        post_data["tags"] = splitted_tag_ids
+        post_data["tags"] = tag_ids
 
     response = client.post(url, json=post_data)
     if response.status_code == 201:
@@ -453,21 +468,19 @@ def update_post(client):
 
     if "CATEGORIES" in os.environ:
         category_ids = os.environ["CATEGORIES"]
-        splitted_category_ids = category_ids.split(",")
-        if any(not c.isdigit() for c in splitted_category_ids):
+        if any(not c.isdigit() for c in category_ids.split(",")):
             raise ValueError(
                 f"Error: Invalid categories: {category_ids}. categories must be a comma separated list of integer ids."
             )
-        post_data["categories"] = splitted_category_ids
+        post_data["categories"] = category_ids
 
     if "TAGS" in os.environ:
         tag_ids = os.environ["TAGS"]
-        splitted_tag_ids = tag_ids.split(",")
-        if any(not t.isdigit() for t in splitted_tag_ids):
+        if any(not t.isdigit() for t in tag_ids.split(",")):
             raise ValueError(
                 f"Error: Invalid tags: {tag_ids}. tags must be a comma separated list of integer ids."
             )
-        post_data["tags"] = splitted_tag_ids
+        post_data["tags"] = tag_ids
 
     response = client.post(url, json=post_data)
     if response.status_code == 200:
