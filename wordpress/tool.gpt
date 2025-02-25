@@ -2,7 +2,7 @@
 Name: Wordpress
 Description: Tools for interacting with self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
-Share Tools: List Users, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, Get Site Settings
+Share Tools: List Users, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media,List Categories, Create Category, Update Category, Delete Category, List Tags, Create Tag, Update Tag, Delete Tag, Get Site Settings
 
 ---
 Name: List Users
@@ -167,6 +167,104 @@ Param: media_id: the id of the media file
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeleteMedia
 
+
+---
+Name: List Categories
+Description: List available categories in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: context: (optional) the context of the categories to list, must be one of: [view, embed, edit], default is view.
+Param: page: (optional) the page number to list, default is 1
+Param: per_page: (optional) the number of categories per page to list, default is 10
+Param: search_query: (optional) limit results to those matching a string, default is None
+Param: order: (optional) the order to sort categories, must be one of: asc, desc, default is asc
+Param: parent_id: (optional) limit result set to categories assigned to a specific parent ID
+Param: post_id: (optional) limit result set to categories assigned to a specific post ID
+Param: slug: (optional) limit result to category matches a specific slug.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListCategories
+
+---
+Name: Create Category
+Description: Create a new category in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: category_name: the name of the category
+Param: description: (optional) the description of the category, default is None. It accepts HTML tags for formatting.
+Param: slug: (optional) the slug for the category, default is None
+Param: parent_id: (optional) the ID of the parent category, default is None
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreateCategory
+
+---
+Name: Update Category
+Description: Update an existing category in user's WordPress site. Only the fields that are provided will be updated.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: category_id: (required) the ID of the category to update
+Param: name: (optional) the new name of the category
+Param: description: (optional) the new description of the category, it accepts HTML tags for formatting.
+Param: slug: (optional) the new slug for the category
+Param: parent_id: (optional) the new parent ID of the category
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdateCategory
+
+---
+Name: Delete Category
+Description: Delete a category in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: category_id: the ID of the category to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeleteCategory
+
+
+---
+Name: List Tags
+Description: List available tags in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: context: (optional) the context of the tags to list, must be one of: [view, embed, edit], default is view.
+Param: page: (optional) the page number to list, default is 1
+Param: per_page: (optional) the number of tags per page to list, default is 10
+Param: search_query: (optional) limit results to those matching a string, default is None
+Param: order: (optional) the order to sort tags, must be one of: asc, desc, default is asc
+Param: post_id: (optional) limit result set to tags assigned to a specific post ID
+Param: slug: (optional) limit result to tag matches a specific slug.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListTags
+
+---
+Name: Create Tag
+Description: Create a new tag in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: name: the name of the tag
+Param: description: (optional) the description of the tag, default is None. It accepts HTML tags for formatting.
+Param: slug: (optional) the slug for the tag, default is None
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreateTag
+
+---
+Name: Update Tag
+Description: Update an existing tag in user's WordPress site. Only the fields that are provided will be updated.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: tag_id: (required) the ID of the tag to update
+Param: name: (optional) the new name of the tag
+Param: description: (optional) the new description of the tag, it accepts HTML tags for formatting.
+Param: slug: (optional) the new slug for the tag
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdateTag
+
+---
+Name: Delete Tag
+Description: Delete a tag in user's WordPress site.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: tag_id: the ID of the tag to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeleteTag
 
 ---
 Name: Wordpress Context

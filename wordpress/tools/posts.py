@@ -10,7 +10,6 @@ from tools.helper import (
 import urllib.parse
 import mistune
 from typing import Union
-import sys
 import json
 
 logger = setup_logger(__name__)

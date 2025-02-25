@@ -10,8 +10,6 @@ import urllib.parse
 import io
 import mimetypes
 from typing import Union
-import sys
-import json
 
 logger = setup_logger(__name__)
 
