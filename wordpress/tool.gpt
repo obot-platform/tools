@@ -79,6 +79,8 @@ Param: format: (optional) the format of the post to create, must be one of: stan
 Param: author_id: (optional) the ID for the author of the post. If not provided, the current user will be used.
 Param: excerpt: (optional) the excerpt of the post, default is None
 Param: ping_status: (optional) the ping status of the post, must be one of: open, closed. Default is open
+Param: categories: (optional) a comma separated list of category ids assign to the post, default is None
+Param: tags: (optional) a comma separated list of tag ids assign to the post, default is None
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreatePost
 
@@ -101,6 +103,8 @@ Param: format: (optional) the format of the post to create, must be one of: stan
 Param: author_id: (optional) the id of the author of the post
 Param: excerpt: (optional) the excerpt of the post
 Param: ping_status: (optional) the ping status of the post, must be one of: open, closed
+Param: categories: (optional) an updated comma separated list of category ids assign to the post.
+Param: tags: (optional) an updated comma separated list of tag ids assign to the post.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdatePost
 

@@ -291,6 +291,24 @@ def create_post(client):
             f"Error: Invalid ping_status: {ping_status}. ping_status must be one of: {ping_status_enum}."
         )
     post_data["ping_status"] = ping_status
+    
+    category_ids = os.getenv("CATEGORIES", None)
+    if category_ids:
+        splitted_category_ids = category_ids.split(",")
+        if any(not c.isdigit() for c in splitted_category_ids):
+            raise ValueError(
+                f"Error: Invalid categories: {category_ids}. categories must be a comma separated list of integer ids."
+            )
+        post_data["categories"] = splitted_category_ids
+
+    tag_ids = os.getenv("TAGS", None)
+    if tag_ids:
+        splitted_tag_ids = tag_ids.split(",")
+        if any(not t.isdigit() for t in splitted_tag_ids):
+            raise ValueError(
+                f"Error: Invalid tags: {tag_ids}. tags must be a comma separated list of integer ids."
+            )
+        post_data["tags"] = splitted_tag_ids
 
     response = client.post(url, json=post_data)
     if response.status_code == 201:
@@ -432,6 +450,24 @@ def update_post(client):
                 f"Error: Invalid ping_status: {ping_status}. ping_status must be one of: {ping_status_enum}."
             )
         post_data["ping_status"] = ping_status
+
+    if "CATEGORIES" in os.environ:
+        category_ids = os.environ["CATEGORIES"]
+        splitted_category_ids = category_ids.split(",")
+        if any(not c.isdigit() for c in splitted_category_ids):
+            raise ValueError(
+                f"Error: Invalid categories: {category_ids}. categories must be a comma separated list of integer ids."
+            )
+        post_data["categories"] = splitted_category_ids
+
+    if "TAGS" in os.environ:
+        tag_ids = os.environ["TAGS"]
+        splitted_tag_ids = tag_ids.split(",")
+        if any(not t.isdigit() for t in splitted_tag_ids):
+            raise ValueError(
+                f"Error: Invalid tags: {tag_ids}. tags must be a comma separated list of integer ids."
+            )
+        post_data["tags"] = splitted_tag_ids
 
     response = client.post(url, json=post_data)
     if response.status_code == 200:
