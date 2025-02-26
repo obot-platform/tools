@@ -1,9 +1,10 @@
 import { delay } from './delay.ts'
 import { type Page } from 'playwright'
 import { inspect } from './browse.ts'
+import { ModelProviderCredentials } from './session.ts'
 
-export async function fill (page: Page, model: string, userInput: string, content: string, keywords: string[], matchTextOnly: boolean): Promise<void> {
-  const locators = await inspect(page, model, userInput, 'fill', matchTextOnly, keywords)
+export async function fill (page: Page, modelProviderCredentials: ModelProviderCredentials | undefined, model: string, userInput: string, content: string, keywords: string[], matchTextOnly: boolean): Promise<void> {
+  const locators = await inspect(page, modelProviderCredentials, model, userInput, 'fill', matchTextOnly, keywords)
   for (const locator of locators) {
     console.log(locator)
     try {

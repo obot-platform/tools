@@ -4,6 +4,7 @@ import { GPTScript } from '@gptscript-ai/gptscript'
 import { delay } from './delay.ts'
 import { URL } from 'url'
 import TurndownService from 'turndown'
+import { ModelProviderCredentials } from './session.ts'
 
 export async function close (page: Page): Promise<void> {
   await page.close()
@@ -150,7 +151,7 @@ export async function filterContent (page: Page, tabID: string, printTabID: bool
 }
 
 // inspect inspects a webpage and returns a locator for a specific element based on the user's input and action.
-export async function inspect (page: Page, model: string, userInput: string, action: string, matchTextOnly: boolean, keywords?: string[]): Promise<string[]> {
+export async function inspect (page: Page, modelProviderCredentials: ModelProviderCredentials | undefined, model: string, userInput: string, action: string, matchTextOnly: boolean, keywords?: string[]): Promise<string[]> {
   if (userInput === '') {
     // This shouldn't happen, since the LLM is told that it must fill in the user input,
     // but in case it doesn't, just use the keywords.
@@ -223,13 +224,16 @@ export async function inspect (page: Page, model: string, userInput: string, act
   const run = await client.evaluate({
     modelName: model,
     instructions
+  }, {
+    BaseURL: modelProviderCredentials?.baseUrl,
+    APIKey: modelProviderCredentials?.apiKey
   })
 
   const output = (await run.text()).replace('\n', '').trim()
   return [output]
 }
 
-export async function inspectForSelect (page: Page, model: string, userInput: string, userSelection: string, keywords?: string[]): Promise<{ selector: string, option: string }> {
+export async function inspectForSelect (page: Page, modelProviderCredentials: ModelProviderCredentials | undefined, model: string, userInput: string, userSelection: string, keywords?: string[]): Promise<{ selector: string, option: string }> {
   let elementData = ''
   const modes = ['matchAll', 'oneSibling', 'twoSiblings', 'parent', 'grandparent']
   for (const mode of modes) {
@@ -267,6 +271,9 @@ export async function inspectForSelect (page: Page, model: string, userInput: st
   const run = await client.evaluate({
     modelName: model,
     instructions
+  }, {
+    BaseURL: modelProviderCredentials?.baseUrl,
+    APIKey: modelProviderCredentials?.apiKey
   })
 
   const output = (await run.text()).replace('\n', '').trim()
