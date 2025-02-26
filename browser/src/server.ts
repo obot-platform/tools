@@ -6,7 +6,7 @@ import { fill } from './fill.ts'
 import { enter } from './enter.ts'
 import { scrollToBottom } from './scrollToBottom.ts'
 import { randomBytes } from 'node:crypto'
-import { getSessionId, SessionManager } from './session.ts'
+import { getSessionId, SessionManager, getModelProviderCredentials } from './session.ts'
 import { screenshot, ScreenshotInfo } from './screenshot.ts'
 import { download } from './download.ts'
 
@@ -58,6 +58,7 @@ async function main (): Promise<void> {
     const keywords: string[] = (data.keywords ?? '').split(',')
     const filter: string = data.filter ?? ''
     const followMode: boolean = data.followMode === 'false' ? false : Boolean(data.followMode)
+    const modelProviderCredentials = getModelProviderCredentials(req.headers)
 
     try {
       const sessionID = getSessionId(req.headers)
@@ -100,6 +101,7 @@ async function main (): Promise<void> {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             response.result = await fill(
               page,
+              modelProviderCredentials,
               model,
               userInput,
               data.content ?? '',

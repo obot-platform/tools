@@ -1,9 +1,9 @@
 Name: Browser
 Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
+Metadata: noUserAuth: sys.model.provider.credential
 Credentials: github.com/gptscript-ai/credentials/model-provider
 Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download File From URL
-Metadata: noUserAuth: sys.model.provider.credential
 
 ---
 Name: Get Page Contents
@@ -43,6 +43,8 @@ Tools: service
 ---
 Name: Fill
 Metadata: index: false
+Metadata: noUserAuth: sys.model.provider.credential
+Credentials: github.com/gptscript-ai/credentials/model-provider
 Share Context: Browser Context
 Tools: service
 Description: Fills text into an element on the web page. Useful for filling out forms and other input fields.
@@ -181,6 +183,7 @@ END TOOL USAGE: The `screenshotInfo` response field
 
 ---
 Name: service
+Metadata: requestedEnvVars: OPENAI_API_KEY,OPENAI_BASE_URL
 Metadata: index: false
 
 #!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run server

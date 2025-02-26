@@ -34,7 +34,7 @@ export async function download(
     const contentType = response.headers['content-type']
     await client.writeFileInWorkspace(workspaceFile, Buffer.from(response.data), workspaceId)
 
-    return { 
+    return {
         url,
         resolvedUrl: response.request.res.responseUrl || url,
         contentType,

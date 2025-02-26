@@ -143,6 +143,21 @@ export function getWorkspaceId (headers: IncomingHttpHeaders): string | undefine
   return getGPTScriptEnv(headers, 'GPTSCRIPT_WORKSPACE_ID')
 }
 
+export interface ModelProviderCredentials {
+    baseUrl: string
+    apiKey: string
+}
+
+export function getModelProviderCredentials(headers: IncomingHttpHeaders): ModelProviderCredentials | undefined {
+  const baseUrl = getGPTScriptEnv(headers, 'OPENAI_BASE_URL')?.trim()
+  if (!baseUrl) return undefined
+
+  const apiKey = getGPTScriptEnv(headers, 'OPENAI_API_KEY')?.trim()
+  if (!apiKey) return undefined
+
+  return { baseUrl, apiKey }
+}
+
 export function getGPTScriptEnv (headers: IncomingHttpHeaders, envKey: string): string | undefined {
   const envHeader = headers?.['x-gptscript-env']
   const envArray = Array.isArray(envHeader) ? envHeader : [envHeader]
