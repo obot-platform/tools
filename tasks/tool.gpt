@@ -1,15 +1,7 @@
 Name: Tasks
 Description: Manage and execute tasks
-Share tools: List Tasks, Run Task, List Task Runs, Create Task
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/check-square-duotone.svg
 Metadata: category: Capability
-Type: context
-
-#!sys.echo
-
-You have the ability to run tasks for a user. When running a task ensure that all parameter values are provided. If all
-parameters values are not known ask the user for their values. Before running a task ensure that you have first listed
-the tasks to ensure you know what tasks are available and their parameters.
 
 ---
 Name: List Tasks
