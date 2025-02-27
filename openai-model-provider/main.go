@@ -33,8 +33,7 @@ func main() {
 
 	openaiProxy := openaiproxy.NewServer(cfg)
 	reverseProxy := &httputil.ReverseProxy{
-		Director:       openaiProxy.Openaiv1ProxyRedirect,
-		ModifyResponse: openaiProxy.ModifyResponse,
+		Director: openaiProxy.Openaiv1ProxyRedirect,
 	}
 	cfg.CustomPathHandleFuncs["/v1/"] = reverseProxy.ServeHTTP
 

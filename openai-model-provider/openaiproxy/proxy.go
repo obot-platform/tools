@@ -50,7 +50,6 @@ func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
 }
 
 func modifyRequestBodyForO1(req *http.Request, reqBody *openai.ChatCompletionRequest) error {
-	reqBody.Stream = false
 	reqBody.Temperature = nil
 	for i, msg := range reqBody.Messages {
 		if msg.Role == "system" {
@@ -63,67 +62,6 @@ func modifyRequestBodyForO1(req *http.Request, reqBody *openai.ChatCompletionReq
 	}
 	req.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
 	req.ContentLength = int64(len(modifiedBodyBytes))
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Accept-Encoding", "")
-	req.Header.Set("Content-Type", "application/json")
-	return nil
-}
-
-func (s *Server) ModifyResponse(resp *http.Response) error {
-	if resp.StatusCode != http.StatusOK || resp.Request.URL.Path != proxy.ChatCompletionsPath || resp.Request.URL.Host != proxy.OpenaiBaseHostName {
-		return nil
-	}
-
-	if resp.Header.Get("Content-Type") == "application/json" {
-		rawBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			resp.Body.Close()
-			return fmt.Errorf("failed to read response body: %w", err)
-		}
-		resp.Body.Close()
-		var respBody openai.ChatCompletionResponse
-		if err := json.Unmarshal(rawBody, &respBody); err == nil && isModelO1(respBody.Model) {
-			// Convert non-streaming response to a single SSE for o1 model
-			streamResponse := openai.ChatCompletionStreamResponse{
-				ID:      respBody.ID,
-				Object:  respBody.Object,
-				Created: respBody.Created,
-				Model:   respBody.Model,
-				Usage:   respBody.Usage,
-				Choices: func() []openai.ChatCompletionStreamChoice {
-					var choices []openai.ChatCompletionStreamChoice
-					for _, choice := range respBody.Choices {
-						choices = append(choices, openai.ChatCompletionStreamChoice{
-							Index: choice.Index,
-							Delta: openai.ChatCompletionStreamChoiceDelta{
-								Content:      choice.Message.Content,
-								Role:         choice.Message.Role,
-								FunctionCall: choice.Message.FunctionCall,
-								ToolCalls:    choice.Message.ToolCalls,
-							},
-							FinishReason: choice.FinishReason,
-						})
-					}
-					return choices
-				}(),
-			}
-
-			sseData, err := json.Marshal(streamResponse)
-			if err != nil {
-				return fmt.Errorf("failed to marshal stream response: %w", err)
-			}
-
-			sseFormattedData := fmt.Sprintf("data: %s\n\nevent: close\ndata: [DONE]\n\n", sseData)
-
-			resp.Header.Set("Content-Type", "text/event-stream")
-			resp.Header.Set("Cache-Control", "no-cache")
-			resp.Header.Set("Connection", "keep-alive")
-			resp.Body = io.NopCloser(bytes.NewBufferString(sseFormattedData))
-		} else {
-			resp.Body = io.NopCloser(bytes.NewBuffer(rawBody))
-		}
-	}
-
 	return nil
 }
 
