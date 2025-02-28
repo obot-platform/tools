@@ -1,0 +1,41 @@
+
+Name: Slack
+Description: Workflow trigger provider for Slack
+Metadata: envVars: OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_BOT_TOKEN,OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_APP_TOKEN,OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_SIGNING_SECRET
+Metadata: noUserAuth: slack-daemon-trigger-provider
+Credential: ../placeholder-credential as slack-daemon-trigger-provider
+
+#!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run start
+
+---
+!metadata:Slack:providerMeta
+{
+    "icon": "/admin/assets/slack_icon_small.png",
+    "iconDark": "/admin/assets/slack_icon_small.png",
+    "link": "https://api.slack.com/apps",
+    "obotScopes": [
+        "workflows:manage"
+    ],
+    "envVars": [
+        {
+            "name": "OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_BOT_TOKEN",
+            "friendlyName": "Bot Token",
+            "description": "Bot token for the Slack app. Can typically be found in Slack App Dashboard > Bot Token",
+            "sensitive": true
+        },
+        {
+            "name": "OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_APP_TOKEN",
+            "friendlyName": "App Token",
+            "description": "App token for the Slack app. Can typically be found in Slack App Dashboard > App Token",
+            "sensitive": true
+        },
+        {
+            "name": "OBOT_SLACK_DAEMON_TRIGGER_PROVIDER_SIGNING_SECRET",
+            "friendlyName": "Signing Secret",
+            "description": "Signing secret for the Slack app. Can typically be found in Slack App Dashboard > Signing Secret",
+            "sensitive": true
+        }
+    ]
+}
+
+

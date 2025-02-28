@@ -131,3 +131,7 @@ authProviders:
     reference: ./github-auth-provider
   google-auth-provider:
     reference: ./google-auth-provider
+
+daemonTriggerProviders:
+  slack-daemon-trigger-provider:
+    reference: ./slack-daemon-trigger-provider
