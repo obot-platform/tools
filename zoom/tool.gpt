@@ -14,7 +14,7 @@ Share Context: Zoom Context
 
 ---
 Name: Create Meeting
-Description: Use this tool to create a zoom meeting. 
+Description: Use this tool to create a Zoom meeting.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_invitees: Optional. A list of emails separated by commas
@@ -65,7 +65,7 @@ Param: recurrence: Optional. Use this only for a meeting with meeting_type 8, a 
 
 ---
 Name: List Meeting Templates
-Description: List all assigned meeting templates of the current zoom user.
+Description: List all assigned meeting templates of the current Zoom user.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -73,7 +73,7 @@ Share Context: Zoom Context
 
 ---
 Name: Get Meeting
-Description: Get a zoom meeting's details information. 
+Description: Get a Zoom meeting's details information. The meeting must be hosted by the current Zoom user.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get
@@ -82,7 +82,7 @@ Param: meeting_id: The ID of the meeting to get
 
 ---
 Name: Delete Meeting
-Description: Delete a zoom meeting.
+Description: Delete a Zoom meeting.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to delete
@@ -91,7 +91,7 @@ Param: meeting_id: The ID of the meeting to delete
 
 ---
 Name: List Meetings
-Description: List all meetings hosted by the current zoom user. 
+Description: List all meetings hosted by the current Zoom user.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -99,7 +99,7 @@ Share Context: Zoom Context
 
 ---
 Name: Get Meeting Invitation
-Description: Retrieve the meeting invitation note for a specific zoom meeting.
+Description: Retrieve the meeting invitation note for a specific Zoom meeting.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get the invitation for
@@ -108,7 +108,7 @@ Param: meeting_id: The ID of the meeting to get the invitation for
 
 ---
 Name: List Upcoming Meetings
-Description: List all upcoming meetings hosted by the current zoom user.
+Description: List all upcoming meetings hosted by the current Zoom user.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -116,7 +116,7 @@ Share Context: Zoom Context
 
 ---
 Name: Get Meeting Recordings
-Description: Get the cloud recordings of a zoom meeting. Cloud rerordings are only available for licensed users.
+Description: Get the cloud recordings of a Zoom meeting. Cloud rerordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get the recordings for
@@ -125,7 +125,7 @@ Param: meeting_id: The ID of the meeting to get the recordings for
 
 ---
 Name: List User Recordings
-Description: List all cloud recordings of the current zoom user. Cloud recordings are only available for licensed users.
+Description: List all cloud recordings of the current Zoom user. Cloud recordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -133,7 +133,7 @@ Share Context: Zoom Context
 
 ---
 Name: Get Past Meeting Details
-Description: Get the details of a past zoom meeting.
+Description: Get the details of a past Zoom meeting.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get the details for
@@ -142,11 +142,11 @@ Param: meeting_id: The ID of the meeting to get the details for
 
 ---
 Name: Get Meeting Summary
-Description: Retrieve the Zoom AI-generated summary of a zoom meeting. This feature is available exclusively to licensed users. To access it, the host must ensure that the `Meeting Summary with AI Companion` feature is enabled in their account settings.
+Description: Retrieve the Zoom AI-generated summary of a Zoom meeting. This feature is available exclusively to licensed users. To access it, the host must ensure that the `Meeting Summary with AI Companion` feature is enabled in their account settings. The meeting summary's accessibility depends on the host's sharing settings, by default only the host has the access.
 Credential: ./credential
 Share Context: Zoom Context
 Share Tools: Get Past Meeting Details
-Param: meeting_uuid: The UUID of the meeting to get the summary for. Must use the UUID obtained from `Get Past Meeting Details` tool.
+Param: meeting_uuid: The UUID of the meeting to get the summary for, NOT the meeting ID. Must use the UUID obtained from `Get Past Meeting Details` tool.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingSummary
 
