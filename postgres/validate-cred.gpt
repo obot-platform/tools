@@ -1,0 +1,5 @@
+Name: postgres-cred-validate
+Description: Validate PostgreSQL credentials
+Metadata: index: false
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate
