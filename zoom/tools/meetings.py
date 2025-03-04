@@ -271,7 +271,21 @@ def list_meetings():
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
-    response = requests.get(url, headers=headers)
+    params = {}
+    type = os.getenv("TYPE", "")
+    type_enums = [
+        "scheduled",
+        "live",
+        "upcoming",
+        "upcoming_meetings",
+        "previous_meetings",
+    ]
+    if type != "":
+        if type not in type_enums:
+            raise ValueError(f"Invalid type: {type}. Must be one of: {type_enums}")
+        params["type"] = type
+
+    response = requests.get(url, headers=headers, params=params)
     if response.status_code != 200:
         return {"message": f"Error listing meetings: {response.text}"}
 
@@ -470,4 +484,17 @@ def get_past_meeting_details():
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         return {"message": f"Error getting past meeting details: {response.text}"}
+    return response.json()
+
+
+@tool_registry.decorator("ListPastMeetingInstances")
+def list_past_meeting_instances():
+    meeting_id = os.environ["MEETING_ID"]
+    url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}/instances"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {"message": f"Error listing past meeting instances: {response.text}"}
     return response.json()

@@ -2,11 +2,11 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, Get Past Meeting Details, List Available Timezones
+Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, List Available Timezones
 
 ---
 Name: Get User
-Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate.
+Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate. This also returns the user's Personal Meeting ID(PMI).
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -91,9 +91,10 @@ Param: meeting_id: The ID of the meeting to delete
 
 ---
 Name: List Meetings
-Description: List all meetings hosted by the current Zoom user.
+Description: List all scheduled meetings hosted by the current Zoom user. This does not return information about instant meetings.
 Credential: ./credential
 Share Context: Zoom Context
+Param: type: Optional. The type of the meetings to list. Default to scheduled, which will return all valid previous (unexpired) meetings, live meetings, and upcoming scheduled meetings. Must be one of: scheduled, live, upcoming, upcoming_meetings, previous_meetings.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListMeetings
 
@@ -108,7 +109,7 @@ Param: meeting_id: The ID of the meeting to get the invitation for
 
 ---
 Name: List Upcoming Meetings
-Description: List all upcoming meetings hosted by the current Zoom user.
+Description: List upcoming meetings(within the next 24 hours) that the current Zoom user scheduled or invited to join.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -119,7 +120,7 @@ Name: Get Meeting Recordings
 Description: Get the cloud recordings of a Zoom meeting. Cloud rerordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
-Param: meeting_id: The ID of the meeting to get the recordings for
+Param: meeting_id_or_uuid: The ID or UUID of the meeting to get the recordings for. If providing the meeting ID instead of UUID, the response will be for the latest meeting instance.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingRecordings
 
@@ -139,6 +140,15 @@ Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get the details for
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetPastMeetingDetails
+
+---
+Name: List Past Meeting Instances
+Description: List all instances of a past Zoom meeting.
+Credential: ./credential
+Share Context: Zoom Context
+Param: meeting_id: The ID of the meeting to get the instances for
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListPastMeetingInstances
 
 ---
 Name: Get Meeting Summary

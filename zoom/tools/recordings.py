@@ -5,8 +5,8 @@ import os
 
 @tool_registry.decorator("GetMeetingRecordings")
 def get_meeting_recordings():
-    meeting_id = os.environ["MEETING_ID"]
-    url = f"{ZOOM_API_URL}/meetings/{meeting_id}/recordings"
+    meeting_id_or_uuid = os.environ["MEETING_ID_OR_UUID"]
+    url = f"{ZOOM_API_URL}/meetings/{meeting_id_or_uuid}/recordings"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
