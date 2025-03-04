@@ -61,6 +61,8 @@ tools:
     reference: ./word
   tavily:
     reference: ./search/tavily
+  googlecustomsearch:
+    reference: ./search/google/googlecustomsearch
   pagerduty:
     reference: ./pagerduty
   postgres:
