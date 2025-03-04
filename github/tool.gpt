@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs
 
 ---
 Name: Search Issues and PRs
@@ -239,6 +239,17 @@ Param: issueNumber: the number of the issue or pull request to remove labels fro
 Param: labels: (optional) comma-separated list of labels to remove. If not provided, all labels will be removed.
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js removeIssueLabels
+
+---
+Name: Get Job Logs
+Description: Get the logs for a specific GitHub Actions job
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: jobId: the ID of the job to get logs for
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getJobLogs
 
 ---
 Name: GitHub Context
