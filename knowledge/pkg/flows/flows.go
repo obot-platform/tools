@@ -168,7 +168,17 @@ func (f *IngestionFlow) Run(ctx context.Context, reader io.Reader, filename stri
 	/*
 	 * Transform documents
 	 */
-	transformerLog := phaseLog.With("stage", "transformer").With(slog.Int("num_documents", len(docs))).With(slog.Int("num_transformers", len(f.Transformations)))
+	docs, err = f.RunTransformers(ctx, docs, phaseLog)
+	if err != nil {
+		return nil, err
+	}
+
+	return f.AddDocIDs(docs), nil
+}
+
+func (f *IngestionFlow) RunTransformers(ctx context.Context, docs []vs.Document, log *slog.Logger) ([]vs.Document, error) {
+	var err error
+	transformerLog := log.With("stage", "transformer").With(slog.Int("num_documents", len(docs))).With(slog.Int("num_transformers", len(f.Transformations)))
 	transformerLog.With("status", "starting").Info("Starting document transformers")
 	docs, err = f.Transform(ctx, docs)
 	if err != nil {
@@ -176,14 +186,16 @@ func (f *IngestionFlow) Run(ctx context.Context, reader io.Reader, filename stri
 		return nil, fmt.Errorf("failed to transform documents: %w", err)
 	}
 	transformerLog.With("status", "completed").Info("Transformed documents", "new_num_documents", len(docs))
+	return docs, nil
+}
 
+func (f *IngestionFlow) AddDocIDs(docs []vs.Document) []vs.Document {
 	for i, doc := range docs {
 		if doc.ID == "" {
 			docs[i].ID = uuid.NewString()
 		}
 	}
-
-	return docs, nil
+	return docs
 }
 
 type RetrievalFlow struct {

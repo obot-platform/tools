@@ -17,6 +17,9 @@ type ExtraMetadata struct {
 func (e *ExtraMetadata) Transform(_ context.Context, docs []vs.Document) ([]vs.Document, error) {
 	for i, doc := range docs {
 		metadata := doc.Metadata
+		if metadata == nil {
+			metadata = make(map[string]any)
+		}
 		for k, v := range e.Metadata {
 			metadata[k] = v
 		}

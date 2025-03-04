@@ -233,6 +233,26 @@ func (s *ChromemStore) ExportCollectionsToFile(ctx context.Context, path string,
 	return s.db.ExportToFile(path, false, "", collections...)
 }
 
+func (s *ChromemStore) GetDocument(ctx context.Context, documentID, collection string) (vs.Document, error) {
+	col := s.db.GetCollection(collection, s.embeddingFunc)
+	if col == nil {
+		return vs.Document{}, fmt.Errorf("%w: %q", errors.ErrCollectionNotFound, collection)
+	}
+
+	doc, err := col.GetByID(ctx, documentID)
+	if err != nil {
+		return vs.Document{}, err
+	}
+
+	return vs.Document{
+		ID:        doc.ID,
+		Metadata:  convertStringMapToAnyMap(doc.Metadata),
+		Content:   doc.Content,
+		Embedding: doc.Embedding,
+	}, nil
+
+}
+
 func (s *ChromemStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
 	col := s.db.GetCollection(collection, s.embeddingFunc)
 	if col == nil {
@@ -247,9 +267,10 @@ func (s *ChromemStore) GetDocuments(ctx context.Context, collection string, wher
 	var docs []vs.Document
 	for _, doc := range cdocs {
 		docs = append(docs, vs.Document{
-			ID:       doc.ID,
-			Metadata: convertStringMapToAnyMap(doc.Metadata),
-			Content:  doc.Content,
+			ID:        doc.ID,
+			Metadata:  convertStringMapToAnyMap(doc.Metadata),
+			Content:   doc.Content,
+			Embedding: doc.Embedding,
 		})
 	}
 
