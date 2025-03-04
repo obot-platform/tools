@@ -354,7 +354,6 @@ func (v VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, colle
 	slog.Debug("Sending batch to pgvector", "store", "pgvector", "batchSize", b.Len())
 
 	results := v.conn.SendBatch(ctx, b)
-	defer results.Close()
 	for _, d := range docs {
 		_, err := results.Exec()
 		if err != nil {

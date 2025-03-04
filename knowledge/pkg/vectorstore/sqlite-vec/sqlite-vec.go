@@ -342,7 +342,7 @@ func (v *VectorStore) GetDocument(ctx context.Context, documentID, collection st
 		SELECT embedding
 		FROM [%s_vec]
 		WHERE document_id = ?;
-		`), documentID).Row().Scan(&emb)
+		`, collection), documentID).Row().Scan(&emb)
 	if err != nil {
 		return vs.Document{}, fmt.Errorf("failed to query embeddings: %w", err)
 	}
