@@ -76,7 +76,7 @@ Param: sticky: (optional) whether the post is sticky to the top of the page, def
 Param: password: (optional) the password of the post, default is None
 Param: slug: (optional) An alphanumeric identifier for the post unique to its type. Default is None
 Param: date: (optional) the date of the post, default is None. Must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date. If the date is a future date, the post will be scheduled to be published at that time.
-Param: featured_media: (optional) the ID of the featured media for the post. Default is None. Get the Id by List Media Tool.
+Param: featured_media: (optional) the ID of the featured media file for the post. Upload the media file with Upload Media Tool or Get the Id by List Media Tool.
 Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio. Default is standard
 Param: author_id: (optional) the ID for the author of the post. If not provided, the current user will be used.
 Param: excerpt: (optional) the excerpt of the post, default is None
@@ -100,7 +100,7 @@ Param: sticky: (optional) whether the post is sticky to the top of the page
 Param: password: (optional) the password of the post
 Param: slug: (optional) the slug of the post
 Param: date: (optional) the date of the post. Must be a valid ISO 8601 date string, in the format of YYYY-MM-DDTHH:MM:SS, or YYYY-MM-DDTHH:MM:SS+HH:MM for timezone aware date. If the date is a future date, the post will be scheduled to be published at that time.
-Param: featured_media: (optional) the ID of the featured media for the post. Get the Id by List Media Tool.
+Param: featured_media: (optional) the ID of the featured media file for the post. Upload the media file with Upload Media Tool or Get the Id by List Media Tool.
 Param: format: (optional) the format of the post to create, must be one of: standard, aside, chat, gallery, link, image, quote, status, video, audio.
 Param: author_id: (optional) the id of the author of the post
 Param: excerpt: (optional) the excerpt of the post
@@ -279,12 +279,11 @@ Share Context: ../time
 
 #!sys.echo
 
-## Instructions for using Wordpress tools
+## Instructions for using WordPress tools
 
 You have access to a set of tools to interact with a Wordpress workspace.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
-You MUST use HTML tags to format the content. WordPress posts do NOT render markdown syntax.
 WordPress posts support the following formats:
 - standard: The default post format.
 - aside: Typically styled without a title. Similar to a Facebook note update.
@@ -297,10 +296,16 @@ WordPress posts support the following formats:
 - audio: An audio file or playlist. Could be used for Podcasting.
 - chat: A chat transcript.
 
-Before using the Create Post Tool, you MUST confirm the post title and content with the user.
-When you share the link of a DRAFT post with the user, you should kindly remind the user that the post is only visible to logged in users with permission to view draft posts.
+KEY instructions:
+1. You MUST use HTML tags to format the content. WordPress posts do NOT render markdown syntax.
+2. Before using the Create Post Tool, you MUST confirm the post title and content with the user. You MUST also confirm with the user whether they would like to include any media files(images, videos, audios) in the post.
+3. When you share the link of a DRAFT post with the user, you should kindly remind the user that the post is only visible to logged in users with permission to view draft posts.
+4. When including media files in a post, it is recommended to first upload them using the Upload Media Tool. Once uploaded, you can reference them in one of two ways:
+- (Preferred) Use the `featured_media` field in the Create Post Tool or Update Post Tool.
+- Embed them directly in the content field using HTML tags.
+Note: If a media file is added via the `featured_media` field in the Create Post tool or Update Post tool, do NOT include its link with html tags in the post content again.
 
-## End of instructions for using Wordpress tools
+## End of instructions for using WordPress tools
 
 ---
 !metadata:*:icon
