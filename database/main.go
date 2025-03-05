@@ -34,7 +34,7 @@ func main() {
 
 	var (
 		ctx                    = context.Background()
-		dbFileName             = "acorn.db"
+		dbFileName             = "obot.db"
 		dbWorkspacePath        = "/databases/" + dbFileName
 		revisionID      string = "-1"
 		initialDBData   []byte
