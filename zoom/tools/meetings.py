@@ -1,4 +1,10 @@
-from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool, tool_registry
+from tools.helper import (
+    ZOOM_API_URL,
+    ACCESS_TOKEN,
+    str_to_bool,
+    tool_registry,
+    setup_logger,
+)
 from tools.users import get_user_type
 import requests
 import os
@@ -8,6 +14,8 @@ import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import json
+
+logger = setup_logger(__name__)
 
 
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
@@ -27,6 +35,7 @@ def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
         )  # Customize format as necessary
         return output_gmt_format
     except Exception as e:
+        logger.error(f"Error converting time: {e}")
         raise ValueError(f"Error converting time: {e}")
 
 
@@ -50,7 +59,10 @@ def _validate_meeting_start_time(input_time: str) -> bool:
     local_format = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
 
     # Validate against both formats
-    return bool(re.match(gmt_format, input_time) or re.match(local_format, input_time))
+    res = bool(re.match(gmt_format, input_time) or re.match(local_format, input_time))
+    if res == False:  # invalid time format
+        logger.error(f"Invalid input time format: {input_time}")
+    return res
 
 
 def _validate_invitees(invitees: list) -> bool:
@@ -101,6 +113,9 @@ def create_meeting():
         "MEETING_INVITEES", ""
     )  # a list of emails separated by commas
     if meeting_invitees != "" and not _validate_invitees(meeting_invitees.split(",")):
+        logger.error(
+            f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
+        )
         raise ValueError(
             f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
         )
@@ -207,8 +222,11 @@ def create_meeting():
             recurrence_object = json.loads(recurrence)
             payload["recurrence"] = recurrence_object
         except Exception as e:
+            logger.error(
+                f"Exception {e}: Invalid recurrence: {recurrence}. Must be a valid JSON object."
+            )
             raise ValueError(
-                f"Invalid recurrence: {recurrence}. Must be a valid JSON object."
+                f"Exception {e}: Invalid recurrence: {recurrence}. Must be a valid JSON object."
             )
     # features for licensed users
     if user_type == 2:
