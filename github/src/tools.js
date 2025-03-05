@@ -345,3 +345,12 @@ export async function removeIssueLabels(octokit, owner, repo, issueNumber, label
 export async function getUser(octokit) {
     await octokit.users.getAuthenticated();
 }
+
+export async function getJobLogs(octokit, owner, repo, jobId) {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs', {
+        owner,
+        repo,
+        job_id: jobId
+    });
+    console.log(response.data);
+}
