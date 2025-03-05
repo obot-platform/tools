@@ -1,0 +1,35 @@
+Name: Survey
+Description: Presents a survey form for the user to fill out, and prints their responses.
+Param: survey: A JSON string containing information for the survey to give to the user. Must match this JSONSchema: {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "title": "Survey",
+        "description": "A survey containing a message and a list of fields",
+        "required": ["message", "fields"],
+        "properties": {
+            "message": {
+                "type": "string",
+                "description": "The message to display for the survey"
+            },
+            "fields": {
+                "type": "array",
+                "description": "List of fields in the survey",
+                "items": {
+                    "type": "object",
+                    "required": ["name", "description"],
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "The name of the field"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A description of the field"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
