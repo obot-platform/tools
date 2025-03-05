@@ -185,12 +185,25 @@ func (db *DB) FindFile(ctx context.Context, searchFile File) (*File, error) {
 }
 
 func (db *DB) FindFileByMetadata(ctx context.Context, dataset string, metadata FileMetadata, includeDocuments bool) (*File, error) {
-	var file File
+	fs, err := db.FindFilesByMetadata(ctx, dataset, metadata, includeDocuments, true)
+	if err != nil {
+		return nil, err
+	}
+	if len(fs) == 0 {
+		return nil, ErrDBFileNotFound
+	}
+	return &fs[0], nil
+}
+
+func (db *DB) FindFilesByMetadata(ctx context.Context, dataset string, metadata FileMetadata, includeDocuments bool, firstOnly bool) ([]File, error) {
 	tx := db.WithContext(ctx)
 	if includeDocuments {
 		tx = tx.Preload("Documents")
 	}
-	tx = tx.Where("dataset = ?", dataset)
+
+	if dataset != "" {
+		tx = tx.Where("dataset = ?", dataset)
+	}
 
 	if metadata.Name != "" {
 		tx = tx.Where("name = ?", metadata.Name)
@@ -204,13 +217,26 @@ func (db *DB) FindFileByMetadata(ctx context.Context, dataset string, metadata F
 	if !metadata.ModifiedAt.IsZero() {
 		tx = tx.Where("modified_at = ?", metadata.ModifiedAt)
 	}
-
-	err := tx.First(&file).Error
-	if err != nil {
-		return nil, ErrDBFileNotFound
+	if metadata.Checksum != "" {
+		tx = tx.Where("checksum = ?", metadata.Checksum)
 	}
 
-	return &file, nil
+	if firstOnly {
+		var file File
+		err := tx.First(&file).Error
+		if err != nil {
+			return nil, ErrDBFileNotFound
+		}
+		return []File{file}, nil
+	}
+
+	var files []File
+	err := tx.Find(&files).Error
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+
 }
 
 func (db *DB) GetDocument(ctx context.Context, documentID string) (*Document, error) {

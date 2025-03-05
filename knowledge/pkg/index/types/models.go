@@ -36,6 +36,7 @@ type FileMetadata struct {
 	AbsolutePath string    `json:"absolute_path"`
 	Size         int64     `json:"size"`
 	ModifiedAt   time.Time `json:"modified_at"`
+	Checksum     string    `json:"checksum"`
 }
 
 type Document struct {

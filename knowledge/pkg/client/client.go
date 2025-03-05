@@ -18,6 +18,7 @@ type SharedIngestionOpts struct {
 	IsDuplicateFuncName string
 	Metadata            map[string]string
 	ReuseEmbeddings     bool
+	ReuseFiles          bool
 }
 
 type IngestPathsOpts struct {

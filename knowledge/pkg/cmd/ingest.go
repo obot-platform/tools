@@ -103,6 +103,7 @@ func (s *ClientIngest) run(ctx context.Context, filePath string) error {
 			IsDuplicateFuncName: s.DeduplicationFuncName,
 			Metadata:            metadata,
 			ReuseEmbeddings:     true,
+			ReuseFiles:          true,
 		},
 		IgnoreExtensions:     strings.Split(s.IgnoreExtensions, ","),
 		Concurrency:          s.Concurrency,

@@ -3,6 +3,7 @@ package datastore
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"log/slog"
 	"os"
@@ -29,6 +30,7 @@ type IngestOpts struct {
 	IngestionFlows      []flows.IngestionFlow
 	ExtraMetadata       map[string]any
 	ReuseEmbeddings     bool
+	ReuseFiles          bool
 }
 
 // Ingest loads a document from a reader and adds it to the dataset.
@@ -160,25 +162,105 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 		return nil, fmt.Errorf("%w (file %q)", &documentloader.UnsupportedFileTypeError{FileType: filetype}, opts.FileMetadata.AbsolutePath)
 	}
 
+	start := time.Now()
+	checksum := sha256.Sum256(content)
+	slog.Debug("File checksum calculated", "size", len(content), "duration", time.Since(start))
+	opts.FileMetadata.Checksum = fmt.Sprintf("%x", checksum)
+
 	// Mandatory Transformation: Add filename to metadata -> append extraMetadata, but do not override filename or absPath
-	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath, "fileSize": opts.FileMetadata.Size, "embeddingModel": s.EmbeddingModelProvider.EmbeddingModelName()}
+	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath, "fileSize": opts.FileMetadata.Size, "embeddingModel": s.EmbeddingModelProvider.EmbeddingModelName(), "fileChecksum": fmt.Sprintf("%x", checksum)}
 	for k, v := range opts.ExtraMetadata {
 		if _, ok := metadata[k]; !ok {
 			metadata[k] = v
 		}
 	}
+
+	// Reuse existing file if possible
+	// TODO: this should honor textsplitter and loading settings somehow to allow for changing them and not use the existing embeddings and documents data
+	var docs []vs.Document
+	if opts.ReuseFiles {
+		slog.Info("Checking if existing file can be reused", "checksum", opts.FileMetadata.Checksum)
+
+		fs, err := s.Index.FindFilesByMetadata(ctx, "", types.FileMetadata{Checksum: opts.FileMetadata.Checksum}, false)
+		if err != nil {
+			slog.Debug("Failed to find file with checksum", "error", err, "checksum", metadata["checksum"])
+		} else if len(fs) > 0 {
+		fileLoop:
+			for _, f := range fs {
+
+				// check if the dataset embeddingsconfig matches - if not, we don't have to fetch the documents for this file
+				ds, err := s.GetDataset(ctx, f.Dataset, nil)
+				if err != nil || ds == nil {
+					slog.Debug("Failed to get dataset", "error", err)
+					continue
+				}
+				if ds.EmbeddingsProviderConfig == nil {
+					slog.Debug("Dataset has no embeddings provider config")
+					continue
+				}
+				dsEmbeddingProvider, err := embeddings.ProviderFromConfig(*ds.EmbeddingsProviderConfig)
+				if err != nil {
+					slog.Debug("Failed to get embeddings model provider", "error", err)
+					continue
+				}
+
+				if dsEmbeddingProvider.EmbeddingModelName() != s.EmbeddingModelProvider.EmbeddingModelName() {
+					slog.Debug("Embeddings model mismatch", "dataset", ds.ID, "attached", dsEmbeddingProvider.EmbeddingModelName(), "configured", s.EmbeddingModelProvider.EmbeddingModelName())
+					continue
+				}
+
+				nf, err := s.FindFile(ctx, f)
+				if err != nil || nf == nil {
+					slog.Debug("Failed to get file", "error", err)
+					continue
+				}
+				f = *nf
+				slog.Info("Found existing file that could be reused", "fileID", f.ID, "checksum", opts.FileMetadata.Checksum, "documents", len(f.Documents), "dataset", f.Dataset)
+
+				docs = make([]vs.Document, len(f.Documents))
+				for i, existingDoc := range f.Documents {
+					document, err := s.Vectorstore.GetDocument(ctx, existingDoc.ID, f.Dataset)
+					if err != nil {
+						// At this point we have to do all or none, as a new ingestion process could generate different chunks, e.g. due to different tokenization in a VLM processing step
+						slog.Info("Failed to get document, aborting file embedding reuse process", "error", err, "docID", existingDoc.ID)
+						continue fileLoop
+					}
+					docs[i] = vs.Document{
+						ID:        uuid.NewString(),  // new UUID for the document to avoid collisions with reused docs
+						Metadata:  document.Metadata, // some keys will be overridden in the transformers
+						Content:   document.Content,
+						Embedding: document.Embedding,
+					}
+				}
+
+				slog.Info("Reused existing file", "fileID", f.ID, "checksum", opts.FileMetadata.Checksum, "documents", len(docs), "dataset", f.Dataset)
+				break
+			}
+		}
+	}
+
 	em := &transformers.ExtraMetadata{Metadata: metadata}
 	ingestionFlow.Transformations = append(ingestionFlow.Transformations, em)
 
-	docs, err := ingestionFlow.Run(ctx, bytes.NewReader(content), filename)
-	if err != nil {
-		statusLog.With("status", "failed").Error("Ingestion Flow failed", "error", err)
-		return nil, fmt.Errorf("ingestion flow failed for file %q: %w", filename, err)
-	}
-
+	// Only run ingestion flow if we're not re-using the details of an existing file and its documents
 	if len(docs) == 0 {
-		statusLog.With("status", "skipped").Info("Ingested document", "num_documents", 0)
-		return nil, nil
+		docs, err = ingestionFlow.Run(ctx, bytes.NewReader(content), filename)
+		if err != nil {
+			statusLog.With("status", "failed").Error("Ingestion Flow failed", "error", err)
+			return nil, fmt.Errorf("ingestion flow failed for file %q: %w", filename, err)
+		}
+
+		if len(docs) == 0 {
+			statusLog.With("status", "skipped").Info("Ingested document", "num_documents", 0)
+			return nil, nil
+		}
+	} else {
+		// We reused documents, so we only need to run the transformers on them, e.g. to add the metadata
+		docs, err = ingestionFlow.RunTransformers(ctx, docs, statusLog)
+		if err != nil {
+			statusLog.With("status", "failed").Error("Failed to run transformers on reused documents", "error", err)
+			return nil, fmt.Errorf("failed to run transformers on reused documents: %w", err)
+		}
 	}
 
 	// Sort documents
@@ -203,6 +285,9 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 	if opts.ReuseEmbeddings {
 		slog.Debug("Checking if existing embeddings can be reused", "count", len(docs))
 		for i, doc := range docs {
+			if len(doc.Embedding) > 0 {
+				continue
+			}
 			existingDocs, err := s.Vectorstore.GetDocuments(ctx, "", nil, []cg.WhereDocument{
 				{
 					Operator: cg.WhereDocumentOperatorEquals,
@@ -287,6 +372,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 		dbFile.FileMetadata.AbsolutePath = opts.FileMetadata.AbsolutePath
 		dbFile.FileMetadata.Size = opts.FileMetadata.Size
 		dbFile.FileMetadata.ModifiedAt = opts.FileMetadata.ModifiedAt
+		dbFile.FileMetadata.Checksum = opts.FileMetadata.Checksum
 	}
 
 	iLog := statusLog.With("component", "index")

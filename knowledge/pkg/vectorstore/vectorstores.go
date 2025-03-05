@@ -22,6 +22,7 @@ type VectorStore interface {
 	RemoveCollection(ctx context.Context, collection string) error
 	RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error
 	GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]types.Document, error)
+	GetDocument(ctx context.Context, documentID string, collection string) (types.Document, error)
 
 	ImportCollectionsFromFile(ctx context.Context, path string, collections ...string) error
 	ExportCollectionsToFile(ctx context.Context, path string, collections ...string) error

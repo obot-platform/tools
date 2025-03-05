@@ -47,6 +47,7 @@ func (s *ClientAskDir) Run(cmd *cobra.Command, args []string) error {
 		SharedIngestionOpts: client.SharedIngestionOpts{
 			IsDuplicateFuncName: s.DeduplicationFuncName,
 			ReuseEmbeddings:     true,
+			ReuseFiles:          true,
 		},
 		IgnoreExtensions:     strings.Split(s.IgnoreExtensions, ","),
 		Concurrency:          s.Concurrency,
