@@ -28,7 +28,7 @@ def setup_logger(name):
 
     # Create a log formatter
     formatter = logging.Formatter(
-        "[WordPress Tool Debugging Log]: %(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        "[Zoom Tool Debugging Log]: %(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     stderr_handler.setFormatter(formatter)
 
