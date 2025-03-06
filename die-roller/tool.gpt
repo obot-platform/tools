@@ -1,0 +1,13 @@
+---
+Name: Die Roller
+Description: Tool to roll dice and return the result
+Metadata: bundle: true
+Share Tools: Roll Dice
+
+---
+Name: Roll Dice
+Description: Roll n-number of dice with n-sides. The user might use notation like `{number of dice}d{number of sides per die}` - ex 1d6, 2d20, etc.
+Param: num_dice: The number of dice to roll
+Param: num_sides: The number of sides each die should have
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool rollDice
