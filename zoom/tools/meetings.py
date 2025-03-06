@@ -373,14 +373,11 @@ def update_meeting():
     payload = {}
 
     if "AGENDA" in os.environ:
-        agenda = os.environ["AGENDA"]
-        payload["agenda"] = agenda
+        payload["agenda"] = os.environ["AGENDA"]
     if "DEFAULT_PASSWORD" in os.environ:
-        default_password = str_to_bool(os.environ["DEFAULT_PASSWORD"])
-        payload["default_password"] = default_password
+        payload["default_password"] = str_to_bool(os.environ["DEFAULT_PASSWORD"])
     if "DURATION" in os.environ:
-        duration = int(os.environ["DURATION"])
-        payload["duration"] = duration
+        payload["duration"] = int(os.environ["DURATION"])
     if "PASSWORD" in os.environ:
         password = os.environ["PASSWORD"]
         if password == "":
@@ -398,8 +395,7 @@ def update_meeting():
         payload["recurrence"] = recurrence_object
 
     if "PRE_SCHEDULE" in os.environ:
-        pre_schedule = str_to_bool(os.environ["PRE_SCHEDULE"])
-        payload["pre_schedule"] = pre_schedule
+        payload["pre_schedule"] = str_to_bool(os.environ["PRE_SCHEDULE"])
 
     if "START_TIME" in os.environ:
         start_time = os.environ["START_TIME"]
@@ -410,14 +406,11 @@ def update_meeting():
         payload["start_time"] = start_time
 
     if "MEETING_TEMPLATE_ID" in os.environ:
-        meeting_template_id = os.environ["MEETING_TEMPLATE_ID"]
-        payload["template_id"] = meeting_template_id
+        payload["template_id"] = os.environ["MEETING_TEMPLATE_ID"]
     if "TIMEZONE" in os.environ:
-        timezone = os.environ["TIMEZONE"]
-        payload["timezone"] = timezone
+        payload["timezone"] = os.environ["TIMEZONE"]
     if "TOPIC" in os.environ:
-        topic = os.environ["TOPIC"]
-        payload["topic"] = topic
+        payload["topic"] = os.environ["TOPIC"]
 
     if "MEETING_TYPE" in os.environ:
         meeting_type = int(os.environ["MEETING_TYPE"])
@@ -430,17 +423,13 @@ def update_meeting():
     # args of settings
     settings = {}
     if "AUDIO_RECORDING" in os.environ:
-        audio_recording = os.environ["AUDIO_RECORDING"]
-        settings["auto_recording"] = audio_recording
+        settings["audio_recording"] = os.environ["AUDIO_RECORDING"]
     if "CONTACT_EMAIL" in os.environ:
-        contact_email = os.environ["CONTACT_EMAIL"]
-        settings["contact_email"] = contact_email
+        settings["contact_email"] = os.environ["CONTACT_EMAIL"]
     if "CONTACT_NAME" in os.environ:
-        contact_name = os.environ["CONTACT_NAME"]
-        settings["contact_name"] = contact_name
+        settings["contact_name"] = os.environ["CONTACT_NAME"]
     if "PRIVATE_MEETING" in os.environ:
-        private_meeting = str_to_bool(os.environ["PRIVATE_MEETING"])
-        settings["private_meeting"] = private_meeting
+        settings["private_meeting"] = str_to_bool(os.environ["PRIVATE_MEETING"])
 
     if "MEETING_INVITEES" in os.environ:
         meeting_invitees = os.environ[
@@ -458,10 +447,9 @@ def update_meeting():
         settings["meeting_invitees"] = meeting_invitees_list
 
     if "AUTO_START_MEETING_SUMMARY" in os.environ:
-        auto_start_meeting_summary = str_to_bool(
+        settings["auto_start_meeting_summary"] = str_to_bool(
             os.environ["AUTO_START_MEETING_SUMMARY"]
         )
-        settings["auto_start_meeting_summary"] = auto_start_meeting_summary
 
     if settings:
         payload["settings"] = settings
