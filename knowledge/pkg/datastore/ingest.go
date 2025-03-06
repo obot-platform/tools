@@ -14,6 +14,7 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/log"
 	"github.com/gptscript-ai/knowledge/pkg/output"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	cg "github.com/philippgille/chromem-go"
 
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
@@ -27,6 +28,7 @@ type IngestOpts struct {
 	IsDuplicateFunc     IsDuplicateFunc
 	IngestionFlows      []flows.IngestionFlow
 	ExtraMetadata       map[string]any
+	ReuseEmbeddings     bool
 }
 
 // Ingest loads a document from a reader and adds it to the dataset.
@@ -159,7 +161,7 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 	}
 
 	// Mandatory Transformation: Add filename to metadata -> append extraMetadata, but do not override filename or absPath
-	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath, "fileSize": opts.FileMetadata.Size}
+	metadata := map[string]any{"filename": filename, "absPath": opts.FileMetadata.AbsolutePath, "fileSize": opts.FileMetadata.Size, "embeddingModel": s.EmbeddingModelProvider.EmbeddingModelName()}
 	for k, v := range opts.ExtraMetadata {
 		if _, ok := metadata[k]; !ok {
 			metadata[k] = v
@@ -197,6 +199,60 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 
 	statusLog = statusLog.With("num_documents", len(docs))
 	ctx = log.ToCtx(ctx, statusLog)
+
+	if opts.ReuseEmbeddings {
+		slog.Debug("Checking if existing embeddings can be reused", "count", len(docs))
+		for i, doc := range docs {
+			existingDocs, err := s.Vectorstore.GetDocuments(ctx, "", nil, []cg.WhereDocument{
+				{
+					Operator: cg.WhereDocumentOperatorEquals,
+					Value:    doc.Content,
+				},
+			})
+			if err != nil {
+				slog.Debug("failed to get documents for reuse", "error", err)
+				continue
+			}
+			if len(existingDocs) == 0 {
+				slog.Debug("no existing documents found for reuse")
+				continue
+			}
+			for _, existingDoc := range existingDocs {
+				if emb, ok := existingDoc.Metadata["embeddingModel"]; ok {
+					if emb == s.EmbeddingModelProvider.EmbeddingModelName() {
+						slog.Info("Reusing existing embedding", "docID", existingDoc.ID, "embeddingModelMeta", emb, "configuredModel", s.EmbeddingModelProvider.EmbeddingModelName())
+						docs[i].Embedding = existingDoc.Embedding
+						break
+					} else {
+						slog.Debug("not using existing embedding", "docID", existingDoc.ID, "embeddingModel", emb, "configuredModel", s.EmbeddingModelProvider.EmbeddingModelName())
+						continue
+					}
+				}
+
+				existingDocumentDataset, err := s.GetDatasetForDocument(ctx, existingDoc.ID)
+				if err != nil {
+					slog.Debug("failed to get document dataset", "error", err)
+					continue
+				}
+
+				if existingDocumentDataset.EmbeddingsProviderConfig != nil {
+					existingEmbeddingProvider, err := embeddings.ProviderFromConfig(*existingDocumentDataset.EmbeddingsProviderConfig)
+					if err != nil {
+						slog.Debug("failed to get embeddings model provider", "error", err)
+						continue
+					}
+					if existingEmbeddingProvider.EmbeddingModelName() == s.EmbeddingModelProvider.EmbeddingModelName() {
+						slog.Info("Reusing existing embedding", "docID", existingDoc.ID, "embeddingModel", existingEmbeddingProvider.EmbeddingModelName(), "configuredModel", s.EmbeddingModelProvider.EmbeddingModelName())
+						docs[i].Embedding = existingDoc.Embedding
+						break
+					} else {
+						slog.Debug("not using existing embedding", "docID", existingDoc.ID, "embeddingModel", existingEmbeddingProvider.EmbeddingModelName(), "configuredModel", s.EmbeddingModelProvider.EmbeddingModelName())
+						continue
+					}
+				}
+			}
+		}
+	}
 
 	statusLog.Debug("Adding documents to vectorstore")
 	startTime := time.Now()

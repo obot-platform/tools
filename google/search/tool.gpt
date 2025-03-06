@@ -24,3 +24,7 @@ Metadata: index: false
 ---
 !metadata:*:icon
 /admin/assets/google_icon_small.png
+
+---
+!metadata:*:toolBundle
+Google Search

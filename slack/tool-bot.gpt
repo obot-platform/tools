@@ -1,0 +1,44 @@
+---
+Name: Slack Bot
+Description: Tools for interacting with Slack as an App
+Metadata: bundle: true
+Share Tools: Send Direct Message As Bot
+
+---
+Name: Send Direct Message As Bot
+Description: Send a direct message as a bot or an app in the Slack workspace
+Credential: ./credential/bot.gpt
+Share Tools: List Users As Bot, Search Users As Bot
+Param: userids: comma-separated list of user IDs to send the message to for a group message (example: USER1ID,USER2ID), or just one ID for an individual message
+Param: text: the text to send
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendDM
+
+---
+Name: List Users As Bot
+Description: List all users in the Slack workspace as a bot
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential/bot.gpt
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUsers
+
+---
+Name: Search Users As Bot
+Description: Search for users in the Slack workspace as a bot
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential/bot.gpt
+Param: query: the search query
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchUsers
+
+---
+!metadata:*:icon
+/admin/assets/slack_icon_small.svg
+
+---
+!metadata:*:oauth
+slack
+
+---
+!metadata:*:supportsOAuthTokenPrompt
+true

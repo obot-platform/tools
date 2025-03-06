@@ -29,6 +29,7 @@ type oauthInfo struct {
 	Integration   string   `json:"integration"`
 	Token         string   `json:"token"`
 	Scope         []string `json:"scope"`
+	UserScope     []string `json:"userScope"`
 	OptionalScope []string `json:"optionalScope"`
 }
 
@@ -226,6 +227,9 @@ func mainErr() (err error) {
 	q.Set("challenge", challenge)
 	if len(in.OAuthInfo.Scope) != 0 {
 		q.Set("scope", strings.Join(in.OAuthInfo.Scope, " "))
+	}
+	if len(in.OAuthInfo.UserScope) != 0 {
+		q.Set("user_scope", strings.Join(in.OAuthInfo.UserScope, " "))
 	}
 	if len(in.OAuthInfo.OptionalScope) != 0 {
 		q.Set("optional_scope", strings.Join(in.OAuthInfo.OptionalScope, " "))

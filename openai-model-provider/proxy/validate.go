@@ -46,8 +46,8 @@ func (cfg *Config) Validate(toolPath string) error {
 		return handleValidationError(toolPath, "Invalid Response Format")
 	}
 
-	if modelsResp.Object != "list" || len(modelsResp.Data) == 0 {
-		return handleValidationError(toolPath, "Invalid Models Response")
+	if modelsResp.Object != "" && modelsResp.Object != "list" || len(modelsResp.Data) == 0 {
+		return handleValidationError(toolPath, fmt.Sprintf("Invalid Models Response: %d models", len(modelsResp.Data)))
 	}
 
 	return nil

@@ -40,7 +40,13 @@ switch (command) {
     await getChannelHistory(webClient, process.env.CHANNELID, process.env.LIMIT)
     break
   case "getChannelHistoryByTime":
-    await getChannelHistoryByTime(webClient, process.env.CHANNELID, process.env.LIMIT, process.env.START, process.env.END)
+    await getChannelHistoryByTime(
+      webClient,
+      process.env.CHANNELID,
+      process.env.LIMIT,
+      process.env.START,
+      process.env.END
+    )
     break
   case "getThreadHistory":
     await getThreadHistory(webClient, process.env.CHANNELID, process.env.THREADID, process.env.LIMIT)

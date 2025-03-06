@@ -3,6 +3,9 @@ package embeddings
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/gptscript-ai/knowledge/pkg/config"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/cohere"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/jina"
@@ -14,8 +17,6 @@ import (
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/vertex"
 	"github.com/mitchellh/mapstructure"
-	"reflect"
-	"strings"
 )
 
 func GetSelectedEmbeddingsModelProvider(selected string, embeddingsConfig config.EmbeddingsConfig) (types.EmbeddingModelProvider, error) {

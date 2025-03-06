@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/knowledge/pkg/env"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -325,10 +326,16 @@ func (v VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, colle
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
 
-			vec, err := v.embeddingFunc(ctx, doc.Content)
-			if err != nil {
-				setSharedErr(fmt.Errorf("failed to embed document %s: %w", doc.ID, err))
-				return
+			var vec []float32
+			if len(doc.Embedding) > 0 {
+				slog.Debug("Using provided embedding", "documentID", doc.ID, "store", "pgvector")
+				vec = doc.Embedding
+			} else {
+				vec, err = v.embeddingFunc(ctx, doc.Content)
+				if err != nil {
+					setSharedErr(fmt.Errorf("failed to embed document %s: %w", doc.ID, err))
+					return
+				}
 			}
 
 			b.Queue(sql, doc.ID, []byte(doc.Content), pgvector.NewVector(vec), doc.Metadata, cid)
@@ -364,17 +371,13 @@ func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocu
 		ef = embeddingFunc
 	}
 
-	if len(whereDocument) > 0 {
-		return nil, fmt.Errorf("pgvector does not support whereDocument")
-	}
-
 	queryEmbedding, err := ef(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	dims := len(queryEmbedding)
 
-	whereClause, args, err := buildWhereClause([]any{dims, pgvector.NewVector(queryEmbedding), numDocuments}, where)
+	whereClause, args, err := buildWhereClause([]any{dims, pgvector.NewVector(queryEmbedding), numDocuments}, where, whereDocument)
 	if err != nil {
 		return nil, err
 	}
@@ -445,10 +448,6 @@ func (v VectorStore) RemoveCollection(ctx context.Context, collection string) er
 }
 
 func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error {
-	if len(whereDocument) > 0 {
-		return fmt.Errorf("pgvector does not support whereDocument")
-	}
-
 	cid, err := v.getCollectionUUID(ctx, collection)
 	if err != nil {
 		return fmt.Errorf("collection %s not found: %w", collection, err)
@@ -467,7 +466,7 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 
 	// Where clause takes precedence over documentID for consistency with chromem-go's behavior, as that was the default before
 	if len(where) > 0 {
-		whereClause, args, err := buildWhereClause([]any{cid}, where)
+		whereClause, args, err := buildWhereClause([]any{cid}, where, whereDocument)
 		if err != nil {
 			return err
 		}
@@ -482,22 +481,23 @@ func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, coll
 }
 
 func (v VectorStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
-	if len(whereDocument) > 0 {
-		return nil, fmt.Errorf("pgvector does not support whereDocument")
+	var args []any
+	var whereCol string
+	if collection != "" {
+		cid, err := v.getCollectionUUID(ctx, collection)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, cid)
+		whereCol = "collection_id = $1 AND"
 	}
 
-	cid, err := v.getCollectionUUID(ctx, collection)
+	whereClause, args, err := buildWhereClause(args, where, whereDocument)
 	if err != nil {
 		return nil, err
 	}
 
-	whereClause, args, err := buildWhereClause([]any{cid}, where)
-	if err != nil {
-		return nil, err
-	}
-
-	sql := fmt.Sprintf(`SELECT uuid, document, cmetadata FROM %s WHERE collection_id = $1 AND %s`, v.embeddingTableName, whereClause)
-	slog.Debug("Get documents", "sql", sql, "store", "pgvector")
+	sql := fmt.Sprintf(`SELECT uuid, document, cmetadata, embedding FROM %s WHERE %s %s`, v.embeddingTableName, whereCol, whereClause)
 	rows, err := v.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
@@ -507,9 +507,13 @@ func (v VectorStore) GetDocuments(ctx context.Context, collection string, where 
 	docs := make([]vs.Document, 0)
 	for rows.Next() {
 		doc := vs.Document{}
-		if err := rows.Scan(&doc.ID, &doc.Content, &doc.Metadata); err != nil {
+		var content []byte
+		var vec pgvector.Vector
+		if err := rows.Scan(&doc.ID, &content, &doc.Metadata, &vec); err != nil {
 			return nil, err
 		}
+		doc.Content = string(content)
+		doc.Embedding = vec.Slice()
 		docs = append(docs, doc)
 	}
 	return docs, rows.Err()
@@ -523,8 +527,8 @@ func (v VectorStore) ExportCollectionsToFile(ctx context.Context, path string, c
 	return fmt.Errorf("function ExportCollectionsToFile not implemented for vectorstore pgvector")
 }
 
-func buildWhereClause(args []any, where map[string]string) (string, []any, error) {
-	if len(where) == 0 {
+func buildWhereClause(args []any, where map[string]string, whereDocument []cg.WhereDocument) (string, []any, error) {
+	if len(where)+len(whereDocument) == 0 {
 		return "TRUE", args, nil
 	}
 
@@ -539,6 +543,15 @@ func buildWhereClause(args []any, where map[string]string) (string, []any, error
 		args = append(args, k, v)
 		argIndex += 2
 	}
+
+	if len(whereDocument) > 0 {
+		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		if err != nil {
+			return "", nil, err
+		}
+		whereClauses = append(whereClauses, wc)
+	}
+
 	whereClause := strings.Join(whereClauses, " AND ")
 	if len(whereClause) == 0 {
 		whereClause = "TRUE"

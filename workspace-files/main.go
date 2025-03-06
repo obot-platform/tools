@@ -121,7 +121,7 @@ Write any suggested changes back to the file.`,
 				if err := c.WriteFileInWorkspace(ctx, path.Join(FilesDir, filename), []byte(content)); err == nil {
 					if !printed {
 						printed = true
-						fmt.Println("The following files have been changed in the workspace:")
+						fmt.Println("The following files have been externally changed in the workspace, re-read them if the up to date content needs to be known:")
 					}
 					fmt.Printf("File: %s\n%s\n", filename, inBackTicks(content))
 				}

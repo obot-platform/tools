@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -120,7 +121,7 @@ func main() {
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("http://127.0.0.1:%s", port)))
 	})
-	mux.HandleFunc("/obot-get-state", state.ObotGetState(oauthProxy))
+	mux.HandleFunc("/obot-get-state", getState(oauthProxy))
 	mux.HandleFunc("/obot-get-icon-url", icon.ObotGetIconURL(profile.FetchGitHubProfileIconURL))
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
@@ -128,5 +129,75 @@ func main() {
 	if err := http.ListenAndServe("127.0.0.1:"+port, mux); !errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("ERROR: github-auth-provider: failed to listen and serve: %v\n", err)
 		os.Exit(1)
+	}
+}
+
+func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var sr state.SerializableRequest
+		if err := json.NewDecoder(r.Body).Decode(&sr); err != nil {
+			http.Error(w, fmt.Sprintf("failed to decode request body: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		reqObj, err := http.NewRequest(sr.Method, sr.URL, nil)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to create request object: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		reqObj.Header = sr.Header
+
+		ss, err := state.GetSerializableState(p, reqObj)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get state: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to get state: %v\n", err)
+			return
+		}
+
+		// The User on the state, for GitHub, is the GitHub username.
+		// This is bad, because we want the user ID instead.
+		// Make an API request to get more info about the authenticated user.
+
+		ss.PreferredUsername = ss.User
+
+		var userID struct {
+			ID int64 `json:"id"`
+		}
+
+		req, err := http.NewRequest("GET", "https://api.github.com/user", nil) // This gets the info for the authenticated user
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to create request: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to create request: %v\n", err)
+			return
+		}
+		req.Header.Set("Authorization", fmt.Sprintf("token %s", ss.AccessToken))
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to make request: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to make request: %v\n", err)
+			return
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			http.Error(w, fmt.Sprintf("failed to get user: %v", resp.StatusCode), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to get user: %v\n", resp.StatusCode)
+			return
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&userID); err != nil {
+			http.Error(w, fmt.Sprintf("failed to decode user: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to decode user: %v\n", err)
+			return
+		}
+
+		ss.User = fmt.Sprintf("%d", userID.ID)
+
+		if err := json.NewEncoder(w).Encode(ss); err != nil {
+			http.Error(w, fmt.Sprintf("failed to encode state: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to encode state: %v\n", err)
+			return
+		}
 	}
 }

@@ -1,4 +1,4 @@
-from tools import posts, users, site, media  # import tool registry
+from tools import posts, users, site, media, categories, tags  # import tool registry to register tools
 from tools.helper import tool_registry, create_session, setup_logger
 import json
 import sys

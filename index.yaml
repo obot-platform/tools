@@ -21,6 +21,8 @@ tools:
     reference: ./bluesky
   slack:
     reference: ./slack
+  slack-bot:
+    reference: ./slack/tool-bot.gpt
   linkedin-publishing:
     reference: ./linkedin-publishing
   notion:
@@ -51,6 +53,10 @@ tools:
     reference: ./workspace-files
   tasks:
     reference: ./tasks
+  threads:
+    reference: ./threads
+  projects:
+    reference: ./projects
   knowledge:
     reference: ./knowledge
   shell:
@@ -59,6 +65,8 @@ tools:
     reference: ./word
   tavily:
     reference: ./search/tavily
+  pagerduty:
+    reference: ./pagerduty
 
 knowledgeDataSources:
   notion-data-source:

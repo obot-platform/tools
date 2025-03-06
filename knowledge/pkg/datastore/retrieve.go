@@ -100,5 +100,13 @@ func (s *Datastore) SimilaritySearch(ctx context.Context, query string, numDocum
 			}
 		}
 	}
-	return s.Vectorstore.SimilaritySearch(ctx, query, numDocuments, datasetID, where, whereDocument, ef)
+	docs, err := s.Vectorstore.SimilaritySearch(ctx, query, numDocuments, datasetID, where, whereDocument, ef)
+	if err != nil {
+		return nil, err
+	}
+	for i, doc := range docs {
+		doc.Metadata["datasetID"] = datasetID
+		docs[i] = doc
+	}
+	return docs, nil
 }

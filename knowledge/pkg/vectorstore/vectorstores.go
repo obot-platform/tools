@@ -10,7 +10,7 @@ import (
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/chromem"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/pgvector"
-	sqlite_vec "github.com/gptscript-ai/knowledge/pkg/vectorstore/sqlite-vec"
+	sqlitevec "github.com/gptscript-ai/knowledge/pkg/vectorstore/sqlite-vec"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	cg "github.com/philippgille/chromem-go"
 )
@@ -46,7 +46,7 @@ func New(ctx context.Context, dsn string, embeddingProvider etypes.EmbeddingMode
 
 		return pgvector.New(ctx, dsn, embeddingFunc)
 	case "sqlite-vec":
-		return sqlite_vec.New(ctx, dsn, embeddingFunc)
+		return sqlitevec.New(ctx, dsn, embeddingFunc)
 	default:
 		return nil, fmt.Errorf("unsupported dialect: %q", dialect)
 	}

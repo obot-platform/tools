@@ -10,6 +10,7 @@ import (
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
 	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
 	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 	cg "github.com/philippgille/chromem-go"
 	"gorm.io/gorm"
@@ -112,9 +113,15 @@ func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, coll
 			args := make([]interface{}, 0, len(docs)*2) // 2 args per doc: document_id and embedding
 
 			for i, doc := range docs {
-				emb, err := v.embeddingFunc(ctx, doc.Content)
-				if err != nil {
-					return fmt.Errorf("failed to compute embedding for document %s: %w", doc.ID, err)
+				var emb []float32
+				if len(doc.Embedding) > 0 {
+					emb = doc.Embedding
+				} else {
+					var err error
+					emb, err = v.embeddingFunc(ctx, doc.Content)
+					if err != nil {
+						return fmt.Errorf("failed to compute embedding for document %s: %w", doc.ID, err)
+					}
 				}
 
 				serializedEmb, err := sqlitevec.SerializeFloat32(emb)
@@ -258,10 +265,6 @@ func (v *VectorStore) RemoveCollection(ctx context.Context, collection string) e
 }
 
 func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error {
-	if len(whereDocument) > 0 {
-		return fmt.Errorf("sqlite-vec does not support whereDocument")
-	}
-
 	var ids []string
 
 	err := v.db.Transaction(func(tx *gorm.DB) error {
@@ -314,15 +317,11 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 	return nil
 }
 
-func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
-	if len(whereDocument) > 0 {
-		return nil, fmt.Errorf("sqlite-vec does not support whereDocument")
-	}
-
+func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
 	var docs []vs.Document
 
 	// Build metadata filter query
-	whereQueries := []string{}
+	var whereQueries []string
 	args := []interface{}{collection}
 
 	for k, v := range where {
@@ -333,6 +332,14 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 		args = append(args, v)
 	}
 
+	if len(whereDocument) > 0 {
+		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		if err != nil {
+			return nil, fmt.Errorf("failed to build whereDocument clause: %w", err)
+		}
+		whereQueries = append(whereQueries, wc)
+	}
+
 	whereQuery := strings.Join(whereQueries, " AND ")
 	if len(whereQuery) > 0 {
 		whereQuery = " AND " + whereQuery
@@ -341,7 +348,7 @@ func (v *VectorStore) GetDocuments(ctx context.Context, collection string, where
 	query := fmt.Sprintf(`
         SELECT id, content, metadata
         FROM [%s]
-        WHERE collection_id = ?%s
+        WHERE collection_id = ?%s;
     `, v.embeddingsTableName, whereQuery)
 
 	rows, err := v.db.Raw(query, args...).Rows()
