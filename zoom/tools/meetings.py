@@ -1,4 +1,10 @@
-from tools.helper import ZOOM_API_URL, ACCESS_TOKEN, str_to_bool, tool_registry
+from tools.helper import (
+    ZOOM_API_URL,
+    ACCESS_TOKEN,
+    str_to_bool,
+    tool_registry,
+    setup_logger,
+)
 from tools.users import get_user_type
 import requests
 import os
@@ -8,6 +14,8 @@ import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import json
+
+logger = setup_logger(__name__)
 
 
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
@@ -27,6 +35,7 @@ def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
         )  # Customize format as necessary
         return output_gmt_format
     except Exception as e:
+        logger.error(f"Error converting time: {e}")
         raise ValueError(f"Error converting time: {e}")
 
 
@@ -50,7 +59,10 @@ def _validate_meeting_start_time(input_time: str) -> bool:
     local_format = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
 
     # Validate against both formats
-    return bool(re.match(gmt_format, input_time) or re.match(local_format, input_time))
+    res = bool(re.match(gmt_format, input_time) or re.match(local_format, input_time))
+    if res == False:  # invalid time format
+        logger.error(f"Invalid input time format: {input_time}")
+    return res
 
 
 def _validate_invitees(invitees: list) -> bool:
@@ -101,6 +113,9 @@ def create_meeting():
         "MEETING_INVITEES", ""
     )  # a list of emails separated by commas
     if meeting_invitees != "" and not _validate_invitees(meeting_invitees.split(",")):
+        logger.error(
+            f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
+        )
         raise ValueError(
             f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
         )
@@ -128,6 +143,9 @@ def create_meeting():
 
     meeting_type = int(os.getenv("MEETING_TYPE", 2))
     recurrence = os.getenv("RECURRENCE", "")
+    auto_start_meeting_summary = str_to_bool(
+        os.getenv("AUTO_START_MEETING_SUMMARY", "false")
+    )
 
     if meeting_type not in _meeting_types:
         raise ValueError(
@@ -188,7 +206,7 @@ def create_meeting():
             },
             "participant_focused_meeting": False,
             "push_change_to_calendar": False,
-            "auto_start_meeting_summary": False,
+            "auto_start_meeting_summary": auto_start_meeting_summary,
             "auto_start_ai_companion_questions": False,
             "device_testing": False,
         },
@@ -204,8 +222,11 @@ def create_meeting():
             recurrence_object = json.loads(recurrence)
             payload["recurrence"] = recurrence_object
         except Exception as e:
+            logger.error(
+                f"Exception {e}: Invalid recurrence: {recurrence}. Must be a valid JSON object."
+            )
             raise ValueError(
-                f"Invalid recurrence: {recurrence}. Must be a valid JSON object."
+                f"Exception {e}: Invalid recurrence: {recurrence}. Must be a valid JSON object."
             )
     # features for licensed users
     if user_type == 2:
@@ -271,9 +292,25 @@ def list_meetings():
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
-    response = requests.get(url, headers=headers)
+    params = {}
+    type = os.getenv("TYPE", "")
+    type_enums = [
+        "scheduled",
+        "live",
+        "upcoming",
+        "upcoming_meetings",
+        "previous_meetings",
+    ]
+    if type != "":
+        if type not in type_enums:
+            raise ValueError(f"Invalid type: {type}. Must be one of: {type_enums}")
+        params["type"] = type
+
+    response = requests.get(url, headers=headers, params=params)
     if response.status_code != 200:
-        return {"message": f"Error listing meetings: {response.text}"}
+        return {
+            "message": f"{response.status_code} Error listing meetings: {response.text}"
+        }
 
     res_json = response.json()
     for meeting in res_json["meetings"]:
@@ -334,31 +371,13 @@ def update_meeting():
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
 
     payload = {}
-    settings = {}
-    if "MEETING_INVITEES" in os.environ:
-        meeting_invitees = os.environ[
-            "MEETING_INVITEES"
-        ]  # a list of emails separated by commas
-        if meeting_invitees != "" and not _validate_invitees(
-            meeting_invitees.split(",")
-        ):
-            raise ValueError(
-                f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
-            )
-        meeting_invitees_list = [
-            {"email": invitee} for invitee in meeting_invitees.split(",")
-        ]
-        settings["meeting_invitees"] = meeting_invitees_list
 
     if "AGENDA" in os.environ:
-        agenda = os.environ["AGENDA"]
-        payload["agenda"] = agenda
+        payload["agenda"] = os.environ["AGENDA"]
     if "DEFAULT_PASSWORD" in os.environ:
-        default_password = str_to_bool(os.environ["DEFAULT_PASSWORD"])
-        payload["default_password"] = default_password
+        payload["default_password"] = str_to_bool(os.environ["DEFAULT_PASSWORD"])
     if "DURATION" in os.environ:
-        duration = int(os.environ["DURATION"])
-        payload["duration"] = duration
+        payload["duration"] = int(os.environ["DURATION"])
     if "PASSWORD" in os.environ:
         password = os.environ["PASSWORD"]
         if password == "":
@@ -376,20 +395,8 @@ def update_meeting():
         payload["recurrence"] = recurrence_object
 
     if "PRE_SCHEDULE" in os.environ:
-        pre_schedule = str_to_bool(os.environ["PRE_SCHEDULE"])
-        payload["pre_schedule"] = pre_schedule
-    if "AUDIO_RECORDING" in os.environ:
-        audio_recording = os.environ["AUDIO_RECORDING"]
-        settings["auto_recording"] = audio_recording
-    if "CONTACT_EMAIL" in os.environ:
-        contact_email = os.environ["CONTACT_EMAIL"]
-        settings["contact_email"] = contact_email
-    if "CONTACT_NAME" in os.environ:
-        contact_name = os.environ["CONTACT_NAME"]
-        settings["contact_name"] = contact_name
-    if "PRIVATE_MEETING" in os.environ:
-        private_meeting = str_to_bool(os.environ["PRIVATE_MEETING"])
-        settings["private_meeting"] = private_meeting
+        payload["pre_schedule"] = str_to_bool(os.environ["PRE_SCHEDULE"])
+
     if "START_TIME" in os.environ:
         start_time = os.environ["START_TIME"]
         if start_time != "" and not _validate_meeting_start_time(start_time):
@@ -399,14 +406,11 @@ def update_meeting():
         payload["start_time"] = start_time
 
     if "MEETING_TEMPLATE_ID" in os.environ:
-        meeting_template_id = os.environ["MEETING_TEMPLATE_ID"]
-        payload["template_id"] = meeting_template_id
+        payload["template_id"] = os.environ["MEETING_TEMPLATE_ID"]
     if "TIMEZONE" in os.environ:
-        timezone = os.environ["TIMEZONE"]
-        payload["timezone"] = timezone
+        payload["timezone"] = os.environ["TIMEZONE"]
     if "TOPIC" in os.environ:
-        topic = os.environ["TOPIC"]
-        payload["topic"] = topic
+        payload["topic"] = os.environ["TOPIC"]
 
     if "MEETING_TYPE" in os.environ:
         meeting_type = int(os.environ["MEETING_TYPE"])
@@ -415,6 +419,37 @@ def update_meeting():
                 f"Invalid meeting type: {meeting_type}. Must be one of: {_meeting_types.keys()}"
             )
         payload["type"] = meeting_type
+
+    # args of settings
+    settings = {}
+    if "AUDIO_RECORDING" in os.environ:
+        settings["audio_recording"] = os.environ["AUDIO_RECORDING"]
+    if "CONTACT_EMAIL" in os.environ:
+        settings["contact_email"] = os.environ["CONTACT_EMAIL"]
+    if "CONTACT_NAME" in os.environ:
+        settings["contact_name"] = os.environ["CONTACT_NAME"]
+    if "PRIVATE_MEETING" in os.environ:
+        settings["private_meeting"] = str_to_bool(os.environ["PRIVATE_MEETING"])
+
+    if "MEETING_INVITEES" in os.environ:
+        meeting_invitees = os.environ[
+            "MEETING_INVITEES"
+        ]  # a list of emails separated by commas
+        if meeting_invitees != "" and not _validate_invitees(
+            meeting_invitees.split(",")
+        ):
+            raise ValueError(
+                f"Invalid invitees: {meeting_invitees}. Must be a list of valid email addresses separated by commas."
+            )
+        meeting_invitees_list = [
+            {"email": invitee} for invitee in meeting_invitees.split(",")
+        ]
+        settings["meeting_invitees"] = meeting_invitees_list
+
+    if "AUTO_START_MEETING_SUMMARY" in os.environ:
+        settings["auto_start_meeting_summary"] = str_to_bool(
+            os.environ["AUTO_START_MEETING_SUMMARY"]
+        )
 
     if settings:
         payload["settings"] = settings
@@ -456,18 +491,37 @@ def get_meeting_summary():
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        return {"message": f"Error getting meeting summary: {response.text}"}
+        return {
+            "message": f"{response.status_code} Error getting meeting summary: {response.text}"
+        }
     return response.json()
 
 
 @tool_registry.decorator("GetPastMeetingDetails")
 def get_past_meeting_details():
-    meeting_id = os.environ["MEETING_ID"]
-    url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}"
+    meeting_id_or_uuid = os.environ["MEETING_ID_OR_UUID"]
+    url = f"{ZOOM_API_URL}/past_meetings/{meeting_id_or_uuid}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        return {"message": f"Error getting past meeting details: {response.text}"}
+        return {
+            "message": f"{response.status_code} Error getting past meeting details: {response.text}"
+        }
+    return response.json()
+
+
+@tool_registry.decorator("ListPastMeetingInstances")
+def list_past_meeting_instances():
+    meeting_id = os.environ["MEETING_ID"]
+    url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}/instances"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return {
+            "message": f"{response.status_code} Error listing past meeting instances: {response.text}"
+        }
     return response.json()

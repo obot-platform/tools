@@ -1,4 +1,6 @@
 import os
+import logging
+import sys
 
 ACCESS_TOKEN = os.getenv("ZOOM_OAUTH_TOKEN")
 
@@ -6,6 +8,37 @@ if ACCESS_TOKEN is None or ACCESS_TOKEN == "":
     raise Exception("Error: ZOOM_OAUTH_TOKEN is not set properly.")
 
 ZOOM_API_URL = "https://api.zoom.us/v2"
+
+
+def setup_logger(name):
+    """Setup a logger that writes to sys.stderr. This will eventually show up in GPTScript's debugging logs.
+
+    Args:
+        name (str): The name of the logger.
+
+    Returns:
+        logging.Logger: The logger.
+    """
+    # Create a logger
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)  # Set the logging level
+
+    # Create a stream handler that writes to sys.stderr
+    stderr_handler = logging.StreamHandler(sys.stderr)
+
+    # Create a log formatter
+    formatter = logging.Formatter(
+        "[Zoom Tool Debugging Log]: %(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    stderr_handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(stderr_handler)
+
+    return logger
+
+
+logger = setup_logger(__name__)
 
 
 def str_to_bool(value):

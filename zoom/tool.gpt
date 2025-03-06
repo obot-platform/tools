@@ -2,11 +2,11 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, Get Past Meeting Details, List Available Timezones
+Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, List Available Timezones
 
 ---
 Name: Get User
-Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate.
+Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate. This also returns the user's Personal Meeting ID(PMI).
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -33,7 +33,7 @@ Param: timezone: Optional. The timezone of the meeting, if not provided, the mee
 Param: topic: Optional. Defaults to empty. The topic of the meeting, up to 2000 characters
 Param: meeting_type: Optional. Defaults to 2(scheduled meeting). The type of the meeting: 1 for instant meeting, 2 for scheduled meeting, 3 for recurring meeting with no fixed time, 8 for recurring meeting with fixed time, 10 for screen share only meeting
 Param: recurrence: Optional. Use this only for a meeting with meeting_type 8, a recurring meeting with a fixed time. Defaults to empty. If provided, it must be a valid JSON string that can be loaded with json.loads(). Attributes of the recurrence object are -- end_date_time (string, date-time): Select the final date when the meeting will recur before it is canceled. Should be in UTC time, such as 2017-11-25T12:00:00Z. Cannot be used with end_times. | end_times (integer, max: 60, default: 1): Select how many times the meeting should recur before it is canceled. If end_times is set to 0, it means there is no end time. The maximum number of recurring is 60. Cannot be used with end_date_time. | monthly_day (integer, default: 1): Use this field only if you're scheduling a recurring meeting of type 3 to state the day in a month when the meeting should recur. The value range is from 1 to 31. For the meeting to recur on 23rd of each month, provide 23 as this field's value and 1 as the repeat_interval field's value. To have the meeting recur every three months on the 23rd, change the repeat_interval field value to 3. | monthly_week (integer, enum: -1, 1, 2, 3, 4): Use this field only if you're scheduling a recurring meeting of type 3 to state the week of the month when the meeting should recur. If you use this field, you must also use the monthly_week_day field to state the day of the week when the meeting should recur. -1 = Last week of the month, 1 = First week, 2 = Second week, 3 = Third week, 4 = Fourth week. | monthly_week_day (integer, enum: 1, 2, 3, 4, 5, 6, 7): Use this field only if you're scheduling a recurring meeting of type 3 to state a specific day in a week when the monthly meeting should recur. To use this field, you must also use the monthly_week field. 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday, 7 = Saturday. | repeat_interval (integer): Define the interval when the meeting should recur. For instance, to schedule a meeting that recurs every two months, set this field's value as 2 and the value of the type parameter as 3. For a daily meeting, the maximum number of recurrences is 99 days. For a weekly meeting, the maximum is 50 weeks. For a monthly meeting, the maximum is 10 months. | type (integer, enum: 1, 2, 3, required): Recurrence meeting types. 1 = Daily, 2 = Weekly, 3 = Monthly. | weekly_days (string, enum: 1, 2, 3, 4, 5, 6, 7, default: 1): Required if you're scheduling a recurring meeting of type 2 to state the days of the week when the meeting should repeat. This field's value could be a number between 1 to 7 in string format. For instance, if the meeting should recur on Sunday, provide "1" as this field's value. To set the meeting to occur on multiple days of a week, provide comma-separated values. For instance, for Sundays and Tuesdays, provide "1,3". 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday, 7 = Saturday.
-
+Param: auto_start_meeting_summary: Optional. Default to false. Set to true to automatically start Zoom's AI meeting summary.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py CreateMeeting
 
@@ -50,8 +50,8 @@ Param: duration: Optional. The duration of the meeting in minutes
 Param: password: Optional. The password for the meeting, if not provided, a random password will be generated
 Param: pre_schedule: Optional. Whether to create a prescheduled meeting. This only supports the meeting type value of 2 (scheduled meetings) and 3 (recurring meetings with no fixed time).
 Param: audio_recording: Optional. none, local or cloud. The audio recording setting for the meeting
-Param: contact_email: Optional.  The email of the contact for the meeting, should be user's email
-Param: contact_name: Optional.  The name of the contact for the meeting, should be user's name
+Param: contact_email: Optional. The email of the contact for the meeting, should be user's email
+Param: contact_name: Optional. The name of the contact for the meeting, should be user's name
 Param: private_meeting: Optional. Whether the meeting is private
 Param: start_time: Optional. The meeting's start time. This field is only used for scheduled or recurring meetings with a fixed time. This supports local time and GMT formats.To set a meeting's start time in GMT, use the yyyy-MM-ddTHH:mm:ssZ date-time format. For example, 2020-03-31T12:02:00Z. To set a meeting's start time using a specific timezone, use the yyyy-MM-ddTHH:mm:ss date-time format and specify the timezone ID in the timezone field. If you do not specify a timezone, the timezone value defaults to your Zoom account's timezone. You can also use UTC for the timezone value. Note: If no start_time is set for a scheduled meeting, the start_time is set at the current time and the meeting type changes to an instant meeting, which expires after 30 days.
 Param: meeting_template_id: Optional. The ID of the meeting template to use.
@@ -59,6 +59,7 @@ Param: timezone: Optional. The timezone of the meeting, if not provided, the mee
 Param: topic: Optional. The topic of the meeting, up to 2000 characters
 Param: meeting_type: Optional. The type of the meeting. 1 for instant meeting, 2 for scheduled meeting, 3 for recurring meeting with no fixed time, 8 for recurring meeting with fixed time, 10 for screen share only meeting
 Param: recurrence: Optional. Use this only for a meeting with meeting_type 8, a recurring meeting with a fixed time. If provided, it must be a valid JSON string that can be loaded with json.loads(), and should include full recurrence information. Attributes of the recurrence object are -- end_date_time (string, date-time): Select the final date when the meeting will recur before it is canceled. Should be in UTC time, such as 2017-11-25T12:00:00Z. Cannot be used with end_times. | end_times (integer, max: 60, default: 1): Select how many times the meeting should recur before it is canceled. If end_times is set to 0, it means there is no end time. The maximum number of recurring is 60. Cannot be used with end_date_time. | monthly_day (integer, default: 1): Use this field only if you're scheduling a recurring meeting of type 3 to state the day in a month when the meeting should recur. The value range is from 1 to 31. For the meeting to recur on 23rd of each month, provide 23 as this field's value and 1 as the repeat_interval field's value. To have the meeting recur every three months on the 23rd, change the repeat_interval field value to 3. | monthly_week (integer, enum: -1, 1, 2, 3, 4): Use this field only if you're scheduling a recurring meeting of type 3 to state the week of the month when the meeting should recur. If you use this field, you must also use the monthly_week_day field to state the day of the week when the meeting should recur. -1 = Last week of the month, 1 = First week, 2 = Second week, 3 = Third week, 4 = Fourth week. | monthly_week_day (integer, enum: 1, 2, 3, 4, 5, 6, 7): Use this field only if you're scheduling a recurring meeting of type 3 to state a specific day in a week when the monthly meeting should recur. To use this field, you must also use the monthly_week field. 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday, 7 = Saturday. | repeat_interval (integer): Define the interval when the meeting should recur. For instance, to schedule a meeting that recurs every two months, set this field's value as 2 and the value of the type parameter as 3. For a daily meeting, the maximum number of recurrences is 99 days. For a weekly meeting, the maximum is 50 weeks. For a monthly meeting, the maximum is 10 months. | type (integer, enum: 1, 2, 3, required): Recurrence meeting types. 1 = Daily, 2 = Weekly, 3 = Monthly. | weekly_days (string, enum: 1, 2, 3, 4, 5, 6, 7, default: 1): Required if you're scheduling a recurring meeting of type 2 to state the days of the week when the meeting should repeat. This field's value could be a number between 1 to 7 in string format. For instance, if the meeting should recur on Sunday, provide "1" as this field's value. To set the meeting to occur on multiple days of a week, provide comma-separated values. For instance, for Sundays and Tuesdays, provide "1,3". 1 = Sunday, 2 = Monday, 3 = Tuesday, 4 = Wednesday, 5 = Thursday, 6 = Friday, 7 = Saturday.
+Param: auto_start_meeting_summary: Optional. Default to false. Set to true to automatically start Zoom's AI meeting summary.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py UpdateMeeting
 
@@ -91,9 +92,10 @@ Param: meeting_id: The ID of the meeting to delete
 
 ---
 Name: List Meetings
-Description: List all meetings hosted by the current Zoom user.
+Description: List all scheduled meetings hosted by the current Zoom user. This does not return information about instant meetings.
 Credential: ./credential
 Share Context: Zoom Context
+Param: type: Optional. The type of the meetings to list. Default to scheduled, which will return all valid previous (unexpired) meetings, live meetings, and upcoming scheduled meetings. Must be one of: scheduled, live, upcoming, upcoming_meetings, previous_meetings.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListMeetings
 
@@ -108,7 +110,7 @@ Param: meeting_id: The ID of the meeting to get the invitation for
 
 ---
 Name: List Upcoming Meetings
-Description: List all upcoming meetings hosted by the current Zoom user.
+Description: List upcoming meetings(within the next 24 hours) that the current Zoom user scheduled or invited to join.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -119,7 +121,7 @@ Name: Get Meeting Recordings
 Description: Get the cloud recordings of a Zoom meeting. Cloud rerordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
-Param: meeting_id: The ID of the meeting to get the recordings for
+Param: meeting_id_or_uuid: The ID or UUID of the meeting to get the recordings for. If providing the meeting ID instead of UUID, the response will be for the latest meeting instance.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingRecordings
 
@@ -133,19 +135,27 @@ Share Context: Zoom Context
 
 ---
 Name: Get Past Meeting Details
-Description: Get the details of a past Zoom meeting.
+Description: Get the details of a Zoom meeting instance. It is possible that the meeting has not occurred yet.
 Credential: ./credential
 Share Context: Zoom Context
-Param: meeting_id: The ID of the meeting to get the details for
+Param: meeting_id_or_uuid: The ID or UUID of the meeting to get the details for. If providing the meeting ID instead of UUID, the response will be for the latest meeting instance.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetPastMeetingDetails
+
+---
+Name: List Past Meeting Instances
+Description: List all instances of a Zoom meeting.
+Credential: ./credential
+Share Context: Zoom Context
+Param: meeting_id: The ID of the meeting to get the instances for
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListPastMeetingInstances
 
 ---
 Name: Get Meeting Summary
 Description: Retrieve the Zoom AI-generated summary of a Zoom meeting. This feature is available exclusively to licensed users. To access it, the host must ensure that the `Meeting Summary with AI Companion` feature is enabled in their account settings. The meeting summary's accessibility depends on the host's sharing settings, by default only the host has the access.
 Credential: ./credential
 Share Context: Zoom Context
-Share Tools: Get Past Meeting Details
 Param: meeting_uuid: The UUID of the meeting to get the summary for, NOT the meeting ID. Must use the UUID obtained from `Get Past Meeting Details` tool.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingSummary
@@ -165,10 +175,14 @@ Share Context: ../time
 
 #!sys.echo
 
-# Instructions for using Zoom tools
+# KEY Instructions for using Zoom tools
 
-You can use this tool to interact with Zoom with Zoom APIs.
-
+- Ensure that when displaying meeting dates and times, both the original meeting timezone and the user's timezone are shown if they differ.
+- When the user provides dates and times, assume they are in the user's preferred timezone unless explicitly stated otherwise.
+- When the user initiates a meeting creation, politely confirm all optional parameters with them.
+- You can use the Get User Tool to get the user's personal meeting ID(PMI).
+- The List Meetings Tool only returns scheduled meetings hosted by the current user. However, users may create meeting events and use instant meetings in their personal meeting room instead. If a user requests to list meetings or find recordings/summaries but finds no results, kindly remind them that you can also check instances of instant meetings held in their personal meeting room.
+- Note that if an instant meeting was not hosted in the user's personal meeting room, you would need the user to provide the meeting ID to get the instances/recordings/summaries of the meeting.
 # End of instructions for using Zoom tools
 
 ---
