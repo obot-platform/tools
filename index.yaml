@@ -1,10 +1,8 @@
 tools:
   sendgrid:
     reference: ./sendgrid
-  file-reader:
-    reference: ./knowledge/file-reader.gpt
-  file-summarizer:
-    reference: ./file-summarizer
+  file-operator:
+    reference: ./file-operator
   database:
     reference: ./database
   zoom:

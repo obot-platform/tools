@@ -4,6 +4,7 @@ from summarize import DocumentSummarizer, MODEL, TIKTOKEN_MODEL, MAX_CHUNK_TOKEN
 import os
 import tiktoken
 import asyncio
+import gptscript
 
 logger = setup_logger(__name__)
 
@@ -13,6 +14,7 @@ TOKEN_THRESHOLD = 10000
 
 async def main():
     input_file = os.getenv("INPUT_FILE", "")
+    logger.info(f"Input file: {input_file}")
     if not input_file:
         raise ValueError("Error: INPUT_FILE environment variable is not set")
 

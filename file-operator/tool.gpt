@@ -1,0 +1,33 @@
+---
+Name: File Operator
+Description: A bundle of tools for interacting with files in the workspace.
+Metadata: bundle: true
+Share Tools: File Reader, File Summarizer
+
+---
+Name: File Summarizer
+Description: This tool summarizes the input file in the workspace, returns a text summary of the file content, either write to a file in the workspace or print to the console.
+Credential: sys.model.provider.credential
+Params: input_file: (Required) Name of the file in the workspace to summarize. Supported formats: [.md, .txt, .markdown, .text, .mdx, .mdtxt, .mdtxtx, .docx, .doc, .pdf, .pptx, .ppt, .html, .htm]. For any other file types, simply say it's not supported yet.
+Params: output_file: (Optional) Name of the file to save the summary, default to empty string. If not provided, a summary file will be created in the same directory as the input file. To print to the console, set this to "NONE".
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/summarize.py
+
+---
+Name: File Reader
+Credential: sys.model.provider.credential
+Description: Read the content of any supported file in the workspace, it takes care of text-heavy documents(PDF, DOCX, PPTX, HTML), and also handles the case where the file content is too long.
+Params: input_file: (Required) Name of the file in the workspace to read the content from.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/file_content_handler.py
+
+---
+Name: File Content Handler
+Credential: sys.model.provider.credential
+Params: input_file: (Required) Name of the file in the workspace to summarize. Only .txt and .md files are supported directly, for any other file types, call the File Reader tool first.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/file_content_handler.py
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/note-pencil-duotone.svg

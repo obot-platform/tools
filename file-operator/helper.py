@@ -83,6 +83,12 @@ async def save_to_gptscript_workspace(filepath: str, content: str) -> None:
     )
 
 
+async def delete_file_from_gptscript_workspace(filepath: str) -> None:
+    gptscript_client = gptscript.GPTScript()
+    wksp_file_path = _prepend_base_path("files", filepath)
+    await gptscript_client.delete_file_in_workspace(wksp_file_path)
+
+
 async def load_from_gptscript_workspace(filepath: str) -> bytes:
     gptscript_client = gptscript.GPTScript()
     wksp_file_path = _prepend_base_path("files", filepath)
