@@ -13,37 +13,6 @@ Credential: ./credentials
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listDevices
 
 ---
-Name: List Locations
-Description: List all SmartThings Locations
-Credential: ./credentials
-
-#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listLocations
-
----
-Name: List Rooms
-Description: List all SmartThings Rooms
-Credential: ./credentials
-
-#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listRooms
-
----
-Name: List Rules
-Description: List all SmartThings Rules
-Credential: ./credentials
-
-#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listRules
-
----
-Name: Get Device Info
-Description: Get information about a SmartThings Device, including Capabilities and current State
-Context: SmartThings Context
-Credential: ./credentials
-Param: device_id: The GUID deviceId of the device you want information on. Can be looked up with `List Devices` tool
-Tools: List Devices
-
-#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDeviceInfo
-
----
 Name: Toggle Device
 Description: Toggle the State of a SmartThings Device Capability
 Context: SmartThings Context
@@ -56,9 +25,18 @@ Tools: List Devices, Get Device Info
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js toggleDevice
 
 ---
-Name: List Locations
-Description: Get all configured SmartThings Locations
+Name: Get Device Info
+Description: Get information about a SmartThings Device, including Capabilities and current State
 Context: SmartThings Context
+Credential: ./credentials
+Param: device_id: The GUID deviceId of the device you want information on. Can be looked up with `List Devices` tool
+Tools: List Devices
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDeviceInfo
+
+---
+Name: List Locations
+Description: List all SmartThings Locations
 Credential: ./credentials
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listLocations
