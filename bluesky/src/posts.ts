@@ -1,4 +1,5 @@
-import { AtpAgent, AppBskyFeedSearchPosts } from '@atproto/api'
+import { RichText, AtpAgent, AppBskyFeedSearchPosts } from '@atproto/api'
+import { getFirstEmbedCard } from "./embed.ts"
 
 export async function searchPosts (
     agent: AtpAgent,
@@ -53,14 +54,24 @@ export async function searchPosts (
     console.log(JSON.stringify(response.data.posts))
 }
 
-export async function createPost(agent: AtpAgent, text?: string, tags?: string): Promise<void> {
+export async function createPost(agent: AtpAgent, text?: string): Promise<void> {
     if (!text) {
         throw new Error('Text is required')
     }
 
+    // Replace all instances of \\n with \n
+    // The LLM sometimes double escapes newlines which will make them visible on bsky.app.
+    text = text.replace(/\\n/g, '\n')
+
+    const rt = new RichText({ text })
+    await rt.detectFacets(agent)
+
     await agent.post({
-        text,
-        tags: tags?.split(',').map(tag => tag.trim().replace(/^#/, '')) ?? [],
+        text: rt.text,
+        facets: rt.facets,
+        // Attempt to get the embed card for the first link in the text.
+        // This renders a preview of the page content on bsky.app.
+        embed: await getFirstEmbedCard(rt, agent),
     })
 
     console.log('Post created')
