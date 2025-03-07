@@ -71,6 +71,8 @@ tools:
     reference: ./weather
   die-roller:
     reference: ./die-roller
+  smartthings:
+    reference: ./smartthings
 
 knowledgeDataSources:
   notion-data-source:

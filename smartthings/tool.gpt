@@ -1,0 +1,286 @@
+---
+Name: SmartThings
+Description: Tools for interacting with Zoom
+Metadata: bundle: true
+Share Tools: List Devices, Toggle Device, Get Device Info, List Locations, List Rooms, List Rules, Get Rule, Delete Rule, Create Rule
+
+---
+Name: List Devices
+Description: List all SmartThings Devices
+Context: SmartThings Context
+Credential: ./credentials
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listDevices
+
+---
+Name: Toggle Device
+Description: Toggle the State of a SmartThings Device Capability
+Context: SmartThings Context
+Credential: ./credentials
+Param: device_id: The GUID deviceId of the device you want information on. Can be looked up with `List Devices` tool
+Param: capability: The name of the capability to toggle. Can be looked up with `Get Device Info` tool
+Param: state: The state to put the device into.
+Tools: List Devices, Get Device Info
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js toggleDevice
+
+---
+Name: Get Device Info
+Description: Get information about a SmartThings Device, including Capabilities and current State
+Context: SmartThings Context
+Credential: ./credentials
+Param: device_id: The GUID deviceId of the device you want information on. Can be looked up with `List Devices` tool
+Tools: List Devices
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getDeviceInfo
+
+---
+Name: List Locations
+Description: List all SmartThings Locations
+Credential: ./credentials
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listLocations
+
+---
+Name: List Rooms
+Description: Get all configured SmartThings Rooms in a Location
+Context: SmartThings Context
+Credential: ./credentials
+Param: location_id: The GUID of a location to filter by
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listRooms
+
+---
+Name: List Rules
+Description: Get all configured SmartThings Rules in a Location. Does not show Rules created in the UI of the SmartThings app.
+Context: SmartThings Context
+Credential: ./credentials
+Param: location_id: The GUID of a location to filter by
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listRules
+
+---
+Name: Get Rule
+Description: Get information about a SmartThings Rule in a Location using the ruleId
+Context: SmartThings Context
+Credential: ./credentials
+Tools: List Rules
+Param: location_id: The GUID of the location that the rule is in
+Param: rule_id: the GUID of the rule to get information on
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getRule
+
+---
+Name: Create Rule
+Description: Create a new SmartThings Rule
+Context: SmartThings Create Rule Context
+Credential: ./credentials
+Tools: List Devices, Get Device Info
+Param: location_id: The GUID of the location that the rule is in
+Param: rule_name: a name for the new rule
+param: rule_actions: a json formatted object containing all the logic and actions to take
+param: rule_sequence: Can be either 'Serial' or 'Parallel'
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js getRule
+
+---
+Name: Delete Rule
+Description: Delete a SmartThings Rule in a Location using the ruleId
+Context: SmartThings Context
+Credential: ./credentials
+Tools: List Rules
+Param: location_id: The GUID of the location that the rule is in
+Param: rule_id: the GUID of the rule to get information on
+
+#!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js deleteRule
+
+---
+Name: SmartThings Context
+Type: Context
+
+#!sys.echo
+
+`List` tools can be used to find the GUID of an object using the friendly human-readable name.
+Do not return IDs or GUIDs to the user unless they specifically ask for it.
+
+Capabilities are generally whatever the current state of the device is and the opposite of that.
+* For a switch, that's "on" or "off".
+* For a lock, that's "lock" or "unlock".
+* For devices with a 'level' capability, it is a value between 0-100.
+The `Get Device Info` tool should be used to discover the current state of a Device.
+
+---
+Name: SmartThings Create Rule Context
+Type: Context
+
+#!sys.echo
+
+Sequence must be set to 'Serial' or 'Parallel'.
+
+A single Rule can be used to contain multiple actions within it. These actions represent a tree that is evaluated when the Rule is triggered.
+
+The Structure of a Rule
+
+```
+{"name":"If my door is opened turn on the lights","actions":[{"if":{"equals":{"left":{"device":{"devices":["5F869A33-ECBC-43D8-AFAB-B1BA6D96E77E"],"component":"main","capability":"contactSensor","attribute":"contact"}},"right":{"string":"open"}},"then":[{"command":{"devices":["420CC6DD-4DC6-497E-855A-48C1FCB70E61","19306729-8D2F-4A68-820B-3172A43403F6"],"commands":[{"component":"main","capability":"switch","command":"on","arguments":[]}]}}],"else":[]}}]}{"name":"If my door is opened turn on the lights","actions":[{"if":{"equals":{"left":{"device":{"devices":["5F869A33-ECBC-43D8-AFAB-B1BA6D96E77E"],"component":"main","capability":"contactSensor","attribute":"contact"}},"right":{"string":"open"}},"then":[{"command":{"devices":["420CC6DD-4DC6-497E-855A-48C1FCB70E61","19306729-8D2F-4A68-820B-3172A43403F6"],"commands":[{"component":"main","capability":"switch","command":"on","arguments":[]}]}}],"else":[]}}]}
+```
+
+This Rule compares the device’s contact sensor (the left side of the equation) to the value defined in the right side of the equation.
+
+Here's a breakdown of the Rule above:
+
+    Action - An Action defines what task the Rule is completing. An Action is contained within the actions array - multiple Actions may be specified in a single Rule. In this case, the Action is an if statement.
+    Condition - An evaluation used as a trigger for the action. A Condition is evaluated during Rule execution and is contained within an action. In this case, the Condition is an equals statement
+    Operands - The devices or locations involved in a Rule. In this case, a contact sensor and switch are included in the Rule.
+    Result - In this case, an Action. The command(s) the Rule will perform if the Condition (equals) is met. If the Condition is not met, any code in the else block will be executed.
+
+# Actions
+
+For a complete list of Actions, Conditions, and Operands, and the requirements of each data type, visit the Rules API documentation.
+
+An Action consists of one or more Conditions. The type of Action you use will determine the Conditions available for use. Visit our GitHub page to view example Automations and see the formatting each type of condition uses.
+
+Below are some commonly used Actions:
+
+    if - Performs the action(s) specified in the then statement if the condition evaluates to true. Otherwise, the else statement will be executed.
+    sleep - Specifies a time interval to wait before executing the remaining code in the condition statement.
+    command - A simple condition used to manipulate one or several devices.
+    every - Each time the specified condition is met, perform a given action.
+
+# Conditions
+
+A Condition is nested within an Action and consists of one or more operands. The type of condition you use will determine the type and number of operands required. For example, a lessThanOrEquals condition requires two operands, left and right. Visit our GitHub page to view example Automations and see the formatting each type of condition uses.
+
+Below are some commonly used Conditions:
+
+    and + or
+    not
+    equals
+    greaterThan + lessThan
+    greaterThanOrEquals + lessThanOrEquals
+    between
+    changes
+
+## and + or
+
+```
+"if":{"and":[{"equals":{"left":{"location":{"attribute":"Mode"}},"right":{"string":"<insert-the-mode-id-here>"}}},{"between":{...}}],"then":[...]};
+```
+
+## not
+
+This Condition inverts the operation. In the example below, if the switch’s current state is different than on, the condition evaluates to true.
+
+```
+"if":{"not":{"equals":{"left":{"device":{"devices":["<insert-device-id-here>"],"component":"main","capability":"switch","attribute":"switch"}},"right":{"string":"on"}}},"then":[...]};
+```
+
+## equals
+
+This Condition compares a left and right side for equal values.
+
+In this example, the switch device operand given on the left side is evaluated against the string given on the right side. When the left and right values are equivalent, the condition is evaluated as true.
+
+```
+"equals":{"left":{"device":{"devices":["<insert-your-device-ID-here>"],"component":"main","capability":"switch","attribute":"switch"}},"right":{"string":"on"}};
+```
+
+Since the attribute devices is an array, several devices may be added. Visit the aggregation operand of the Rules API for more info on the behavior of the equals Condition when including multiple devices in a Rule.
+
+The aggregation operand is available on the following Conditions: equals, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals and between.
+
+## greaterThan + lessThan
+
+These conditions check if a value given on the left side is greater or less than the current value of an attribute specified on the right side.
+
+In this example, if the switch’s current level is greater than the specified integer, the condition is true.
+
+    This Condition will evaluate to true for each event that is greater than (or less than) the specified value. For example, if you use greaterThan to control your thermostat when the temperature rises above 50, the Rule will evaluate to true and run for each interval over 50. To have a Condition run only once when a value changes to above (or below) a set point, wrap the changes Condition around the current greaterThan Condition.
+
+```
+"greaterThan":{"left":{"integer":50},"right":{"device":{"devices":["your-device-id-here"],"component":"main","capability":"switchLevel","attribute":"level"}}};
+```
+
+## lessThanOrEquals + greaterThanOrEquals
+
+These Conditions are variations on lessThan and greaterThan and add a secondary check for equality.
+
+In the example below, a specified integer on the left side is evaluated against the current level of a switch. If the switch’s current level is less than or equal to the specified integer, the condition is true.
+
+    This Condition will evaluate to true for each event that is greater than (or less than) the specified value. For example, if you use greaterThanOrEquals to control your thermostat when the temperature is equal or greater than 50, the Rule will evaluate to true and run for each interval at 50 and above (run once at 51, run again at 52, etc.). To have a Condition run only once when a value rises above (or below) a set point, wrap the changes Condition around the current greaterThanOrEquals Condition.
+
+```
+"lessThanOrEquals":{"left":{"integer":50},"right":{"device":{"devices":["your-device-id-here"],"component":"main","capability":"switchLevel","attribute":"level"}}};
+```
+
+## between
+
+Check if a given attribute is between two provided values.
+
+In this example, if the attribute level falls between the start and end integers, the Condition is true.
+
+```
+"between":{"value":{"device":{"devices":["your-device-id-here"],"component":"main","capability":"switchLevel","attribute":"level"}},"start":{"integer":50},"end":{"integer":75}};
+```
+
+## changes
+
+changes is a Condition that tracks the state of the operation it contains, returning true when the state of the inner operation transitions from false to true.
+changes with lessThan
+
+In the example below, the Condition evaluates to true if the dimmer’s switch level changes to less than the given value of 50. It will not evaluate to true again until the dimmer first changes to 50 or above, and then changes to below 50 again.
+
+```
+"changes":{"lessThan":{"left":{"device":{"devices":["{{your-device-id-here}}"],"component":"main","capability":"switchLevel","attribute":"level"}},"right":{"integer":50}}};
+```
+
+# Operands
+
+Operands are used within Conditions. The operand is evaluated against a value (often an integer or string) specified in the condition you elect to use for your Rule. Simply put, an operand is generally the Device or Location you want to evaluate in a Rule.
+
+Commonly used operands include:
+
+    device - For evaluating a device attribute.
+    location - For evaluating a location mode state.
+    array - An array containing multiple operands.
+    specific - A specific instance under which the operation evalutes to true.
+    trigger - Referred to as "preconditions" in the SmartThings app. A precondition or trigger can be used to prevent a Condition from triggering and executing a Rule.
+
+## specific
+
+This operand is used in conjunction with the every Action and gives a specific instance under which the operation evaluates to true.
+
+In the example below, the Condition will evaluate to true every day at 10:55 AM and change the specified location’s mode.
+
+```
+"every":{"specific":{"reference":"Noon","offset":{"value":{"integer":-65},"unit":"Minute"}},"actions":[{"location":{"mode":"your-location-mode-id-here"}}]};
+```
+
+## trigger
+
+Use a trigger, or precondition, to specify exactly which Conditions should and should not trigger Rule execution.
+
+When you include several conditions in a Rule, each condition may act as a trigger. This means that as soon as any condition specified as a trigger evaluates to true, the Rule will execute (e.g. the then block in an if Action will execute).
+
+    Use "trigger":"Never" to prevent a Condition from triggering a Rule.
+    Use "trigger":"Always" to ensure a Condition can trigger a Rule.
+
+If trigger is not explicitly specified, "trigger":"Auto" is used by default in each Condition. This means that the Automation server will examine all Conditions used in the Rule and determine which Conditions should be used as triggers, based on each Condition's functionality.
+
+In the example Rule below:
+
+    The if Action with equals Condition specifies that if button-device-id is pressed (the use of "trigger":"Always" dictates that this Condition is used as a trigger for this Rule), then the Rule will check whether switch1-device-id is on.
+    If switch1 is on, then the Rule will turn switch2-device-id on. The use of "trigger":"Never" in this then statement prevents this Condition from triggering the Rule whenever switch1 is on; this Condition is instead used as a check for the remaining Rule logic, determining the next actions of the Rule.
+    For all other cases (else), the Rule will turn switch2 off.
+
+```
+{"name":"Sample for precondition","actions":[{"if":{"equals":{"left":{"string":"pushed"},"right":{"device":{"devices":["button-device-id"],"component":"main","capability":"button","attribute":"button","trigger":"Always"}}},"then":[{"if":{"equals":{"left":{"device":{"devices":["switch1-device-id"],"component":"main","capability":"switch","attribute":"switch","trigger":"Never"}},"right":{"string":"on"}},"then":[{"command":{"devices":["switch2-device-id"],"commands":[{"component":"main","capability":"switch","command":"on","arguments":[]}]}}],"else":[{"command":{"devices":["switch2-device-id"],"commands":[{"component":"main","capability":"switch","command":"off","arguments":[]}]}}]}}]}}]}
+```
+
+---
+!metadata:*:oauth
+smartthings
+
+---
+!metadata:*:icon
+/admin/assets/smartthings_icon.png
