@@ -15,7 +15,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.16",
+    "@atproto/api": "^0.14.7",
+    "cheerio": "^1.0.0",
     "ts-node-dev": "^2.0.0"
   }
 }

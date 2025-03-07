@@ -37,7 +37,6 @@ Credential: ./credential
 JSON Response: true
 Share Context: Current Date and Time from ../time
 Param: text: The text of the post.
-Param: tags: (optional) A comma separated list of tags to add to the post. For example, `#apple,#banana` will add both `#apple` and `#banana` to the post.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- createPost
 

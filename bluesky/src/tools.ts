@@ -38,7 +38,6 @@ try {
           await createPost(
               agent,
               process.env.TEXT,
-              process.env.TAGS,
           )
           break
       case 'deletePost':
