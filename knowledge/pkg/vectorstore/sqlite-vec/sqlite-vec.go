@@ -317,6 +317,45 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 	return nil
 }
 
+func (v *VectorStore) GetDocument(ctx context.Context, documentID, collection string) (vs.Document, error) {
+	var doc vs.Document
+	var metadata string
+
+	err := v.db.Raw(fmt.Sprintf(`
+		SELECT content, metadata 
+		FROM [%s]
+		WHERE id = ? AND collection_id = ?;
+	`, v.embeddingsTableName), documentID, collection).Row().Scan(&doc.Content, &metadata)
+	if err != nil {
+		return vs.Document{}, fmt.Errorf("failed to query document: %w", err)
+	}
+
+	if err := json.Unmarshal([]byte(metadata), &doc.Metadata); err != nil {
+		return vs.Document{}, fmt.Errorf("failed to parse metadata for document %s: %w", documentID, err)
+	}
+
+	doc.ID = documentID
+
+	// Get embeddings
+	var emb []byte
+	err = v.db.Raw(fmt.Sprintf(`
+		SELECT embedding
+		FROM [%s_vec]
+		WHERE document_id = ?;
+		`, collection), documentID).Row().Scan(&emb)
+	if err != nil {
+		return vs.Document{}, fmt.Errorf("failed to query embeddings: %w", err)
+	}
+
+	embedding, err := DeserializeFloat32(emb)
+	if err != nil {
+		return vs.Document{}, fmt.Errorf("failed to deserialize embeddings: %w", err)
+	}
+	doc.Embedding = embedding
+
+	return doc, nil
+}
+
 func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
 	var docs []vs.Document
 

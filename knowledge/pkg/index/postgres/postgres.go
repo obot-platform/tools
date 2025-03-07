@@ -87,6 +87,10 @@ func (i *Index) FindFileByMetadata(ctx context.Context, dataset string, metadata
 	return i.DB.FindFileByMetadata(ctx, dataset, metadata, includeDocuments)
 }
 
+func (i *Index) FindFilesByMetadata(ctx context.Context, dataset string, metadata types.FileMetadata, includeDocuments bool) ([]types.File, error) {
+	return i.DB.FindFilesByMetadata(ctx, dataset, metadata, includeDocuments, false)
+}
+
 func (i *Index) GetDocumentByID(ctx context.Context, documentID string) (*types.Document, error) {
 	return i.DB.GetDocument(ctx, documentID)
 }
