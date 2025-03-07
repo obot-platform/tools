@@ -1,6 +1,6 @@
 Name: vLLM
 Description: Model Provider for vLLM
-Metadata: envVars: OBOT_VLLM_MODEL_PROVIDER_ENDPOINT,OBOT_VLLM_MODEL_PROVIDER_API_KEY
+Metadata: envVars: OBOT_VLLM_MODEL_PROVIDER_ENDPOINT
 Model Provider: true
 Credential: ../placeholder-credential as vllm-model-provider with OBOT_VLLM_MODEL_PROVIDER_ENDPOINT;OBOT_VLLM_MODEL_PROVIDER_API_KEY as env_vars
 Metadata: noUserAuth: vllm-model-provider
@@ -19,7 +19,9 @@ Metadata: noUserAuth: vllm-model-provider
             "friendlyName": "Endpoint",
             "description": "Endpoint for the vLLM OpenAI service (eg. http://localhost:8000)",
             "sensitive": false
-        },
+        }
+    ],
+    "optionalEnvVars": [
         {
             "name": "OBOT_VLLM_MODEL_PROVIDER_API_KEY",
             "friendlyName": "API Key",
