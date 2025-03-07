@@ -5,6 +5,8 @@ import os
 import tiktoken
 import asyncio
 import gptscript
+from gptscript.gptscript import Options
+import json
 
 logger = setup_logger(__name__)
 
@@ -17,6 +19,14 @@ async def main():
     logger.info(f"Input file: {input_file}")
     if not input_file:
         raise ValueError("Error: INPUT_FILE environment variable is not set")
+    
+    gptscript_client = gptscript.GPTScript()
+    run = gptscript_client.run(
+        "github.com/obot-platform/tools/knowledge/file-loader.gpt",
+        Options(input=json.dumps({"input": input_file, "output": "temp.md"}))
+    )
+    text = await run.text()
+    print(text)
 
     file_content = await load_text_from_file(input_file)
     tokens = enc.encode(file_content)
