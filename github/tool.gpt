@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, List Projects, Get Project, List Cards, Create Card, Move Card, Update Card, Delete Card
 
 ---
 Name: Search Issues and PRs
@@ -239,6 +239,75 @@ Param: issueNumber: the number of the issue or pull request to remove labels fro
 Param: labels: (optional) comma-separated list of labels to remove. If not provided, all labels will be removed.
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js removeIssueLabels
+
+---
+Name: List Projects
+Description: List all projects for a given GitHub user or organization
+Credential: ./credential
+Tools: github.com/gptscript-ai/datasets/filter
+Param: owner: the username or organization whose projects to list
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listProjects
+
+---
+Name: Get Project
+Description: Get details of a GitHub Project (V2) including its fields and status options
+Credential: ./credential
+Tools: github.com/gptscript-ai/datasets/filter
+Param: projectId: the ID of the project
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getProject
+
+---
+Name: List Cards
+Description: List all cards (items) in a GitHub Project (V2). This function automatically handles pagination and returns all results.
+Credential: ./credential
+Tools: github.com/gptscript-ai/datasets/filter
+Param: projectId: the ID of the project
+Param: perPage: (optional) number of results per page (default is 100)
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listCards
+
+---
+Name: Create Card
+Description: Add an item to a GitHub Project (V2) and optionally set its status
+Credential: ./credential
+Param: projectId: the ID of the project
+Param: contentId: the ID of the issue or PR to add
+Param: status: (optional) the status to set for the item (must match an existing status option in the project)
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js createCard
+
+---
+Name: Move Card
+Description: Update an item's status in a GitHub Project (V2)
+Credential: ./credential
+Param: projectId: the ID of the project
+Param: itemId: the ID of the item to move
+Param: fieldId: the ID of the status field
+Param: optionId: the ID of the status option to set
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js moveCard
+
+---
+Name: Update Card
+Description: Update an item's field value in a GitHub Project (V2)
+Credential: ./credential
+Param: projectId: the ID of the project
+Param: itemId: the ID of the item to update
+Param: fieldId: the ID of the field to update
+Param: value: the new value for the field
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js updateCard
+
+---
+Name: Delete Card
+Description: Remove an item from a GitHub Project (V2)
+Credential: ./credential
+Param: projectId: the ID of the project
+Param: itemId: the ID of the item to delete
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js deleteCard
 
 ---
 Name: GitHub Context
