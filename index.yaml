@@ -67,6 +67,10 @@ tools:
     reference: ./postgres
   survey:
     reference: ./survey
+  weather:
+    reference: ./weather
+  die-roller:
+    reference: ./die-roller
 
 knowledgeDataSources:
   notion-data-source:
