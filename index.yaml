@@ -65,7 +65,8 @@ tools:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-
+  survey:
+    reference: ./survey
 knowledgeDataSources:
   notion-data-source:
     reference: ./knowledge/data-sources/notion
