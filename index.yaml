@@ -73,6 +73,8 @@ tools:
     reference: ./die-roller
   smartthings:
     reference: ./smartthings
+  gemini-image-generator:
+    reference: ./gemini/image-generator.gpt
 
 knowledgeDataSources:
   notion-data-source:
