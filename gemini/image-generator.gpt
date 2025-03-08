@@ -1,0 +1,11 @@
+Name: Gemini Image Generator
+Description: Generate images based on a given prompt using Google's Gemini Developer API.
+Credential: ./credential
+Param: prompt: (required) Text describing the image to generate
+Param: title: (required) Title for the generated image (will be converted to a safe filename)
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py generate-image
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/googlegemini.svg
