@@ -75,7 +75,9 @@ tools:
     reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-
+  firecrawl:
+    reference: ./firecrawl
+    
 knowledgeDataSources:
   notion-data-source:
     reference: ./knowledge/data-sources/notion
