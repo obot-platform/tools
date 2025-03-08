@@ -33,9 +33,9 @@ def main():
             if command == "safe-search":
                 include_domains = check_allowed_include_domains(include_domains)
 
-            max_results = 20  # broader search if general,
+            max_results = 10  # broader search if general,
             if len(include_domains) > 0:
-                max_results = 5 * len(
+                max_results = 3 * len(
                     include_domains
                 )  # more narrow  search if scoped to specific sites
             if os.getenv("MAX_RESULTS", "").strip():
