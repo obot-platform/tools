@@ -59,7 +59,7 @@ export async function analyzeImages(
 const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 const threadId = process.env.OBOT_THREAD_ID
 const obotServerUrl = process.env.OBOT_SERVER_URL
-const imageGenBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/files/` : null
+const imageGenBaseUrl = (threadId && obotServerUrl) ? `${obotServerUrl}/api/threads/${threadId}/file/` : null
 
 async function resolveImageURL (image: string): Promise<string> {
   // If the image is a URL, return it as is
@@ -99,9 +99,9 @@ async function readImageFile(path: string): Promise<Buffer> {
 
   // The Generate Images tool returns file paths with a special prefix
   // so that they can be rendered in the Obot UI.
-  // e.g. /api/threads/<thread-id>/files/generated_image_<hash>.webp
+  // e.g. /api/threads/<thread-id>/file/generated_image_<hash>.webp
   // It must be stripped before reading the file from the workspace
-  path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/files\//, '')
+  path = path.replace(/^\/?api\/threads\/[a-z0-9]+\/file\//, '')
 
   const client = new GPTScript()
   return Buffer.from(await client.readFileInWorkspace(`files/${path}`))
