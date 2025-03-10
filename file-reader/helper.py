@@ -3,7 +3,9 @@ import os
 import logging
 import sys
 from openai import OpenAI
-
+import gptscript
+from gptscript.gptscript import Options
+import json
 
 
 def setup_logger(name):
@@ -35,6 +37,7 @@ def setup_logger(name):
 
 
 logger = setup_logger(__name__)
+
 
 def _prepend_base_path(base_path: str, file_path: str):
     """
@@ -94,6 +97,20 @@ async def load_from_gptscript_workspace(filepath: str) -> bytes:
     wksp_file_path = _prepend_base_path("files", filepath)
     file_content = await gptscript_client.read_file_in_workspace(wksp_file_path)
     return file_content
+
+
+async def load_from_knowledge_tool(input_file: str) -> str:
+    gptscript_client = gptscript.GPTScript()
+    run = gptscript_client.run(
+        "github.com/obot-platform/tools/knowledge/file-loader.gpt",
+        Options(
+            # input=json.dumps({"input": input_file, "output": "temp.md"}),
+            input=json.dumps({"input": input_file}),
+            workspace=os.environ.get("GPTSCRIPT_WORKSPACE_ID"),
+        ),
+    )
+    text = await run.text()
+    return text
 
 
 def get_openai_client() -> OpenAI:

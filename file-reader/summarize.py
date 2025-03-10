@@ -26,6 +26,7 @@ if "OPENAI_API_KEY" not in os.environ:
 MODEL = os.getenv("OBOT_DEFAULT_LLM_MODEL", "gpt-4o")
 TIKTOKEN_MODEL = "gpt-4o"
 
+
 class DocumentSummarizer:
     """
     Summarizes very large documents with hierarchical chunking using gpt-4o.

@@ -1,5 +1,5 @@
 ---
-Name: File Operator
+Name: File Insights
 Description: A bundle of tools for interacting with files in the workspace.
 Metadata: bundle: true
 Share Tools: File Reader, File Summarizer
@@ -19,14 +19,7 @@ Credential: sys.model.provider.credential
 Description: Read the content of any supported file in the workspace, it takes care of text-heavy documents(PDF, DOCX, PPTX, HTML), and also handles the case where the file content is too long.
 Params: input_file: (Required) Name of the file in the workspace to read the content from.
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/file_content_handler.py
-
----
-Name: File Content Handler
-Credential: sys.model.provider.credential
-Params: input_file: (Required) Name of the file in the workspace to summarize. Only .txt and .md files are supported directly, for any other file types, call the File Reader tool first.
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/file_content_handler.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/file_reader.py
 
 ---
 !metadata:*:icon
