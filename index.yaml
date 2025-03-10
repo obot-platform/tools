@@ -1,8 +1,8 @@
 tools:
   sendgrid:
     reference: ./sendgrid
-  file-operator:
-    reference: ./file-operator
+  file-reader:
+    reference: ./file-reader
   database:
     reference: ./database
   zoom:

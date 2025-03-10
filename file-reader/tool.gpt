@@ -1,5 +1,5 @@
 ---
-Name: File Insights
+Name: File Reader Bundle
 Description: A bundle of tools for interacting with files in the workspace.
 Metadata: bundle: true
 Share Tools: File Reader, File Summarizer
