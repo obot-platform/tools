@@ -95,7 +95,11 @@ func main() {
 	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/../auth-providers-common/templates"
 	oauthProxyOpts.RawRedirectURL = opts.ObotServerURL + "/"
 	if opts.AuthEmailDomains != "" {
-		oauthProxyOpts.EmailDomains = strings.Split(opts.AuthEmailDomains, ",")
+		emailDomains := strings.Split(opts.AuthEmailDomains, ",")
+		for i := range emailDomains {
+			emailDomains[i] = strings.TrimSpace(emailDomains[i])
+		}
+		oauthProxyOpts.EmailDomains = emailDomains
 	}
 	oauthProxyOpts.Logging.RequestEnabled = false
 	oauthProxyOpts.Logging.AuthEnabled = false
