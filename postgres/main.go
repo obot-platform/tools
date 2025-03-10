@@ -12,19 +12,12 @@ import (
 
 func main() {
 	query := os.Getenv("QUERY")
-	host := os.Getenv("POSTGRES_HOST")
-	port := os.Getenv("POSTGRES_PORT")
-	database := os.Getenv("POSTGRES_DATABASE")
-	user := os.Getenv("POSTGRES_USERNAME")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	sslmode := os.Getenv("POSTGRES_SSLMODE")
-
-	if sslmode == "" {
-		sslmode = "require"
+	dsn := os.Getenv("POSTGRES_CONNECTION_STRING")
+	if dsn == "" {
+		fmt.Println("Error: POSTGRES_CONNECTION_STRING environment variable is required")
+		os.Exit(1)
 	}
 
-	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
-		user, password, host, port, database, sslmode)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Printf("Error opening database: %v\n", err)
