@@ -1,0 +1,77 @@
+---
+Name: Google Calendar
+Description: Tools for interacting with a user's Google Calendar account
+Metadata: bundle: true
+Share Tools: List Calendars, Get Calendar, Create Calendar, Update Calendar, Delete Calendar
+
+---
+Name: List Calendars
+Description: List all google calendars for the user
+Credential: ../credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_calendars
+
+---
+Name: Get Calendar
+Description: Get details of a specific google calendar
+Credential: ../credential
+Param: calendar_id: (Required) ID of the calendar to get details of
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py get_calendar
+
+---
+Name: Create Calendar
+Description: Create a new google calendar
+Credential: ../credential
+Param: summary: (Required) Title of the calendar to create.
+Param: time_zone: (Optional) Time zone of the calendar to create. Default is the user's timezone, if the user's timezone is not known, it will be set to UTC.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py create_calendar
+
+---
+Name: Update Calendar
+Description: Update an existing google calendar. Only the fields that are provided will be updated.
+Credential: ../credential
+Param: calendar_id: (Required) ID of the calendar to update
+Param: summary: (Optional) Title of the calendar to update.
+Param: time_zone: (Optional) Time zone of the calendar to update.
+Param: location: (Optional) Geographic location of the calendar as free-form text to update.
+Param: description: (Optional) Description of the calendar to update.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py update_calendar
+
+---
+Name: Delete Calendar
+Description: Delete an existing google calendar
+Credential: ../credential
+Param: calendar_id: (Required) ID of the calendar to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py delete_calendar
+
+---
+Name: Google Calendar Context
+Type: context
+Share Context: ../../time
+
+#!sys.echo
+
+## Instructions for Using Google Calendar Tools
+
+You have access to tools for interacting with the Google Calendar API. 
+
+KEY guidelines to follow when handling dates and times:
+- Relative Dates: Interpret relative terms like "today," "tomorrow," or "last week" based on the current date in the user's preferred timezone.
+- Event Creation & Modification: Assume that any dates or times provided by the user are in their preferred timezone unless explicitly stated otherwise.
+- Timezone Conversion: Ensure all dates and times are accurately converted to and from the user's preferred timezone when displaying or processing them.
+- UTC Format: When creating date/time values in UTC, append 'Z' to indicate UTC time properly.
+- Event Grouping: When listing events from multiple calendars or groups, group them by the calendar owner and label each group with the owner's name so the user can easily identify the source of each event.
+
+## End of instructions for Using Google Calendar Tools
+
+---
+!metadata:*:icon
+/admin/assets/gmail_icon_small.png
+
+---
+!metadata:*:oauth
+google

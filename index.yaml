@@ -3,6 +3,8 @@ tools:
     reference: ./sendgrid
   file-summarizer:
     reference: ./file-summarizer
+  google-calendar:
+    reference: ./google/calendar
   database:
     reference: ./database
   zoom:
