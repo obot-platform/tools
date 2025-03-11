@@ -12,7 +12,7 @@ import (
 
 func exitError(err error) {
 	if err != nil {
-		fmt.Printf("google custom search failed: %v\n", err)
+		fmt.Printf("website scraper failed: %v\n", err)
 		os.Exit(1)
 	}
 }
