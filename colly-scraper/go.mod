@@ -1,12 +1,11 @@
 module github.com/obot-platform/tools/colly-scraper
 
-
 go 1.24.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/gocolly/colly v1.2.0
-	github.com/obot-platform/tools/website-cleaner v0.0.0-00010101000000-000000000000
+	github.com/obot-platform/tools/website-cleaner v0.0.0-20250312164931-71605e1d26d5
 )
 
 require (
