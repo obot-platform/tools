@@ -3,24 +3,29 @@ Share Tools: store, get, list, erase
 
 ---
 name: store
-stdin: true
+tools: service
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool store
+#!http://service.daemon.gptscript.local/store
 
 ---
 name: get
-stdin: true
+tools: service
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool get
+#!http://service.daemon.gptscript.local/get
 
 ---
 name: list
-stdin: true
+tools: service
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
+#!http://service.daemon.gptscript.local/list
 
 ---
 name: erase
-stdin: true
+tools: service
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool erase
+#!http://service.daemon.gptscript.local/erase
+
+---
+name: service
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
