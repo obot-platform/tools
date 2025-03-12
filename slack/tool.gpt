@@ -80,6 +80,7 @@ Share Context: Slack Context
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Param: query: the search query
+Param: sortbytime: (optional) sort by timestamp rather than score. Default is false.
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js searchMessages
 
@@ -226,8 +227,8 @@ Use the following guidelines when constructing `query` arguments for the search-
 The following search modifiers can be used in search-messages `query` arguments:
 - `after:<date>`: Matches messages sent after the specified date (exclusive, so excludes messages from the given date). Must be in `YYYY-MM-DD` format (no time/timezone). Example: `after:2025-01-01`
 - `before:<date>`: Matches messages sent before the specified date (exclusive, so excludes messages from the given date). Example: `before:2025-01-01`
-- `with:<user>`: Matches messages from threads/DMs that include the specified user. Example: `with:@bob`
-- `from:<user>`: Matches messages sent by the specified user. Example: `from:@alice`
+- `with:<user>`: Matches messages from threads/DMs that include the specified user. Example: `with:@bob`. Must use the normal name, not the Display Name or Real Name.
+- `from:<user>`: Matches messages sent by the specified user. Example: `from:@alice`. Must use the normal name, not the Display Name or Real Name.
 - `in:<channel>`: Matches messages from the specified channel. Example: `in:#general`
 - `is:<type>`: Matches messages of the specified type. Valid types are `dm`, `thread`. Example: `is:thread`
 
