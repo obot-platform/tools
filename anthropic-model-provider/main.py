@@ -3,6 +3,7 @@ import os
 
 import anthropic.pagination
 from anthropic import AsyncAnthropic
+from anthropic.types import ModelInfo
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -14,6 +15,8 @@ client = AsyncAnthropic(
 )
 app = FastAPI()
 uri = "http://127.0.0.1:" + os.environ.get("PORT", "8000")
+
+thinking_models_prefixes = ["claude-3-7-sonnet"]
 
 
 def log(*args):
@@ -40,12 +43,23 @@ async def list_models() -> JSONResponse:
         resp: anthropic.pagination.AsyncPage[
             anthropic.types.ModelInfo
         ] = await client.models.list(limit=20)
+        thinking_models = []
+        for model in resp.data:
+            if any(model.id.startswith(m) for m in thinking_models_prefixes):
+                thinking_models.append(
+                    ModelInfo(
+                        id=model.id + "-thinking",
+                        display_name=model.display_name + " (Thinking)",
+                        created_at=model.created_at,
+                        type="model",
+                    )
+                )
         return JSONResponse(
             content={
                 "object": "list",
                 "data": [
                     set_model_usage(model.model_dump(exclude={"created_at"}))
-                    for model in resp.data
+                    for model in resp.data + thinking_models
                 ],
             }
         )
