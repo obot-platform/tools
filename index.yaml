@@ -81,6 +81,8 @@ tools:
     reference: ./firecrawl
   colly-scraper:
     reference: ./colly-scraper
+  obot-search:
+    reference: ./obot-search
 
 knowledgeDataSources:
   notion-data-source:
