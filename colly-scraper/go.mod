@@ -1,4 +1,4 @@
-module github.com/obot-platform/tools/website-scraper
+module github.com/obot-platform/tools/colly-scraper
 
 replace github.com/obot-platform/tools/website-cleaner => ../website-cleaner
 

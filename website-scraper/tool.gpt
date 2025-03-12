@@ -1,6 +1,0 @@
----
-Name: Website Scraper
-Description: Scrape a URL to get its content
-Param: url: the URL to scrape
-
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

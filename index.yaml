@@ -79,7 +79,9 @@ tools:
     reference: ./gemini/image-generator.gpt
   firecrawl:
     reference: ./firecrawl
-    
+  colly-scraper:
+    reference: ./colly-scraper
+
 knowledgeDataSources:
   notion-data-source:
     reference: ./knowledge/data-sources/notion
