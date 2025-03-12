@@ -1,4 +1,5 @@
-filetype
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
+rfc3339-validator
+icalendar

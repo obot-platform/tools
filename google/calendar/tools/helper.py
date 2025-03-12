@@ -5,7 +5,8 @@ from googleapiclient.errors import HttpError
 import os
 import logging
 
-def setup_logger(name, tool_name : str = "Google Calendar Tool"):
+
+def setup_logger(name, tool_name: str = "Google Calendar Tool"):
     """Setup a logger that writes to sys.stderr. This will eventually show up in GPTScript's debugging logs.
 
     Args:
@@ -35,8 +36,9 @@ def setup_logger(name, tool_name : str = "Google Calendar Tool"):
 
 logger = setup_logger(__name__)
 
-def get_client(service_name: str = 'calendar', version: str = 'v3'):
-    token = os.getenv('GOOGLE_OAUTH_TOKEN')
+
+def get_client(service_name: str = "calendar", version: str = "v3"):
+    token = os.getenv("GOOGLE_OAUTH_TOKEN")
     if token is None:
         raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
 
@@ -48,16 +50,17 @@ def get_client(service_name: str = 'calendar', version: str = 'v3'):
         print(err)
         exit(1)
 
+
 def get_user_timezone(service):
     """Fetches the authenticated user's time zone from calendar settings."""
     try:
-        settings = service.settings().get(setting='timezone').execute()
-        return settings.get('value', 'UTC')  # Default to UTC if not found
+        settings = service.settings().get(setting="timezone").execute()
+        return settings.get("value", "UTC")  # Default to UTC if not found
     except HttpError as err:
         if err.status_code == 403:
             raise Exception(f"HttpError retrieving user timezone: {err}")
         logger.error(f"HttpError retrieving user timezone: {err}")
-        return 'UTC'
+        return "UTC"
     except Exception as e:
         logger.error(f"Exception retrieving user timezone: {e}")
-        return 'UTC'
+        return "UTC"

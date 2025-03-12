@@ -1,29 +1,125 @@
+from datetime import datetime
 import os
 from tools.helper import setup_logger, get_user_timezone
 from googleapiclient.errors import HttpError
+from rfc3339_validator import validate_rfc3339
+from zoneinfo import available_timezones
+import json
+from icalendar import Calendar, Event
 
 logger = setup_logger(__name__)
 
+DEFAULT_MAX_RESULTS = 250
 
+
+# Private helper functions
+def _is_valid_date(date_string: str) -> bool:
+    try:
+        datetime.strptime(date_string, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
+def _is_valid_iana_timezone(timezone: str) -> bool:
+    return timezone in available_timezones()
+
+
+def _validate_rrule(rrule_str: str):
+    """Validates an RRULE string for recurrence rules"""
+    event = Event()
+    try:
+        event.add("rrule", rrule_str)
+        return True
+    except ValueError as e:
+        return False
+
+# Public functions
 def list_events(service):
     """Lists events for a specific calendar."""
-    calendar_id = os.getenv('CALENDAR_ID')
-    if not calendar_id or calendar_id == '':
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
         raise ValueError("CALENDAR_ID environment variable is not set properly")
-    
+
+    # optional parameters
+    params = {}
+    event_type = os.getenv("EVENT_TYPE")
+    event_type_options = [
+        "birthday",
+        "default",
+        "focusTime",
+        "fromGmail",
+        "outOfOffice",
+        "workingLocation",
+    ]
+    if event_type:
+        if event_type not in event_type_options:
+            raise ValueError(
+                f"Invalid event type: {event_type}. Valid options are: {event_type_options}"
+            )
+        params["eventType"] = event_type
+    time_min = os.getenv("TIME_MIN")
+    if time_min:
+        if not validate_rfc3339(time_min):
+            raise ValueError(
+                f"Invalid time_min: {time_min}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        params["timeMin"] = time_min
+    time_max = os.getenv("TIME_MAX")
+    if time_max:
+        if not validate_rfc3339(time_max):
+            raise ValueError(
+                f"Invalid time_max: {time_max}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        params["timeMax"] = time_max
+
+    q = os.getenv("Q")
+    if q:
+        params["q"] = q
+
+    # Filter out None or empty values
+    params = {k: v for k, v in params.items() if v not in [None, ""]}
+
+    max_results_to_return = os.getenv("MAX_RESULTS", DEFAULT_MAX_RESULTS)
+    if max_results_to_return.isdigit():
+        raise ValueError(
+            f"Invalid max_results_to_return: {max_results_to_return}. It must be a positive integer."
+        )
     try:
-        events_result = service.events().list(calendarId=calendar_id).execute()
-        return events_result.get('items', [])
+        page_token = None
+        all_events = []
+        while True:
+            events_result = (
+                service.events()
+                .list(calendarId=calendar_id, **params, pageToken=page_token)
+                .execute()
+            )
+            events_result_list = events_result.get("items", [])
+            if len(events_result_list) >= max_results_to_return:
+                all_events.extend(events_result_list[:max_results_to_return])
+                break
+            else:
+                all_events.extend(events_result_list)
+                max_results_to_return -= len(events_result_list)
+
+            page_token = events_result.get("nextPageToken")
+            if not page_token:
+                break
+        return all_events
     except HttpError as err:
         raise Exception(f"HttpError listing events from calendar {calendar_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception listing events from calendar {calendar_id}: {e}")
 
-def get_event(service, event_id):
+
+def get_event(service):
     """Gets details of a specific event."""
-    calendar_id = os.getenv('CALENDAR_ID')
-    if not calendar_id or calendar_id == '':
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
         raise ValueError("CALENDAR_ID environment variable is not set properly")
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
@@ -33,69 +129,348 @@ def get_event(service, event_id):
     except Exception as e:
         raise Exception(f"Exception retrieving event {event_id}: {e}")
 
-def create_event(service, summary, start_time, end_time, description='', time_zone=None):
-    """Creates an event in the calendar."""
-    calendar_id = os.getenv('CALENDAR_ID')
-    if not calendar_id or calendar_id == '':
+
+def move_event(service):
+    """Moves an event to a different calendar."""
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
         raise ValueError("CALENDAR_ID environment variable is not set properly")
-
-    if time_zone is None:
-        time_zone = get_user_timezone(service)  # Retrieve user's timezone if not provided
-
-    event_body = {
-        'summary': summary,
-        'description': description,
-        'start': {'dateTime': start_time, 'timeZone': time_zone},
-        'end': {'dateTime': end_time, 'timeZone': time_zone}
-    }
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
+    new_calendar_id = os.getenv("NEW_CALENDAR_ID")
+    if not new_calendar_id:
+        raise ValueError("NEW_CALENDAR_ID environment variable is not set properly")
 
     try:
-        event = service.events().insert(calendarId=calendar_id, body=event_body).execute()
+        event = (
+            service.events()
+            .move(calendarId=calendar_id, eventId=event_id, destination=new_calendar_id)
+            .execute()
+        )
+        return event
+    except HttpError as err:
+        raise Exception(
+            f"HttpError moving event {event_id} to calendar {new_calendar_id}: {err}"
+        )
+    except Exception as e:
+        raise Exception(
+            f"Exception moving event {event_id} to calendar {new_calendar_id}: {e}"
+        )
+
+
+def quick_add_event(service):
+    """Quickly adds an event to the calendar based on a simple text string."""
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
+        raise ValueError("CALENDAR_ID environment variable is not set properly")
+
+    text = os.getenv("TEXT")
+    if not text:
+        raise ValueError("TEXT environment variable is not set properly")
+
+    try:
+        event = service.events().quickAdd(calendarId=calendar_id, text=text).execute()
+        return event
+    except HttpError as err:
+        raise Exception(
+            f"HttpError quick adding event to calendar {calendar_id}: {err}"
+        )
+    except Exception as e:
+        raise Exception(f"Exception quick adding event to calendar {calendar_id}: {e}")
+
+
+def create_event(service):
+    """Creates an event in the calendar."""
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
+        raise ValueError("CALENDAR_ID environment variable is not set properly")
+
+    summary = os.getenv("SUMMARY", "My Event")
+    location = os.getenv("LOCATION", "")
+    description = os.getenv("DESCRIPTION", "")
+
+    user_timezone = get_user_timezone(service)
+    time_zone = os.getenv("TIME_ZONE", user_timezone)
+    if not _is_valid_iana_timezone(time_zone):
+        raise ValueError(
+            f"Invalid time_zone: {time_zone}. It must be a valid IANA timezone string."
+        )
+
+    start = {}
+    start_date = os.getenv("START_DATE")
+    start_datetime = os.getenv("START_DATETIME")
+    if start_date:
+        if not _is_valid_date(start_date):
+            raise ValueError(
+                f"Invalid start_date: {start_date}. It must be a valid date string in the format YYYY-MM-DD."
+            )
+        start["date"] = start_date
+    elif start_datetime:
+        if not validate_rfc3339(start_datetime):
+            raise ValueError(
+                f"Invalid start_datetime: {start_datetime}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        start["dateTime"] = start_datetime
+    else:
+        raise ValueError("Either start_date or start_datetime must be provided.")
+    start["timeZone"] = time_zone
+
+    end = {}
+    end_date = os.getenv("END_DATE")
+    end_datetime = os.getenv("END_DATETIME")
+    if end_date:
+        if not _is_valid_date(end_date):
+            raise ValueError(
+                f"Invalid end_date: {end_date}. It must be a valid date string in the format YYYY-MM-DD."
+            )
+        end["date"] = end_date
+    elif end_datetime:
+        if not validate_rfc3339(end_datetime):
+            raise ValueError(
+                f"Invalid end_datetime: {end_datetime}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        end["dateTime"] = end_datetime
+    else:
+        raise ValueError("Either end_date or end_datetime must be provided.")
+    end["timeZone"] = time_zone
+
+    event_body = {
+        "summary": summary,
+        "location": location,
+        "description": description,
+        "start": start,
+        "end": end,
+        "reminders": {
+            "useDefault": True,  # TODO: make this configurable
+        },
+    }
+    recurrence = os.getenv("RECURRENCE")
+    if recurrence:
+        try:
+            recurrence_list = json.loads(recurrence)
+        except json.JSONDecodeError:
+            raise ValueError(
+                f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
+            )
+        finally:
+            for r in recurrence_list:
+                if not _validate_rrule(r):
+                    raise ValueError(
+                        f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
+                    )
+            event_body["recurrence"] = recurrence_list
+
+    attendees = os.getenv(
+        "ATTENDEES"
+    )  # comma separated list of email addresses FOR NOW. TODO: support other types of attendees
+    if attendees:
+        try:
+            final_attendees = []
+            attendees_list = attendees.split(",")
+            for attendee in attendees_list:
+                final_attendees.append({"email": attendee})
+            event_body["attendees"] = final_attendees
+        except Exception as e:
+            raise ValueError(
+                f"Invalid attendees list: {attendees}. It must be a valid comma-separated list of email addresses."
+            )
+
+    try:
+        event = (
+            service.events().insert(calendarId=calendar_id, body=event_body).execute()
+        )
         return event
     except HttpError as err:
         raise Exception(f"HttpError creating event in calendar {calendar_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception creating event in calendar {calendar_id}: {e}")
 
-def update_event(service, event_id, summary=None, start_time=None, end_time=None, description=None, time_zone=None):
+
+def update_event(service):
     """Updates an existing event."""
-    calendar_id = os.getenv('CALENDAR_ID')
-    if not calendar_id or calendar_id == '':
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
         raise ValueError("CALENDAR_ID environment variable is not set properly")
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
+
+    event_body = {}
+    summary = os.getenv("SUMMARY")
+    if summary:
+        event_body["summary"] = summary
+    location = os.getenv("LOCATION")
+    if location:
+        event_body["location"] = location
+    description = os.getenv("DESCRIPTION")
+    if description:
+        event_body["description"] = description
+
+    time_zone = os.getenv("TIME_ZONE")
+    if time_zone and not _is_valid_iana_timezone(time_zone):
+        raise ValueError(
+            f"Invalid time_zone: {time_zone}. It must be a valid IANA timezone string."
+        )
+
+    start = {}
+    start_date = os.getenv("START_DATE")
+    start_datetime = os.getenv("START_DATETIME")
+    if start_date:
+        if not _is_valid_date(start_date):
+            raise ValueError(
+                f"Invalid start_date: {start_date}. It must be a valid date string in the format YYYY-MM-DD."
+            )
+        start["date"] = start_date
+    elif start_datetime:
+        if not validate_rfc3339(start_datetime):
+            raise ValueError(
+                f"Invalid start_datetime: {start_datetime}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        start["dateTime"] = start_datetime
+    if time_zone:
+        start["timeZone"] = time_zone
+    if start != {}:
+        event_body["start"] = start
+
+    end = {}
+    end_date = os.getenv("END_DATE")
+    end_datetime = os.getenv("END_DATETIME")
+    if end_date:
+        if not _is_valid_date(end_date):
+            raise ValueError(
+                f"Invalid end_date: {end_date}. It must be a valid date string in the format YYYY-MM-DD."
+            )
+        end["date"] = end_date
+    elif end_datetime:
+        if not validate_rfc3339(end_datetime):
+            raise ValueError(
+                f"Invalid end_datetime: {end_datetime}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        end["dateTime"] = end_datetime
+    if time_zone:
+        end["timeZone"] = time_zone
+    if end != {}:
+        event_body["end"] = end
+
+    recurrence = os.getenv("RECURRENCE")
+    if recurrence:
+        try:
+            recurrence_list = json.loads(recurrence)
+        except json.JSONDecodeError:
+            raise ValueError(
+                f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
+            )
+        finally:
+            for r in recurrence_list:
+                if not _validate_rrule(r):
+                    raise ValueError(
+                        f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
+                    )
+            event_body["recurrence"] = recurrence_list
+
+    attendees = os.getenv(
+        "ATTENDEES"
+    )  # comma separated list of email addresses FOR NOW. TODO: support other types of attendees
+    if attendees:
+        try:
+            final_attendees = []
+            attendees_list = attendees.split(",")
+            for attendee in attendees_list:
+                final_attendees.append({"email": attendee})
+            event_body["attendees"] = final_attendees
+        except Exception as e:
+            raise ValueError(
+                f"Invalid attendees list: {attendees}. It must be a valid comma-separated list of email addresses."
+            )
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
 
-        if summary:
-            event['summary'] = summary
-        if description:
-            event['description'] = description
-        if start_time:
-            event['start']['dateTime'] = start_time
-        if end_time:
-            event['end']['dateTime'] = end_time
-        if time_zone:
-            event['start']['timeZone'] = time_zone
-            event['end']['timeZone'] = time_zone
-
-        updated_event = service.events().update(calendarId=calendar_id, eventId=event_id, body=event).execute()
+        updated_event = (
+            service.events()
+            .update(calendarId=calendar_id, eventId=event_id, body=event)
+            .execute()
+        )
         return updated_event
     except HttpError as err:
         raise Exception(f"HttpError updating event {event_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception updating event {event_id}: {e}")
 
-def delete_event(service, event_id):
+
+def delete_event(service):
     """Deletes an event from the calendar."""
-    calendar_id = os.getenv('CALENDAR_ID')
-    if not calendar_id or calendar_id == '':
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
         raise ValueError("CALENDAR_ID environment variable is not set properly")
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
 
     try:
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
         print(f"Event {event_id} deleted successfully.")
-        return True
     except HttpError as err:
         raise Exception(f"HttpError deleting event {event_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception deleting event {event_id}: {e}")
+
+
+def recurring_event_instances(service):
+    """Gets all instances of a recurring event."""
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
+        raise ValueError("CALENDAR_ID environment variable is not set properly")
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
+
+    params = {}
+    time_min = os.getenv("TIME_MIN")
+    if time_min:
+        if not validate_rfc3339(time_min):
+            raise ValueError(
+                f"Invalid time_min: {time_min}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        params["timeMin"] = time_min
+    time_max = os.getenv("TIME_MAX")
+    if time_max:
+        if not validate_rfc3339(time_max):
+            raise ValueError(
+                f"Invalid time_max: {time_max}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        params["timeMax"] = time_max
+
+    max_results_to_return = os.getenv("MAX_RESULTS", DEFAULT_MAX_RESULTS)
+    if max_results_to_return.isdigit():
+        raise ValueError(
+            f"Invalid max_results_to_return: {max_results_to_return}. It must be a positive integer."
+        )
+
+    try:
+        page_token = None
+        all_instances = []
+        while True:
+            instances = (
+                service.events()
+                .instances(
+                    calendarId=calendar_id, eventId=event_id, pageToken=page_token
+                )
+                .execute()
+            )
+            instances_result_list = instances.get("items", [])
+            if len(instances_result_list) >= max_results_to_return:
+                all_instances.extend(instances_result_list[:max_results_to_return])
+                break
+            else:
+                all_instances.extend(instances_result_list)
+                max_results_to_return -= len(instances_result_list)
+            page_token = instances.get("nextPageToken")
+            if not page_token:
+                break
+        return all_instances
+    except HttpError as err:
+        raise Exception(f"HttpError retrieving instances of event {event_id}: {err}")
+    except Exception as e:
+        raise Exception(f"Exception retrieving instances of event {event_id}: {e}")
