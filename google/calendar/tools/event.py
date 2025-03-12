@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
 from zoneinfo import available_timezones
 import json
-from icalendar import Calendar, Event
+from dateutil.rrule import rrulestr
 
 logger = setup_logger(__name__)
 
@@ -25,13 +25,12 @@ def _is_valid_iana_timezone(timezone: str) -> bool:
     return timezone in available_timezones()
 
 
-def _validate_rrule(rrule_str: str):
+def _validate_rrule(rrule_str: str) -> bool:
     """Validates an RRULE string for recurrence rules"""
-    event = Event()
     try:
-        event.add("rrule", rrule_str)
+        rrulestr(rrule_str)  # If it doesn't raise an error, it's valid
         return True
-    except ValueError as e:
+    except ValueError:
         return False
 
 # Public functions
@@ -73,6 +72,15 @@ def list_events(service):
             )
         params["timeMax"] = time_max
 
+    order_by = os.getenv("ORDER_BY")
+    order_by_options = ["updated"] # TODO: add startTime, but that requires `singleEvents` to be True
+    if order_by:
+        if order_by not in order_by_options:
+            raise ValueError(
+                f"Invalid order_by: {order_by}. Valid options are: startTime, updated"
+            )
+        params["orderBy"] = order_by
+
     q = os.getenv("Q")
     if q:
         params["q"] = q
@@ -80,11 +88,17 @@ def list_events(service):
     # Filter out None or empty values
     params = {k: v for k, v in params.items() if v not in [None, ""]}
 
-    max_results_to_return = os.getenv("MAX_RESULTS", DEFAULT_MAX_RESULTS)
-    if max_results_to_return.isdigit():
-        raise ValueError(
-            f"Invalid max_results_to_return: {max_results_to_return}. It must be a positive integer."
-        )
+    max_results_to_return = os.getenv("MAX_RESULTS")
+    if max_results_to_return:
+        if not max_results_to_return.isdigit() or int(max_results_to_return) <= 0:
+            raise ValueError(
+                f"Invalid MAX_RESULTS: {max_results_to_return}. It must be a positive integer."
+            )
+        else:
+            max_results_to_return = int(max_results_to_return)
+    else:
+        max_results_to_return = DEFAULT_MAX_RESULTS
+
     try:
         page_token = None
         all_events = []
@@ -442,11 +456,16 @@ def recurring_event_instances(service):
             )
         params["timeMax"] = time_max
 
-    max_results_to_return = os.getenv("MAX_RESULTS", DEFAULT_MAX_RESULTS)
-    if max_results_to_return.isdigit():
-        raise ValueError(
-            f"Invalid max_results_to_return: {max_results_to_return}. It must be a positive integer."
-        )
+    max_results_to_return = os.getenv("MAX_RESULTS")
+    if max_results_to_return:
+        if not max_results_to_return.isdigit() or int(max_results_to_return) <= 0:
+            raise ValueError(
+                f"Invalid MAX_RESULTS: {max_results_to_return}. It must be a positive integer."
+            )
+        else:
+            max_results_to_return = int(max_results_to_return)
+    else:
+        max_results_to_return = DEFAULT_MAX_RESULTS
 
     try:
         page_token = None
