@@ -35,7 +35,8 @@ type Database struct {
 }
 
 func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
-	if migrate {
+	migrator := db.Migrator()
+	if migrate || !migrator.HasTable(&GptscriptCredential{}) {
 		if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
 			return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
 		}
