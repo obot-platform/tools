@@ -37,6 +37,13 @@ logger = setup_logger(__name__)
 
 
 def get_openai_client() -> OpenAI:
+    # Check for OPENAI_API_KEY
+    if "OPENAI_API_KEY" not in os.environ:
+        sys.exit(
+            "ERROR: OPENAI_API_KEY environment variable not found.\n"
+            "Please set it before running the script, e.g.:\n\n"
+            "  export OPENAI_API_KEY='sk-xxxxxxx'\n"
+        )
     try:
         base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
         logger.debug(f"Using base_url: {base_url}")

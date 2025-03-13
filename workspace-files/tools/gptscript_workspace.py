@@ -58,17 +58,20 @@ async def write_file_in_workspace(filepath: str, content: str) -> bool:
 
 async def list_files_in_workspace(directory: str) -> str:
     gptscript_client = gptscript.GPTScript()
-    files = await gptscript_client.list_files_in_workspace(prefix=Path(FILES_DIR) / directory)
-    unique_dirs = set()
-    for file in files:
-        p = str(Path(file).relative_to(FILES_DIR))  # Remove "FILES_DIR/"
-        parts = p.split("/")
-        if len(parts) > 1:
-            unique_dirs.add(parts[0] + "/")  # Add top-level dir with "/"
-        else:
-            unique_dirs.add(parts[0])  # Add filename
+    files = await gptscript_client.list_files_in_workspace(prefix=str(Path(FILES_DIR) / directory))
+    if files is None:
+        return ""
+    print("\n".join(files))
+    # unique_dirs = set()
+    # for file in files:
+    #     p = str(Path(file).relative_to(FILES_DIR))  # Remove "FILES_DIR/"
+    #     parts = p.split("/")
+    #     if len(parts) > 1:
+    #         unique_dirs.add(parts[0] + "/")  # Add top-level dir with "/"
+    #     else:
+    #         unique_dirs.add(parts[0])  # Add filename
 
-    print( "\n".join(sorted(unique_dirs)))
+    # print( "\n".join(sorted(unique_dirs)))
 
 
 async def delete_file_in_workspace(filepath: str) -> None:

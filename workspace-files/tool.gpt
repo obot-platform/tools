@@ -35,7 +35,7 @@ Name: workspace_list
 Description: List all files in the workspace
 Params: dir: The directory to list files from
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list
 
 ---
 Name: workspace_read
@@ -43,7 +43,7 @@ Description: Read the contents of a file in the workspace. For non-plain text fi
 Credential: sys.model.provider.credential
 Params: filename: The filename to read
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool read
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py read
 
 ---
 Name: workspace_write
@@ -51,7 +51,7 @@ Description: Writes content to a file, replacing any existing content if the fil
 Params: filename: The filename to write to
 Params: content: The contents to write to the file
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool write
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py write
 
 ---
 Name: workspace_copy
@@ -59,7 +59,7 @@ Description: Copy the contents of a file to a new filename
 Params: filename: The filename to copy from
 Params: to_filename: The new filename to copy to
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool copy
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py copy
 
 ---
 Name: input_parse

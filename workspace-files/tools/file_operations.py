@@ -2,13 +2,7 @@
 from dataclasses import dataclass
 from tools.load_text import load_text_from_workspace_file
 from tools.helper import setup_logger, get_openai_client
-from tools.summarizer import (
-    DocumentSummarizer,
-    MODEL,
-    TIKTOKEN_MODEL,
-    MAX_CHUNK_TOKENS,
-    MAX_WORKERS,
-)
+
 import os
 import tiktoken
 import json
@@ -51,6 +45,14 @@ async def read_file():
         ValueError: If the INPUT_FILE environment variable is not set
         Exception: If the file content is not a valid UTF-8 encoded string
     """
+    
+    from tools.summarizer import (
+        DocumentSummarizer,
+        MODEL,
+        MAX_CHUNK_TOKENS,
+        MAX_WORKERS,
+    )
+    
     input_file = os.getenv("INPUT_FILE")
     logger.info(f"Input file: {input_file}")
     if not input_file:

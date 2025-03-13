@@ -2,10 +2,6 @@
 import asyncio
 import os
 import sys
-import json
-import signal
-import contextlib
-from pathlib import Path
 from tools import file_operations
 
 FILES_DIR = "files"

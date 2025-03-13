@@ -2,7 +2,6 @@
 import tiktoken
 from typing import List
 import concurrent.futures
-import sys
 import os
 from tools.helper import setup_logger
 
@@ -14,13 +13,7 @@ OVERHEAD_TOKENS = 2000
 MAX_CHUNK_TOKENS = MAX_CONTEXT_TOKENS - MAX_OUTPUT_TOKENS - OVERHEAD_TOKENS
 CHUNK_OVERLAP_TOKENS = 0
 MAX_WORKERS = 4
-# Check for OPENAI_API_KEY
-if "OPENAI_API_KEY" not in os.environ:
-    sys.exit(
-        "ERROR: OPENAI_API_KEY environment variable not found.\n"
-        "Please set it before running the script, e.g.:\n\n"
-        "  export OPENAI_API_KEY='sk-xxxxxxx'\n"
-    )
+
 MODEL = os.getenv("OBOT_DEFAULT_LLM_MODEL", "gpt-4o")
 TIKTOKEN_MODEL = "gpt-4o"
 
