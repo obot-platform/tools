@@ -2,7 +2,14 @@
 Name: Gmail
 Description: Tools for interacting with a user's Gmail account
 Metadata: bundle: true
-Share Tools: List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
+Share Tools: Current Email, List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
+
+---
+Name: Current Email
+Description: Gets the email address of the currently signed in user
+Credential: ../credential
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/currentEmail.py
 
 ---
 Name: List Inbox
