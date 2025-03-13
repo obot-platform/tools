@@ -188,6 +188,9 @@ func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, nam
 		return "", "", fmt.Errorf("name cannot be empty")
 	}
 	dir := filepath.Dir(name)
+	if dir == "." {
+		dir = ""
+	}
 	name = filepath.Base(name)
 
 	// Get the user's drive.

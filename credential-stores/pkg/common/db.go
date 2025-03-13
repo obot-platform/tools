@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/docker/docker-credential-helpers/credentials"
@@ -16,6 +17,8 @@ import (
 // This is similar to authenticatedDataString from the k8s apiserver's storage interface
 // for etcd: https://github.com/kubernetes/kubernetes/blob/a42f4f61c2c46553bfe338eefe9e81818c7360b4/staging/src/k8s.io/apiserver/pkg/storage/etcd3/store.go#L63
 type uid string
+
+var migrate = os.Getenv("OBOT_TOOLS_MIGRATE_DB") != "false"
 
 func (u uid) AuthenticatedData() []byte {
 	return []byte(u)
@@ -32,8 +35,10 @@ type Database struct {
 }
 
 func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
-	if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
-		return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
+	if migrate {
+		if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
+			return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
+		}
 	}
 
 	encryptionConf, err := readEncryptionConfig(ctx)

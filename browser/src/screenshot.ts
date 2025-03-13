@@ -37,7 +37,7 @@ export async function screenshot (
     const screenshotPath = workspaceId !== undefined ? `files/${screenshotName}` : screenshotName
 
     // Save the screenshot to the workspace
-    await client.writeFileInWorkspace(screenshotPath, screenshot, workspaceId)
+    await client.writeFileInWorkspace(screenshotPath, new Uint8Array(screenshot).buffer, workspaceId)
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     throw new Error(`Failed to save screenshot to workspace: ${msg}`)
@@ -48,7 +48,7 @@ export async function screenshot (
   const obotServerUrl = process.env?.OBOT_SERVER_URL
   const threadId = getGPTScriptEnv(headers, 'OBOT_THREAD_ID')
   if (obotServerUrl !== undefined && threadId !== undefined) {
-    downloadUrl = `${obotServerUrl}/api/threads/${threadId}/files/${screenshotName}`
+    downloadUrl = `${obotServerUrl}/api/threads/${threadId}/file/${screenshotName}`
   }
 
   return {

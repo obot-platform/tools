@@ -16,9 +16,16 @@ func AddWorksheetRow(ctx context.Context, workbookID, worksheetID, contents stri
 		return err
 	}
 
-	if err := graph.AddWorksheetRow(ctx, c, workbookID, worksheetID, strings.Split(contents, "|")); err != nil {
+	rows := strings.Split(contents, "\n")
+	var parsedRows [][]string
+	for _, row := range rows {
+		parsedRows = append(parsedRows, strings.Split(row, "|"))
+	}
+
+	if err := graph.AddWorksheetRow(ctx, c, workbookID, worksheetID, parsedRows); err != nil {
 		return err
 	}
-	fmt.Println("Row added successfully")
+
+	fmt.Printf("Added %d rows successfully\n", len(parsedRows))
 	return nil
 }

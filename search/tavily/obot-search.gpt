@@ -1,0 +1,11 @@
+---
+Name: Obot Search
+Description: Search the web with Obot. This returns a list of search results scored by relevance to the query and summarized.
+Credential: ./credential
+Param: query: The search query
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py search
+
+---
+!metadata:*:icon
+/admin/assets/obot_search_icon.png
