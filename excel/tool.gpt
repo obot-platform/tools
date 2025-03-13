@@ -76,7 +76,7 @@ Credential: ./credential
 Share Tools: List Workbooks, List Worksheets, Get Worksheet Data
 Param: workbook_id: ID of the workbook to add row to
 Param: worksheet_id: ID of the worksheet to add row to
-Param: contents: each row is a pipe-separated (`|`) values. Rows are separated by newlines (`\n`).
+Param: contents: The rows to add to the worksheet. Cells within a row must be pipe-separated (`|`). Rows must be separated by newlines (`\n`).
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool addWorksheetRow
 
