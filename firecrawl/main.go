@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/obot-platform/tools/firecrawl/cmd"
 )
@@ -37,26 +38,48 @@ func main() {
 	}
 	command := os.Args[1]
 
-	var (
-		result string
-		err    error
-		ctx    = context.Background()
-	)
+	ctx := context.Background()
 
 	apiKey := validateAPIKey()
 
 	switch command {
 	case "scrapeUrl":
-		url := validateRequiredParam(os.Getenv("URL"), "URL")
-		result, err = cmd.Scrape(ctx, apiKey, url)
-		
+		urls := validateRequiredParam(os.Getenv("URLS"), "URLS")
+
+		// clean and deduplicate urls
+		urlMap := make(map[string]struct{})
+		for _, url := range strings.Split(urls, ",") {
+			url = strings.TrimSpace(url)
+			if _, ok := urlMap[url]; ok || url == "" {
+				continue
+			}
+			urlMap[url] = struct{}{}
+		}
+
+		// Scrape each URL concurrently
+		results := make(chan string, len(urlMap))
+		wg := sync.WaitGroup{}
+		wg.Add(len(urlMap))
+
+		for url := range urlMap {
+			go func(url string) {
+				defer wg.Done()
+				content, err := cmd.Scrape(ctx, apiKey, url)
+				if err != nil {
+					content = fmt.Sprintf("ERROR: failed to scrape URL %q: %v", url, err)
+				}
+				results <- fmt.Sprintf("!==== Start Contents of URL %q ====!\n%s\n!==== End Contents of URL %q ====!\n", url, content, url)
+			}(url)
+		}
+
+		wg.Wait()
+		close(results)
+
+		for content := range results {
+			fmt.Println(content)
+		}
+
 	default:
 		exitWithError(fmt.Sprintf("unknown command: %s", command))
 	}
-
-	if err != nil {
-		exitWithError(err.Error())
-	}
-
-	fmt.Print(result)
 }

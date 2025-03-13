@@ -6,7 +6,7 @@ Tools: ../search/google/googlecustomsearch, ../firecrawl
 
 Search the Web using the Google Custom Search Engine for the query ${QUERY}.
 Skim through the results and decide if you need to scrape any of the URLs to get more information.
-Scrape all relevant items using the provided link.
+Scrape all relevant items in one go using firecrawl using the provided links.
 Then construct an answer based on the information you have gathered.
 Return your answer with the sources you have used in the following JSON format (do not use any syntax highlighting, just return the JSON):
 {
