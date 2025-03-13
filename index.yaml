@@ -82,7 +82,7 @@ tools:
   colly-scraper:
     reference: ./colly-scraper
   obot-search:
-    reference: ./obot-search
+    reference: ./search/tavily/obot-search.gpt
 
 knowledgeDataSources:
   notion-data-source:
