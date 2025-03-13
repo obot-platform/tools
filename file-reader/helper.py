@@ -107,6 +107,9 @@ async def load_from_knowledge_tool(input_file: str) -> str:
             # input=json.dumps({"input": input_file, "output": "temp.md"}),
             input=json.dumps({"input": input_file}),
             workspace=os.environ.get("GPTSCRIPT_WORKSPACE_ID"),
+            env=[
+                f"OPENAI_EMBEDDING_MODEL={os.environ.get('OBOT_DEFAULT_TEXT_EMBEDDING_MODEL')}",
+            ],
         ),
     )
     text = await run.text()
