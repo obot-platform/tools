@@ -2,15 +2,15 @@
 import os
 import asyncio
 from tools.summarizer import DocumentSummarizer, MODEL, MAX_CHUNK_TOKENS, MAX_WORKERS
-from tools.load_text import load_text_from_file
+from tools.load_text import load_text_from_workspace_file
 from tools.helper import save_to_gptscript_workspace, get_openai_client
 
 async def main():
-    input_file = os.getenv("INPUT_FILE", "")
+    input_file = os.getenv("INPUT_INPUT", "")
     if not input_file:
-        raise ValueError("Error: INPUT_FILE environment variable is not set")
+        raise ValueError("Error: INPUT_INPUT environment variable is not set")
 
-    file_content = await load_text_from_file(input_file)
+    file_content = await load_text_from_workspace_file(input_file)
 
     if len(file_content) == 0:
         print("Warning: File is empty, skipping summarization")

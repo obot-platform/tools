@@ -35,7 +35,7 @@ Name: workspace_list
 Description: List all files in the workspace
 Params: dir: The directory to list files from
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
 
 ---
 Name: workspace_read
@@ -51,7 +51,7 @@ Description: Writes content to a file, replacing any existing content if the fil
 Params: filename: The filename to write to
 Params: content: The contents to write to the file
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py write
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool write
 
 ---
 Name: workspace_copy
@@ -59,11 +59,11 @@ Description: Copy the contents of a file to a new filename
 Params: filename: The filename to copy from
 Params: to_filename: The new filename to copy to
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py copy
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool copy
 
 ---
 Name: input_parse
 Description: Prompt formatting for Obot
 Params: input: The input to filter
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py input
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool input

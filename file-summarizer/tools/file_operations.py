@@ -55,7 +55,7 @@ async def read_file(input_file: str):
     
     logger.info(f"Input file: {input_file}")
     if not input_file:
-        raise ValueError("Error: INPUT_FILE environment variable is not set")
+        raise ValueError("Error: INPUT environment variable is not set")
 
     file_content : str = await load_text_from_workspace_file(input_file)
     tokens = enc.encode(file_content)
@@ -124,7 +124,7 @@ async def write_file(filename: str, content: str):
         print(f"Writing to files with extension {ext} is not supported")
         return
     
-    if await write_file_in_workspace(filename, content):
+    if await write_file_in_workspace(filename, content.encode("utf-8")):
         print(f"Successfully wrote {len(content)} bytes to {filename}")
     else:
         print("Failed to write file to GPTScript workspace")

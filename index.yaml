@@ -2,7 +2,7 @@ tools:
   sendgrid:
     reference: ./sendgrid
   file-summarizer:
-    reference: ./workspace-files/summarize.gpt
+    reference: ./file-summarizer
   database:
     reference: ./database
   zoom:

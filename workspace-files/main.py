@@ -12,7 +12,7 @@ DIR_ENV = os.getenv("DIR", "")
 async def main():
     if len(sys.argv) == 1:
         print("""
-Subcommands: read, write, copy, input, list
+Subcommands: read, write, copy
 env: FILENAME, CONTENT, TO_FILENAME, GPTSCRIPT_WORKSPACE_DIR
 Usage: python script.py <command>
         """)
