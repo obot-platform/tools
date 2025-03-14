@@ -21,7 +21,7 @@ TOKEN_THRESHOLD = 10000
 
 FILE_ENV = os.getenv("FILENAME", "")
 DIR_ENV = os.getenv("DIR", "")
-MAX_FILE_SIZE = 250_000
+MAX_FILE_SIZE = 100_000_000
 
 UNSUPPORTED_FILE_TYPES = {
     ".pdf",
@@ -55,7 +55,7 @@ class Data:
     changedFiles: dict = None
 
 
-async def read_file(input_file: str):
+async def read_file(input_file: str, max_file_size: int = MAX_FILE_SIZE):
     """the enhanced workspace_read tool
     This tool reads a file from the GPTScript workspace and returns the file content.
     If the file has too many tokens, it summarizes the file content and returns the summary instead.
@@ -76,7 +76,7 @@ async def read_file(input_file: str):
     if not input_file:
         raise ValueError("Error: INPUT_FILE environment variable is not set")
 
-    file_content: str = await load_text_from_workspace_file(input_file)
+    file_content: str = await load_text_from_workspace_file(input_file, max_file_size)
     tokens = enc.encode(file_content)
 
     # if the file has too many tokens, summarize it and return the summary

@@ -16,6 +16,8 @@ SUPPORTED_KNOWLEDGE_DOC_FILE_TYPES = (
     ".ppt",
 )
 
+MAX_FILE_SIZE = 100_000_000
+
 
 async def load_from_knowledge_tool(input_file: str) -> str:
     """Load text from a workspace file using the knowledge-load tool.
@@ -40,8 +42,7 @@ async def load_from_knowledge_tool(input_file: str) -> str:
     text = await run.text()
     return text
 
-
-async def load_text_from_workspace_file(file_path: str) -> str:
+async def load_text_from_workspace_file(file_path: str, max_file_size: int = MAX_FILE_SIZE) -> str:
     """Logic to load text from a workspace file.
 
     Args:
@@ -58,13 +59,17 @@ async def load_text_from_workspace_file(file_path: str) -> str:
 
     # first read from gptscript workspace
     try:
-        file_content = await read_file_in_workspace(file_path)
+        file_content: bytes = await read_file_in_workspace(file_path)
     except Exception as e:
         logger.error(
             f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}"
         )
         raise ValueError(
             f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}"
+        )
+    if len(file_content) > max_file_size:
+        raise Exception(
+            f"File size exceeds {max_file_size} bytes"
         )
 
     # if the file is not a supported knowledge doc file type, try to decode it as a plain text file using utf-8 encoding
