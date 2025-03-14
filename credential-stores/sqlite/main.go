@@ -82,5 +82,9 @@ func NewSqlite(ctx context.Context) (common.Database, error) {
 		return common.Database{}, fmt.Errorf("failed to open database: %w", err)
 	}
 
+	if err := db.AutoMigrate(&common.GptscriptCredential{}); err != nil {
+		return common.Database{}, fmt.Errorf("failed to migrate database: %w", err)
+	}
+
 	return common.NewDatabase(ctx, db)
 }
