@@ -283,53 +283,6 @@ func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, d
 		})
 	}
 
-	// Handle pagination if there are more items
-	nextLink := items.GetOdataNextLink()
-	for nextLink != nil && *nextLink != "" {
-		// Create a new request for the next page
-		requestInfo := kiota.NewRequestInformation()
-		requestInfo.UrlTemplate = *nextLink
-		requestInfo.Method = kiota.GET
-
-		// Get the next page
-		res, err := c.RequestAdapter.Send(ctx, requestInfo, graphmodels.CreateDriveItemCollectionResponseFromDiscriminatorValue, nil)
-		if err != nil {
-			return fmt.Errorf("failed to get next page: %w", err)
-		}
-
-		collection, ok := res.(graphmodels.DriveItemCollectionResponseable)
-		if !ok {
-			return fmt.Errorf("unexpected response type for drive item collection")
-		}
-
-		// Process this page of items
-		for _, item := range collection.GetValue() {
-			// Skip folders, but process their contents
-			if item.GetFolder() != nil {
-				err = listDocsInFolder(ctx, c, driveID, deref(item.GetId()), infos)
-				if err != nil {
-					return err
-				}
-				continue
-			}
-
-			// Only include Word documents
-			file := item.GetFile()
-			if file == nil || !isWordDocument(deref(item.GetName())) {
-				continue
-			}
-
-			// Add Word documents to our list
-			*infos = append(*infos, DocInfo{
-				ID:   deref(item.GetId()),
-				Name: deref(item.GetName()),
-			})
-		}
-
-		// Update nextLink for the next iteration
-		nextLink = collection.GetOdataNextLink()
-	}
-
 	return nil
 }
 
