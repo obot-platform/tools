@@ -191,14 +191,38 @@ func read(ctx context.Context, filename string) error {
 		return err
 	}
 
-	if len(data) > MaxFileSize {
-		return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
-	}
-
+	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
 	if utf8.Valid(data) {
-		fmt.Println(string(data))
+		newData := map[string]string{"input_text": string(data)}
+
+		jsonData, err := json.Marshal(newData)
+		if err != nil {
+			return err
+		}
+
+		run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/summarize.gpt", gptscript.Options{
+			Input: string(jsonData),
+			Workspace: workspaceID,
+		})
+	
+		text, err := run.Text()
+		if err != nil {
+			return err
+		}
+	
+		fmt.Println("============Summary:============\n")
+		fmt.Println(string(text))
 		return nil
 	}
+
+	// if len(data) > MaxFileSize {
+	// 	return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
+	// }
+
+	// if utf8.Valid(data) {
+	// 	fmt.Println(string(data))
+	// 	return nil
+	// }
 
 	return fmt.Errorf("file is not valid UTF-8")
 }
