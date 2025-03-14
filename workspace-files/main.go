@@ -10,7 +10,7 @@ import (
 	"path"
 	"slices"
 	"strings"
-	"unicode/utf8"
+	// "unicode/utf8"
 
 	"github.com/gptscript-ai/go-gptscript"
 )
@@ -174,57 +174,31 @@ func list(ctx context.Context, filename string) error {
 
 func read(ctx context.Context, filename string) error {
 
-	// Check for common binary file types that are not supported. Less common types should be caught by the utf8.Valid() check
-	for _, ext := range unsupportedFileTypes {
-		if strings.HasSuffix(strings.ToLower(filename), ext) {
-			return fmt.Errorf("reading files with extension %s is not supported", ext)
-		}
-	}
-
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return err
 	}
 
-	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
+	newData := map[string]string{"input_file": string(filename)}
+
+	jsonData, err := json.Marshal(newData)
 	if err != nil {
 		return err
 	}
 
-	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
-	if utf8.Valid(data) {
-		newData := map[string]string{"input_text": string(data)}
+	run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/tool.gpt", gptscript.Options{
+		Input: string(jsonData),
+		Workspace: workspaceID,
+	})
 
-		jsonData, err := json.Marshal(newData)
-		if err != nil {
-			return err
-		}
-
-		run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/summarize.gpt", gptscript.Options{
-			Input: string(jsonData),
-			Workspace: workspaceID,
-		})
-	
-		text, err := run.Text()
-		if err != nil {
-			return err
-		}
-	
-		fmt.Println("============Summary:============\n")
-		fmt.Println(string(text))
-		return nil
+	text, err := run.Text()
+	if err != nil {
+		return err
 	}
 
-	// if len(data) > MaxFileSize {
-	// 	return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
-	// }
-
-	// if utf8.Valid(data) {
-	// 	fmt.Println(string(data))
-	// 	return nil
-	// }
-
-	return fmt.Errorf("file is not valid UTF-8")
+	fmt.Println(string(text))
+	return nil
 }
 
 func write(ctx context.Context, filename, content string) error {
