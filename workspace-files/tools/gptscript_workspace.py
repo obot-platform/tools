@@ -6,6 +6,8 @@ from tools.helper import setup_logger
 logger = setup_logger(__name__)
 
 FILES_DIR = "files"
+
+
 def _prepend_base_path(file_path: str, base_path: str = FILES_DIR):
     """
     Prepend a base path to a file path if it's not already rooted in the base path.
@@ -43,6 +45,7 @@ def _prepend_base_path(file_path: str, base_path: str = FILES_DIR):
     # Prepend the base path
     return os.path.join(base_path, file_path)
 
+
 # for gptscript workspace S/L, see https://github.com/gptscript-ai/py-gptscript/blob/main/gptscript/gptscript.py
 async def write_file_in_workspace(filepath: str, content: str) -> bool:
     try:
@@ -56,22 +59,27 @@ async def write_file_in_workspace(filepath: str, content: str) -> bool:
         logger.error(f"Failed to write file to GPTScript workspace: {e}")
         return False
 
+
 async def list_files_in_workspace(directory: str) -> str:
     gptscript_client = gptscript.GPTScript()
-    files = await gptscript_client.list_files_in_workspace(prefix=str(Path(FILES_DIR) / directory))
+    files = await gptscript_client.list_files_in_workspace(
+        prefix=str(Path(FILES_DIR) / directory)
+    )
     if files is None:
         return ""
-    print("\n".join(files))
-    # unique_dirs = set()
-    # for file in files:
-    #     p = str(Path(file).relative_to(FILES_DIR))  # Remove "FILES_DIR/"
-    #     parts = p.split("/")
-    #     if len(parts) > 1:
-    #         unique_dirs.add(parts[0] + "/")  # Add top-level dir with "/"
-    #     else:
-    #         unique_dirs.add(parts[0])  # Add filename
 
-    # print( "\n".join(sorted(unique_dirs)))
+    unique_dirs = set()
+    for file in files:
+        p = str(Path(file).relative_to(FILES_DIR))  # Remove "FILES_DIR/"
+        if p is None:
+            continue
+        parts = p.split("/")
+        if len(parts) > 1:
+            unique_dirs.add(parts[0] + "/")  # Add top-level dir with "/"
+        else:
+            unique_dirs.add(parts[0])  # Add filename
+
+    return "\n".join(sorted(unique_dirs))
 
 
 async def delete_file_in_workspace(filepath: str) -> None:
@@ -79,8 +87,9 @@ async def delete_file_in_workspace(filepath: str) -> None:
     wksp_file_path = _prepend_base_path(filepath, FILES_DIR)
     await gptscript_client.delete_file_in_workspace(wksp_file_path)
 
+
 async def read_file_in_workspace(filepath: str) -> bytes:
     gptscript_client = gptscript.GPTScript()
     wksp_file_path = _prepend_base_path(filepath, FILES_DIR)
-    file_content : bytes = await gptscript_client.read_file_in_workspace(wksp_file_path)
+    file_content: bytes = await gptscript_client.read_file_in_workspace(wksp_file_path)
     return file_content

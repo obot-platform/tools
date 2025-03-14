@@ -253,4 +253,3 @@ Requirements:
         reduced_summary = self.iterative_summarize(document_text)
         final_summary = self.final_reduction(reduced_summary)
         return final_summary
-

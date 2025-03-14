@@ -67,18 +67,23 @@ async def load_text_from_workspace_file(file_path: str) -> str:
             f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}"
         )
 
-
     # if the file is not a supported knowledge doc file type, try to decode it as a plain text file using utf-8 encoding
     if not file_path.endswith(SUPPORTED_KNOWLEDGE_DOC_FILE_TYPES):
         try:
             file_content = file_content.decode("utf-8")
             return file_content
         except UnicodeDecodeError:
-            logger.error(f"Failed to decode file content from GPTScript workspace file {file_path}, Error: {e}")
+            logger.error(
+                f"Failed to decode file content from GPTScript workspace file {file_path}, Error: {e}"
+            )
 
     # if the file is a supported knowledge doc file type, or the file is not a plain text file, try to load it using the knowledge-load tool
     try:
         return await load_from_knowledge_tool(file_path)
     except Exception as e:
-        logger.error(f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}")
-        raise ValueError(f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}")
+        logger.error(
+            f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}"
+        )
+        raise ValueError(
+            f"Failed to load file from GPTScript workspace file {file_path}, Error: {e}"
+        )
