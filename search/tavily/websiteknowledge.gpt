@@ -1,0 +1,15 @@
+Name: Obot Website Knowledge
+Description: Search explicit list of configured domains.
+Credential: ./credential
+Share Context: tavily-safe-search-context
+Metadata: icon: /admin/assets/obot_search_icon.png
+Param: query: The search query
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py site-search Obot
+
+---
+Name: tavily-safe-search-context
+Type: context
+Share Context: ../../time
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py site-search-context Obot
