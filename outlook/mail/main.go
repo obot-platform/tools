@@ -35,18 +35,17 @@ func main() {
 			fmt.Printf("failed to list mail: %v\n", err)
 			os.Exit(1)
 		}
-	// case "listGroupMessages":
-	// 	if err := commands.ListGroupMessages(
-	// 		context.Background(),
-	// 		os.Getenv("GROUP_ID"),
-	// 		os.Getenv("FOLDER_ID"),
-	// 		os.Getenv("START"),
-	// 		os.Getenv("END"),
-	// 		os.Getenv("LIMIT"),
-	// 	); err != nil {
-	// 		fmt.Printf("failed to list group messages: %v\n", err)
-	// 		os.Exit(1)
-	// 	}
+	case "listGroupMessages":
+		if err := commands.ListGroupMessages(
+			context.Background(),
+			os.Getenv("GROUP_ID"),
+			os.Getenv("START"),
+			os.Getenv("END"),
+			os.Getenv("LIMIT"),
+		); err != nil {
+			fmt.Printf("failed to list group messages: %v\n", err)
+			os.Exit(1)
+		}
 	case "listGroups":
 		if err := commands.ListGroups(context.Background()); err != nil {
 			fmt.Printf("failed to list groups: %v\n", err)
