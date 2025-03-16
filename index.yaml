@@ -121,8 +121,6 @@ system:
     reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
-  safe-search:
-    reference: ./search/tavily/safesearch.gpt
 
 modelProviders:
   openai-model-provider:

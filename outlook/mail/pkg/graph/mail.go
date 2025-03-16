@@ -319,3 +319,11 @@ func MoveMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, m
 
 	return message, nil
 }
+
+func GetMe(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (models.Userable, error) {
+	user, err := client.Me().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get me: %w", err)
+	}
+	return user, nil
+}

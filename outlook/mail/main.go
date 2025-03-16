@@ -74,6 +74,11 @@ func main() {
 			fmt.Printf("failed to move message: %v\n", err)
 			os.Exit(1)
 		}
+	case "getMyEmailAddress":
+		if err := commands.GetMyEmailAddress(context.Background()); err != nil {
+			fmt.Printf("failed to get my email address: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)
