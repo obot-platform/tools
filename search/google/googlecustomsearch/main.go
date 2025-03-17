@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	googlecustomsearch "google.golang.org/api/customsearch/v1"
-	"google.golang.org/api/option"
+	"github.com/obot-platform/tools/search/google/googlecustomsearch/pkg/googlecustomsearchengine"
 )
 
 func exitError(err error) {
@@ -15,12 +14,6 @@ func exitError(err error) {
 		fmt.Printf("google custom search failed: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-type result struct {
-	Title   string
-	Link    string
-	Snippet string
 }
 
 func main() {
@@ -31,25 +24,11 @@ func main() {
 }
 
 func search(ctx context.Context) (string, error) {
-	apiKey := os.Getenv("GOOGLE_CSE_API_KEY")
-	client, err := googlecustomsearch.NewService(ctx, option.WithAPIKey(apiKey))
-	exitError(err)
-
-	cseID := os.Getenv("GOOGLE_CSE_ID")
 	query := os.Getenv("QUERY")
+	cse := googlecustomsearchengine.NewGoogleCSEFromEnv()
 
-	resp, err := client.Cse.List().Cx(cseID).Q(query).Do()
+	results, err := cse.Search(ctx, query)
 	exitError(err)
-
-	results := make([]result, len(resp.Items))
-
-	for i, item := range resp.Items {
-		results[i] = result{
-			Title:   item.Title,
-			Link:    item.Link,
-			Snippet: item.Snippet,
-		}
-	}
 
 	resJSON, err := json.Marshal(results)
 	if err != nil {
