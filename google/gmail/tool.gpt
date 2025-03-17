@@ -2,7 +2,7 @@
 Name: Gmail
 Description: Tools for interacting with a user's Gmail account
 Metadata: bundle: true
-Share Tools: Current Email, List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft
+Share Tools: Current Email, List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft, List Attachments, Get Attachment
 
 ---
 Name: Current Email
@@ -124,6 +124,26 @@ Share Tools: List Drafts, Read Email, Create Draft, Update Draft
 Param: draft_id: The ID of the draft email to send
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/sendDraft.py
+
+---
+Name: List Attachments
+Description: List attachments in an email from a user's Gmail account.
+Credential: ../credential
+Share Context: Email List Context
+Param: email_id: The ID of the email to list attachments from
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listAttachments.py
+
+---
+Name: Get Attachment
+Description: Read an attachment from an email in a user's Gmail account.
+Credential: ../credential
+Share Context: Email List Context
+Share Tools: List Attachments
+Param: email_id: The ID of the email containing the attachment
+Param: attachment_id: The ID of the attachment to read
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getAttachment.py
 
 ---
 Name: Draft Context
