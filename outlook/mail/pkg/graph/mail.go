@@ -327,3 +327,28 @@ func GetMe(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (models
 	}
 	return user, nil
 }
+
+func ListAttachments(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) ([]models.Attachmentable, error) {
+	attachments, err := client.Me().Messages().ByMessageId(messageID).Attachments().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list attachments: %w", err)
+	}
+
+	// Filter to only include file attachments
+	var fileAttachments []models.Attachmentable
+	for _, attachment := range attachments.GetValue() {
+		if *attachment.GetOdataType() == "#microsoft.graph.fileAttachment" && !*attachment.GetIsInline() {
+			fileAttachments = append(fileAttachments, attachment)
+		}
+	}
+
+	return fileAttachments, nil
+}
+
+func GetAttachment(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID, attachmentID string) (models.Attachmentable, error) {
+	attachment, err := client.Me().Messages().ByMessageId(messageID).Attachments().ByAttachmentId(attachmentID).Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get attachment: %w", err)
+	}
+	return attachment, nil
+}
