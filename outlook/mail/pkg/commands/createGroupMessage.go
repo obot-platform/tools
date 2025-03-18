@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
@@ -22,12 +21,6 @@ func CreateGroupThreadMessage(ctx context.Context, groupID string, info graph.Dr
 		return fmt.Errorf("failed to create group thread message: %w", err)
 	}
 
-	// Get numerical ID for the draft
-	threadID, err := id.SetOutlookID(ctx, util.Deref(threads.GetId()))
-	if err != nil {
-		return fmt.Errorf("failed to set draft ID: %w", err)
-	}
-
-	fmt.Printf("Group thread message created successfully. Thread ID: %s\n", threadID)
+	fmt.Println("Group thread message created successfully, thread ID:", util.Deref(threads.GetId()))
 	return nil
 }

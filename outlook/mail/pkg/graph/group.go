@@ -89,23 +89,26 @@ func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 
 // ListGroups retrieves all Microsoft 365 groups the authenticated user has access to
 func ListGroups(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.Groupable, error) {
-	// Define query parameters (e.g., sorting or filtering if needed)
-	queryParams := &groups.GroupsRequestBuilderGetQueryParameters{
-		Select: []string{"id", "displayName", "mail"},
-		Orderby: []string{"displayName ASC"},
-	}
 
-	// Fetch list of groups
-	result, err := client.Groups().Get(ctx, &groups.GroupsRequestBuilderGetRequestConfiguration{
-		QueryParameters: queryParams,
-	})
+	// Fetch groups where the user is a member
+	result, err := client.Me().MemberOf().Get(ctx, nil)
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to list groups: %w", err)
+		return nil, fmt.Errorf("failed to list user groups: %w", err)
 	}
 
-	return result.GetValue(), nil
-}
+	// Filter for groups that have a mailbox (mailEnabled == true)
+	var accessibleGroups []models.Groupable
+	for _, group := range result.GetValue() {
+		if g, ok := group.(models.Groupable); ok {
+			if g.GetMailEnabled() != nil && *g.GetMailEnabled() {
+				accessibleGroups = append(accessibleGroups, g)
+			}
+		}
+	}
 
+	return accessibleGroups, nil
+}
 
 func getGroup(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string) (models.Groupable, error) {
 	groups, err := client.Groups().ByGroupId(groupID).Get(ctx, nil)
