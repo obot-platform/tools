@@ -121,6 +121,8 @@ system:
     reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
+  task-invoke:
+    reference: ./task-invoke
 
 modelProviders:
   openai-model-provider:
