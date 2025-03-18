@@ -35,15 +35,15 @@ func main() {
 			fmt.Printf("failed to list mail: %v\n", err)
 			os.Exit(1)
 		}
-	case "listGroupMessages":
-		if err := commands.ListGroupMessages(
+	case "listGroupThreads":
+		if err := commands.ListGroupThreads(
 			context.Background(),
 			os.Getenv("GROUP_ID"),
 			os.Getenv("START"),
 			os.Getenv("END"),
 			os.Getenv("LIMIT"),
 		); err != nil {
-			fmt.Printf("failed to list group messages: %v\n", err)
+			fmt.Printf("failed to list group threads: %v\n", err)
 			os.Exit(1)
 		}
 	case "listGroups":
