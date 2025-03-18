@@ -75,6 +75,11 @@ func main() {
 			fmt.Printf("failed to create draft: %v\n", err)
 			os.Exit(1)
 		}
+	case "createGroupThreadMessage":
+		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), getDraftInfoFromEnv()); err != nil {
+			fmt.Printf("failed to create group thread message: %v\n", err)
+			os.Exit(1)
+		}
 	case "sendDraft":
 		if err := commands.SendDraft(context.Background(), os.Getenv("DRAFT_ID")); err != nil {
 			fmt.Printf("failed to send draft: %v\n", err)
@@ -96,18 +101,27 @@ func main() {
 	}
 }
 
+
+func smartSplit(s, sep string) []string {
+	if s == "" {
+		return []string{} // Return an empty slice if the input is empty
+	}
+	return strings.Split(s, sep)
+}
+
+
 func getDraftInfoFromEnv() graph.DraftInfo {
 	var attachments []string
 	if os.Getenv("ATTACHMENTS") != "" {
-		attachments = strings.Split(os.Getenv("ATTACHMENTS"), ",")
+		attachments = smartSplit(os.Getenv("ATTACHMENTS"), ",")
 	}
 
 	info := graph.DraftInfo{
 		Subject:     os.Getenv("SUBJECT"),
 		Body:        os.Getenv("BODY"),
-		Recipients:  strings.Split(os.Getenv("RECIPIENTS"), ","),
-		CC:          strings.Split(os.Getenv("CC"), ","),
-		BCC:         strings.Split(os.Getenv("BCC"), ","),
+		Recipients:  smartSplit(os.Getenv("RECIPIENTS"), ","),
+		CC:          smartSplit(os.Getenv("CC"), ","),
+		BCC:         smartSplit(os.Getenv("BCC"), ","),
 		Attachments: attachments,
 	}
 

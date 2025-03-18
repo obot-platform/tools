@@ -28,13 +28,14 @@ func PrintThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceC
 	fmt.Println("\n✉️ Messages:")
 	for _, post := range posts {
 		fmt.Println("------------------------------------------")
-		fmt.Printf("📧 Message ID: %s\n", *post.GetId())
+		messageID := util.Deref(post.GetId())
+		fmt.Printf("📧 Message ID: %s\n", messageID)
 
 		// Check if sender information is available
 		if post.GetFrom() != nil && post.GetFrom().GetEmailAddress() != nil {
 			fmt.Printf("👤 From: %s <%s>\n",
-				*post.GetFrom().GetEmailAddress().GetName(),
-				*post.GetFrom().GetEmailAddress().GetAddress(),
+				util.Deref(post.GetFrom().GetEmailAddress().GetName()),
+				util.Deref(post.GetFrom().GetEmailAddress().GetAddress()),
 			)
 		} else {
 			fmt.Println("👤 Sender: Unknown")
@@ -45,7 +46,7 @@ func PrintThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceC
 		// Print message body if available
 		if post.GetBody() != nil && post.GetBody().GetContent() != nil {
 			fmt.Println("📝 Message Body:")
-			fmt.Println(*post.GetBody().GetContent())
+			fmt.Println(util.Deref(post.GetBody().GetContent()))
 		} else {
 			fmt.Println("📭 (No content in this message)")
 		}
@@ -53,7 +54,7 @@ func PrintThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceC
 	}
 }
 
-func ListGroupMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, start, end string, limit int) ([]models.ConversationThreadable, error) {
+func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, start, end string, limit int) ([]models.ConversationThreadable, error) {
 	queryParams := &groups.ItemThreadsRequestBuilderGetQueryParameters{
 		Orderby: []string{"lastDeliveredDateTime DESC"},
 	}
@@ -103,4 +104,71 @@ func ListGroups(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([
 	}
 
 	return result.GetValue(), nil
+}
+
+
+func getGroup(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string) (models.Groupable, error) {
+	groups, err := client.Groups().ByGroupId(groupID).Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get group: %w", err)
+	}
+	return groups, nil
+}
+
+
+func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, info DraftInfo) (models.ConversationThreadable, error) {
+
+	requestBody := models.NewConversationThread()
+	requestBody.SetTopic(util.Ptr(info.Subject)) 
+
+	post := models.NewPost()
+	body := models.NewItemBody()
+	body.SetContentType(util.Ptr(models.HTML_BODYTYPE)) 
+	body.SetContent(util.Ptr(info.Body)) 
+	post.SetBody(body)
+
+	if len(info.Recipients) > 0 {
+		post.SetNewParticipants(emailAddressesToRecipientable(info.Recipients))
+	} else {
+		// if no recipients are provided, use the group email address
+		group, err := getGroup(ctx, client, groupID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get group: %w", err)
+		}
+		post.SetNewParticipants(emailAddressesToRecipientable([]string{util.Deref(group.GetMail())}))
+	}
+
+	// if len(info.CC) > 0 {
+	// 	post.SetCcRecipients(emailAddressesToRecipientable(info.CC))
+	// }
+
+	// if len(info.BCC) > 0 {
+	// 	post.SetBccRecipients(emailAddressesToRecipientable(info.BCC))
+	// }
+
+	posts := []models.Postable {
+		post,
+	}
+	requestBody.SetPosts(posts)
+
+	threads, err := client.Groups().ByGroupId(groupID).Threads().Post(ctx, requestBody, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create group thread message: %w", err)
+	}
+
+	// for _, file := range info.Attachments {
+	// 	if file == "" {
+	// 		return nil, fmt.Errorf("attachment file path cannot be empty")
+	// 	}
+	// }
+
+
+
+	// if len(info.Attachments) > 0 {
+	// 	if err := attachFiles(ctx, client, util.Deref(draft.GetId()), info.Attachments); err != nil {
+	// 		return nil, fmt.Errorf("failed to attach files to draft: %w", err)
+	// 	}
+	// }
+
+	return threads, nil
 }

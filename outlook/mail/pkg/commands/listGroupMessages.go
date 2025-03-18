@@ -11,7 +11,7 @@ import (
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
 	// "github.com/gptscript-ai/tools/outlook/mail/pkg/printers"
-	// "github.com/gptscript-ai/tools/outlook/mail/pkg/util"
+	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	// "github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
@@ -41,16 +41,17 @@ func ListGroupMessages(ctx context.Context, groupID, start, end, limit string) e
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	messages, err := graph.ListGroupMessages(ctx, c, groupID, start, end, limitInt)
+	threads, err := graph.ListGroupThreads(ctx, c, groupID, start, end, limitInt)
 	if err != nil {
-		return fmt.Errorf("failed to list group messages: %w", err)
+		return fmt.Errorf("failed to list group threads: %w", err)
 	}
 
-	for _, thread := range messages {
+	for _, thread := range threads {
 		fmt.Println("==========================================")
-		fmt.Printf("📩 Thread ID: %s\n", *thread.GetId())
+		threadID := util.Deref(thread.GetId())
+		fmt.Printf("📩 Thread ID: %s\n", threadID)
 		if thread.GetTopic() != nil {
-			fmt.Printf("📌 Subject: %s\n", *thread.GetTopic())
+			fmt.Printf("📌 Subject: %s\n", util.Deref(thread.GetTopic()))
 		} else {
 			fmt.Println("📌 Subject: (No Subject)")
 		}
@@ -65,7 +66,7 @@ func ListGroupMessages(ctx context.Context, groupID, start, end, limit string) e
 		fmt.Println()
 
 		// Fetch posts (individual emails/messages) inside the thread
-		threadID := *thread.GetId()
+		
 		graph.PrintThreadMessages(ctx, c, groupID, threadID)
 
 		fmt.Println("==========================================")

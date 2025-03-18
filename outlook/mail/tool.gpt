@@ -2,7 +2,7 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Send Draft, Delete Message, Move Message, List Groups, List Group Messages
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Messages
 
 ---
 Name: List Mail Folders
@@ -71,6 +71,21 @@ Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the m
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDraft
+
+---
+Name: Create Group Thread Message
+Description: Create a group thread message. You MUST kindly confirm with the user about the subject and body of the message, and the recipients, cc, and bcc.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: Create Draft
+Param: group_id: The ID of the group to create the thread message in.
+Param: subject: The subject of the message.
+Param: body: The body of the message in markdown format.
+Param: recipients: (Optional) A comma-separated list of email addresses to send the message to. No spaces. If unset, the group email address will be used.
+Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
+Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createGroupThreadMessage
 
 ---
 Name: Send Draft
