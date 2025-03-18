@@ -270,11 +270,13 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
 	err := v.db.Transaction(func(tx *gorm.DB) error {
 		if len(where) > 0 {
 			whereQueries := make([]string, 0)
+			args := []any{collection}
 			for k, v := range where {
 				if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
 					continue
 				}
-				whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = '%s'", k, v))
+				whereQueries = append(whereQueries, "(metadata ->> '$.?') = '?'")
+				args = append(args, k, v)
 			}
 			whereQuery := strings.Join(whereQueries, " AND ")
 			if len(whereQuery) == 0 {
@@ -285,7 +287,7 @@ func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, col
                 SELECT id 
                 FROM [%s]
                 WHERE collection_id = ? AND %s
-            `, v.embeddingsTableName, whereQuery), collection).Scan(&ids).Error
+            `, v.embeddingsTableName, whereQuery), args...).Scan(&ids).Error
 			if err != nil {
 				return fmt.Errorf("failed to query IDs: %w", err)
 			}
@@ -361,14 +363,14 @@ func (v *VectorStore) GetDocuments(_ context.Context, collection string, where m
 
 	// Build metadata filter query
 	var whereQueries []string
-	args := []interface{}{collection}
+	args := []any{collection}
 
 	for k, v := range where {
 		if strings.TrimSpace(k) == "" || strings.TrimSpace(v) == "" {
 			continue
 		}
-		whereQueries = append(whereQueries, fmt.Sprintf("(metadata ->> '$.%s') = ?", k))
-		args = append(args, v)
+		whereQueries = append(whereQueries, "(metadata ->> '$.?') = ?")
+		args = append(args, k, v)
 	}
 
 	if len(whereDocument) > 0 {
