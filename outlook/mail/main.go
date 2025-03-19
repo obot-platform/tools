@@ -76,7 +76,7 @@ func main() {
 			os.Exit(1)
 		}
 	case "createGroupThreadMessage":
-		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), getDraftInfoFromEnv()); err != nil {
+		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), getDraftInfoFromEnv()); err != nil {
 			fmt.Printf("failed to create group thread message: %v\n", err)
 			os.Exit(1)
 		}

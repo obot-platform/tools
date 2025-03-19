@@ -133,6 +133,44 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 }
 
 
+
+func ReplyToGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string, info DraftInfo) ( error) {
+	for _, file := range info.Attachments {
+		if file == "" {
+			return fmt.Errorf("attachment file path cannot be empty")
+		}
+	}
+	
+	requestBody := groups.NewItemConversationsItemThreadsItemReplyPostRequestBody()
+	post := models.NewPost()
+	body := models.NewItemBody()
+	body.SetContentType(util.Ptr(models.HTML_BODYTYPE)) 
+	body.SetContent(util.Ptr(info.Body)) 
+	post.SetBody(body)
+
+	if len(info.Recipients) > 0 {
+		post.SetNewParticipants(emailAddressesToRecipientable(info.Recipients))
+	}
+
+	// models.Post() doesn't support cc and bcc
+	
+	if len(info.Attachments) > 0 {
+		attachments, err := setAttachments(ctx, info.Attachments)
+		if err != nil {
+			return fmt.Errorf("failed to attach files to group thread message post: %w", err)
+		}
+		post.SetAttachments(attachments)
+	}
+	requestBody.SetPost(post)
+
+	err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Reply().Post(ctx, requestBody, nil)
+	if err != nil {
+		return fmt.Errorf("failed to reply to group thread message %s: %w", threadID, err)
+	}
+
+	return nil
+}
+
 func setAttachments(ctx context.Context, attachment_filenames []string) ([]models.Attachmentable, error) {
 	attachments := []models.Attachmentable{}
 	gsClient, err := gptscript.NewGPTScript()

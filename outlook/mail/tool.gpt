@@ -78,9 +78,10 @@ Description: Compose a group thread message that is always sent to the microsoft
 Share Context: Outlook Mail Context
 Credential: ./credential
 Share Tools: Create Draft
-Param: group_id: The ID of the group to create the thread message in.
-Param: subject: The subject of the message.
-Param: body: The body of the message in markdown format.
+Param: group_id: (Required) The ID of the group to create the thread message in.
+Param: subject: (Required) The subject of the message.
+Param: body: (Required) The body of the message in markdown format.
+Param: reply_to_thread_id: (Optional) The ID of the thread to reply to. If unset, a new thread will be created.
 Param: recipients: (Optional) The additional recipients to send the message to, must be a comma-separated list of email addresses. 
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
 
@@ -170,6 +171,12 @@ When printing a single message or a list of messages, use Markdown formatting.
 When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
 
 Do not attempt to forward emails. Email forwarding is not supported.
+
+Before using the Create Group Thread Message tool, confirm the following with the user:
+- The subject and body of the message.
+- Whether they want to reply to an existing thread or start a new one. If replying, which thread?
+- Whether they want to add additional recipients.
+- Whether they want to attach any files.
 
 ## End of instructions for using the Microsoft Outlook Mail tools
 
