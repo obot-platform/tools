@@ -11,47 +11,14 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func PrintThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) {
+func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) ([]models.Postable, error) {
 	// Fetch messages inside a thread
 	result, err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Posts().Get(ctx, nil)
 	if err != nil {
-		fmt.Printf("❌ Error fetching messages in thread %s: %v\n", threadID, err)
-		return
+		return nil, fmt.Errorf("failed to list group mailbox messages: %w", err)
 	}
 
-	posts := result.GetValue()
-	if len(posts) == 0 {
-		fmt.Println("📭 No messages found in this thread.")
-		return
-	}
-
-	fmt.Println("\n✉️ Messages:")
-	for _, post := range posts {
-		fmt.Println("------------------------------------------")
-		messageID := util.Deref(post.GetId())
-		fmt.Printf("📧 Message ID: %s\n", messageID)
-
-		// Check if sender information is available
-		if post.GetFrom() != nil && post.GetFrom().GetEmailAddress() != nil {
-			fmt.Printf("👤 From: %s <%s>\n",
-				util.Deref(post.GetFrom().GetEmailAddress().GetName()),
-				util.Deref(post.GetFrom().GetEmailAddress().GetAddress()),
-			)
-		} else {
-			fmt.Println("👤 Sender: Unknown")
-		}
-
-		fmt.Printf("📅 Sent: %s\n", post.GetReceivedDateTime().String())
-
-		// Print message body if available
-		if post.GetBody() != nil && post.GetBody().GetContent() != nil {
-			fmt.Println("📝 Message Body:")
-			fmt.Println(util.Deref(post.GetBody().GetContent()))
-		} else {
-			fmt.Println("📭 (No content in this message)")
-		}
-		fmt.Println("------------------------------------------")
-	}
+	return result.GetValue(), nil
 }
 
 func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, start, end string, limit int) ([]models.ConversationThreadable, error) {
