@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	// "github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
@@ -27,7 +26,6 @@ func ListGroups(ctx context.Context) error {
 		return nil
 	}
 
-	// gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}

@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	// "github.com/gptscript-ai/go-gptscript"
-	// "github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
-	// "github.com/gptscript-ai/tools/outlook/mail/pkg/printers"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	// "github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 
@@ -66,7 +62,7 @@ func ListGroupThreads(ctx context.Context, groupID, start, end, limit string) er
 		}
 		fmt.Println()
 
-		// Fetch posts (individual emails/messages) inside the thread
+		// Fetch posts (individual emails/messages) inside the thread and then print them
 		posts, err := graph.ListThreadMessages(ctx, c, groupID, threadID)
 		if err != nil {
 			return fmt.Errorf("failed to list thread messages: %w", err)
