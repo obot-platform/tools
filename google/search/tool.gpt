@@ -8,7 +8,6 @@ Share Tools: Search
 Name: Search
 Description: Search Google with a given query and return relevant information from the search results. Search with more maxResults if you need more information.
 JSON Response: true
-Share Context: Current Date and Time from ../../time
 Tools: service
 Args: query: A question, statement, or topic to search with (required)
 Args: maxResults: The maximum number of search results to gather relevant information from (optional, default 3, minimum 2)

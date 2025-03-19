@@ -10,6 +10,5 @@ Param: query: The search query
 ---
 Name: tavily-safe-search-context
 Type: context
-Share Context: ../../time
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py site-search-context Obot

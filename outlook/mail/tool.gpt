@@ -135,7 +135,6 @@ Param: attachment_id: The ID of the attachment to get. Required.
 ---
 Name: Outlook Mail Context
 Type: context
-Share Context: ../../time
 
 #!sys.echo
 

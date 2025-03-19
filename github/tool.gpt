@@ -9,7 +9,6 @@ Name: Search Issues and PRs
 Description: Search for issues and PRs in GitHub. Results are paginated, so in order to get all results for a search, call this function with the `page` parameter incremented by 1 until no results are returned.
 Credential: ./credential
 Share Context: GitHub Context
-Share Contexts: Current Date and Time from ../time
 Tools: github.com/gptscript-ai/datasets/filter
 Param: owner: (optional) the owner of the repository the issues or PRs belong to
 Param: repo: (optional) the name of the repository the issues or PRs belong to
@@ -36,7 +35,6 @@ Name: Create Issue
 Description: Create a new issue in the specified GitHub repository
 Credential: ./credential
 Share Context: GitHub Context
-Share Context: Current Date and Time from ../time
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the issue
@@ -113,7 +111,6 @@ Name: Create PR
 Description: Create a new pull request in the specified GitHub repository
 Credential: ./credential
 Share Context: GitHub Context
-Share Context: Current Date and Time from ../time
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 Param: title: the title of the pull request

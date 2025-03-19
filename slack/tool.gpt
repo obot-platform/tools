@@ -195,7 +195,6 @@ Credential: ./credential
 ---
 Name: Slack Context
 Type: context
-Share Context: ../time
 Share Tools: User Context
 
 #!sys.echo

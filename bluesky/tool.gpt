@@ -9,7 +9,6 @@ Name: Search Posts
 Description: Search for Bluesky posts
 Credential: ./credential
 JSON Response: true
-Share Context: Current Date and Time from ../time
 Share Tools: Search Users
 Param: query: A Lucene query to search for posts with.
 Param: since: (optional) ISO 8601 UTC timestamp to search for posts since (inclusive). Defaults to 7 days ago.
@@ -24,7 +23,6 @@ Name: Search Users
 Description: Search for Bluesky users
 Credential: ./credential
 JSON Response: true
-Share Context: Current Date and Time from ../time
 Param: query: A Lucene query to search for users with.
 Param: limit: (optional) The maximum number of users to return. Must be an integer >=1 and <=100. Defaults to 25.
 
@@ -35,7 +33,6 @@ Name: Create Post
 Description: Create a Bluesky post
 Credential: ./credential
 JSON Response: true
-Share Context: Current Date and Time from ../time
 Param: text: The text of the post.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- createPost
@@ -45,7 +42,6 @@ Name: Delete Post
 Description: Delete a Bluesky post
 Credential: ./credential
 JSON Response: true
-Share Context: Current Date and Time from ../time
 Param: post_uri: The URI of the post to delete.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- deletePost
