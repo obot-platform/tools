@@ -145,7 +145,6 @@ END TOOL USAGE: Download File From URL
 Name: Browser Context
 Metadata: index: false
 Type: context
-Share Context: Current Date and Time from ../time
 
 #!sys.echo
 

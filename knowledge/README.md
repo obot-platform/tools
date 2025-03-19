@@ -54,15 +54,27 @@ knowledge delete-dataset foobar
 ## Supported File Types
 
 - `.pdf`
+- `.pptx`
+- `.ppt`
 - `.html`
+- `.css`
 - `.md`
 - `.txt`
 - `.docx`
+- `.doc`
 - `.odt`
 - `.rtf`
 - `.csv`
 - `.ipynb`
 - `.json`
+- `.cpp`
+- `.c`
+- `.go`
+- `.java`
+- `.js`
+- `.py`
+- `.ts`
+
 
 ## OpenAPI / Swagger
 

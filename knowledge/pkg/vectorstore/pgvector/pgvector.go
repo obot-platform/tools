@@ -568,7 +568,7 @@ func buildWhereClause(args []any, where map[string]string, whereDocument []cg.Wh
 		args = make([]any, 0)
 	}
 
-	argIndex := len(args) + 1 // Usually w start with index 2 because $1 is for cid
+	argIndex := len(args) + 1 // Usually we start with index 2 because $1 is for cid
 	for k, v := range where {
 		whereClauses = append(whereClauses, fmt.Sprintf("(cmetadata ->> $%d) = $%d", argIndex, argIndex+1))
 		args = append(args, k, v)
@@ -576,11 +576,12 @@ func buildWhereClause(args []any, where map[string]string, whereDocument []cg.Wh
 	}
 
 	if len(whereDocument) > 0 {
-		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		wc, a, err := helper.BuildWhereDocumentClauseIndexed(whereDocument, "AND", argIndex)
 		if err != nil {
 			return "", nil, err
 		}
 		whereClauses = append(whereClauses, wc)
+		args = append(args, a...)
 	}
 
 	whereClause := strings.Join(whereClauses, " AND ")

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/obot-platform/obot/apiclient"
-	"github.com/obot-platform/obot/apiclient/types"
 )
 
 var (
@@ -63,39 +62,6 @@ func runs(ctx context.Context, c *apiclient.Client, taskID string) error {
 	return json.NewEncoder(os.Stdout).Encode(result)
 }
 
-func run(ctx context.Context, c *apiclient.Client) error {
-	if id == "" {
-		return fmt.Errorf("missing ID")
-	}
-
-	resp, err := c.RunTask(ctx, id, args, apiclient.TaskRunOptions{
-		ThreadID: threadID,
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("task started: %s\n", resp.ID)
-	return nil
-}
-
-func create(ctx context.Context, c *apiclient.Client) error {
-	var manifest types.TaskManifest
-	if err := json.Unmarshal([]byte(definition), &manifest); err != nil {
-		return err
-	}
-
-	resp, err := c.CreateTask(ctx, manifest, apiclient.CreateTaskOptions{
-		ThreadID: threadID,
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("task created: %s\n", resp.ID)
-	return nil
-}
-
 func mainErr(ctx context.Context) error {
 	if len(os.Args) == 1 {
 		fmt.Printf("incorrect usage: %s [list|run|create|list-runs]\n", os.Args[0])
@@ -114,12 +80,8 @@ func mainErr(ctx context.Context) error {
 	}
 
 	switch os.Args[1] {
-	case "create":
-		return create(ctx, client)
 	case "list":
 		return list(ctx, client)
-	case "run":
-		return run(ctx, client)
 	case "list-runs":
 		return runs(ctx, client, id)
 	}

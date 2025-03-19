@@ -187,7 +187,6 @@ func (s *Datastore) Ingest(ctx context.Context, datasetID string, filename strin
 		} else if len(fs) > 0 {
 		fileLoop:
 			for _, f := range fs {
-
 				// check if the dataset embeddingsconfig matches - if not, we don't have to fetch the documents for this file
 				ds, err := s.GetDataset(ctx, f.Dataset, nil)
 				if err != nil || ds == nil {

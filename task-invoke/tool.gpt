@@ -1,0 +1,5 @@
+Name: Task Invoke
+Description: A sys.call interpreter to invoke a task by ID
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/check-square-duotone.svg
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

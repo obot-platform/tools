@@ -100,6 +100,21 @@ func main() {
 			fmt.Printf("failed to move message: %v\n", err)
 			os.Exit(1)
 		}
+	case "getMyEmailAddress":
+		if err := commands.GetMyEmailAddress(context.Background()); err != nil {
+			fmt.Printf("failed to get my email address: %v\n", err)
+			os.Exit(1)
+		}
+	case "listAttachments":
+		if err := commands.ListAttachments(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
+			fmt.Printf("failed to list attachments: %v\n", err)
+			os.Exit(1)
+		}
+	case "getAttachment":
+		if err := commands.GetAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID")); err != nil {
+			fmt.Printf("failed to get attachment: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)

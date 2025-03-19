@@ -80,9 +80,16 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 			filetype = stat.MimeType
 		}
 	} else {
-		inputBytes, err = os.ReadFile(input)
-		if err != nil {
-			return fmt.Errorf("failed to read input file %q: %w", input, err)
+		if input == "-" {
+			inputBytes, err = io.ReadAll(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("failed to read input file %q: %w", input, err)
+			}
+		} else {
+			inputBytes, err = os.ReadFile(input)
+			if err != nil {
+				return fmt.Errorf("failed to read input file %q: %w", input, err)
+			}
 		}
 		filetype, err = filetypes.GetFiletype(input, inputBytes)
 		if err != nil {

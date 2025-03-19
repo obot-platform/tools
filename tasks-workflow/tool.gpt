@@ -1,22 +1,5 @@
-Name: Get Task Result
-Description: Wait for a task to complete and return it's result
-Param: ID: The task run ID to query
-Share Tool: Abort Current Task
-Chat: true
-
-#!/bin/bash
-if [ -n "$ID" ]; then
-    echo '{"type":"ObotTaskResult",'
-    echo '"id":"'${ID}'"'
-    echo '}'
-else
-    INPUT=$(${GPTSCRIPT_BIN} getenv GPTSCRIPT_INPUT)
-    ${GPTSCRIPT_BIN} sys.chat.finish "${INPUT}"
-fi
-
----
 Name: Abort Current Task
-Description: Aborts the current step/task/workflow such that no futher steps will execute
+Description: Aborts the current step/task/workflow such that no further steps will execute
 
 #!/bin/bash
 

@@ -55,7 +55,7 @@ switch (command) {
     await getThreadHistoryFromLink(webClient, process.env.MESSAGELINK, process.env.LIMIT)
     break
   case "searchMessages":
-    await search(webClient, process.env.QUERY)
+    await search(webClient, process.env.QUERY, process.env.SORTBYTIME === "true")
     break
   case "sendMessage":
     await sendMessage(webClient, process.env.CHANNELID, process.env.TEXT)

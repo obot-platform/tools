@@ -2,7 +2,7 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Get Attachment
 
 ---
 Name: List Mail Folders
@@ -119,6 +119,35 @@ Param: destination_folder_id: The ID of the folder to move the message into.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
 
 ---
+Name: Current Email
+Description: Get the email address of the currently authenticated user.
+Share Context: Outlook Mail Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMyEmailAddress
+
+---
+Name: List Attachments
+Description: List the attachments of a message.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Messages
+Param: message_id: The ID of the message to list attachments for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listAttachments
+
+---
+Name: Get Attachment
+Description: Get the markdown converted contents of an attachment from a given message.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Attachments
+Param: message_id: The ID of the message to get the attachment from. Required.
+Param: attachment_id: The ID of the attachment to get. Required.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getAttachment
+
+---
 Name: Delete Group Thread
 Description: Delete a group mailbox thread.
 Share Context: Outlook Mail Context
@@ -153,7 +182,6 @@ Param: limit: (Optional) The maximum number of threads to return. If unset, retu
 ---
 Name: Outlook Mail Context
 Type: context
-Share Context: ../../time
 
 #!sys.echo
 
@@ -169,6 +197,8 @@ Do not output mail folder IDs or message IDs because they are not helpful for th
 When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
 When printing a single message or a list of messages, use Markdown formatting.
 When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
+
+If an email has an attachment, ask user whether they would like to read the attachment and add the contents to the context.
 
 Do not attempt to forward emails. Email forwarding is not supported.
 
