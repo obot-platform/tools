@@ -59,7 +59,7 @@ Param: limit: (Optional, default 10) The maximum number of messages to return.
 
 ---
 Name: Create Draft
-Description: Create (but do not send) a draft message.
+Description: Create (but do not send) a draft individual message.
 Share Context: Outlook Mail Context
 Credential: ./credential
 Share Tools: Send Draft
@@ -74,16 +74,14 @@ Param: attachments: (Optional) A comma separated list of workspace file paths to
 
 ---
 Name: Create Group Thread Message
-Description: Create a group thread message. You MUST kindly confirm with the user about the subject and body of the message, and the recipients, cc, and bcc.
+Description: Compose a group thread message that is always sent to the microsoft365 group email address. Allow the user to add additional recipients who are not part of the group. Before sending, you MUST politely confirm the subject and body of the message with the user.
 Share Context: Outlook Mail Context
 Credential: ./credential
 Share Tools: Create Draft
 Param: group_id: The ID of the group to create the thread message in.
 Param: subject: The subject of the message.
 Param: body: The body of the message in markdown format.
-Param: recipients: (Optional) A comma-separated list of email addresses to send the message to. No spaces. If unset, the group email address will be used.
-Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
-Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
+Param: recipients: (Optional) The additional recipients to send the message to, must be a comma-separated list of email addresses. 
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createGroupThreadMessage

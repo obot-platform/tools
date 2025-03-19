@@ -107,22 +107,10 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 
 	if len(info.Recipients) > 0 {
 		post.SetNewParticipants(emailAddressesToRecipientable(info.Recipients))
-	} else {
-		// if no recipients are provided, use the group email address
-		group, err := getGroup(ctx, client, groupID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get group: %w", err)
-		}
-		post.SetNewParticipants(emailAddressesToRecipientable([]string{util.Deref(group.GetMail())}))
 	}
 
-	// if len(info.CC) > 0 {
-	// 	post.SetCcRecipients(emailAddressesToRecipientable(info.CC))
-	// }
-
-	// if len(info.BCC) > 0 {
-	// 	post.SetBccRecipients(emailAddressesToRecipientable(info.BCC))
-	// }
+	// models.Post() doesn't support cc and bcc
+	
 	if len(info.Attachments) > 0 {
 		attachments, err := setAttachments(ctx, info.Attachments)
 		if err != nil {
