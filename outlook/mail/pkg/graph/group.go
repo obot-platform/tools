@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"path/filepath"
 
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/gptscript-ai/go-gptscript"
 )
 
 func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) ([]models.Postable, error) {
@@ -88,6 +90,12 @@ func getGroup(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, grou
 
 func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, info DraftInfo) (models.ConversationThreadable, error) {
 
+	for _, file := range info.Attachments {
+		if file == "" {
+			return nil, fmt.Errorf("attachment file path cannot be empty")
+		}
+	}
+
 	requestBody := models.NewConversationThread()
 	requestBody.SetTopic(util.Ptr(info.Subject)) 
 
@@ -115,10 +123,17 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 	// if len(info.BCC) > 0 {
 	// 	post.SetBccRecipients(emailAddressesToRecipientable(info.BCC))
 	// }
-
+	if len(info.Attachments) > 0 {
+		attachments, err := setAttachments(ctx, info.Attachments)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach files to group thread message post: %w", err)
+		}
+		post.SetAttachments(attachments)
+	}
 	posts := []models.Postable {
 		post,
 	}
+
 	requestBody.SetPosts(posts)
 
 	threads, err := client.Groups().ByGroupId(groupID).Threads().Post(ctx, requestBody, nil)
@@ -126,23 +141,33 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 		return nil, fmt.Errorf("failed to create group thread message: %w", err)
 	}
 
-	// for _, file := range info.Attachments {
-	// 	if file == "" {
-	// 		return nil, fmt.Errorf("attachment file path cannot be empty")
-	// 	}
-	// }
-
-
-
-	// if len(info.Attachments) > 0 {
-	// 	if err := attachFiles(ctx, client, util.Deref(draft.GetId()), info.Attachments); err != nil {
-	// 		return nil, fmt.Errorf("failed to attach files to draft: %w", err)
-	// 	}
-	// }
-
 	return threads, nil
 }
 
+
+func setAttachments(ctx context.Context, attachment_filenames []string) ([]models.Attachmentable, error) {
+	attachments := []models.Attachmentable{}
+	gsClient, err := gptscript.NewGPTScript()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GPTScript client: %w", err)
+	}
+
+	for _, filename := range attachment_filenames {
+		attachment := models.NewFileAttachment()
+		attachment.SetName(util.Ptr(filename)) 
+
+		data, err := gsClient.ReadFileInWorkspace(ctx, filepath.Join("files", filename))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read attachment file %s from workspace: %v", filename, err)
+		}
+
+		attachment.SetContentBytes(data) 
+		attachments = append(attachments, attachment)
+	}
+
+	return attachments, nil
+
+}
 
 func DeleteGroupThread(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) error {
 	err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Delete(ctx, nil)
