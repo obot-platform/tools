@@ -2,7 +2,7 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread
 
 ---
 Name: List Mail Folders
@@ -117,6 +117,17 @@ Param: message_id: The ID of the message to move.
 Param: destination_folder_id: The ID of the folder to move the message into.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
+
+---
+Name: Delete Group Thread
+Description: Delete a group mailbox thread.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Group Threads
+Param: group_id: The ID of the group to delete the thread from.
+Param: thread_id: The ID of the thread to delete.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteGroupThread
 
 ---
 Name: List Groups

@@ -175,3 +175,13 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 
 	return threads, nil
 }
+
+
+func DeleteGroupThread(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) error {
+	err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Delete(ctx, nil)
+	if err != nil {
+		fmt.Errorf("failed to delete group thread: %w", err)
+		return err
+	}
+	return nil
+}

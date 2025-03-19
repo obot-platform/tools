@@ -90,6 +90,11 @@ func main() {
 			fmt.Printf("failed to delete message: %v\n", err)
 			os.Exit(1)
 		}
+	case "deleteGroupThread":
+		if err := commands.DeleteGroupThread(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("THREAD_ID")); err != nil {
+			fmt.Printf("failed to delete group thread: %v\n", err)
+			os.Exit(1)
+		}
 	case "moveMessage":
 		if err := commands.MoveMessage(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("DESTINATION_FOLDER_ID")); err != nil {
 			fmt.Printf("failed to move message: %v\n", err)
