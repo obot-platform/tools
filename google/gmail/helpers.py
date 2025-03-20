@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
 async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
     gptscript_client = gptscript.GPTScript()
     message = MIMEMultipart()
-    message.attach(MIMEText(message_text, 'plain'))
+    message_text_html = message_text.replace('\n', '<br>')
+    message.attach(MIMEText(message_text_html, 'html'))
 
     thread_id = None
     if reply_to_email_id:
@@ -353,6 +354,9 @@ def extract_email_body(payload):
 
 def format_reply_gmail_style(original_from, original_date, original_body_html):
     """Formats the reply in Gmail-style with 'On [date], [sender] wrote:'."""
+
+    if original_body_html is None:
+        original_body_html = ""
     
     # Format date as "Mon, Mar 18, 2024 at 10:30 AM"
     formatted_date = original_date
