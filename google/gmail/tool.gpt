@@ -81,6 +81,8 @@ Share Context: Draft Context
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
+Param: reply_to_email_id: The ID of the email to reply to (Optional)
+Param: reply_all: Whether to reply to all (Optional: Default is false)
 Param: subject: Subject of the email
 Param: message: Message body of the email
 Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
@@ -97,6 +99,8 @@ Param: draft_id: The ID of the draft email to update
 Param: to_emails: A comma separated list of email addresses to send the email to
 Param: cc_emails: A comma separated list of email addresses to cc the email to (Optional)
 Param: bcc_emails: A comma separated list of email addresses to bcc the email to (Optional)
+Param: reply_to_email_id: The ID of the email to reply to (Optional)
+Param: reply_all: Whether to reply to all (Optional: Default is false)
 Param: subject: Subject of the email
 Param: message: Message body of the email
 
@@ -153,9 +157,9 @@ Type: context
 If more information about a draft email is required before updating, deleting, or sending it,
 retrieve the contents of the current draft using the Read Email tool.
 
-Replying to and forwarding emails are not supported operations.
+Forwarding emails are not supported operations.
 Drafts should not be used to provide indirect support for these operations.
-Do not assist the user with drafting an email to reply to or forward an email in any way.
+Do not assist the user with drafting an email to forward an email in any way.
 
 
 ## End of instructions for Updating, Deleting, or Sending a Draft Email
