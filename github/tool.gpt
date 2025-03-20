@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs, List User Organizations
 
 ---
 Name: Search Issues and PRs
@@ -174,11 +174,11 @@ Param: comment: the comment to add
 
 ---
 Name: List Repos
-Description: List all repositories for a given owner
+Description: List GitHub repositories. If no owner is provided, lists the authenticated user's repositories. If an owner is provided, lists public repositories for that user or organization. When listing repositories for the authenticated user or an organization the authenticated user belongs to, private repositories will also be included based on permissions.
 Credential: ./credential
 Share Context: GitHub Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: owner: the owner of the repositories
+Param: owner: (optional) the GitHub username or organization name to list repositories for. If omitted, lists repositories for the authenticated user.
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepos
 
@@ -187,7 +187,7 @@ Name: Get Star Count
 Description: Return the star count for the specified repo.
 Credential: ./credential
 Share Context: GitHub Context
-Share Tool: List Repos
+Share Tools: List Repos
 Param: owner: the owner of the repository
 Param: repo: the name of the repository
 
@@ -247,6 +247,15 @@ Param: repo: the name of the repository
 Param: jobId: the ID of the job to get logs for
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getJobLogs
+
+---
+Name: List User Organizations
+Description: Lists organizations that the authenticated user is a member of
+Credential: ./credential
+Share Context: GitHub Context
+Tools: github.com/gptscript-ai/datasets/filter
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUserOrgs
 
 ---
 Name: GitHub Context
