@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from tools.helper import setup_logger, get_user_timezone, str_to_bool
+from tools.helper import setup_logger, get_user_timezone, str_to_bool, get_obot_user_timezone
 import os
 from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
@@ -35,10 +35,8 @@ def _validate_rrule(rrule_str: str) -> bool:
 
 
 def _get_current_time_rfc3339():
-    obot_user_timezone = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
-
     try:
-        timezone = ZoneInfo(obot_user_timezone)
+        timezone = ZoneInfo(get_obot_user_timezone())
     except ValueError:
         # Invalid timezone, fallback to UTC
         timezone = ZoneInfo("UTC")
