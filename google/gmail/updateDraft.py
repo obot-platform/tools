@@ -24,17 +24,20 @@ def main():
     if draft_id is None:
         raise ValueError("draft_id must be set")
 
+    reply_to_email_id = os.getenv('REPLY_TO_EMAIL_ID')
+    reply_all = os.getenv('REPLY_ALL') == 'true'
+
     service = client('gmail', 'v1')
     try:
         update_draft(service=service, draft_id=draft_id, to=to_emails, cc=cc_emails, bcc=bcc_emails, subject=subject,
-                     body=message)
+                     body=message, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
     except HttpError as err:
         print(err)
 
 
-def update_draft(service, draft_id, to, cc, bcc, subject, body):
+def update_draft(service, draft_id, to, cc, bcc, subject, body, reply_to_email_id=None, reply_all=False):
     try:
-        message = create_message(to=to, cc=cc, bcc=bcc, subject=subject, message_text=body)
+        message = create_message(to=to, cc=cc, bcc=bcc, subject=subject, message_text=body, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
         updated_draft = {
             'id': draft_id,
             'message': message,

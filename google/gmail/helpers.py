@@ -6,23 +6,44 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
+from bs4 import BeautifulSoup
 
-async def create_message(to, cc, bcc, subject, message_text, attachments):
-    if attachments:
-        # Create a multipart message when there are attachments
-        gptscript_client = gptscript.GPTScript()
-        message = MIMEMultipart()
-        message.attach(MIMEText(message_text, 'plain'))
+async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
+    gptscript_client = gptscript.GPTScript()
+    message = MIMEMultipart()
+    message_text_html = message_text.replace('\n', '<br>')
+    message.attach(MIMEText(message_text_html, 'html'))
+
+    thread_id = None
+    if reply_to_email_id:
+        # Get the original message and extract sender's email
+        existing_message = service.users().messages().get(userId='me', id=reply_to_email_id, format='full').execute()
+        payload = existing_message['payload']
+        thread_id = existing_message['threadId']
+        headers = {header['name']: header['value'] for header in payload['headers']}
+    
+        original_from = headers.get('From', '')  # Sender of the original email
+        sender_email = headers.get('From', '') 
+        subject = headers.get('Subject', '')     # Subject line
+        references = headers.get('References', '')  # References for threading
+        in_reply_to = headers.get('Message-ID', '') # Message ID for threading
+        original_date = headers.get('Date', '')  # Date of the original email
+        original_body_html = extract_email_body(payload)
+        reply_html = format_reply_gmail_style(original_from, original_date, original_body_html)
+        final_reply_html = f"<br>{reply_html}"
+        message['to'] = sender_email
+        if reply_all:
+            message['cc'] = headers.get('CC', '')
+        message.attach(MIMEText(final_reply_html, "html"))
+        message['References'] = references
+        message['In-Reply-To'] = in_reply_to
     else:
-        # Use MIMEText for plain text messages without attachments
-        message = MIMEText(message_text, 'plain')
-
-    message['to'] = to
-    if cc is not None:
-        message['cc'] = cc
+        message['to'] = to
+        if cc is not None:
+            message['cc'] = cc
+    message['subject'] = subject
     if bcc is not None:
         message['bcc'] = bcc
-    message['subject'] = subject
 
     # Read and attach any workspace files if provided
     for filepath in attachments:
@@ -52,7 +73,10 @@ async def create_message(to, cc, bcc, subject, message_text, attachments):
 
     # Encode the message as a base64 string
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
-    return {'raw': raw_message}
+    data = {'raw': raw_message}
+    if thread_id:
+        data['threadId'] = thread_id
+    return data
 
 
 from google.oauth2.credentials import Credentials
@@ -310,3 +334,42 @@ async def prepend_base_path(base_path: str, file_path: str):
 
     # Prepend the base path
     return os.path.join(base_path, file_path)
+
+
+def extract_email_body(payload):
+    """Extracts the email body and formats it as HTML."""
+    body_html = None
+
+    if 'parts' in payload:  # Multipart email
+        for part in payload['parts']:
+            if part['mimeType'] == 'text/html':
+                body_html = base64.urlsafe_b64decode(part['body']['data']).decode("utf-8")
+                break
+    else:  # Single-part email
+        if payload['mimeType'] == 'text/html':
+            body_html = base64.urlsafe_b64decode(payload['body']['data']).decode("utf-8")
+
+    return body_html
+
+
+def format_reply_gmail_style(original_from, original_date, original_body_html):
+    """Formats the reply in Gmail-style with 'On [date], [sender] wrote:'."""
+
+    if original_body_html is None:
+        original_body_html = ""
+    
+    # Format date as "Mon, Mar 18, 2024 at 10:30 AM"
+    formatted_date = original_date
+    try:
+        parsed_date = datetime.strptime(original_date, "%a, %d %b %Y %H:%M:%S %z")
+        formatted_date = parsed_date.strftime("%a, %b %d, %Y at %I:%M %p")
+    except:
+        pass
+    # Plain text reply formatting
+
+    soup = BeautifulSoup(original_body_html, "html.parser")
+    quoted_body_html = f'<blockquote style="border-left:2px solid gray;margin-left:10px;padding-left:10px;">{soup.prettify()}</blockquote>'
+
+    reply_html = f'<br><br>On {formatted_date}, <b>{original_from}</b> wrote:<br>{quoted_body_html}'
+
+    return reply_html

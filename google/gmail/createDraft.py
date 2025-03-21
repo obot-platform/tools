@@ -21,6 +21,8 @@ async def main():
     if message is None:
         raise ValueError("Email message must be set")
 
+    reply_to_email_id = os.getenv('REPLY_TO_EMAIL_ID')
+    reply_all = os.getenv('REPLY_ALL') == 'true'
     # Filter out empty strings to clean up attachments
     attachments = os.getenv('ATTACHMENTS', '').split(',')
     attachments = [attachment.strip() for attachment in attachments if attachment.strip()]
@@ -34,7 +36,9 @@ async def main():
             bcc=bcc_emails,
             subject=subject,
             body=message,
-            attachments=attachments
+            attachments=attachments,
+            reply_to_email_id=reply_to_email_id,
+            reply_all=reply_all
         )
     except HttpError as err:
         print(err)
@@ -42,15 +46,18 @@ async def main():
         print(err)
 
 
-async def create_draft(service, to, cc, bcc, subject, body, attachments):
+async def create_draft(service, to, cc, bcc, subject, body, attachments, reply_to_email_id=None, reply_all=False):
     try:
         message = await create_message(
+            service=service,
             to=to,
             cc=cc,
             bcc=bcc,
             subject=subject,
             message_text=body,
-            attachments=attachments
+            attachments=attachments,
+            reply_to_email_id=reply_to_email_id,
+            reply_all=reply_all
         )
 
         draft = {
