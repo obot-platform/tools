@@ -2,7 +2,7 @@
 Name: Slack
 Description: Tools for interacting with Slack
 Metadata: bundle: true
-Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History From Link, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History
+Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History From Link, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History, Format Message
 
 ---
 Name: List Channels
@@ -86,10 +86,10 @@ Param: sortbytime: (optional) sort by timestamp rather than score. Default is fa
 
 ---
 Name: Send Message
-Description: Send a message to a channel in the Slack workspace
+Description: Send a message to a channel in the Slack workspace. Before you are sending a message, call the Format Message tool to format the message.
 Share Context: Slack Context
 Credential: ./credential
-Share Tools: List Channels, Search Channels
+Share Tools: List Channels, Search Channels, Format Message
 Param: channelid: the ID of the channel to send the message to
 Param: text: the text to send
 
@@ -97,10 +97,10 @@ Param: text: the text to send
 
 ---
 Name: Send Message in Thread
-Description: Send a message in a thread in the Slack workspace
+Description: Send a message in a thread in the Slack workspace. Before you are sending a message, call the Format Message tool to format the message.
 Share Context: Slack Context
 Credential: ./credential
-Share Tools: List Channels, Search Channels, Get Channel History, Search Messages
+Share Tools: List Channels, Search Channels, Get Channel History, Search Messages, Format Message
 Param: channelid: the ID of the channel containing the thread
 Param: threadid: the ID of the thread to send the message to
 Param: text: the text to send
@@ -128,10 +128,10 @@ Param: query: the search query
 
 ---
 Name: Send DM
-Description: Send a direct message to a user.
+Description: Send a direct message to a user. Before you are sending a message, call the Format Message tool to format the message.
 Share Context: Slack Context
 Credential: ./credential
-Share Tools: List Users, Search Users
+Share Tools: List Users, Search Users, Format Message
 Param: userids: comma-separated list of user IDs to send the message to for a group message (example: USER1ID,USER2ID), or just one ID for an individual message
 Param: text: the text to send
 
@@ -139,10 +139,10 @@ Param: text: the text to send
 
 ---
 Name: Send DM in Thread
-Description: Send a message in a thread in a direct message conversation
+Description: Send a message in a thread in a direct message conversation. Before you are sending a message, call the Format Message tool to format the message.
 Share Context: Slack Context
 Credential: ./credential
-Share Tools: List Users, Search Users, Get DM History
+Share Tools: List Users, Search Users, Get DM History, Format Message
 Param: userids: comma-separated list of user IDs for the conversation (example: USER1ID,USER2ID), or just one ID for an individual conversation
 Param: threadid: the ID of the thread to send the message to
 Param: text: the text to send
@@ -193,6 +193,21 @@ Credential: ./credential
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js userContext
 
 ---
+Name: Format Message
+Param: text: the message to format in slack
+metadata: index: false
+
+You have a message in input. Look at the text field and convert it to the appropriate format for the Slack message. For other parameters, return the value unchanged.
+
+- For **your text**, convert it to bold *your text* 
+- For _your text_, convert it to italic _your text_
+- For `your text`, convert it to code `your text`
+- For ```your text```, convert it to a code block ```your text```
+- For [your text](https://www.google.com), convert it to a link <https://www.google.com|your text>
+
+Print the modified message back to the user.
+
+---
 Name: Slack Context
 Type: context
 Share Tools: User Context
@@ -212,6 +227,8 @@ Do not provide channel, thread, or message IDs in the output, as these are not h
 When you use the search-messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the search-users or list-users tools.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
+
+Before you are sending a message, call the Format Message tool to format the message.
 
 Use the following guidelines when constructing `query` arguments for the search-messages tool:
 - `*` (Wildcard): Matches any number of characters in a term. Example: `dev*` matches "developer", "development", etc.
