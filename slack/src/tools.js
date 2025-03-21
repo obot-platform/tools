@@ -182,9 +182,10 @@ export async function getThreadHistoryFromLink(webClient, messageLink, limit) {
   await getThreadHistory(webClient, channelId, threadId, limit)
 }
 
-export async function search(webClient, query) {
+export async function search(webClient, query, sortByTime) {
   const result = await webClient.search.all({
     query: query,
+    sort: sortByTime === true ? "timestamp" : "score", // "score" is default
   })
 
   if (!result.ok) {

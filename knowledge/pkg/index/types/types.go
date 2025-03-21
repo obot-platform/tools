@@ -236,7 +236,6 @@ func (db *DB) FindFilesByMetadata(ctx context.Context, dataset string, metadata 
 		return nil, err
 	}
 	return files, nil
-
 }
 
 func (db *DB) GetDocument(ctx context.Context, documentID string) (*Document, error) {

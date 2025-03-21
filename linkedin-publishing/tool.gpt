@@ -31,7 +31,6 @@ Param: share_media_file_path: (optional) the workspace file path for the share m
 ---
 Name: LinkedIn Publishing Context
 Type: context
-Share Context: ../time
 
 #!sys.echo
 

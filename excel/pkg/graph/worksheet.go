@@ -204,33 +204,49 @@ func GetWorksheetTables(ctx context.Context, c *msgraphsdkgo.GraphServiceClient,
 	return tables, nil
 }
 
-func AddWorksheetRow(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string, contents []string) error {
+func AddWorksheetRow(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, workbookID, worksheetID string, contents [][]string) error {
 	_, usedRange, err := GetWorksheetData(ctx, c, workbookID, worksheetID)
 	if err != nil {
 		return err
 	}
-	rowCount := util.Deref(usedRange.GetRowCount())
-	newRowNumber := int(rowCount + 1)
+	lastUsedRow, err := getLastUsedRow(util.Deref(usedRange.GetAddress()))
+	if err != nil {
+		return err
+	}
+	newRowNumber := lastUsedRow + 1
+	newEndRowNumber := newRowNumber + len(contents) - 1
 
-	endColumnLetter := numberToColumnLetter(len(contents))
-	address := fmt.Sprintf("A%d:%s%d", newRowNumber, endColumnLetter, newRowNumber)
+	maxColumn := 0
+	for _, row := range contents {
+		if maxColumn < len(row) {
+			maxColumn = len(row)
+		}
+	}
+	endColumnLetter := numberToColumnLetter(maxColumn)
+	address := fmt.Sprintf("A%d:%s%d", newRowNumber, endColumnLetter, newEndRowNumber)
 
 	// Update the worksheet.
 	// Unfortunately, the SDK lacks a function to do what we need to do, so we need to make a raw HTTP request.
-	var values, formulas []any
-	for _, v := range contents {
-		if strings.HasPrefix(v, "=") {
-			formulas = append(formulas, v)
-			values = append(values, nil)
-		} else {
-			values = append(values, v)
-			formulas = append(formulas, nil)
+	var values, formulas [][]any
+	for _, row := range contents {
+		var rowValues, rowFormulas []any
+		for _, cell := range row {
+			if strings.HasPrefix(cell, "=") {
+				rowFormulas = append(rowFormulas, cell)
+				rowValues = append(rowValues, nil)
+			} else {
+				rowValues = append(rowValues, cell)
+				rowFormulas = append(rowFormulas, nil)
+			}
 		}
+		values = append(values, rowValues)
+		formulas = append(formulas, rowFormulas)
 	}
 	body := &UpdateBody{
-		Values:   [][]any{values},
-		Formulas: [][]any{formulas},
+		Values:   values,
+		Formulas: formulas,
 	}
+
 	bodyJSON, err := json.Marshal(body)
 	if err != nil {
 		return fmt.Errorf("failed to marshal data: %w", err)
@@ -316,4 +332,37 @@ func AddWorksheetColumn(ctx context.Context, workbookID, worksheetID, columnID s
 	}
 
 	return nil
+}
+
+func getLastUsedRow(address string) (int, error) {
+	parts := strings.Split(address, "!")
+	if len(parts) < 2 {
+		return 0, fmt.Errorf("invalid address format")
+	}
+
+	rangePart := parts[1] // Extract "A2:C3"
+	cellRanges := strings.Split(rangePart, ":")
+	if len(cellRanges) > 2 {
+		return 0, fmt.Errorf("invalid range format: %s", rangePart)
+	}
+
+	var endCell string
+	if len(cellRanges) == 1 {
+		return 0, nil
+	} else {
+		endCell = cellRanges[1] // "C3"
+	}
+	var rowNumStr string
+	for _, ch := range endCell {
+		if ch >= '0' && ch <= '9' { // Extract numeric part
+			rowNumStr += string(ch)
+		}
+	}
+
+	lastRow, err := strconv.Atoi(rowNumStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid row number")
+	}
+
+	return lastRow, nil
 }

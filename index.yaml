@@ -63,6 +63,8 @@ tools:
     reference: ./word
   tavily:
     reference: ./search/tavily
+  googlecustomsearch:
+    reference: ./search/google/googlecustomsearch
   pagerduty:
     reference: ./pagerduty
   postgres:
@@ -79,7 +81,11 @@ tools:
     reference: ./gemini/image-generator.gpt
   firecrawl:
     reference: ./firecrawl
-    
+  colly-scraper:
+    reference: ./colly-scraper
+  obot-search:
+    reference: ./search/tavily/obot-search.gpt
+
 knowledgeDataSources:
   notion-data-source:
     reference: ./knowledge/data-sources/notion
@@ -117,8 +123,8 @@ system:
     reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
-  safe-search:
-    reference: ./search/tavily/safesearch.gpt
+  task-invoke:
+    reference: ./task-invoke
 
 modelProviders:
   openai-model-provider:

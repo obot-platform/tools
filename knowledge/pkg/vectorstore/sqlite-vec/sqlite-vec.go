@@ -372,11 +372,12 @@ func (v *VectorStore) GetDocuments(_ context.Context, collection string, where m
 	}
 
 	if len(whereDocument) > 0 {
-		wc, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
+		wc, a, err := helper.BuildWhereDocumentClause(whereDocument, "AND")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build whereDocument clause: %w", err)
 		}
 		whereQueries = append(whereQueries, wc)
+		args = append(args, a...)
 	}
 
 	whereQuery := strings.Join(whereQueries, " AND ")

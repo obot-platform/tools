@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/adrg/xdg"
@@ -20,7 +22,40 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "error creating sqlite: %v\n", err)
 		os.Exit(1)
 	}
-	credentials.Serve(s)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
+		if err := credentials.HandleCommand(s, credentials.ActionStore, r.Body, w); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	})
+	mux.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
+		if err := credentials.HandleCommand(s, credentials.ActionGet, r.Body, w); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	})
+	mux.HandleFunc("/erase", func(w http.ResponseWriter, r *http.Request) {
+		if err := credentials.HandleCommand(s, credentials.ActionErase, r.Body, w); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	})
+	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+		if err := credentials.HandleCommand(s, credentials.ActionList, r.Body, w); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	})
+
+	if err := http.ListenAndServe("127.0.0.1:"+port, mux); !errors.Is(err, http.ErrServerClosed) {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
 
 func NewSqlite(ctx context.Context) (common.Database, error) {
@@ -45,6 +80,12 @@ func NewSqlite(ctx context.Context) (common.Database, error) {
 	})
 	if err != nil {
 		return common.Database{}, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// We always migrate the gptscript_credentials table for sqlite, because it is a separate database
+	// from the one managed by the main obot server.
+	if err := db.AutoMigrate(&common.GptscriptCredential{}); err != nil {
+		return common.Database{}, fmt.Errorf("failed to migrate database: %w", err)
 	}
 
 	return common.NewDatabase(ctx, db)

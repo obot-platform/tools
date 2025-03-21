@@ -1,21 +1,20 @@
 Name: Tasks
 Description: Manage and execute tasks
-Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/check-square-duotone.svg
+Share tools: List Tasks, List Task Runs
 Metadata: category: Capability
+Type: context
+
+#!sys.echo
+
+You have the ability to run tasks for a user. When running a task ensure that all parameter values are provided. If all
+parameters values are not known ask the user for their values. Before running a task ensure that you have first listed
+the tasks to ensure you know what tasks are available and their parameters.
 
 ---
 Name: List Tasks
 Description: List available tasks with their name, descriptions, and their parameters definitions
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
-
----
-Name: Run Task
-Description: Runs tasks in the background using the specified parameters if needed
-Param: ID: The task ID
-Param: Args: The arguments for the task, if the task defined parameters, in JSON format like '{"key1": "value1", "key2": "value2"}'
-
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool run
 
 ---
 Name: List Task Runs
@@ -25,8 +24,5 @@ Param: ID: The task ID for which to list runs
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list-runs
 
 ---
-Name: Create Task
-Description: Create a new task from the definition. Returns the task ID
-Param: definition: The json form of the task definition
-
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool create
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/check-square-duotone.svg

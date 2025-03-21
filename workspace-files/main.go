@@ -23,6 +23,10 @@ var (
 	MaxFileSize = 250_000
 )
 
+var unsupportedFileTypes = []string{
+	".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".jpg", ".png", ".gif", ".mp3", ".mp4", ".zip", ".rar",
+}
+
 func main() {
 	if len(os.Args) == 1 {
 		fmt.Printf(`
@@ -169,6 +173,14 @@ func list(ctx context.Context, filename string) error {
 }
 
 func read(ctx context.Context, filename string) error {
+
+	// Check for common binary file types that are not supported. Less common types should be caught by the utf8.Valid() check
+	for _, ext := range unsupportedFileTypes {
+		if strings.HasSuffix(strings.ToLower(filename), ext) {
+			return fmt.Errorf("reading files with extension %s is not supported", ext)
+		}
+	}
+
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return err
@@ -192,6 +204,13 @@ func read(ctx context.Context, filename string) error {
 }
 
 func write(ctx context.Context, filename, content string) error {
+	// Check if the file extension is unsupported
+	for _, ext := range unsupportedFileTypes {
+		if strings.HasSuffix(strings.ToLower(filename), ext) {
+			return fmt.Errorf("writing to files with extension %s is not supported", ext)
+		}
+	}
+
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return err

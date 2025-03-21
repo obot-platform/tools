@@ -250,7 +250,6 @@ func (s *ChromemStore) GetDocument(ctx context.Context, documentID, collection s
 		Content:   doc.Content,
 		Embedding: doc.Embedding,
 	}, nil
-
 }
 
 func (s *ChromemStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {

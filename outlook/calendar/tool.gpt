@@ -129,7 +129,6 @@ Param: response: The response to the invitation. Possible values are "accept", "
 ---
 Name: Outlook Calendar Context
 Type: context
-Share Context: ../../time
 
 #!sys.echo
 

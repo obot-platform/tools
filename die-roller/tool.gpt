@@ -1,7 +1,6 @@
 ---
 Name: Die Roller
 Description: Tool to roll dice and return the result
-Metadata: bundle: true
 Share Tools: Roll Dice
 
 ---
@@ -11,3 +10,7 @@ Param: num_dice: The number of dice to roll
 Param: num_sides: The number of sides each die should have
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool rollDice
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/dice-six-duotone.svg
