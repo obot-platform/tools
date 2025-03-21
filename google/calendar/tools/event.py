@@ -4,7 +4,7 @@ import os
 from tools.helper import setup_logger, get_user_timezone
 from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
-from zoneinfo import available_timezones
+from zoneinfo import available_timezones, ZoneInfo
 import json
 from dateutil.rrule import rrulestr
 
@@ -33,6 +33,17 @@ def _validate_rrule(rrule_str: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def _get_current_time_rfc3339():
+    obot_user_timezone = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+
+    try:
+        timezone = ZoneInfo(obot_user_timezone)
+    except ValueError:
+        # Invalid timezone, fallback to UTC
+        timezone = ZoneInfo("UTC")
+    return datetime.now(timezone).isoformat()
 
 
 # Public functions
@@ -80,11 +91,7 @@ def list_events(service):
     if (
         not time_min and not time_max
     ):  # if no time_min or time_max is provided, default to the current time, so it will list all upcoming events
-        time_min = datetime.now(timezone.utc).isoformat()
-        if not validate_rfc3339(time_min):
-            raise ValueError(
-                f"Invalid time_min: {time_min}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
-            )
+        time_min = _get_current_time_rfc3339()
         params["timeMin"] = time_min
 
     order_by = os.getenv("ORDER_BY")
