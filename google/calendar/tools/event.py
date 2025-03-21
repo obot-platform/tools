@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from distutils.util import strtobool
 import os
 from tools.helper import setup_logger, get_user_timezone
 from googleapiclient.errors import HttpError
@@ -33,6 +34,7 @@ def _validate_rrule(rrule_str: str) -> bool:
     except ValueError:
         return False
 
+
 # Public functions
 def list_events(service):
     """Lists events for a specific calendar."""
@@ -51,6 +53,9 @@ def list_events(service):
         "outOfOffice",
         "workingLocation",
     ]
+    single_event = strtobool(os.getenv("SINGLE_EVENT", "false"))
+    params["singleEvents"] = single_event
+
     if event_type:
         if event_type not in event_type_options:
             raise ValueError(
@@ -72,8 +77,20 @@ def list_events(service):
             )
         params["timeMax"] = time_max
 
+    if (
+        not time_min and not time_max
+    ):  # if no time_min or time_max is provided, default to the current time, so it will list all upcoming events
+        time_min = datetime.now(timezone.utc).isoformat()
+        if not validate_rfc3339(time_min):
+            raise ValueError(
+                f"Invalid time_min: {time_min}. It must be a valid RFC 3339 formatted date/time string, for example, 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z"
+            )
+        params["timeMin"] = time_min
+
     order_by = os.getenv("ORDER_BY")
-    order_by_options = ["updated"] # TODO: add startTime, but that requires `singleEvents` to be True
+    order_by_options = [
+        "updated"
+    ]  # TODO: add startTime, but that requires `singleEvents` to be True
     if order_by:
         if order_by not in order_by_options:
             raise ValueError(

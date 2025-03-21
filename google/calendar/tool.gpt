@@ -6,12 +6,13 @@ Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, 
 
 ---
 Name: List Events
-Description: List all events in a google calendar
+Description: Retrieves events from a Google Calendar. By default, it sets `time_min` to the current time, returning all upcoming and recurring events scheduled for the future.
 Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to list events from. Set to `primary` to list events from the primary calendar.
 Param: event_type: (Optional) Type of events to list. Valid options are: birthday, default, focusTime, fromGmail, outOfOffice, workingLocation. If not set, will list all events.
-Param: time_min: (Optional) Upper bound (exclusive) for an event's start time to filter by. Optional. The default is not to filter by start time.  Must be an RFC3339 timestamp with mandatory time zone offset.
+Param: single_event: (Optional) Whether to list only single event. Defaults to false.
+Param: time_min: (Optional) Upper bound (exclusive) for an event's start time to filter by. Optional. The default is the current time.  Must be an RFC3339 timestamp with mandatory time zone offset.
 Param: time_max: (Optional) Lower bound (exclusive) for an event's end time to filter by. Optional. The default is not to filter by end time. Must be an RFC3339 timestamp with mandatory time zone offset.
 Param: max_results: (Optional) Maximum number of events to return. It must be a positive integer. The default value is 250.
 Param: order_by: (Optional) Order by which to sort events. Valid options are: updated. If set, results will be returned in ascending order. The default value is an unspecified stable order.
