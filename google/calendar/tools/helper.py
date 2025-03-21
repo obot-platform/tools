@@ -37,6 +37,11 @@ def setup_logger(name, tool_name: str = "Google Calendar Tool"):
 logger = setup_logger(__name__)
 
 
+def str_to_bool(value):
+    """Convert a string to a boolean."""
+    return str(value).lower() in ("true", "1", "yes")
+
+
 def get_client(service_name: str = "calendar", version: str = "v3"):
     token = os.getenv("GOOGLE_OAUTH_TOKEN")
     if token is None:

@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
-from distutils.util import strtobool
+from tools.helper import setup_logger, get_user_timezone, str_to_bool
 import os
-from tools.helper import setup_logger, get_user_timezone
 from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
 from zoneinfo import available_timezones, ZoneInfo
@@ -64,7 +63,7 @@ def list_events(service):
         "outOfOffice",
         "workingLocation",
     ]
-    single_event = strtobool(os.getenv("SINGLE_EVENT", "false"))
+    single_event = str_to_bool(os.getenv("SINGLE_EVENT", "false"))
     params["singleEvents"] = single_event
 
     if event_type:
