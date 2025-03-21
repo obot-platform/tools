@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import tiktoken
 from typing import List
 import concurrent.futures
-import sys
 import os
-from helper import load_from_gptscript_workspace, save_to_gptscript_workspace
+from tools.helper import setup_logger
 
+logger = setup_logger(__name__)
 
 MAX_CONTEXT_TOKENS = 128000
 MAX_OUTPUT_TOKENS = 16384
@@ -14,13 +13,6 @@ OVERHEAD_TOKENS = 2000
 MAX_CHUNK_TOKENS = MAX_CONTEXT_TOKENS - MAX_OUTPUT_TOKENS - OVERHEAD_TOKENS
 CHUNK_OVERLAP_TOKENS = 0
 MAX_WORKERS = 4
-# Check for OPENAI_API_KEY
-if "OPENAI_API_KEY" not in os.environ:
-    sys.exit(
-        "ERROR: OPENAI_API_KEY environment variable not found.\n"
-        "Please set it before running the script, e.g.:\n\n"
-        "  export OPENAI_API_KEY='sk-xxxxxxx'\n"
-    )
 
 MODEL = os.getenv("OBOT_DEFAULT_LLM_MODEL", "gpt-4o")
 TIKTOKEN_MODEL = "gpt-4o"
@@ -43,7 +35,7 @@ class DocumentSummarizer:
         max_chunk_tokens: int = MAX_CHUNK_TOKENS,
         chunk_overlap_tokens: int = CHUNK_OVERLAP_TOKENS,
         max_workers: int = MAX_WORKERS,
-        verbose: bool = False,
+        verbose: bool = True,
     ):
         """
         :param client: An OpenAI() client instance (from openai import OpenAI).
@@ -82,12 +74,12 @@ class DocumentSummarizer:
             )
 
         if self.verbose:
-            print(f"[DEBUG] Using model: {self.model}")
-            print(f"[DEBUG] max_context_tokens: {self.max_context_tokens}")
-            print(f"[DEBUG] max_output_tokens: {self.max_output_tokens}")
-            print(f"[DEBUG] overhead_tokens: {self.overhead_tokens}")
-            print(f"[DEBUG] max_chunk_size: {self.max_chunk_size}")
-            print(f"[DEBUG] max_workers: {self.max_workers}")
+            logger.debug(f"Using model: {self.model}")
+            logger.debug(f"max_context_tokens: {self.max_context_tokens}")
+            logger.debug(f"max_output_tokens: {self.max_output_tokens}")
+            logger.debug(f"overhead_tokens: {self.overhead_tokens}")
+            logger.debug(f"max_chunk_size: {self.max_chunk_size}")
+            logger.debug(f"max_workers: {self.max_workers}")
 
     def chunk_text(self, text: str) -> List[str]:
         """
@@ -98,8 +90,8 @@ class DocumentSummarizer:
         chunks = []
 
         if self.verbose:
-            print(f"[DEBUG] Total tokens in document: {len(tokens)}")
-            print("[DEBUG] Splitting into chunks...")
+            logger.debug(f"Total tokens in document: {len(tokens)}")
+            logger.debug("Splitting into chunks...")
 
         for i in range(0, len(tokens), self.max_chunk_size - self.chunk_overlap_tokens):
             chunk_slice = tokens[i : i + self.max_chunk_size]
@@ -107,7 +99,7 @@ class DocumentSummarizer:
             chunks.append(chunk_text)
 
         if self.verbose:
-            print(f"[DEBUG] Created {len(chunks)} chunk(s).")
+            logger.debug(f"Created {len(chunks)} chunk(s).")
 
         return chunks
 
@@ -182,7 +174,7 @@ Critical rules:
         Summarize multiple chunks in parallel using ThreadPoolExecutor.
         """
         if self.verbose:
-            print("[DEBUG] Starting multi-pass summarization...")
+            logger.debug("Starting multi-pass summarization...")
         summaries = []
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.max_workers
@@ -195,7 +187,7 @@ Critical rules:
                 summaries.append(future.result())
 
         if self.verbose:
-            print(f"[DEBUG] Summarized {len(chunks)} chunk(s) in parallel.")
+            logger.debug(f"Summarized {len(chunks)} chunk(s) in parallel.")
 
         return summaries
 
@@ -247,8 +239,8 @@ Requirements:
         # Otherwise, split the text into chunks and summarize them in parallel
         next_level_summaries = self.summarize_chunks_in_parallel(chunks)
         if self.verbose:
-            print(
-                f"[DEBUG] Combining {len(next_level_summaries)} summaries into a new text..."
+            logger.debug(
+                f"Combining {len(next_level_summaries)} summaries into a new text..."
             )
         return self.iterative_summarize("\n\n".join(next_level_summaries))
 
@@ -261,75 +253,3 @@ Requirements:
         reduced_summary = self.iterative_summarize(document_text)
         final_summary = self.final_reduction(reduced_summary)
         return final_summary
-
-
-async def main():
-    input_file = os.getenv("INPUT_FILE", "")
-    if not input_file:
-        raise ValueError("Error: INPUT_FILE environment variable is not set")
-    if not input_file.endswith(".md") and not input_file.endswith(".txt"):
-        raise ValueError(
-            "Error: the input file must end with .md or .txt, other file types are not supported yet."
-        )
-    try:
-        file_content = await load_from_gptscript_workspace(input_file)
-    except Exception as e:
-        raise ValueError(
-            f"Failed to load file from GPTScript workspace file {input_file}, Error: {e}"
-        )
-    if len(file_content) == 0:
-        print("Warning: File is empty, skipping summarization")
-        return
-
-    output_file = os.getenv("OUTPUT_FILE", "")
-
-    if output_file == "NONE":
-        verbose = False
-    else:
-        verbose = True
-
-    try:
-        from openai import OpenAI
-        base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-        if verbose:
-            print(f"[DEBUG] Using base_url: {base_url}")
-        api_key = os.environ["OPENAI_API_KEY"]
-        client = OpenAI(base_url=base_url, api_key=api_key)
-    except Exception as e:
-        raise Exception(f"ERROR: Failed to initialize OpenAI client: {e}")
-
-    summarizer = DocumentSummarizer(
-        client,
-        model=MODEL,
-        max_chunk_tokens=MAX_CHUNK_TOKENS,
-        max_workers=MAX_WORKERS,
-        verbose=verbose,
-    )
-
-    try:
-        final_summary = summarizer.summarize(file_content)
-    except Exception as e:
-        raise Exception(f"ERROR: Summarization failed: {e}")
-
-    # Handle output
-    if output_file.upper() == "NONE":
-        print(final_summary)
-    else:
-        if output_file == "":
-            directory, file_name = os.path.split(input_file)
-            name, ext = os.path.splitext(file_name)
-            summary_file_name = f"{name}_summary{ext}"
-            output_file = os.path.join(directory, summary_file_name)
-
-        try:
-            await save_to_gptscript_workspace(output_file, final_summary)
-            print(f"Summary written to workspace file: {output_file}")
-        except Exception as e:
-            print(f"File Summary:\n{final_summary}")
-            raise Exception(
-                f"Failed to save summary to GPTScript workspace file {output_file}, Error: {e}"
-            )
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
