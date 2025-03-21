@@ -83,6 +83,8 @@ tools:
     reference: ./colly-scraper
   obot-search:
     reference: ./search/tavily/obot-search.gpt
+  search-combo:
+    reference: ./search-combo
 
 knowledgeDataSources:
   notion-data-source:
