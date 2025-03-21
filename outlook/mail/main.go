@@ -6,7 +6,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gptscript-ai/tools/outlook/common/id"
+	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/commands"
+	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
 )
 
@@ -71,12 +74,24 @@ func main() {
 			os.Exit(1)
 		}
 	case "createDraft":
-		if err := commands.CreateDraft(context.Background(), getDraftInfoFromEnv()); err != nil {
+		ctx := context.Background()
+		info, err := getDraftInfoFromEnv(ctx)
+		if err != nil {
+			fmt.Printf("failed to get draft info: %v\n", err)
+			os.Exit(1)
+		}
+		if err := commands.CreateDraft(ctx, info); err != nil {
 			fmt.Printf("failed to create draft: %v\n", err)
 			os.Exit(1)
 		}
 	case "createGroupThreadMessage":
-		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), getDraftInfoFromEnv()); err != nil {
+		ctx := context.Background()
+		info, err := getDraftInfoFromEnv(ctx)
+		if err != nil {
+			fmt.Printf("failed to get draft info: %v\n", err)
+			os.Exit(1)
+		}
+		if err := commands.CreateGroupThreadMessage(ctx, os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), info); err != nil {
 			fmt.Printf("failed to create group thread message: %v\n", err)
 			os.Exit(1)
 		}
@@ -121,7 +136,6 @@ func main() {
 	}
 }
 
-
 func smartSplit(s, sep string) []string {
 	if s == "" {
 		return []string{} // Return an empty slice if the input is empty
@@ -129,18 +143,55 @@ func smartSplit(s, sep string) []string {
 	return strings.Split(s, sep)
 }
 
-
-func getDraftInfoFromEnv() graph.DraftInfo {
+func getDraftInfoFromEnv(ctx context.Context) (graph.DraftInfo, error) {
 	var attachments []string
 	if os.Getenv("ATTACHMENTS") != "" {
 		attachments = smartSplit(os.Getenv("ATTACHMENTS"), ",")
 	}
 
+	body := os.Getenv("BODY")
+	replyMessageID := os.Getenv("REPLY_MESSAGE_ID")
+	replyAll := os.Getenv("REPLY_ALL") == "true"
+	cc := os.Getenv("CC")
+
+	if replyMessageID != "" {
+		trueMessageID, err := id.GetOutlookID(ctx, replyMessageID)
+		if err != nil {
+			return graph.DraftInfo{}, fmt.Errorf("failed to get true message ID: %w", err)
+		}
+
+		c, err := client.NewClient(global.ReadOnlyScopes)
+		if err != nil {
+			return graph.DraftInfo{}, fmt.Errorf("failed to create client: %w", err)
+		}
+
+		result, err := graph.GetMessageDetails(ctx, c, trueMessageID)
+		if err != nil {
+			return graph.DraftInfo{}, fmt.Errorf("failed to get message details: %w", err)
+		}
+
+		// Format reply in Outlook web client style
+		originalMessage := fmt.Sprintf("<br><br>**-------- Original Message --------**  <br><br>**From:** %s  <br>**Sent:** %s  <br>**To:** %s  <br>**Subject:** %s  <br><br>%s  <br><br>",
+			*result.GetFrom().GetEmailAddress().GetAddress(),
+			result.GetReceivedDateTime().Format("Monday, January 2, 2006 3:04 PM"),
+			*result.GetToRecipients()[0].GetEmailAddress().GetAddress(),
+			*result.GetSubject(),
+			*result.GetBodyPreview())
+
+		body = body + originalMessage
+
+		if replyAll && result.GetCcRecipients() != nil {
+			for _, recipient := range result.GetCcRecipients() {
+				cc = fmt.Sprintf("%s, %s", cc, *recipient.GetEmailAddress().GetAddress())
+			}
+		}
+	}
+
 	info := graph.DraftInfo{
 		Subject:     os.Getenv("SUBJECT"),
-		Body:        os.Getenv("BODY"),
+		Body:        body,
 		Recipients:  smartSplit(os.Getenv("RECIPIENTS"), ","),
-		CC:          smartSplit(os.Getenv("CC"), ","),
+		CC:          smartSplit(cc, ","),
 		BCC:         smartSplit(os.Getenv("BCC"), ","),
 		Attachments: attachments,
 	}
@@ -149,5 +200,5 @@ func getDraftInfoFromEnv() graph.DraftInfo {
 	// it will cause problems, since the workspace tools have an argument with the same name.
 	_ = os.Unsetenv("BODY")
 
-	return info
+	return info, nil
 }

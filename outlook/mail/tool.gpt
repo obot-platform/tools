@@ -69,6 +69,8 @@ Param: recipients: A comma-separated list of email addresses to send the message
 Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
 Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
+Param: reply_message_id: (Optional) The ID of the message to reply to.
+Param: reply_all: (Optional, default false) Whether to reply to all. If true, CC will be the original message's CC.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDraft
 
