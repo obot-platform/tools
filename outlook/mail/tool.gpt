@@ -189,7 +189,7 @@ Type: context
 
 You have access to tools for the Microsoft Outlook Mail API.
 
-Display all dates and times in the user's preferred timezone.
+Display the recieved and sent datetimes of all messages in the user's preferred timezone.
 When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
 When the user uses relative terms like "today", "tomorrow", or "last week", assume the date is the current day in the user's preferred timezone.
 
