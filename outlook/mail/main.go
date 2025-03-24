@@ -121,14 +121,12 @@ func main() {
 	}
 }
 
-
 func smartSplit(s, sep string) []string {
 	if s == "" {
 		return []string{} // Return an empty slice if the input is empty
 	}
 	return strings.Split(s, sep)
 }
-
 
 func getDraftInfoFromEnv() graph.DraftInfo {
 	var attachments []string
@@ -137,12 +135,14 @@ func getDraftInfoFromEnv() graph.DraftInfo {
 	}
 
 	info := graph.DraftInfo{
-		Subject:     os.Getenv("SUBJECT"),
-		Body:        os.Getenv("BODY"),
-		Recipients:  smartSplit(os.Getenv("RECIPIENTS"), ","),
-		CC:          smartSplit(os.Getenv("CC"), ","),
-		BCC:         smartSplit(os.Getenv("BCC"), ","),
-		Attachments: attachments,
+		Subject:          os.Getenv("SUBJECT"),
+		Body:             os.Getenv("BODY"),
+		Recipients:       smartSplit(os.Getenv("RECIPIENTS"), ","),
+		CC:               smartSplit(os.Getenv("CC"), ","),
+		BCC:              smartSplit(os.Getenv("BCC"), ","),
+		Attachments:      attachments,
+		ReplyAll:         os.Getenv("REPLY_ALL") == "true",
+		ReplyToMessageID: os.Getenv("REPLY_MESSAGE_ID"),
 	}
 
 	// We need to unset BODY, because if it's still set when we try to write files to the workspace,
