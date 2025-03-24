@@ -157,7 +157,7 @@ Type: context
 If more information about a draft email is required before updating, deleting, or sending it,
 retrieve the contents of the current draft using the Read Email tool.
 
-Forwarding emails are not supported operations.
+Forwarding emails is not a supported operation.
 Drafts should not be used to provide indirect support for these operations.
 Do not assist the user with drafting an email to forward an email in any way.
 
