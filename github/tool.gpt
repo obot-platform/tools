@@ -2,7 +2,7 @@
 Name: GitHub
 Description: Tools for interacting with GitHub
 Metadata: bundle: true
-Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs, List User Organizations
+Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs, List User Organizations, Create Branch, Get File Content, Create or Update File, Delete File, List Repo Contents, List Branches
 
 ---
 Name: Search Issues and PRs
@@ -256,6 +256,82 @@ Share Context: GitHub Context
 Tools: github.com/gptscript-ai/datasets/filter
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listUserOrgs
+
+---
+Name: Create Branch
+Description: Create a new branch in the specified GitHub repository from a base branch
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: branchName: the name of the new branch to create
+Param: baseBranchName: (optional) the name of the base branch to create from (default is 'main')
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js createBranch
+
+---
+Name: Get File Content
+Description: Get the content of a file from a GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: repoPath: the path to the file within the repository
+Param: branch: (optional) the branch to get the file from (default is 'main')
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getFileContent
+
+---
+Name: Create or Update File
+Description: Create a new file or update an existing file in a GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: repoPath: the path to the file within the repository
+Param: content: the content of the file
+Param: message: the commit message
+Param: branch: the branch where the file should be created or updated
+Param: sha: (optional) the SHA of the file to update. Only needed if updating an existing file.
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js createOrUpdateFile
+
+---
+Name: Delete File
+Description: Delete a file from a GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: repoPath: the path to the file within the repository
+Param: message: the commit message
+Param: branch: the branch where the file should be deleted
+Param: sha: (optional) the SHA of the file to delete. If not provided, it will be automatically retrieved.
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js deleteFile
+
+---
+Name: List Repo Contents
+Description: List the contents of a directory in a GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Tools: github.com/gptscript-ai/datasets/filter
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+Param: repoPath: (optional) the path to the directory within the repository. If not provided, lists contents of the root directory.
+Param: branch: (optional) the branch to get the contents from (default is 'main')
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listRepoContents
+
+---
+Name: List Branches
+Description: List all branches in the specified GitHub repository
+Credential: ./credential
+Share Context: GitHub Context
+Param: owner: the owner of the repository
+Param: repo: the name of the repository
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js listBranches
 
 ---
 Name: GitHub Context

@@ -218,10 +218,11 @@ async function _fetchUserRepos(octokit, username) {
     return allRepos;
 }
 
-async function _fetchAuthenticatedUserRepos(octokit) {
+async function _fetchAuthenticatedUserRepos(octokit, type = "all") {
     const allRepos = [];
     for await (const response of octokit.paginate.iterator(octokit.repos.listForAuthenticatedUser, {
-        per_page: 100
+        per_page: 100,
+        type: type
     })) {
         allRepos.push(...response.data);
     }
@@ -232,7 +233,8 @@ async function _fetchOrgRepos(octokit, org) {
     const allRepos = [];
     for await (const response of octokit.paginate.iterator(octokit.repos.listForOrg, {
         org,
-        per_page: 100
+        per_page: 100,
+        visibility: 'all' // Include both public and private repositories
     })) {
         allRepos.push(...response.data);
     }
@@ -250,7 +252,7 @@ export async function listRepos(octokit, owner) {
         // Determine what type of repository listing we need to perform
         if (!owner) {
             // List authenticated user's repos
-            allRepos = await _fetchAuthenticatedUserRepos(octokit);
+            allRepos = await _fetchAuthenticatedUserRepos(octokit, 'owner');
             description = `GitHub repos for authenticated user ${username}`;
             datasetName = "my_github_repos";
             console.log(`Found ${allRepos.length} repositories for authenticated user ${username}`);
@@ -469,5 +471,236 @@ export async function listUserOrgs(octokit) {
         }
     } catch (e) {
         console.log('Failed to create dataset:', e);
+    }
+}
+
+export async function createBranch(octokit, owner, repo, branchName, baseBranchName = 'main') {
+    try {
+        // Get the SHA of the latest commit on the base branch
+        const { data: refData } = await octokit.git.getRef({
+            owner,
+            repo,
+            ref: `heads/${baseBranchName}`
+        });
+
+        const sha = refData.object.sha;
+
+        // Create a new branch at the same commit
+        const { data: newBranch } = await octokit.git.createRef({
+            owner,
+            repo,
+            ref: `refs/heads/${branchName}`,
+            sha: sha
+        });
+
+        console.log(`Created branch '${branchName}' from '${baseBranchName}' at commit ${sha.substring(0, 7)} - https://github.com/${owner}/${repo}/tree/${branchName}`);
+        return newBranch;
+    } catch (error) {
+        if (error.status === 404) {
+            console.error(`Error: Base branch '${baseBranchName}' not found in repository '${owner}/${repo}'. Please specify an existing base branch.`);
+        } else if (error.status === 422) {
+            console.error(`Error: Branch '${branchName}' already exists in repository '${owner}/${repo}'.`);
+        } else {
+            console.error(`Error creating branch: ${error.message}`);
+        }
+        throw error;
+    }
+}
+
+export async function getFileContent(octokit, owner, repo, repoPath, branch = null) {
+    try {
+        // Dynamically fetch the default branch if none is provided
+        if (!branch) {
+            const { data: repoData } = await octokit.repos.get({
+                owner,
+                repo,
+            });
+            branch = repoData.default_branch;
+        }
+
+        const { data } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: repoPath,
+            ref: branch
+        });
+
+        // If the result is a file (not a directory)
+        if (!Array.isArray(data)) {
+            const content = Buffer.from(data.content, 'base64').toString();
+            console.log(`Retrieved content of file '${repoPath}' from branch '${branch}'`);
+            console.log(content);
+            return {
+                content,
+                sha: data.sha
+            };
+        } else {
+            throw new Error(`The path '${repoPath}' points to a directory, not a file`);
+        }
+    } catch (error) {
+        if (error.status === 404) {
+            console.log(`File '${repoPath}' not found on branch '${branch}'`);
+            return { content: null, sha: null };
+        } else {
+            console.error(`Error retrieving file content: ${error.message}`);
+            throw error;
+        }
+    }
+}
+
+export async function createOrUpdateFile(octokit, owner, repo, repoPath, content, message, branch = null, sha = null) {
+    try {
+        // Dynamically fetch the default branch if none is provided
+        if (!branch) {
+            const { data: repoData } = await octokit.repos.get({
+                owner,
+                repo,
+            });
+            branch = repoData.default_branch;
+        }
+
+        // Fetch the latest sha if not provided
+        if (!sha) {
+            try {
+                const fileData = await getFileContent(octokit, owner, repo, repoPath, branch);
+                sha = fileData.sha;
+            } catch (error) {
+                if (error.status === 404) {
+                    console.log(`File '${repoPath}' does not exist. It will be created.`);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        const contentEncoded = Buffer.from(content).toString('base64');
+
+        const params = {
+            owner,
+            repo,
+            path: repoPath,
+            message,
+            content: contentEncoded,
+            branch
+        };
+
+        if (sha) {
+            params.sha = sha;
+        }
+
+        const { data } = await octokit.repos.createOrUpdateFileContents(params);
+
+        const operation = sha ? 'Updated' : 'Created';
+        console.log(`${operation} file '${repoPath}' on branch '${branch}' - ${data.commit.html_url}`);
+
+        return data;
+    } catch (error) {
+        if (error.status === 409) {
+            console.error(`Conflict error: The file '${repoPath}' has been updated since the provided sha. Fetching the latest sha and retrying...`);
+            try {
+                // Fetch the latest sha and retry
+                const fileData = await getFileContent(octokit, owner, repo, repoPath, branch);
+                return await createOrUpdateFile(octokit, owner, repo, repoPath, content, message, branch, fileData.sha);
+            } catch (retryError) {
+                console.error(`Retry failed: ${retryError.message}`);
+                throw retryError;
+            }
+        } else {
+            console.error(`Error ${sha ? 'updating' : 'creating'} file: ${error.message}`);
+            throw error;
+        }
+    }
+}
+
+export async function deleteFile(octokit, owner, repo, repoPath, message, branch = null, sha = null) {
+    try {
+        // Dynamically fetch the default branch if none is provided
+        if (!branch) {
+            const { data: repoData } = await octokit.repos.get({
+                owner,
+                repo,
+            });
+            branch = repoData.default_branch;
+        }
+
+        if (!sha) {
+            const fileData = await getFileContent(octokit, owner, repo, repoPath, branch);
+            if (!fileData.sha) {
+                throw new Error(`File '${repoPath}' not found on branch '${branch}'`);
+            }
+            sha = fileData.sha;
+        }
+
+        const { data } = await octokit.repos.deleteFile({
+            owner,
+            repo,
+            path: repoPath,
+            message,
+            sha,
+            branch
+        });
+
+        console.log(`Deleted file '${repoPath}' from branch '${branch}' - ${data.commit.html_url}`);
+        return data;
+    } catch (error) {
+        console.error(`Error deleting file: ${error.message}`);
+        throw error;
+    }
+}
+
+export async function listRepoContents(octokit, owner, repo, repoPath = '/', branch = null) {
+    try {
+        // Dynamically fetch the default branch if none is provided
+        if (!branch) {
+            const { data: repoData } = await octokit.repos.get({
+                owner,
+                repo,
+            });
+            branch = repoData.default_branch;
+        }
+
+        const normalizedPath = repoPath === '/' ? '' : repoPath.trim();
+
+        console.log(`Fetching contents of '${normalizedPath || 'root'}' in ${owner}/${repo} (branch: ${branch})`);
+
+        const { data } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: normalizedPath,
+            ref: branch
+        });
+
+        if (Array.isArray(data)) {
+            console.log(`Contents of ${normalizedPath || 'root directory'} in ${owner}/${repo} (branch: ${branch}):`);
+            data.forEach(item => {
+                console.log(`${item.type}: ${item.path} - ${item.html_url}`);
+            });
+        } else {
+            console.log(`File: ${data.path} (${data.type}) - ${data.html_url}`);
+        }
+    } catch (error) {
+        console.error(`Error fetching contents of '${repoPath || 'root'}' in ${owner}/${repo} (branch: ${branch}):`);
+        console.error(`Status: ${error.status || 'Unknown'}, Message: ${error.message}`);
+        if (error.response && error.response.data) {
+            console.error(`Response Data: ${JSON.stringify(error.response.data, null, 2)}`);
+        }
+        throw error;
+    }
+}
+
+export async function listBranches(octokit, owner, repo) {
+    try {
+        const { data } = await octokit.repos.listBranches({
+            owner,
+            repo,
+        });
+
+        console.log(`Branches in ${owner}/${repo}:`);
+        data.forEach(branch => {
+            console.log(`- ${branch.name}`);
+        });
+    } catch (error) {
+        console.error(`Error listing branches for ${owner}/${repo}: ${error.message}`);
+        throw error;
     }
 }
