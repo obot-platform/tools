@@ -1,0 +1,5 @@
+Name: discord-cred-validate
+Description: Validate Discord credential
+Metadata: index: false
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- login

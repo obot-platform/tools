@@ -87,6 +87,8 @@ tools:
     reference: ./search/tavily/obot-search.gpt
   search-combo:
     reference: ./search-combo
+  discord:
+    reference: ./discord
 
 knowledgeDataSources:
   notion-data-source:

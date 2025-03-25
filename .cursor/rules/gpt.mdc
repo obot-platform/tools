@@ -1,0 +1,101 @@
+---
+description: GPTScript Tool Files
+globs: *.gpt
+alwaysApply: true
+---
+# GPTScript Tool File Format Rules
+
+## File Extension
+
+- Files with extension `.gpt` are GPTScript tool files
+- These files define tools that can be provided to a large language model for execution
+
+## File Structure
+
+Each tool definition in the file follows this structure:
+
+1. Preamble:
+   - Contains tool directives. Here are some common ones:
+     - `Name`: The name of the tool
+     - `Description`: A description of what the tool does
+     - `Param`: Parameters the tool accepts (optional)
+     - `Share Tools`: Other tools this tool can use (optional)
+     - `Share Context`: Context this tool shares with other tools (optional)
+     - `Tools`: External tools this tool can use (optional)
+     - `Credential`: Path to credential file (optional)
+     - `Metadata`: Additional metadata (optional)
+
+2. Command/Prompt:
+   - Separated from preamble by a blank line
+   - Contains the actual command or prompt to execute
+   - Can be a shell command or a prompt for the language model
+
+3. Tool Separation:
+   - Each tool definition is separated by `---`
+
+## Special Sections
+
+- Context tool definitions start with `Type: context`
+- Metadata sections can be defined using `!metadata:*:key` syntax
+  - You don't need to worry about these, and can just ignore them
+
+## Example Structure
+
+```
+Name: Tool Name
+Description: Tool description
+Param: param1: description
+Share Tools: Tool1, Tool2
+Credential: ./credential
+
+#!/usr/bin/env command
+
+---
+Name: Another Tool
+Description: Another tool description
+Param: param1: description
+
+# Prompt or command here
+```
+
+## Context Tools
+
+A context tool is a way to provide additional prompting to the LLM. Any tool with `Type: context` and any tool that is included in another tool like
+`Context: tool name` is a context tool, and will be called automatically for the LLM to provide helpful information.
+
+## Tool Directives
+
+Here is the full list of tool directives:
+
+| Key                   | Description                                                                                                                                   |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `Name`                | The name of the tool.                                                                                                                         |
+| `Description`         | The description of the tool. It is important that this properly describes the tool's purpose as the description is used by the LLM.           |
+| `Tools`               | A comma-separated list of tools that are available to be called by this tool.                                                                 |
+| `Parameter` / `Param` | Parameters for the tool. Each parameter is defined in the format `param-name: description`.                                                   |
+| `JSON Response`       | Setting to `true` will cause the LLM to respond in a JSON format. If you set true you must also include instructions in the tool.             |
+| `Credential`          | Credential tool to call to set credentials as environment variables before doing anything else. One per line.                                 | 
+| `Share Tools`         | A comma-separated list of tools that are shared by the tool.                                                                                  |
+| `Context`             | A comma-separated list of context tools available to the tool.                                                                                |
+| `Share Context`       | A comma-separated list of context tools shared by this tool with any tool including this tool in its context.                                 | 
+
+## Helpful Information
+
+- When a tool is executed, all parameter values become environment variables in all caps. For example, if the value of a param called `color` is set to `blue`, then in the environment, the tool will have `COLOR=blue`.
+
+## Tool Bundles
+
+- A tool bundle is a tool with `Metadata: bundle: true`
+- Tool bundles MUST include all tools defined in their file in their `Share Tools` list
+- This ensures that when other tools include the bundle, they get access to all tools in the bundle
+
+## Best Practices
+
+1. Each tool should have a clear, descriptive name
+2. Descriptions should be detailed and explain the tool's purpose
+3. Parameters should be clearly documented with descriptions
+4. Use appropriate sharing of tools and context to enable tool composition
+
+## Canonical Examples
+
+See [tool.gpt](mdc:slack/tool.gpt), [tool.gpt](mdc:github/tool.gpt), and [tool.gpt](mdc:google/gmail/tool.gpt) for good examples of tool files.
