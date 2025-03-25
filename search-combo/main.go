@@ -208,9 +208,9 @@ func main() {
 	exitError(err)
 	defer resp.Close()
 	var r []map[string]any
-	t, err := resp.Text()
+	t, err := resp.Bytes()
 	exitError(err)
-	err = json.Unmarshal([]byte(t), &r)
+	err = json.Unmarshal(t, &r)
 	exitError(err)
 	var searchResults []searchResult
 	for _, v := range r {
