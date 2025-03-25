@@ -2,7 +2,6 @@ Name: Workspace Files
 Description: Adds the capability for users to read and write workspace files
 Type: context
 Metadata: category: Capability
-Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/file-text-duotone.svg
 Context: workspace_list
 Share Tools: workspace_read, workspace_write, workspace_copy
 Share Input Filter: input_parse
@@ -66,3 +65,7 @@ Description: Prompt formatting for Obot
 Params: input: The input to filter
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool input
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/file-text-duotone.svg
