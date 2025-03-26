@@ -2,7 +2,7 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Recordings, List User Recordings, Get Meeting Summary, List Available Timezones
+Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get Meeting Summary, List Available Timezones
 
 ---
 Name: Get User
@@ -117,21 +117,21 @@ Share Context: Zoom Context
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListUpcomingMeetings
 
 ---
-Name: Get Meeting Recordings
+Name: Get Meeting Cloud Recordings
 Description: Get the cloud recordings of a Zoom meeting. Cloud rerordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id_or_uuid: The ID or UUID of the meeting to get the recordings for. If providing the meeting ID instead of UUID, the response will be for the latest meeting instance.
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingRecordings
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingCloudRecordings
 
 ---
-Name: List User Recordings
+Name: List User Cloud Recordings
 Description: List all cloud recordings of the current Zoom user. Cloud recordings are only available for licensed users.
 Credential: ./credential
 Share Context: Zoom Context
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListUserRecordings
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListUserCloudRecordings
 
 ---
 Name: Get Past Meeting Details

@@ -18,6 +18,9 @@ import json
 logger = setup_logger(__name__)
 
 
+# ------------------------------------------------------------------------------------------------
+# Helper functions
+# ------------------------------------------------------------------------------------------------
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
     try:
         # Parse ISO 8601 string into a naive datetime object
@@ -96,6 +99,13 @@ def _generate_password():
     return password
 
 
+def _trim_meeting_id(meeting_id: str) -> str:
+    """
+    Trims the meeting ID to remove any whitespace
+    """
+    return "".join(meeting_id.split())
+
+
 _meeting_types = {
     1: "An instant meeting",
     2: "A scheduled meeting",
@@ -105,6 +115,9 @@ _meeting_types = {
 }
 
 
+# ------------------------------------------------------------------------------------------------
+# Tool functions
+# ------------------------------------------------------------------------------------------------
 @tool_registry.decorator("CreateMeeting")
 def create_meeting():
     url = f"{ZOOM_API_URL}/users/me/meetings"
@@ -244,7 +257,7 @@ def create_meeting():
 
 
 def _get_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -274,7 +287,7 @@ def get_meeting():
 
 @tool_registry.decorator("DeleteMeeting")
 def delete_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -354,7 +367,7 @@ def list_upcoming_meetings():
 
 @tool_registry.decorator("GetMeetingInvitation")
 def get_meeting_invitation():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}/invitation"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -367,7 +380,7 @@ def get_meeting_invitation():
 
 @tool_registry.decorator("UpdateMeeting")
 def update_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
 
     payload = {}
@@ -499,7 +512,7 @@ def get_meeting_summary():
 
 @tool_registry.decorator("GetPastMeetingDetails")
 def get_past_meeting_details():
-    meeting_id_or_uuid = os.environ["MEETING_ID_OR_UUID"]
+    meeting_id_or_uuid = _trim_meeting_id(os.environ["MEETING_ID_OR_UUID"])
     url = f"{ZOOM_API_URL}/past_meetings/{meeting_id_or_uuid}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -514,7 +527,7 @@ def get_past_meeting_details():
 
 @tool_registry.decorator("ListPastMeetingInstances")
 def list_past_meeting_instances():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}/instances"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",

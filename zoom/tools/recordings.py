@@ -3,8 +3,8 @@ import requests
 import os
 
 
-@tool_registry.decorator("GetMeetingRecordings")
-def get_meeting_recordings():
+@tool_registry.decorator("GetMeetingCloudRecordings")
+def get_meeting_cloud_recordings():
     meeting_id_or_uuid = os.environ["MEETING_ID_OR_UUID"]
     url = f"{ZOOM_API_URL}/meetings/{meeting_id_or_uuid}/recordings"
     headers = {
@@ -16,8 +16,8 @@ def get_meeting_recordings():
     return response.json()
 
 
-@tool_registry.decorator("ListUserRecordings")
-def list_user_recordings():
+@tool_registry.decorator("ListUserCloudRecordings")
+def list_user_cloud_recordings():
     url = f"{ZOOM_API_URL}/users/me/recordings"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
