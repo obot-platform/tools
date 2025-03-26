@@ -212,6 +212,8 @@ github.com/hupe1980/go-textractor v0.0.9 h1:hrVh7HnANQ6SZVziLtjOhfK00Xe+prVGuGLu
 github.com/hupe1980/go-textractor v0.0.9/go.mod h1:hKvHHZENWuXgDNHz9nluoDDLNlbkcMSLeBDrgNHBhZ0=
 github.com/hupe1980/go-tiktoken v0.0.9 h1:qNs/XGTe7UHDUaFkU+jAPbhGzyi9BusOpxrNC8GKVEc=
 github.com/hupe1980/go-tiktoken v0.0.9/go.mod h1:NME6d8hrE+Jo+kLUZHhXShYV8e40hYkm4BbSLQKtvAo=
+github.com/hupe1980/golc v0.0.112 h1:aFUMfnEkqdapukuj6/Ny0zbwBDngeC/ZyvvACRdBfv4=
+github.com/hupe1980/golc v0.0.112/go.mod h1:w692KzkSTSvXROfyu+jYauNXB4YaL1s8zHPDMnNW88o=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/invopop/yaml v0.3.1 h1:f0+ZpmhfBSS4MhG+4HYseMdJhoeeopbSKbq5Rpeelso=
