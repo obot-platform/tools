@@ -2,11 +2,11 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get Meeting Summary, List Available Timezones
+Share Tools: Get Zoom User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get Meeting Summary, List Available Timezones
 
 ---
-Name: Get User
-Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate. This also returns the user's Personal Meeting ID(PMI).
+Name: Get Zoom User
+Description: Get the information of the current zoom user. In the response, `type` will indicate user's plan type. 1 - Basic. 2 - Licensed. 4 - Unassigned without Meetings Basic. 99 - None, which can only be set with ssoCreate. This also returns the user's Personal Meeting ID(PMI). You can also use this tool to get the user's timezone.
 Credential: ./credential
 Share Context: Zoom Context
 
@@ -182,6 +182,8 @@ Type: context
 - You can use the Get User Tool to get the user's personal meeting ID(PMI).
 - The List Meetings Tool only returns scheduled meetings hosted by the current user. However, users may create meeting events and use instant meetings in their personal meeting room instead. If a user requests to list meetings or find recordings/summaries but finds no results, kindly remind them that you can also check instances of instant meetings held in their personal meeting room.
 - Note that if an instant meeting was not hosted in the user's personal meeting room, you would need the user to provide the meeting ID to get the instances/recordings/summaries of the meeting.
+- Once a meeting is scheduled, if you have access to the Google or Outlook calendar tool, please confirm with the user whether they'd like to create a calendar event for the meeting.
+
 # End of instructions for using Zoom tools
 
 ---
