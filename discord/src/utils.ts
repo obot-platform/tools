@@ -1,13 +1,40 @@
 import { GPTScript } from '@gptscript-ai/gptscript';
 
 /**
- * Converts a timestamp to RFC 3339 format
+ * Formats a timestamp in a human-readable format (hh:mm AM/PM Month Day, YYYY (Timezone))
  * @param timestamp The timestamp in milliseconds since epoch
- * @returns The RFC 3339 formatted date string
+ * @returns The formatted date string
  */
-export function toRFC3339(timestamp: number | null | undefined): string | null {
+export function formatTime(timestamp: number | null | undefined): string | null {
   if (timestamp == null) return null;
-  return new Date(timestamp).toISOString();
+
+  const tz = process.env.OBOT_USER_TIMEZONE || "UTC";
+  const date = new Date(timestamp);
+
+  try {
+    const formatted = date.toLocaleString('en-US', {
+      timeZone: tz,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    return `${formatted} (${tz})`;
+  } catch (e) {
+    // If timezone is invalid, fall back to UTC
+    const formatted = new Date(timestamp).toLocaleString('en-US', {
+      timeZone: 'UTC',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    return `${formatted} (UTC)`;
+  }
 }
 
 /**

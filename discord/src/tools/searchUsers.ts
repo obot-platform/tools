@@ -1,5 +1,5 @@
 import { client } from '../client.js';
-import { toRFC3339, createDataset } from '../utils.js';
+import { formatTime, createDataset } from '../utils.js';
 
 export async function searchUsers() {
   if (!process.env.QUERY || !process.env.GUILDID) {
@@ -27,7 +27,7 @@ export async function searchUsers() {
       color: role.color,
       position: role.position
     })),
-    joinedAt: toRFC3339(member.joinedTimestamp),
+    joinedAt: formatTime(member.joinedTimestamp),
     isBot: member.user.bot,
     avatarUrl: member.user.displayAvatarURL()
   }));

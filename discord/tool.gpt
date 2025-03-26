@@ -123,6 +123,14 @@ You have access to a set of tools to use the Discord API.
 
 Do not provide guild, channel, thread, message, or user IDs in the output, as these are not helpful for the user.
 
+When displaying the output of a message, format it like this: 
+
+Time User: Content
+  Additional details if needed
+  Link
+
+When displaying times, use the user's default time zone.
+
 ## End of instructions for using Discord tools
 
 ---

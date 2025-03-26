@@ -1,6 +1,6 @@
 import { TextChannel, Attachment, Embed } from 'discord.js';
 import { client } from '../client.js';
-import { toRFC3339, createDataset } from '../utils.js';
+import { formatTime, createDataset } from '../utils.js';
 
 export async function getChannelHistory() {
   if (!process.env.CHANNELID || !process.env.GUILDID || !process.env.LIMIT) {
@@ -19,48 +19,67 @@ export async function getChannelHistory() {
   }
 
   const messages = await channel.messages.fetch({ limit });
-  const history = await Promise.all(messages.map(async msg => {
-    const result: any = {
-      id: msg.id,
-      content: msg.content,
-      permalink: `https://discord.com/channels/${guildId}/${channelId}/${msg.id}`,
-      author: {
-        id: msg.author.id,
-        username: msg.author.username,
-        discriminator: msg.author.discriminator,
-      },
-      timestamp: toRFC3339(msg.createdTimestamp),
-      attachments: msg.attachments.map((att: Attachment) => ({
-        url: att.url,
-        name: att.name,
-      })),
-      embeds: msg.embeds.map((embed: Embed) => ({
-        title: embed.title,
-        description: embed.description,
-        url: embed.url,
-        color: embed.color,
-        fields: embed.fields,
-        timestamp: embed.timestamp ? toRFC3339(new Date(embed.timestamp).getTime()) : null,
-      })),
-    };
+  const history = await Promise.all(Array.from(messages.values())
+    .sort((a, b) => a.createdTimestamp - b.createdTimestamp)
+    .map(async msg => {
+      const result: any = {
+        id: msg.id,
+        content: msg.content,
+        type: msg.type,
+        system: msg.system,
+        permalink: `https://discord.com/channels/${guildId}/${channelId}/${msg.id}`,
+        author: {
+          id: msg.author.id,
+          username: msg.author.username,
+          discriminator: msg.author.discriminator,
+        },
+        timestamp: formatTime(msg.createdTimestamp),
+        attachments: msg.attachments.map((att: Attachment) => ({
+          url: att.url,
+          name: att.name,
+        })),
+        embeds: msg.embeds.map((embed: Embed) => ({
+          title: embed.title,
+          description: embed.description,
+          url: embed.url,
+          color: embed.color,
+          fields: embed.fields,
+          timestamp: embed.timestamp ? formatTime(new Date(embed.timestamp).getTime()) : null,
+        })),
+      };
 
-    // Check if message is part of a thread
-    if (msg.thread) {
-      const thread = await channel.threads.fetch(msg.thread.id);
-      if (thread) {
-        result.thread = {
-          id: thread.id,
-          name: thread.name,
-          messageCount: thread.messageCount,
-          memberCount: thread.memberCount,
-          isLocked: thread.locked,
-          isArchived: thread.archived,
-        };
+      // Add system message details if applicable
+      if (msg.system) {
+        if (msg.type === 7) { // Member join message
+          result.systemData = {
+            type: 'memberJoin',
+            member: msg.member ? {
+              id: msg.member.id,
+              username: msg.member.user.username,
+              nickname: msg.member.nickname,
+              joinedAt: formatTime(msg.member.joinedTimestamp)
+            } : null
+          };
+        }
       }
-    }
 
-    return result;
-  }));
+      // Check if message is part of a thread
+      if (msg.thread) {
+        const thread = await channel.threads.fetch(msg.thread.id);
+        if (thread) {
+          result.thread = {
+            id: thread.id,
+            name: thread.name,
+            messageCount: thread.messageCount,
+            memberCount: thread.memberCount,
+            isLocked: thread.locked,
+            isArchived: thread.archived,
+          };
+        }
+      }
+
+      return result;
+    }));
 
   await createDataset(history, 'discord_channel_history');
 } 

@@ -1,6 +1,6 @@
 import { TextChannel, Attachment, Embed } from 'discord.js';
 import { client } from '../client.js';
-import { toRFC3339, createDataset } from '../utils.js';
+import { formatTime, createDataset } from '../utils.js';
 
 export async function getThreadHistory() {
   if (!process.env.CHANNELID || !process.env.GUILDID || !process.env.THREADID || !process.env.LIMIT) {
@@ -27,29 +27,42 @@ export async function getThreadHistory() {
 
   // Fetch messages from the thread
   const messages = await thread.messages.fetch({ limit });
-  const history = messages.map(msg => ({
-    id: msg.id,
-    content: msg.content,
-    permalink: `https://discord.com/channels/${guildId}/${channelId}/${msg.id}`,
-    author: {
-      id: msg.author.id,
-      username: msg.author.username,
-      discriminator: msg.author.discriminator,
-    },
-    timestamp: toRFC3339(msg.createdTimestamp),
-    attachments: msg.attachments.map((att: Attachment) => ({
-      url: att.url,
-      name: att.name,
-    })),
-    embeds: msg.embeds.map((embed: Embed) => ({
-      title: embed.title,
-      description: embed.description,
-      url: embed.url,
-      color: embed.color,
-      fields: embed.fields,
-      timestamp: embed.timestamp ? toRFC3339(new Date(embed.timestamp).getTime()) : null,
-    })),
-  }));
+  const history = Array.from(messages.values())
+    .sort((a, b) => a.createdTimestamp - b.createdTimestamp)
+    .map(msg => ({
+      id: msg.id,
+      content: msg.content,
+      type: msg.type,
+      system: msg.system,
+      permalink: `https://discord.com/channels/${guildId}/${channelId}/${threadId}/${msg.id}`,
+      author: {
+        id: msg.author.id,
+        username: msg.author.username,
+        discriminator: msg.author.discriminator,
+      },
+      timestamp: formatTime(msg.createdTimestamp),
+      attachments: msg.attachments.map((att: Attachment) => ({
+        url: att.url,
+        name: att.name,
+      })),
+      embeds: msg.embeds.map((embed: Embed) => ({
+        title: embed.title,
+        description: embed.description,
+        url: embed.url,
+        color: embed.color,
+        fields: embed.fields,
+        timestamp: embed.timestamp ? formatTime(new Date(embed.timestamp).getTime()) : null,
+      })),
+      systemData: msg.system && msg.type === 7 ? {
+        type: 'memberJoin',
+        member: msg.member ? {
+          id: msg.member.id,
+          username: msg.member.user.username,
+          nickname: msg.member.nickname,
+          joinedAt: formatTime(msg.member.joinedTimestamp)
+        } : null
+      } : undefined
+    }));
 
   await createDataset(history, 'discord_thread_history');
 } 
