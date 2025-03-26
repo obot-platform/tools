@@ -31,8 +31,6 @@ github.com/ProtonMail/go-crypto v1.0.0/go.mod h1:EjAoLdwvbIOoOQr3ihjnSoLZRtE8azu
 github.com/PuerkitoBio/goquery v1.4.1/go.mod h1:T9ezsOHcCrDCgA8aF1Cqr3sSYbO/xgdy8/R/XiIMAhA=
 github.com/PuerkitoBio/goquery v1.9.2 h1:4/wZksC3KgkQw7SQgkKotmKljk0M6V8TUvA8Wb4yPeE=
 github.com/PuerkitoBio/goquery v1.9.2/go.mod h1:GHPCaP0ODyyxqcNoFGYlAprUFH81NuRPd0GX3Zu2Mvk=
-github.com/StrongMonkey/langchaingo v0.0.0-20240617180437-9af4bee04c8b h1:xY/6vmYx7H3ZM2Apa926VvmYrzL228unIElCDYrhjEo=
-github.com/StrongMonkey/langchaingo v0.0.0-20240617180437-9af4bee04c8b/go.mod h1:MFQg4CUOwjT5VTYjorSmXHhQju6XqdJkSbdpBcZf7SQ=
 github.com/acorn-io/cmd v0.0.0-20240728043647-5ee22f336de6 h1:VfmAJVPak2jai4e20JAbPYZ+Uozq3IxB6kHNnkLgx2k=
 github.com/acorn-io/cmd v0.0.0-20240728043647-5ee22f336de6/go.mod h1:9jrYuzTJCv6QgGKl5gbhKqhG3kke31PmUE2KruBHzpg=
 github.com/acorn-io/z v0.0.0-20231104012607-4cab1b3ec5e5 h1:oQnpRt5KoANqwwUNzWFu+5I12Unfu/WZ330QHefxNc8=
@@ -393,6 +391,8 @@ github.com/swaggo/swag v1.16.3 h1:PnCYjPCah8FK4I26l2F/KQ4yz3sILcVUN3cTlBFA9Pg=
 github.com/swaggo/swag v1.16.3/go.mod h1:DImHIuOFXKpMFAQjcC7FG4m3Dg4+QuUgUzJmKjI/gRk=
 github.com/tetratelabs/wazero v1.8.2 h1:yIgLR/b2bN31bjxwXHD8a3d+BogigR952csSDdLYEv4=
 github.com/tetratelabs/wazero v1.8.2/go.mod h1:yAI0XTsMBhREkM/YDAK/zNou3GoiAce1P6+rp/wQhjs=
+github.com/tmc/langchaingo v0.1.13 h1:rcpMWBIi2y3B90XxfE4Ao8dhCQPVDMaNPnN5cGB1CaA=
+github.com/tmc/langchaingo v0.1.13/go.mod h1:vpQ5NOIhpzxDfTZK9B6tf2GM/MoaHewPWM5KXXGh7hg=
 github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc h1:9lRDQMhESg+zvGYmW5DyG0UqvY96Bu5QYsTLvCHdrgo=
 github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc/go.mod h1:bciPuU6GHm1iF1pBvUfxfsH0Wmnc2VbpgvbI9ZWuIRs=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=

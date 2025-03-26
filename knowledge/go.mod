@@ -4,10 +4,7 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace (
-	github.com/philippgille/chromem-go => github.com/iwilltry42/chromem-go v0.0.0-20250218054308-81ac4c30d459
-	github.com/tmc/langchaingo => github.com/StrongMonkey/langchaingo v0.0.0-20240617180437-9af4bee04c8b // Context-Aware Markdown Splitting
-)
+replace github.com/philippgille/chromem-go => github.com/iwilltry42/chromem-go v0.0.0-20250218054308-81ac4c30d459
 
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
@@ -47,7 +44,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
-	github.com/tmc/langchaingo v0.1.12
+	github.com/tmc/langchaingo v0.1.13
 	golang.org/x/sync v0.9.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
