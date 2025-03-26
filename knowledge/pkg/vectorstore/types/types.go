@@ -1,6 +1,6 @@
 package types
 
-// Disclaimer: a lot of this was taken over from our custom for of github.com/philippgille/chromem-go which deviated quite a lot from the original,
+// Disclaimer: a lot of this was taken over from our custom fork of github.com/philippgille/chromem-go which deviated quite a lot from the original,
 // and we ended up only still needing some low level abstractions.
 
 import (
