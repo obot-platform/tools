@@ -17,7 +17,6 @@ func NewRegionMatchedS3Client(ctx context.Context, client *s3.Client, bucket str
 		Bucket: aws.String(bucket),
 	})
 	if err == nil {
-		region = client.Options().Region
 		return client, nil
 	}
 
