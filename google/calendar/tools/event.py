@@ -421,6 +421,7 @@ def update_event(service):
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+        event.update(event_body)
 
         updated_event = (
             service.events()
