@@ -38,16 +38,11 @@ func main() {
 		BaseURL:         "https://api.openai.com/v1",
 		RewriteModelsFn: proxy.DefaultRewriteModelsResponse,
 		Name:            "OpenAI",
-		CustomPathHandleFuncs: map[string]http.HandlerFunc{
-			"/v1/": translateResponsesAPI(apiKey),
-		},
 	}
 
-	openaiProxy := openaiproxy.NewServer(cfg)
-	reverseProxy := &httputil.ReverseProxy{
-		Director: openaiProxy.Openaiv1ProxyRedirect,
+	cfg.CustomPathHandleFuncs = map[string]http.HandlerFunc{
+		"/v1/": translateResponsesAPI(apiKey, openaiproxy.NewServer(cfg)),
 	}
-	cfg.CustomPathHandleFuncs["/v1/"] = reverseProxy.ServeHTTP
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
 		if err := cfg.Validate("/tools/openai-model-provider/validate"); err != nil {
@@ -62,14 +57,16 @@ func main() {
 }
 
 type responsesRequestTranslator struct {
+	openAIProxy   *openaiproxy.Server
 	apiKey        string
 	wasTranslated bool
 	streaming     bool
 }
 
-func translateResponsesAPI(apiKey string) func(rw http.ResponseWriter, req *http.Request) {
+func translateResponsesAPI(apiKey string, openAIProxy *openaiproxy.Server) func(rw http.ResponseWriter, req *http.Request) {
+	fmt.Println("Translating responses API request")
 	return func(rw http.ResponseWriter, req *http.Request) {
-		r := &responsesRequestTranslator{apiKey: apiKey}
+		r := &responsesRequestTranslator{apiKey: apiKey, openAIProxy: openAIProxy}
 		(&httputil.ReverseProxy{
 			Director:       r.openaiProxyWithComputerUse,
 			ModifyResponse: r.modifyResponsesAPIResponse,
@@ -86,12 +83,15 @@ func (r *responsesRequestTranslator) openaiProxyWithComputerUse(req *http.Reques
 	if r.wasTranslated {
 		req.ContentLength = contentLength
 		req.Header.Set("Content-Length", fmt.Sprintf("%d", contentLength))
+	} else {
+		r.openAIProxy.Openaiv1ProxyRedirect(req)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+r.apiKey)
 }
 
 func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string) (io.ReadCloser, string, int64) {
+	fmt.Fprintf(os.Stdout, "REWRITING REQUEST BODY: %s\n", path)
 	if body == nil || path != proxy.ChatCompletionsPath {
 		// Not a chat completion request, just return the original body and path.
 		return body, path, 0
@@ -100,14 +100,14 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		// Best effort, just return the original body and path on error.
-		fmt.Fprintf(os.Stderr, "Failed to read request body: %v\n", err)
+		fmt.Fprintf(os.Stdout, "Failed to read request body: %v\n", err)
 		return body, path, 0
 	}
 
 	var chatCompletionRequest gopenai.ChatCompletionRequest
 	if err := json.Unmarshal(bodyBytes, &chatCompletionRequest); err != nil {
 		// Best effort, just return the original body and path on error.
-		fmt.Fprintf(os.Stderr, "Failed to unmarshal chat completion request: %v\n", err)
+		fmt.Fprintf(os.Stdout, "Failed to unmarshal chat completion request: %v\n", err)
 		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 	if !strings.HasPrefix(chatCompletionRequest.Model, "computer-use-") {
@@ -142,7 +142,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 			}
 		default:
 			// Best effort log and move on.
-			fmt.Fprintf(os.Stderr, "Unsupported response format type: %v\n", chatCompletionRequest.ResponseFormat.Type)
+			fmt.Fprintf(os.Stdout, "Unsupported response format type: %v\n", chatCompletionRequest.ResponseFormat.Type)
 		}
 	}
 	// Translate the initial system message to instructions
@@ -174,7 +174,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 			))
 		default:
 			// Best effort log and move on.
-			fmt.Fprintf(os.Stderr, "Unsupported message role: %v\n", message.Role)
+			fmt.Fprintf(os.Stdout, "Unsupported message role: %v\n", message.Role)
 		}
 	}
 	// Translate the tools to tool union params
@@ -234,7 +234,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 	responsesRequestBytes, err := json.Marshal(responsesRequest)
 	if err != nil {
 		// Best effort, just return the original body and path on error.
-		fmt.Fprintf(os.Stderr, "Failed to marshal responses request: %v\n", err)
+		fmt.Fprintf(os.Stdout, "Failed to marshal responses request: %v\n", err)
 		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 
@@ -243,7 +243,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 		responsesRequestBytes, err = sjson.SetBytes(responsesRequestBytes, "stream", true)
 		if err != nil {
 			// Best effort, just return the original body and path on error.
-			fmt.Fprintf(os.Stderr, "Failed to set stream in responses request: %v\n", err)
+			fmt.Fprintf(os.Stdout, "Failed to set stream in responses request: %v\n", err)
 			return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 		}
 	}
