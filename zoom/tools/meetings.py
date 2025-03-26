@@ -99,11 +99,11 @@ def _generate_password():
     return password
 
 
-def _trim_meeting_id(meeting_id: str) -> str:
+def _trim_meeting_id(meeting_id_or_uuid: str) -> str:
     """
-    Trims the meeting ID to remove any whitespace
+    Trims the meeting ID or UUID to remove any whitespace
     """
-    return "".join(meeting_id.split())
+    return "".join(meeting_id_or_uuid.split())
 
 
 _meeting_types = {
