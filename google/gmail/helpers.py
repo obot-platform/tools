@@ -1,7 +1,10 @@
 import base64
 import os
+import re
 import gptscript
 from filetype import guess_mime
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -104,6 +107,7 @@ from gptscript.datasets import DatasetElement
 async def list_messages(service, query, max_results):
     all_messages = []
     next_page_token = None
+    query = format_query_dates(service, query)
     try:
         while True:
             if next_page_token:
@@ -357,7 +361,7 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
 
     if original_body_html is None:
         original_body_html = ""
-    
+
     # Format date as "Mon, Mar 18, 2024 at 10:30 AM"
     formatted_date = original_date
     try:
@@ -373,3 +377,61 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
     reply_html = f'<br><br>On {formatted_date}, <b>{original_from}</b> wrote:<br>{quoted_body_html}'
 
     return reply_html
+
+def format_query_dates(service, query):
+    """
+    Converts date strings in Gmail search queries to Unix timestamps for correct timezone handling.
+    - before: uses beginning of day (00:00:00)
+    - after: uses end of day (23:59:59)
+    """
+    if not query:
+        return query
+
+    # Get user's timezone
+    user_tz_str = get_user_timezone(service)
+
+    # Use UTC if timezone is invalid
+    try:
+        user_tz = ZoneInfo(user_tz_str)
+    except:
+        user_tz = timezone.utc
+
+    def replace_date(match):
+        operator, quote1, date_str, quote2 = match.groups()
+        date_str = date_str.replace('/', '-')
+
+        try:
+            # Parse date parts
+            year, month, day = map(int, date_str.split('-'))
+
+            if operator == "before":
+                # For 'before:', use beginning of day (00:00:00)
+                dt = datetime(year, month, day, 0, 0, 0, tzinfo=user_tz)
+            else:  # after
+                # For 'after:', use end of day (23:59:59)
+                dt = datetime(year, month, day, 23, 59, 59, tzinfo=user_tz)
+
+            timestamp = int(dt.timestamp())
+            return f"{operator}:{quote1}{timestamp}{quote2}"
+        except:
+            return match.group(0)
+
+    # Replace dates with timestamps
+    pattern = r'(before|after):(["\']?)(\d{4}[-/]\d{1,2}[-/]\d{1,2})(["\']?)'
+    return re.sub(pattern, replace_date, query)
+
+
+def get_obot_user_timezone():
+    return os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+
+def get_user_timezone(service):
+    """Fetches the authenticated user's time zone from User's Gmail settings."""
+    try:
+        settings = service.settings().get(setting="timezone").execute()
+        return settings.get("value", get_obot_user_timezone())  # Default to Obot's user timezone if not found
+    except HttpError as err:
+        if err.status_code == 403:
+            raise Exception(f"HttpError retrieving user timezone: {err}")
+        return "UTC"
+    except Exception as e:
+        return "UTC"
