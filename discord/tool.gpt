@@ -103,7 +103,6 @@ Param: query: the search query to match against usernames, nicknames, or discrim
 ---
 Name: Send Message
 Description: Send a message to a text channel in a Discord guild
-Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Channels, Search Channels
 Share Context: Discord Context
@@ -116,7 +115,6 @@ Param: text: the text content to send
 ---
 Name: Send Message in Thread
 Description: Send a message in a thread in a Discord channel
-Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Channels, Search Channels, Get Channel History, Get Thread History
 Share Context: Discord Context
@@ -138,7 +136,6 @@ Type: context
 You have access to a set of tools to use the Discord API.
 
 Do not provide guild, channel, thread, message, or user IDs in the output, as these are not helpful for the user.
-When you use the search-messages tool, you can use normal Discord search filters.
 
 ## End of instructions for using Discord tools
 
