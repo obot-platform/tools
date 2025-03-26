@@ -66,20 +66,6 @@ Param: limit: the number of messages to return - recommend starting with 10 and 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- getThreadHistory
 
 ---
-Name: Search Messages
-Description: Search for messages across all accessible Discord channels. Returns messages matching the query, including thread information if the message is part of a thread.
-Tools: github.com/gptscript-ai/datasets/filter
-Credential: ./credential
-Share Tools: List Channels, Search Channels, Get Channel History, Get Thread History
-Share Context: Discord Context
-Param: query: the search query
-Param: limit: the maximum number of messages to return - recommend starting with 10 and increasing if necessary
-Param: guildid: (optional) the ID of the guild to search in. If not provided, searches across all accessible guilds.
-Param: channelid: (optional) the ID of the channel to search in. If provided, guildid must also be provided.
-
-#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchMessages
-
----
 Name: List Users
 Description: List all users in a Discord guild. Returns detailed user information including username, nickname, roles, and other metadata.
 Tools: github.com/gptscript-ai/datasets/filter

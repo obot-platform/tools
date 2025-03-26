@@ -4,7 +4,6 @@ import { searchChannels } from './tools/searchChannels.js';
 import { getChannelHistory } from './tools/getChannelHistory.js';
 import { getChannelHistoryByTime } from './tools/getChannelHistoryByTime.js';
 import { getThreadHistory } from './tools/getThreadHistory.js';
-import { searchMessages } from './tools/searchMessages.js';
 import { listUsers } from './tools/listUsers.js';
 import { searchUsers } from './tools/searchUsers.js';
 import { sendMessage } from './tools/sendMessage.js';
@@ -40,9 +39,6 @@ async function main() {
         break;
       case 'getThreadHistory':
         console.log(await getThreadHistory());
-        break;
-      case 'searchMessages':
-        console.log(await searchMessages());
         break;
       case 'listUsers':
         console.log(await listUsers());
