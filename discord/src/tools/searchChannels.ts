@@ -1,5 +1,6 @@
 import { TextChannel } from 'discord.js';
-import { client } from '../client';
+import { client } from '../client.js';
+import { createDataset } from '../utils.js';
 
 export async function searchChannels() {
   if (!process.env.QUERY) {
@@ -7,10 +8,9 @@ export async function searchChannels() {
   }
 
   const query = process.env.QUERY;
-  const guilds = client.guilds.cache;
   const results = [];
 
-  for (const guild of guilds.values()) {
+  for (const guild of client.guilds.cache.values()) {
     const guildChannels = await guild.channels.fetch();
     for (const channel of guildChannels.values()) {
       if (channel instanceof TextChannel && 
@@ -19,11 +19,11 @@ export async function searchChannels() {
           id: channel.id,
           name: channel.name,
           guildId: guild.id,
-          guildName: guild.name,
+          guildName: guild.name
         });
       }
     }
   }
 
-  return JSON.stringify(results);
+  await createDataset(results, 'discord_channel_search');
 }

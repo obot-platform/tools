@@ -1,5 +1,6 @@
 import { TextChannel } from 'discord.js';
-import { client } from '../client';
+import { client } from '../client.js';
+import { toRFC3339 } from '../utils.js';
 
 export async function sendMessage() {
   if (!process.env.CHANNELID || !process.env.GUILDID || !process.env.TEXT) {
@@ -23,7 +24,7 @@ export async function sendMessage() {
     return JSON.stringify({
       id: message.id,
       content: message.content,
-      timestamp: message.createdTimestamp,
+      timestamp: toRFC3339(message.createdTimestamp),
       permalink: `https://discord.com/channels/${guildId}/${channelId}/${message.id}`,
       channel: {
         id: channel.id,

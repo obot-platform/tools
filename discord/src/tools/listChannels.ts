@@ -1,5 +1,6 @@
 import { TextChannel } from 'discord.js';
-import { client } from '../client';
+import { client } from '../client.js';
+import { createDataset } from '../utils.js';
 
 export async function listChannels() {
   const guilds = client.guilds.cache;
@@ -13,11 +14,11 @@ export async function listChannels() {
           id: channel.id,
           name: channel.name,
           guildId: guild.id,
-          guildName: guild.name,
+          guildName: guild.name
         });
       }
     }
   }
 
-  return JSON.stringify(channels);
+  await createDataset(channels, 'discord_channels');
 } 

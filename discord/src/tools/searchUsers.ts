@@ -1,19 +1,23 @@
-import { client } from '../client';
+import { client } from '../client.js';
+import { toRFC3339, createDataset } from '../utils.js';
 
 export async function searchUsers() {
-  if (!process.env.GUILDID || !process.env.QUERY) {
-    throw new Error('GUILDID and QUERY environment variables are required for searchUsers');
+  if (!process.env.QUERY || !process.env.GUILDID) {
+    throw new Error('QUERY and GUILDID environment variables are required for searchUsers');
   }
 
+  const query = process.env.QUERY.toLowerCase();
   const guildId = process.env.GUILDID;
-  const query = process.env.QUERY;
+
   const guild = await client.guilds.fetch(guildId);
-  
-  // Fetch members matching the query
-  const members = await guild.members.fetch({ query });
-  
-  const users = members.map(member => ({
+  const members = await guild.members.fetch();
+
+  const results = members.filter(member => 
+    member.user.username.toLowerCase().includes(query) ||
+    (member.nickname && member.nickname.toLowerCase().includes(query))
+  ).map(member => ({
     id: member.user.id,
+    name: member.user.username,
     username: member.user.username,
     discriminator: member.user.discriminator,
     nickname: member.nickname,
@@ -23,10 +27,10 @@ export async function searchUsers() {
       color: role.color,
       position: role.position
     })),
-    joinedAt: member.joinedTimestamp,
+    joinedAt: toRFC3339(member.joinedTimestamp),
     isBot: member.user.bot,
     avatarUrl: member.user.displayAvatarURL()
   }));
 
-  return JSON.stringify(users);
+  await createDataset(results, 'discord_user_search');
 } 

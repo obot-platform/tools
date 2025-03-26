@@ -1,5 +1,6 @@
 import { TextChannel, Attachment, Embed } from 'discord.js';
-import { client } from '../client';
+import { client } from '../client.js';
+import { toRFC3339, createDataset } from '../utils.js';
 
 export async function getChannelHistory() {
   if (!process.env.CHANNELID || !process.env.GUILDID || !process.env.LIMIT) {
@@ -28,7 +29,7 @@ export async function getChannelHistory() {
         username: msg.author.username,
         discriminator: msg.author.discriminator,
       },
-      timestamp: msg.createdTimestamp,
+      timestamp: toRFC3339(msg.createdTimestamp),
       attachments: msg.attachments.map((att: Attachment) => ({
         url: att.url,
         name: att.name,
@@ -39,7 +40,7 @@ export async function getChannelHistory() {
         url: embed.url,
         color: embed.color,
         fields: embed.fields,
-        timestamp: embed.timestamp,
+        timestamp: embed.timestamp ? toRFC3339(new Date(embed.timestamp).getTime()) : null,
       })),
     };
 
@@ -61,5 +62,5 @@ export async function getChannelHistory() {
     return result;
   }));
 
-  return JSON.stringify(history);
+  await createDataset(history, 'discord_channel_history');
 } 

@@ -1,14 +1,14 @@
-import { client } from './client';
-import { listChannels } from './tools/listChannels';
-import { searchChannels } from './tools/searchChannels';
-import { getChannelHistory } from './tools/getChannelHistory';
-import { getChannelHistoryByTime } from './tools/getChannelHistoryByTime';
-import { getThreadHistory } from './tools/getThreadHistory';
-import { searchMessages } from './tools/searchMessages';
-import { listUsers } from './tools/listUsers';
-import { searchUsers } from './tools/searchUsers';
-import { sendMessage } from './tools/sendMessage';
-import { sendMessageInThread } from './tools/sendMessageInThread';
+import { client } from './client.js';
+import { listChannels } from './tools/listChannels.js';
+import { searchChannels } from './tools/searchChannels.js';
+import { getChannelHistory } from './tools/getChannelHistory.js';
+import { getChannelHistoryByTime } from './tools/getChannelHistoryByTime.js';
+import { getThreadHistory } from './tools/getThreadHistory.js';
+import { searchMessages } from './tools/searchMessages.js';
+import { listUsers } from './tools/listUsers.js';
+import { searchUsers } from './tools/searchUsers.js';
+import { sendMessage } from './tools/sendMessage.js';
+import { sendMessageInThread } from './tools/sendMessageInThread.js';
 
 async function login(): Promise<void> {
   try {
