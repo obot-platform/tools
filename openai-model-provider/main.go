@@ -64,6 +64,7 @@ func main() {
 type responsesRequestTranslator struct {
 	apiKey        string
 	wasTranslated bool
+	streaming     bool
 }
 
 func translateResponsesAPI(apiKey string) func(rw http.ResponseWriter, req *http.Request) {
@@ -81,7 +82,7 @@ func (r *responsesRequestTranslator) openaiProxyWithComputerUse(req *http.Reques
 	req.URL.Scheme = "https"
 	req.URL.Host = "api.openai.com"
 	req.Host = req.URL.Host
-	req.Body, req.URL.Path, contentLength, r.wasTranslated = rewriteBody(req.Body, req.URL.Path)
+	req.Body, req.URL.Path, contentLength = r.rewriteBody(req.Body, req.URL.Path)
 	if r.wasTranslated {
 		req.ContentLength = contentLength
 		req.Header.Set("Content-Length", fmt.Sprintf("%d", contentLength))
@@ -90,20 +91,20 @@ func (r *responsesRequestTranslator) openaiProxyWithComputerUse(req *http.Reques
 	req.Header.Set("Authorization", "Bearer "+r.apiKey)
 }
 
-func rewriteBody(body io.ReadCloser, path string) (io.ReadCloser, string, int64, bool) {
+func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string) (io.ReadCloser, string, int64) {
 	if body == nil || path != proxy.ChatCompletionsPath {
-		return body, path, 0, false
+		return body, path, 0
 	}
 
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
-		return body, path, 0, false
+		return body, path, 0
 	}
 
 	var chatCompletionRequest gopenai.ChatCompletionRequest
 	if err := json.Unmarshal(bodyBytes, &chatCompletionRequest); err != nil || !strings.HasPrefix(chatCompletionRequest.Model, "computer-use-") {
 		// Best effort, just return the original body and path on error.
-		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0, false
+		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 
 	var (
@@ -225,19 +226,21 @@ func rewriteBody(body io.ReadCloser, path string) (io.ReadCloser, string, int64,
 	responsesRequestBytes, err := json.Marshal(responsesRequest)
 	if err != nil {
 		// Best effort, just return the original body and path on error.
-		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0, false
+		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 
 	if chatCompletionRequest.Stream {
+		r.streaming = true
 		responsesRequestBytes, err = sjson.SetBytes(responsesRequestBytes, "stream", true)
 		if err != nil {
 			// Best effort, just return the original body and path on error.
-			return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0, false
+			return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 		}
 	}
 
+	r.wasTranslated = true
 	// Return the new body and path
-	return io.NopCloser(bytes.NewBuffer(responsesRequestBytes)), "/v1/responses", int64(len(responsesRequestBytes)), true
+	return io.NopCloser(bytes.NewBuffer(responsesRequestBytes)), "/v1/responses", int64(len(responsesRequestBytes))
 }
 
 func (r *responsesRequestTranslator) modifyResponsesAPIResponse(resp *http.Response) error {
