@@ -93,17 +93,25 @@ func (r *responsesRequestTranslator) openaiProxyWithComputerUse(req *http.Reques
 
 func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string) (io.ReadCloser, string, int64) {
 	if body == nil || path != proxy.ChatCompletionsPath {
+		// Not a chat completion request, just return the original body and path.
 		return body, path, 0
 	}
 
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
+		// Best effort, just return the original body and path on error.
+		fmt.Fprintf(os.Stderr, "Failed to read request body: %v\n", err)
 		return body, path, 0
 	}
 
 	var chatCompletionRequest gopenai.ChatCompletionRequest
-	if err := json.Unmarshal(bodyBytes, &chatCompletionRequest); err != nil || !strings.HasPrefix(chatCompletionRequest.Model, "computer-use-") {
+	if err := json.Unmarshal(bodyBytes, &chatCompletionRequest); err != nil {
 		// Best effort, just return the original body and path on error.
+		fmt.Fprintf(os.Stderr, "Failed to unmarshal chat completion request: %v\n", err)
+		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
+	}
+	if !strings.HasPrefix(chatCompletionRequest.Model, "computer-use-") {
+		// Not a computer use model, just return the original body and path.
 		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 
@@ -134,7 +142,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 			}
 		default:
 			// Best effort log and move on.
-			fmt.Fprintln(os.Stderr, "Unsupported response format type:", chatCompletionRequest.ResponseFormat.Type)
+			fmt.Fprintf(os.Stderr, "Unsupported response format type: %v\n", chatCompletionRequest.ResponseFormat.Type)
 		}
 	}
 	// Translate the initial system message to instructions
@@ -166,7 +174,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 			))
 		default:
 			// Best effort log and move on.
-			fmt.Fprintln(os.Stderr, "Unsupported message role:", message.Role)
+			fmt.Fprintf(os.Stderr, "Unsupported message role: %v\n", message.Role)
 		}
 	}
 	// Translate the tools to tool union params
@@ -226,6 +234,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 	responsesRequestBytes, err := json.Marshal(responsesRequest)
 	if err != nil {
 		// Best effort, just return the original body and path on error.
+		fmt.Fprintf(os.Stderr, "Failed to marshal responses request: %v\n", err)
 		return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 	}
 
@@ -234,6 +243,7 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 		responsesRequestBytes, err = sjson.SetBytes(responsesRequestBytes, "stream", true)
 		if err != nil {
 			// Best effort, just return the original body and path on error.
+			fmt.Fprintf(os.Stderr, "Failed to set stream in responses request: %v\n", err)
 			return io.NopCloser(bytes.NewBuffer(bodyBytes)), path, 0
 		}
 	}
@@ -248,5 +258,79 @@ func (r *responsesRequestTranslator) modifyResponsesAPIResponse(resp *http.Respo
 		return nil
 	}
 
+	if !r.streaming {
+		return handleNonStreamingResponse(resp)
+	}
+
+	return nil
+}
+
+func handleNonStreamingResponse(resp *http.Response) error {
+	var responsesResponse responses.Response
+	if err := json.NewDecoder(resp.Body).Decode(&responsesResponse); err != nil {
+		return fmt.Errorf("failed to decode chat completion response: %w", err)
+	}
+
+	choices := make([]gopenai.ChatCompletionChoice, 0, len(responsesResponse.Output))
+	for i, choice := range responsesResponse.Output {
+		switch choice.Type {
+		case "message":
+			// Convert all outputs
+			for _, content := range choice.Content {
+				switch content.Type {
+				case "output_text":
+					choices = append(choices, gopenai.ChatCompletionChoice{
+						Index: i,
+						Message: gopenai.ChatCompletionMessage{
+							Role:    string(choice.Role),
+							Content: content.AsOutputText().Text,
+						},
+						FinishReason: gopenai.FinishReasonStop,
+					})
+				case "refusal":
+					choices = append(choices, gopenai.ChatCompletionChoice{
+						Index: i,
+						Message: gopenai.ChatCompletionMessage{
+							Role:    string(choice.Role),
+							Content: content.AsRefusal().Refusal,
+						},
+						FinishReason: gopenai.FinishReasonContentFilter,
+					})
+				}
+			}
+		case "function_call":
+			choices = append(choices, gopenai.ChatCompletionChoice{
+				Index: i,
+				Message: gopenai.ChatCompletionMessage{
+					Role:    string(choice.Role),
+					Content: choice.AsFunctionCall().Name,
+				},
+				FinishReason: gopenai.FinishReasonToolCalls,
+			})
+		}
+	}
+
+	chatCompletionResponse := gopenai.ChatCompletionResponse{
+		ID:      responsesResponse.ID,
+		Object:  "chat.completion",
+		Created: int64(responsesResponse.CreatedAt),
+		Model:   responsesResponse.Model,
+		Choices: choices,
+		Usage: gopenai.Usage{
+			PromptTokens:     int(responsesResponse.Usage.InputTokens),
+			CompletionTokens: int(responsesResponse.Usage.OutputTokens),
+			TotalTokens:      int(responsesResponse.Usage.TotalTokens),
+		},
+		SystemFingerprint: "",
+	}
+
+	b, err := json.Marshal(chatCompletionResponse)
+	if err != nil {
+		return fmt.Errorf("failed to marshal chat completion response: %w", err)
+	}
+
+	resp.Body = io.NopCloser(bytes.NewReader(b))
+	resp.ContentLength = int64(len(b))
+	resp.Header.Set("Content-Length", fmt.Sprintf("%d", len(b)))
 	return nil
 }
