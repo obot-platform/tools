@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
-	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
-	"github.com/gptscript-ai/knowledge/pkg/output"
-	types2 "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings"
+	etypes "github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
+	types2 "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/copystructure"
 )
 

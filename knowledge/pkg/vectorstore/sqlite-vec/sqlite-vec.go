@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
-	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	dbtypes "github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/helper"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"gorm.io/gorm"
 
 	"github.com/ncruces/go-sqlite3/gormlite"

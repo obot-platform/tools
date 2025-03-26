@@ -84,7 +84,6 @@ type WhereDocument struct {
 }
 
 func (wd *WhereDocument) Validate() error {
-
 	if !slices.Contains([]WhereDocumentOperator{WhereDocumentOperatorContains, WhereDocumentOperatorNotContains, WhereDocumentOperatorOr, WhereDocumentOperatorAnd}, wd.Operator) {
 		return fmt.Errorf("unsupported where document operator %s", wd.Operator)
 	}

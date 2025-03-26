@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 func BuildWhereDocumentClauseIndexed(whereDocs []types.WhereDocument, joinOperator string, argIndex int) (string, []any, error) {

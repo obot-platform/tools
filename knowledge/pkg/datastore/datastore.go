@@ -11,16 +11,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	"github.com/gptscript-ai/knowledge/pkg/output"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	etypes "github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
 
 	"github.com/adrg/xdg"
-	"github.com/gptscript-ai/knowledge/pkg/index"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type Datastore struct {

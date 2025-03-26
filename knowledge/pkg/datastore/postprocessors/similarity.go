@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const SimilarityPostprocessorName = "similarity"

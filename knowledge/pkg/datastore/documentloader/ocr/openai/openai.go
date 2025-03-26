@@ -15,12 +15,12 @@ import (
 
 	"github.com/acorn-io/z"
 	"github.com/gen2brain/go-fitz"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
-	"github.com/gptscript-ai/knowledge/pkg/env"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/load"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/env"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )

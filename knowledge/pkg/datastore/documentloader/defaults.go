@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"code.sajari.com/docconv/v2"
-	pdfdefaults "github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/defaults"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	pdfdefaults "github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/defaults"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	golcdocloaders "github.com/hupe1980/golc/documentloader"
 	"github.com/lu4p/cat/rtftxt"
 	lcgodocloaders "github.com/tmc/langchaingo/documentloaders"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 func (s *Datastore) DeleteDocument(ctx context.Context, documentID, datasetID string) error {

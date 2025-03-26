@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	types2 "github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	dstypes "github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	types2 "github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
 )
 
 type StandaloneClient struct {

@@ -3,7 +3,7 @@ package transformers
 import (
 	"fmt"
 
-	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	dstypes "github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 )
 
 var TransformerMap = map[string]dstypes.DocumentTransformer{

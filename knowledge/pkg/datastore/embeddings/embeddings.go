@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
 	"github.com/mitchellh/mapstructure"
 )
 

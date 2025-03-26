@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

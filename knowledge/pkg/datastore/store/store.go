@@ -3,8 +3,8 @@ package store
 import (
 	"context"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type Store interface {

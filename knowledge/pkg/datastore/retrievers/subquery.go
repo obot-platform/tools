@@ -8,11 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	"github.com/gptscript-ai/knowledge/pkg/llm"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	"github.com/obot-platform/tools/knowledge/pkg/llm"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const SubqueryRetrieverName = "subquery"

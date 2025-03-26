@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 )
 
 // ErrDBFileNotFound is returned when a file is not found.

@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	"github.com/gptscript-ai/knowledge/pkg/output"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/filetypes"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/transformers"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type IngestOpts struct {

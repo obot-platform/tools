@@ -3,7 +3,7 @@ package bm25
 import (
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/iwilltry42/bm25-go/bm25"
 	"github.com/jmcarbo/stopwords"
 )

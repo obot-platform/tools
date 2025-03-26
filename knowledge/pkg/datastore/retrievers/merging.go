@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/sync/errgroup"
 )

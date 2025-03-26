@@ -9,9 +9,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/gopdf"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/gopdf"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/structured"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 
 	golcdocloaders "github.com/hupe1980/golc/documentloader"
 	"github.com/lu4p/cat"

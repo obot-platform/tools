@@ -6,11 +6,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/bm25"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/postprocessors"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/bm25"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/postprocessors"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const BM25RetrieverName = postprocessors.BM25PostprocessorName

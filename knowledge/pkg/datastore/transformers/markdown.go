@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const FilterMarkdownDocsNoContentName = "filter_markdown_docs_no_content"

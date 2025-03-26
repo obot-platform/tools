@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"strings"
 
-	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/pgvector"
-	sqlitevec "github.com/gptscript-ai/knowledge/pkg/vectorstore/sqlite-vec"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	etypes "github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
+	dbtypes "github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/pgvector"
+	sqlitevec "github.com/obot-platform/tools/knowledge/pkg/vectorstore/sqlite-vec"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type VectorStore interface {

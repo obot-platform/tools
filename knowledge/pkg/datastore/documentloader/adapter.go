@@ -3,9 +3,9 @@ package documentloader
 import (
 	"context"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/textsplitter"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	golcschema "github.com/hupe1980/golc/schema"
 	lcgodocloaders "github.com/tmc/langchaingo/documentloaders"
 )

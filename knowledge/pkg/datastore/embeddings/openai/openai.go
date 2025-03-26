@@ -17,11 +17,11 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
-	"github.com/gptscript-ai/knowledge/pkg/env"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/load"
+	"github.com/obot-platform/tools/knowledge/pkg/env"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second

@@ -1,4 +1,4 @@
-module github.com/gptscript-ai/knowledge
+module github.com/obot-platform/tools/knowledge
 
 go 1.23.1
 
