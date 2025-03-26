@@ -4,8 +4,6 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/philippgille/chromem-go => github.com/iwilltry42/chromem-go v0.0.0-20250218054308-81ac4c30d459
-
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
 	dario.cat/mergo v1.0.0
@@ -39,7 +37,7 @@ require (
 	github.com/ncruces/go-sqlite3/gormlite v0.20.3
 	github.com/obot-platform/pdf-parser v0.0.0-20250326062146-23d345e30ecc
 	github.com/pgvector/pgvector-go v0.2.2
-	github.com/philippgille/chromem-go v0.6.1-0.20240811154507-a1944285b284
+	github.com/philippgille/chromem-go v0.7.0
 	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0

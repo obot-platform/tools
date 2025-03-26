@@ -10,20 +10,18 @@ import (
 
 	"github.com/acorn-io/z"
 	"github.com/google/uuid"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/mitchellh/mapstructure"
-	"github.com/philippgille/chromem-go"
-
 	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/converter"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/postprocessors"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/querymodifiers"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/retrievers"
+	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/textsplitter"
 	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
 	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/gptscript-ai/knowledge/pkg/log"
+	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/mitchellh/mapstructure"
 )
 
 type IngestionFlowGlobals struct {
@@ -213,7 +211,7 @@ func (f *RetrievalFlow) FillDefaults(topK int) {
 
 type RetrievalFlowOpts struct {
 	Where         map[string]string
-	WhereDocument []chromem.WhereDocument
+	WhereDocument []vs.WhereDocument
 }
 
 func (f *RetrievalFlow) Run(ctx context.Context, store store.Store, query string, datasetIDs []string, opts *RetrievalFlowOpts) (*dstypes.RetrievalResponse, error) {

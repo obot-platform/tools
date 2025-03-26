@@ -20,7 +20,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/gptscript-ai/knowledge/pkg/index"
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore"
-	cg "github.com/philippgille/chromem-go"
+	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
 )
 
 type Datastore struct {
@@ -56,7 +56,7 @@ func GetDefaultDSNs(indexDSN, vectorDSN string) (string, string, bool, error) {
 	return indexDSN, vectorDSN, isArchive, nil
 }
 
-func LogEmbeddingFunc(embeddingFunc cg.EmbeddingFunc) cg.EmbeddingFunc {
+func LogEmbeddingFunc(embeddingFunc vs.EmbeddingFunc) vs.EmbeddingFunc {
 	return func(ctx context.Context, text string) ([]float32, error) {
 		l := log.FromCtx(ctx).With("stage", "embedding")
 

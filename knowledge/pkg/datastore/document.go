@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/philippgille/chromem-go"
 )
 
 func (s *Datastore) DeleteDocument(ctx context.Context, documentID, datasetID string) error {
@@ -22,6 +21,6 @@ func (s *Datastore) DeleteDocument(ctx context.Context, documentID, datasetID st
 	return nil
 }
 
-func (s *Datastore) GetDocuments(ctx context.Context, datasetID string, where map[string]string, whereDocument []chromem.WhereDocument) ([]types.Document, error) {
+func (s *Datastore) GetDocuments(ctx context.Context, datasetID string, where map[string]string, whereDocument []types.WhereDocument) ([]types.Document, error) {
 	return s.Vectorstore.GetDocuments(ctx, datasetID, where, whereDocument)
 }
