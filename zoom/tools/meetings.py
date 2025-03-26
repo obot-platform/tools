@@ -497,7 +497,7 @@ def get_meeting_summary():
         raise ValueError(
             "The `Get Meeting Summary` feature is only available for licensed users."
         )
-    meeting_uuid = os.environ["MEETING_UUID"]
+    meeting_uuid = _trim_meeting_id(os.environ["MEETING_UUID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_uuid}/meeting_summary"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
