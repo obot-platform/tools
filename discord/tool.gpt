@@ -2,7 +2,7 @@
 Name: Discord Bot
 Description: Tools for interacting with Discord using a Discord Bot
 Metadata: bundle: true
-Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, Search Messages, List Users, Search Users, Send Message, Send Message in Thread
+Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, List Users, Search Users, Send Message, Send Message in Thread
 
 ---
 Name: List Channels
