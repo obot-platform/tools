@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 func handleValidationError(loggerPath, msg string) error {
 	slog.Error(msg, "logger", loggerPath)
 	fmt.Printf("{\"error\": \"%s\"}\n", msg)
-	return fmt.Errorf(msg)
+	return errors.New(msg)
 }
 
 func (cfg *Config) Validate(toolPath string) error {
