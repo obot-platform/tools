@@ -23,13 +23,10 @@ func NewRegionMatchedS3Client(ctx context.Context, client *s3.Client, bucket str
 	var respErr *smithyhttp.ResponseError
 	if errors.As(err, &respErr) {
 		hdr := respErr.Response.Header.Get("x-amz-bucket-region")
-		if hdr != "" {
-			region = hdr
+		if hdr == "" {
+			return nil, fmt.Errorf("failed to find s3 region: %w", err)
 		}
-	}
-
-	if region == "" {
-		return nil, fmt.Errorf("failed to find s3 region: %w", err)
+		region = hdr
 	}
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
