@@ -25,6 +25,42 @@ export async function getThreadHistory() {
     throw new Error('Thread not found');
   }
 
+  // Get the starter message if it exists
+  let starterMessage = null;
+  const starterMessageId = thread.id; // The thread ID is the same as its starter message ID
+  try {
+    const starter = await channel.messages.fetch(starterMessageId);
+    if (starter) {
+      starterMessage = {
+        id: starter.id,
+        content: starter.content,
+        type: starter.type,
+        system: starter.system,
+        permalink: `https://discord.com/channels/${guildId}/${channelId}/${starter.id}`,
+        author: {
+          id: starter.author.id,
+          username: starter.author.username,
+          discriminator: starter.author.discriminator,
+        },
+        timestamp: formatTime(starter.createdTimestamp),
+        attachments: starter.attachments.map((att: Attachment) => ({
+          url: att.url,
+          name: att.name,
+        })),
+        embeds: starter.embeds.map((embed: Embed) => ({
+          title: embed.title,
+          description: embed.description,
+          url: embed.url,
+          color: embed.color,
+          fields: embed.fields,
+          timestamp: embed.timestamp ? formatTime(new Date(embed.timestamp).getTime()) : null,
+        }))
+      };
+    }
+  } catch (error) {
+    console.warn('Could not fetch starter message:', error);
+  }
+
   // Fetch messages from the thread
   const messages = await thread.messages.fetch({ limit });
   const history = Array.from(messages.values())
@@ -64,5 +100,7 @@ export async function getThreadHistory() {
       } : undefined
     }));
 
-  await createDataset(history, 'discord_thread_history');
+  // Combine starter message with thread messages
+  const allMessages = starterMessage ? [starterMessage, ...history] : history;
+  await createDataset(allMessages, 'discord_thread_history');
 } 
