@@ -327,6 +327,14 @@ def create_event(service):
         raise Exception(f"Exception creating event in calendar {calendar_id}: {e}")
 
 
+def _get_current_user_email(service) -> str:
+    """
+    Gets the email of the current user, by getting the user_id of the primary calendar.
+    """
+    user_info = service.calendars().get(calendarId="primary").execute()
+    return user_info["id"]
+
+
 def update_event(service):
     """Updates an existing event."""
     calendar_id = os.getenv("CALENDAR_ID")
@@ -426,6 +434,13 @@ def update_event(service):
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+        current_user_email = _get_current_user_email(service)
+        organizer_email = event.get("organizer", {}).get("email")
+
+        if current_user_email.lower() != organizer_email.lower():
+            raise PermissionError(
+                f"You are not the organizer of this event. Only the organizer ({organizer_email}) can update it."
+            )
         event.update(event_body)
 
         updated_event = (
@@ -438,14 +453,6 @@ def update_event(service):
         raise Exception(f"HttpError updating event {event_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception updating event {event_id}: {e}")
-
-
-def _get_current_user_email(service) -> str:
-    """
-    Gets the email of the current user, by getting the user_id of the primary calendar.
-    """
-    user_info = service.calendars().get(calendarId="primary").execute()
-    return user_info["id"]
 
 
 def respond_to_event(service):
