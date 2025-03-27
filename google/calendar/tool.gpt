@@ -2,7 +2,7 @@
 Name: Google Calendar
 Description: Tools for interacting with a user's Google Calendar account
 Metadata: bundle: true
-Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, Update Event, Delete Event, List Recurring Event Instances, List Calendars, Get Calendar, Create Calendar, Update Calendar, Delete Calendar
+Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, Update Event, Respond To Event, Delete Event, List Recurring Event Instances, List Calendars, Get Calendar, Create Calendar, Update Calendar, Delete Calendar
 
 ---
 Name: List Events
@@ -112,6 +112,17 @@ Param: time_min: (Optional) Upper bound (exclusive) for an event's start time to
 Param: time_max: (Optional) Lower bound (exclusive) for an event's end time to filter by. Optional. The default is not to filter by end time. Must be an RFC3339 timestamp with mandatory time zone offset.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_recurring_event_instances
+
+---
+Name: Respond To Event
+Description: Respond to an Google Calendar event invitation
+Credential: ./credential
+Share Context: Google Calendar Context
+Param: calendar_id: (Required) ID of the calendar to respond to event in.
+Param: event_id: (Required) ID of the event to respond to.
+Param: response: (Required) Response to the event invitation. Must be one of 'accepted', 'declined', or 'tentative'.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py respond_to_event
 
 ---
 Name: List Calendars

@@ -27,6 +27,8 @@ def main():
                 json_response = event_tools.move_event(service)
             case "update_event":
                 json_response = event_tools.update_event(service)
+            case "respond_to_event":
+                json_response = event_tools.respond_to_event(service)
             case "create_event":
                 json_response = event_tools.create_event(service)
             case "list_recurring_event_instances":

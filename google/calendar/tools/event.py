@@ -1,5 +1,10 @@
 from datetime import datetime, timezone
-from tools.helper import setup_logger, get_user_timezone, str_to_bool, get_obot_user_timezone
+from tools.helper import (
+    setup_logger,
+    get_user_timezone,
+    str_to_bool,
+    get_obot_user_timezone,
+)
 import os
 from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
@@ -433,6 +438,78 @@ def update_event(service):
         raise Exception(f"HttpError updating event {event_id}: {err}")
     except Exception as e:
         raise Exception(f"Exception updating event {event_id}: {e}")
+
+
+def _get_current_user_email(service) -> str:
+    """
+    Gets the email of the current user, by getting the user_id of the primary calendar.
+    """
+    user_info = service.calendars().get(calendarId="primary").execute()
+    return user_info["id"]
+
+
+def respond_to_event(service):
+    """
+    Responds to a calendar event by updating the current user's attendee status.
+
+    Args:
+        service: An authenticated Google Calendar API service instance.
+        calendar_id (str): The ID of the calendar containing the event.
+        event_id (str): The ID of the event to respond to.
+        response (str): One of 'accepted', 'declined', or 'tentative'.
+
+    Returns:
+        dict: The updated event object.
+    """
+    calendar_id = os.getenv("CALENDAR_ID")
+    if not calendar_id:
+        raise ValueError("CALENDAR_ID environment variable is not set properly")
+    event_id = os.getenv("EVENT_ID")
+    if not event_id:
+        raise ValueError("EVENT_ID environment variable is not set properly")
+    response = os.getenv("RESPONSE")
+    if not response:
+        raise ValueError("RESPONSE environment variable is not set properly")
+
+    response_options = ["accepted", "declined", "tentative"]
+    if response not in response_options:
+        raise ValueError(f"Invalid response. Must be one of: {response_options}")
+
+    try:
+        # Get current user's email
+        user_email = _get_current_user_email(service)
+
+        event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+
+        # Only update the responseStatus for the current user
+        updated = False
+        for attendee in event.get("attendees", []):
+            if attendee["email"].lower() == user_email.lower():
+                attendee["responseStatus"] = response
+                updated = True
+                break
+
+        if not updated:
+            raise ValueError(
+                f"User {user_email} is not listed as an attendee on this event."
+            )
+
+        updated_event = (
+            service.events()
+            .patch(
+                calendarId=calendar_id,
+                eventId=event_id,
+                body={"attendees": event["attendees"]},
+            )
+            .execute()
+        )
+
+        return updated_event
+
+    except HttpError as err:
+        raise Exception(f"HttpError responding to event: {err}")
+    except Exception as e:
+        raise Exception(f"Exception responding to event: {e}")
 
 
 def delete_event(service):

@@ -59,11 +59,14 @@ def get_client(service_name: str = "calendar", version: str = "v3"):
 def get_obot_user_timezone():
     return os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
 
+
 def get_user_timezone(service):
     """Fetches the authenticated user's time zone from User's Google Calendar settings."""
     try:
         settings = service.settings().get(setting="timezone").execute()
-        return settings.get("value", get_obot_user_timezone())  # Default to Obot's user timezone if not found
+        return settings.get(
+            "value", get_obot_user_timezone()
+        )  # Default to Obot's user timezone if not found
     except HttpError as err:
         if err.status_code == 403:
             raise Exception(f"HttpError retrieving user timezone: {err}")
