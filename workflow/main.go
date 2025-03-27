@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+
+	"github.com/gptscript-ai/go-gptscript"
 )
 
-var inputText = os.Getenv("WORKFLOW_INPUT")
+var inputText = gptscript.GetEnv("WORKFLOW_INPUT", "")
 
 const (
 	webhookContext = `This workflow is being called from a webhook. The input is a JSON structure of the webhook payload and any
