@@ -14,6 +14,7 @@ import (
 	gopenai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/obot-platform/tools/openai-model-provider/openaiproxy"
 	"github.com/obot-platform/tools/openai-model-provider/proxy"
+	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/packages/param"
 	"github.com/openai/openai-go/responses"
 	"github.com/openai/openai-go/shared"
@@ -118,10 +119,9 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 	}
 
 	var (
-		text         responses.ResponseTextConfigParam
-		inputItems   []responses.ResponseInputItemUnionParam
-		tools        []responses.ToolUnionParam
-		instructions string
+		text       responses.ResponseTextConfigParam
+		inputItems []responses.ResponseInputItemUnionParam
+		tools      []responses.ToolUnionParam
 	)
 	// Translate the response format
 	if chatCompletionRequest.ResponseFormat != nil {
@@ -146,11 +146,6 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 			// Best effort log and move on.
 			fmt.Fprintf(os.Stderr, "Unsupported response format type: %v\n", chatCompletionRequest.ResponseFormat.Type)
 		}
-	}
-	// Translate the initial system message to instructions
-	if len(chatCompletionRequest.Messages) > 0 && (chatCompletionRequest.Messages[0].Role == gopenai.ChatMessageRoleSystem || chatCompletionRequest.Messages[0].Role == "developer") {
-		instructions = chatCompletionRequest.Messages[0].Content
-		//chatCompletionRequest.Messages = chatCompletionRequest.Messages[1:]
 	}
 	// Translate the messages to input items
 	inputItems = make([]responses.ResponseInputItemUnionParam, 0, len(chatCompletionRequest.Messages))
@@ -194,36 +189,20 @@ func (r *responsesRequestTranslator) rewriteBody(body io.ReadCloser, path string
 		Input: responses.ResponseNewParamsInputUnion{
 			OfInputItemList: inputItems,
 		},
-		Model: shared.ResponsesModel(chatCompletionRequest.Model),
-		Instructions: param.Opt[string]{
-			Value: instructions,
-		},
-		MaxOutputTokens: param.Opt[int64]{
-			Value: int64(chatCompletionRequest.MaxTokens),
-		},
-		ParallelToolCalls: param.Opt[bool]{
-			Value: true,
-		},
-		PreviousResponseID: param.Opt[string]{
-			Value: "",
-		},
-		Store: param.Opt[bool]{
-			Value: false,
-		},
-		Temperature: param.Opt[float64]{
-			Value: float64(*chatCompletionRequest.Temperature),
-		},
-		TopP: param.Opt[float64]{
-			Value: float64(chatCompletionRequest.TopP),
-		},
-		User: param.Opt[string]{
-			Value: chatCompletionRequest.User,
-		},
-		Reasoning:  shared.ReasoningParam{},
-		Include:    nil,
-		Metadata:   nil,
-		Truncation: responses.ResponseNewParamsTruncationDisabled,
-		Text:       text,
+		Model:              shared.ResponsesModel(chatCompletionRequest.Model),
+		Instructions:       openai.String(""),
+		MaxOutputTokens:    openai.Int(int64(chatCompletionRequest.MaxTokens)),
+		ParallelToolCalls:  openai.Bool(true),
+		PreviousResponseID: openai.String(""),
+		Store:              openai.Bool(false),
+		Temperature:        openai.Float(float64(*chatCompletionRequest.Temperature)),
+		TopP:               openai.Float(float64(chatCompletionRequest.TopP)),
+		User:               openai.String(chatCompletionRequest.User),
+		Reasoning:          shared.ReasoningParam{},
+		Include:            nil,
+		Metadata:           nil,
+		Truncation:         responses.ResponseNewParamsTruncationDisabled,
+		Text:               text,
 		ToolChoice: responses.ResponseNewParamsToolChoiceUnion{
 			OfToolChoiceMode: param.Opt[responses.ToolChoiceOptions]{
 				Value: responses.ToolChoiceOptionsAuto,
