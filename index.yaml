@@ -89,6 +89,8 @@ tools:
     reference: ./search-combo
   aws-s3:
     reference: ./aws/s3
+  aws-ec2:
+    reference: ./aws/ec2
   discord:
     reference: ./discord
 

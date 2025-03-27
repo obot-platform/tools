@@ -60,3 +60,7 @@ Param: object_key: The full path to an object inside the bucket
 Param: bucket_name: The name of the S3 bucket
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteObject
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/amazons3.svg
