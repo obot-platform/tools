@@ -57,8 +57,8 @@ export async function getThreadHistory() {
         }))
       };
     }
-  } catch (error) {
-    console.warn('Could not fetch starter message:', error);
+  } catch {
+    // ignore
   }
 
   // Fetch messages from the thread
