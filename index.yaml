@@ -89,6 +89,8 @@ tools:
     reference: ./search-combo
   aws-s3:
     reference: ./aws/s3
+  discord:
+    reference: ./discord
 
 knowledgeDataSources:
   notion-data-source:

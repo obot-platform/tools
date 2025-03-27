@@ -1,0 +1,138 @@
+---
+Name: Discord Bot
+Description: Tools for interacting with Discord using a Discord Bot
+Metadata: bundle: true
+Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, List Users, Search Users, Send Message, Send Message in Thread
+
+---
+Name: List Channels
+Description: List all text channels in all Discord guilds the bot has access to. Returns the name, ID, guild name, and guild ID for each channel.
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Context: Discord Context
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- listChannels
+
+---
+Name: Search Channels
+Description: Search for text channels in Discord guilds the bot has access to
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Context: Discord Context
+Param: query: the search query
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchChannels
+
+---
+Name: Get Channel History
+Description: Get the chat history for a text channel in Discord
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Tools: List Channels, Search Channels
+Share Context: Discord Context
+Param: channelid: the ID of the channel to get the history for
+Param: guildid: the ID of the guild that the channel belongs to
+Param: limit: the number of messages to return - recommend starting with 10 and increasing if necessary
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- getChannelHistory
+
+---
+Name: Get Channel History by Time
+Description: Get the chat history for a text channel in Discord within a specific time range
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Tools: List Channels, Search Channels
+Share Context: Discord Context
+Param: channelid: the ID of the channel to get the history for
+Param: guildid: the ID of the guild that the channel belongs to
+Param: limit: the maximum number of messages to return - recommend starting with 10 and increasing if necessary
+Param: start: the start time in RFC 3339 format
+Param: end: the end time in RFC 3339 format
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- getChannelHistoryByTime
+
+---
+Name: Get Thread History
+Description: Get the chat history for a particular thread in a Discord channel
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Tools: List Channels, Get Channel History
+Share Context: Discord Context
+Param: channelid: the ID of the channel containing the thread
+Param: guildid: the ID of the guild that the channel belongs to
+Param: threadid: the ID of the thread to get the history for
+Param: limit: the number of messages to return - recommend starting with 10 and increasing if necessary
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- getThreadHistory
+
+---
+Name: List Users
+Description: List all users in a Discord guild. Returns detailed user information including username, nickname, roles, and other metadata.
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Context: Discord Context
+Param: guildid: the ID of the guild to list users from
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- listUsers
+
+---
+Name: Search Users
+Description: Search for users in a Discord guild by username, nickname, or discriminator.
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ./credential
+Share Context: Discord Context
+Param: guildid: the ID of the guild to search users in
+Param: query: the search query to match against usernames, nicknames, or discriminators
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- searchUsers
+
+---
+Name: Send Message
+Description: Send a message to a text channel in a Discord guild
+Credential: ./credential
+Share Tools: List Channels, Search Channels
+Share Context: Discord Context
+Param: channelid: the ID of the channel to send the message to
+Param: guildid: the ID of the guild that the channel belongs to
+Param: text: the text content to send
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- sendMessage
+
+---
+Name: Send Message in Thread
+Description: Send a message in a thread in a Discord channel
+Credential: ./credential
+Share Tools: List Channels, Search Channels, Get Channel History, Get Thread History
+Share Context: Discord Context
+Param: channelid: the ID of the channel containing the thread
+Param: guildid: the ID of the guild that the channel belongs to
+Param: threadid: the ID of the thread to send the message to
+Param: text: the text content to send
+
+#!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- sendMessageInThread
+
+---
+Name: Discord Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Discord tools
+
+You have access to a set of tools to use the Discord API.
+
+Do not provide guild, channel, thread, message, or user IDs in the output, as these are not helpful for the user.
+
+When displaying the output of a message, format it like this: 
+
+Time User: Content
+  Additional details if needed
+  Link
+
+When displaying times, use the user's default time zone.
+
+## End of instructions for using Discord tools
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/discord.svg

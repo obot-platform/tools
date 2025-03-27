@@ -103,6 +103,7 @@ Param: reply_to_email_id: The ID of the email to reply to (Optional)
 Param: reply_all: Whether to reply to all (Optional: Default is false)
 Param: subject: Subject of the email
 Param: message: Message body of the email
+Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateDraft.py
 

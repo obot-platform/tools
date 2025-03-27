@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 from helpers import client, create_message
 
 
-def main():
+async def main():
     to_emails = os.getenv('TO_EMAILS')
     if to_emails is None:
         raise ValueError("At least one recipient must be specified with 'to_emails'")
@@ -23,21 +23,24 @@ def main():
     draft_id = os.getenv('DRAFT_ID')
     if draft_id is None:
         raise ValueError("draft_id must be set")
+    
+    attachments = os.getenv('ATTACHMENTS', '').split(',')
+    attachments = [attachment.strip() for attachment in attachments if attachment.strip()]
 
     reply_to_email_id = os.getenv('REPLY_TO_EMAIL_ID')
     reply_all = os.getenv('REPLY_ALL') == 'true'
 
     service = client('gmail', 'v1')
     try:
-        update_draft(service=service, draft_id=draft_id, to=to_emails, cc=cc_emails, bcc=bcc_emails, subject=subject,
-                     body=message, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
+        await update_draft(service=service, draft_id=draft_id, to=to_emails, cc=cc_emails, bcc=bcc_emails, subject=subject,
+                     body=message, attachments=attachments, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
     except HttpError as err:
         print(err)
 
 
-def update_draft(service, draft_id, to, cc, bcc, subject, body, reply_to_email_id=None, reply_all=False):
+async def update_draft(service, draft_id, to, cc, bcc, subject, body, attachments, reply_to_email_id=None, reply_all=False):
     try:
-        message = create_message(to=to, cc=cc, bcc=bcc, subject=subject, message_text=body, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
+        message = await create_message(service=service, to=to, cc=cc, bcc=bcc, subject=subject, message_text=body, attachments=attachments, reply_to_email_id=reply_to_email_id, reply_all=reply_all)
         updated_draft = {
             'id': draft_id,
             'message': message,

@@ -43,6 +43,7 @@ async def main():
 async def send_message(service, to, cc, bcc, subject, body, attachments):
     try:
         message = await create_message(
+            service=service,
             to=to,
             cc=cc,
             bcc=bcc,
