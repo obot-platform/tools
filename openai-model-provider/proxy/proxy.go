@@ -131,6 +131,7 @@ func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *server) proxyDirector(req *http.Request) {
+	fmt.Println("Proxying request to OpenAI the lame way")
 	req.URL.Scheme = s.cfg.URL.Scheme
 	req.URL.Host = s.cfg.URL.Host
 	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
