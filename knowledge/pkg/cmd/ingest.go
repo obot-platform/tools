@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
 	"github.com/spf13/cobra"
 
-	"github.com/gptscript-ai/knowledge/pkg/client"
-	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
+	"github.com/obot-platform/tools/knowledge/pkg/client"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
 )
 
 type ClientIngest struct {

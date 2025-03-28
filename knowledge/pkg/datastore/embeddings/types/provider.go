@@ -1,12 +1,12 @@
 package types
 
 import (
-	cg "github.com/philippgille/chromem-go"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type EmbeddingModelProvider interface {
 	Name() string
-	EmbeddingFunc() (cg.EmbeddingFunc, error)
+	EmbeddingFunc() (vs.EmbeddingFunc, error)
 	Configure() error
 	Config() any
 	EmbeddingModelName() string

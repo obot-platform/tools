@@ -1,5 +1,5 @@
 // Start Generation Here
-module github.com/gptscript-ai/knowledge-website-integration
+module github.com/obot-platform/tools/knowledge-website-integration
 
 go 1.23.1
 

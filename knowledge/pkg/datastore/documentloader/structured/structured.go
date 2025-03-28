@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/knadh/koanf/maps"
 )
 

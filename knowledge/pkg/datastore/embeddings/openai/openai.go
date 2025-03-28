@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"math"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -16,11 +17,11 @@ import (
 	"time"
 
 	"dario.cat/mergo"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
-	"github.com/gptscript-ai/knowledge/pkg/env"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	cg "github.com/philippgille/chromem-go"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/load"
+	"github.com/obot-platform/tools/knowledge/pkg/env"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 var OpenAIEmbeddingAPITimeout = time.Duration(env.GetIntFromEnvOrDefault("KNOW_OPENAI_EMBEDDING_API_TIMEOUT_SECONDS", defaults.ModelAPIRequestTimeoutSeconds)) * time.Second
@@ -55,6 +56,12 @@ type OpenAIEmbeddingRequest struct {
 	Model          string `json:"model"`
 	EncodingFormat string `json:"encoding_format,omitempty"`
 	Dimensions     *int   `json:"dimensions,omitempty"`
+}
+
+type OpenAIResponse struct {
+	Data []struct {
+		Embedding []float32 `json:"embedding"`
+	} `json:"data"`
 }
 
 func (o OpenAIConfig) Name() string {
@@ -117,8 +124,8 @@ func (p *EmbeddingModelProviderOpenAI) fillDefaults() error {
 	return nil
 }
 
-func (p *EmbeddingModelProviderOpenAI) EmbeddingFunc() (cg.EmbeddingFunc, error) {
-	var embeddingFunc cg.EmbeddingFunc
+func (p *EmbeddingModelProviderOpenAI) EmbeddingFunc() (vs.EmbeddingFunc, error) {
+	var embeddingFunc vs.EmbeddingFunc
 
 	switch strings.ToLower(p.APIType) {
 	// except for Azure, most other OpenAI API compatible providers only differ in the normalization of output vectors (apart from the obvious API endpoint, etc.)
@@ -182,7 +189,7 @@ func (p *EmbeddingModelProviderOpenAI) Config() any {
 // model are already normalized, as is the case for OpenAI's and Mistral's models.
 // The flag is optional. If it's nil, it will be autodetected on the first request
 // (which bears a small risk that the vector just happens to have a length of 1).
-func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
+func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) vs.EmbeddingFunc {
 	if config == nil {
 		panic("config must not be nil")
 	}
@@ -250,7 +257,7 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 			return nil, fmt.Errorf("error sending request(s): %w", err)
 		}
 
-		var embeddingResponse cg.OpenAIResponse
+		var embeddingResponse OpenAIResponse
 		err = json.Unmarshal(body, &embeddingResponse)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't unmarshal response body: %w", err)
@@ -266,21 +273,48 @@ func NewEmbeddingFuncOpenAICompat(config *OpenAICompatConfig) cg.EmbeddingFunc {
 			if *config.normalized {
 				return v, nil
 			}
-			return cg.NormalizeVector(v), nil
+			return normalizeVector(v), nil
 		}
 		checkNormalized.Do(func() {
-			if cg.IsNormalized(v) {
+			if isNormalized(v) {
 				checkedNormalized = true
 			} else {
 				checkedNormalized = false
 			}
 		})
 		if !checkedNormalized {
-			v = cg.NormalizeVector(v)
+			v = normalizeVector(v)
 		}
 
 		return v, nil
 	}
+}
+
+func normalizeVector(v []float32) []float32 {
+	var norm float32
+	for _, val := range v {
+		norm += val * val
+	}
+	norm = float32(math.Sqrt(float64(norm)))
+
+	res := make([]float32, len(v))
+	for i, val := range v {
+		res[i] = val / norm
+	}
+
+	return res
+}
+
+const isNormalizedPrecisionTolerance = 1e-6
+
+// isNormalized checks if the vector is normalized.
+func isNormalized(v []float32) bool {
+	var sqSum float64
+	for _, val := range v {
+		sqSum += float64(val) * float64(val)
+	}
+	magnitude := math.Sqrt(sqSum)
+	return math.Abs(magnitude-1) < isNormalizedPrecisionTolerance
 }
 
 func RequestWithExponentialBackoff(ctx context.Context, client *http.Client, req *http.Request, maxRetries int, handleRateLimit bool) ([]byte, error) {
@@ -418,7 +452,7 @@ const (
 // using the Azure OpenAI API.
 // The `deploymentURL` is the URL of the deployed model, e.g. "https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME"
 // See https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/embeddings?tabs=console#how-to-get-embeddings
-func NewEmbeddingFuncAzureOpenAI(apiKey string, deploymentURL string, apiVersion string, model string) cg.EmbeddingFunc {
+func NewEmbeddingFuncAzureOpenAI(apiKey string, deploymentURL string, apiVersion string, model string) vs.EmbeddingFunc {
 	if apiVersion == "" {
 		apiVersion = azureDefaultAPIVersion
 	}

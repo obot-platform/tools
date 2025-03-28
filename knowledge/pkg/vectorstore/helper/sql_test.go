@@ -3,12 +3,12 @@ package helper
 import (
 	"testing"
 
-	cg "github.com/philippgille/chromem-go"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildWhereDocumentClause_EmptyInput_TRUEClause(t *testing.T) {
-	var whereDocs []cg.WhereDocument
+	var whereDocs []vs.WhereDocument
 	whereClause, a, err := BuildWhereDocumentClause(whereDocs, "AND")
 	assert.NoError(t, err)
 	assert.Equal(t, "TRUE", whereClause)
@@ -16,8 +16,8 @@ func TestBuildWhereDocumentClause_EmptyInput_TRUEClause(t *testing.T) {
 }
 
 func TestBuildWhereDocumentClause_SingleEqualsCondition_ReturnsCorrectClause(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
-		{Operator: cg.WhereDocumentOperatorEquals, Value: "test"},
+	whereDocs := []vs.WhereDocument{
+		{Operator: vs.WhereDocumentOperatorEquals, Value: "test"},
 	}
 	whereClause, a, err := BuildWhereDocumentClause(whereDocs, "AND")
 	assert.NoError(t, err)
@@ -26,8 +26,8 @@ func TestBuildWhereDocumentClause_SingleEqualsCondition_ReturnsCorrectClause(t *
 }
 
 func TestBuildWhereDocumentClause_SingleContainsCondition_ReturnsCorrectClause(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
-		{Operator: cg.WhereDocumentOperatorContains, Value: "test"},
+	whereDocs := []vs.WhereDocument{
+		{Operator: vs.WhereDocumentOperatorContains, Value: "test"},
 	}
 	whereClause, a, err := BuildWhereDocumentClause(whereDocs, "AND")
 	assert.NoError(t, err)
@@ -36,8 +36,8 @@ func TestBuildWhereDocumentClause_SingleContainsCondition_ReturnsCorrectClause(t
 }
 
 func TestBuildWhereDocumentClause_SingleNotContainsCondition_ReturnsCorrectClause(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
-		{Operator: cg.WhereDocumentOperatorNotContains, Value: "test"},
+	whereDocs := []vs.WhereDocument{
+		{Operator: vs.WhereDocumentOperatorNotContains, Value: "test"},
 	}
 	whereClause, a, err := BuildWhereDocumentClause(whereDocs, "AND")
 	assert.NoError(t, err)
@@ -46,12 +46,12 @@ func TestBuildWhereDocumentClause_SingleNotContainsCondition_ReturnsCorrectClaus
 }
 
 func TestBuildWhereDocumentClause_AndCondition_ReturnsCorrectClauses(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
+	whereDocs := []vs.WhereDocument{
 		{
-			Operator: cg.WhereDocumentOperatorAnd,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test1"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test2"},
+			Operator: vs.WhereDocumentOperatorAnd,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test1"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test2"},
 			},
 		},
 	}
@@ -62,12 +62,12 @@ func TestBuildWhereDocumentClause_AndCondition_ReturnsCorrectClauses(t *testing.
 }
 
 func TestBuildWhereDocumentClause_OrCondition_ReturnsCorrectClauses(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
+	whereDocs := []vs.WhereDocument{
 		{
-			Operator: cg.WhereDocumentOperatorOr,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test1"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test2"},
+			Operator: vs.WhereDocumentOperatorOr,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test1"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test2"},
 			},
 		},
 	}
@@ -78,32 +78,32 @@ func TestBuildWhereDocumentClause_OrCondition_ReturnsCorrectClauses(t *testing.T
 }
 
 func TestBuildWhereDocumentClause_Nested_ReturnsCorrectClauses(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
+	whereDocs := []vs.WhereDocument{
 		{
-			Operator: cg.WhereDocumentOperatorOr,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test1"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test2"},
+			Operator: vs.WhereDocumentOperatorOr,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test1"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test2"},
 			},
 		},
 		{
-			Operator: cg.WhereDocumentOperatorAnd,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test3"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test4"},
+			Operator: vs.WhereDocumentOperatorAnd,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test3"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test4"},
 			},
 		},
 		{
-			Operator: cg.WhereDocumentOperatorAnd,
-			WhereDocuments: []cg.WhereDocument{
+			Operator: vs.WhereDocumentOperatorAnd,
+			WhereDocuments: []vs.WhereDocument{
 				{
-					Operator: cg.WhereDocumentOperatorAnd,
-					WhereDocuments: []cg.WhereDocument{
-						{Operator: cg.WhereDocumentOperatorEquals, Value: "test5"},
-						{Operator: cg.WhereDocumentOperatorEquals, Value: "test6"},
+					Operator: vs.WhereDocumentOperatorAnd,
+					WhereDocuments: []vs.WhereDocument{
+						{Operator: vs.WhereDocumentOperatorEquals, Value: "test5"},
+						{Operator: vs.WhereDocumentOperatorEquals, Value: "test6"},
 					},
 				},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test7"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test7"},
 			},
 		},
 	}
@@ -114,32 +114,32 @@ func TestBuildWhereDocumentClause_Nested_ReturnsCorrectClauses(t *testing.T) {
 }
 
 func TestBuildWhereDocumentClauseIndexed_Nested_ReturnsCorrectClauses(t *testing.T) {
-	whereDocs := []cg.WhereDocument{
+	whereDocs := []vs.WhereDocument{
 		{
-			Operator: cg.WhereDocumentOperatorOr,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test1"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test2"},
+			Operator: vs.WhereDocumentOperatorOr,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test1"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test2"},
 			},
 		},
 		{
-			Operator: cg.WhereDocumentOperatorAnd,
-			WhereDocuments: []cg.WhereDocument{
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test3"},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test4"},
+			Operator: vs.WhereDocumentOperatorAnd,
+			WhereDocuments: []vs.WhereDocument{
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test3"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test4"},
 			},
 		},
 		{
-			Operator: cg.WhereDocumentOperatorAnd,
-			WhereDocuments: []cg.WhereDocument{
+			Operator: vs.WhereDocumentOperatorAnd,
+			WhereDocuments: []vs.WhereDocument{
 				{
-					Operator: cg.WhereDocumentOperatorAnd,
-					WhereDocuments: []cg.WhereDocument{
-						{Operator: cg.WhereDocumentOperatorEquals, Value: "test5"},
-						{Operator: cg.WhereDocumentOperatorEquals, Value: "test6"},
+					Operator: vs.WhereDocumentOperatorAnd,
+					WhereDocuments: []vs.WhereDocument{
+						{Operator: vs.WhereDocumentOperatorEquals, Value: "test5"},
+						{Operator: vs.WhereDocumentOperatorEquals, Value: "test6"},
 					},
 				},
-				{Operator: cg.WhereDocumentOperatorEquals, Value: "test7"},
+				{Operator: vs.WhereDocumentOperatorEquals, Value: "test7"},
 			},
 		},
 	}

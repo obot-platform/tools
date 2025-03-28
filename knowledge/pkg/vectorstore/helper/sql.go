@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	cg "github.com/philippgille/chromem-go"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
-func BuildWhereDocumentClauseIndexed(whereDocs []cg.WhereDocument, joinOperator string, argIndex int) (string, []any, error) {
+func BuildWhereDocumentClauseIndexed(whereDocs []types.WhereDocument, joinOperator string, argIndex int) (string, []any, error) {
 	if len(whereDocs) == 0 {
 		return "TRUE", nil, nil
 	}
@@ -19,7 +19,7 @@ func BuildWhereDocumentClauseIndexed(whereDocs []cg.WhereDocument, joinOperator 
 	var args []any
 	for _, wd := range whereDocs {
 		switch wd.Operator {
-		case cg.WhereDocumentOperatorAnd:
+		case types.WhereDocumentOperatorAnd:
 			wc, a, err := BuildWhereDocumentClauseIndexed(wd.WhereDocuments, "AND", argIndex)
 			if err != nil {
 				return "", nil, err
@@ -27,7 +27,7 @@ func BuildWhereDocumentClauseIndexed(whereDocs []cg.WhereDocument, joinOperator 
 			whereClauses = append(whereClauses, fmt.Sprintf("(%s)", wc))
 			args = append(args, a...)
 			argIndex += len(a)
-		case cg.WhereDocumentOperatorOr:
+		case types.WhereDocumentOperatorOr:
 			wc, a, err := BuildWhereDocumentClauseIndexed(wd.WhereDocuments, "OR", argIndex)
 			if err != nil {
 				return "", nil, err
@@ -35,15 +35,15 @@ func BuildWhereDocumentClauseIndexed(whereDocs []cg.WhereDocument, joinOperator 
 			whereClauses = append(whereClauses, fmt.Sprintf("(%s)", wc))
 			args = append(args, a...)
 			argIndex += len(a)
-		case cg.WhereDocumentOperatorEquals:
+		case types.WhereDocumentOperatorEquals:
 			whereClauses = append(whereClauses, fmt.Sprintf("document = $%d", argIndex))
 			args = append(args, wd.Value)
 			argIndex += 1
-		case cg.WhereDocumentOperatorContains:
+		case types.WhereDocumentOperatorContains:
 			whereClauses = append(whereClauses, fmt.Sprintf("document LIKE $%d", argIndex))
 			args = append(args, "%"+wd.Value+"%")
 			argIndex += 1
-		case cg.WhereDocumentOperatorNotContains:
+		case types.WhereDocumentOperatorNotContains:
 			whereClauses = append(whereClauses, fmt.Sprintf("document NOT LIKE $%d", argIndex))
 			args = append(args, "%"+wd.Value+"%")
 			argIndex += 1
@@ -52,7 +52,7 @@ func BuildWhereDocumentClauseIndexed(whereDocs []cg.WhereDocument, joinOperator 
 	return strings.Join(whereClauses, joinOperator), args, nil
 }
 
-func BuildWhereDocumentClause(whereDocs []cg.WhereDocument, joinOperator string) (string, []any, error) {
+func BuildWhereDocumentClause(whereDocs []types.WhereDocument, joinOperator string) (string, []any, error) {
 	if len(whereDocs) == 0 {
 		return "TRUE", nil, nil
 	}
@@ -64,27 +64,27 @@ func BuildWhereDocumentClause(whereDocs []cg.WhereDocument, joinOperator string)
 	var args []any
 	for _, wd := range whereDocs {
 		switch wd.Operator {
-		case cg.WhereDocumentOperatorAnd:
+		case types.WhereDocumentOperatorAnd:
 			wc, a, err := BuildWhereDocumentClause(wd.WhereDocuments, "AND")
 			if err != nil {
 				return "", nil, err
 			}
 			whereClauses = append(whereClauses, fmt.Sprintf("(%s)", wc))
 			args = append(args, a...)
-		case cg.WhereDocumentOperatorOr:
+		case types.WhereDocumentOperatorOr:
 			wc, a, err := BuildWhereDocumentClause(wd.WhereDocuments, "OR")
 			if err != nil {
 				return "", nil, err
 			}
 			whereClauses = append(whereClauses, fmt.Sprintf("(%s)", wc))
 			args = append(args, a...)
-		case cg.WhereDocumentOperatorEquals:
+		case types.WhereDocumentOperatorEquals:
 			whereClauses = append(whereClauses, fmt.Sprintf("document = ?"))
 			args = append(args, wd.Value)
-		case cg.WhereDocumentOperatorContains:
+		case types.WhereDocumentOperatorContains:
 			whereClauses = append(whereClauses, fmt.Sprintf("document LIKE ?"))
 			args = append(args, "%"+wd.Value+"%")
-		case cg.WhereDocumentOperatorNotContains:
+		case types.WhereDocumentOperatorNotContains:
 			whereClauses = append(whereClauses, fmt.Sprintf("document NOT LIKE ?"))
 			args = append(args, "%"+wd.Value+"%")
 		}

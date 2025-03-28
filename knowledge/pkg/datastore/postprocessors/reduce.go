@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"slices"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 )
 
 const ReducePostprocessorName = "reduce"

@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/acorn-io/cmd"
-	"github.com/gptscript-ai/knowledge/version"
+	"github.com/obot-platform/tools/knowledge/version"
 	"github.com/spf13/cobra"
 )
 

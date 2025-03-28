@@ -8,11 +8,10 @@ import (
 	"sync"
 
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
-	"github.com/philippgille/chromem-go"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -58,7 +57,7 @@ func (r *MergingRetriever) DecodeConfig(cfg map[string]any) error {
 	return nil
 }
 
-func (r *MergingRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
+func (r *MergingRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	log := slog.With("component", "MergingRetriever")
 
 	// Set default weight to 1.0 if not provided

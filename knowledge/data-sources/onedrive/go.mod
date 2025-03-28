@@ -1,4 +1,4 @@
-module github.com/gptscript-ai/knowledge-onedrive-integration
+module github.com/obot-platform/tools/knowledge-onedrive-integration
 
 go 1.23.1
 

@@ -13,9 +13,9 @@ import (
 	"github.com/JohannesKaufmann/html-to-markdown/v2/plugin/commonmark"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gen2brain/go-fitz"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/pkoukk/tiktoken-go"
 	"golang.org/x/sync/errgroup"
 )
@@ -129,7 +129,7 @@ func (l *PDF) Load(ctx context.Context) ([]vs.Document, error) {
 	numPages := l.Document.NumPage()
 
 	// We need a Lock here, since MuPDF is not thread-safe and there are some edge cases that can cause a CGO panic.
-	// See https://github.com/gptscript-ai/knowledge/issues/135
+	// See https://github.com/obot-platform/tools/knowledge/issues/135
 	MuPDFLock.Lock()
 	defer MuPDFLock.Unlock()
 	g, childCtx := errgroup.WithContext(ctx)

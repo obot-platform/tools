@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
 
 	golcmodel "github.com/hupe1980/golc/model"
 	"github.com/hupe1980/golc/model/chatmodel"

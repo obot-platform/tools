@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
 )
 
 // compile time check

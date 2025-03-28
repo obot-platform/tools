@@ -9,22 +9,21 @@ import (
 	"strings"
 
 	sqlitevec "github.com/asg017/sqlite-vec-go-bindings/ncruces"
-	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	cg "github.com/philippgille/chromem-go"
+	dbtypes "github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/helper"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"gorm.io/gorm"
 
 	"github.com/ncruces/go-sqlite3/gormlite"
 )
 
 type VectorStore struct {
-	embeddingFunc       cg.EmbeddingFunc
+	embeddingFunc       vs.EmbeddingFunc
 	db                  *gorm.DB
 	embeddingsTableName string
 }
 
-func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*VectorStore, error) {
+func New(ctx context.Context, dsn string, embeddingFunc vs.EmbeddingFunc) (*VectorStore, error) {
 	dsn = "file:" + strings.TrimPrefix(dsn, "sqlite-vec://")
 
 	slog.Debug("sqlite-vec", "dsn", dsn)
@@ -175,7 +174,7 @@ func (v *VectorStore) AddDocuments(ctx context.Context, docs []vs.Document, coll
 	return ids, nil
 }
 
-func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument, embeddingFunc cg.EmbeddingFunc) ([]vs.Document, error) {
+func (v *VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []vs.WhereDocument, embeddingFunc vs.EmbeddingFunc) ([]vs.Document, error) {
 	ef := v.embeddingFunc
 	if embeddingFunc != nil {
 		ef = embeddingFunc
@@ -264,7 +263,7 @@ func (v *VectorStore) RemoveCollection(ctx context.Context, collection string) e
 	return nil
 }
 
-func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error {
+func (v *VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []vs.WhereDocument) error {
 	var ids []string
 
 	err := v.db.Transaction(func(tx *gorm.DB) error {
@@ -356,7 +355,7 @@ func (v *VectorStore) GetDocument(ctx context.Context, documentID, collection st
 	return doc, nil
 }
 
-func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
+func (v *VectorStore) GetDocuments(_ context.Context, collection string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	var docs []vs.Document
 
 	// Build metadata filter query

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-LD_FLAGS="-s -w -X github.com/gptscript-ai/knowledge/version.Version=${GIT_TAG}"
+LD_FLAGS="-s -w -X github.com/obot-platform/tools/knowledge/version.Version=${GIT_TAG}"
 
 #
 # Main build - includes MuPDF, which requires CGO and is currently not possible to be built for linux/arm64 and windows/arm64

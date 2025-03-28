@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
-	vserr "github.com/gptscript-ai/knowledge/pkg/vectorstore/errors"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
+	vserr "github.com/obot-platform/tools/knowledge/pkg/vectorstore/errors"
 	"github.com/spf13/cobra"
 )
 

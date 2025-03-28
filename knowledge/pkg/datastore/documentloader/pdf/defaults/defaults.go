@@ -5,8 +5,8 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/gopdf"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/gopdf"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 var DefaultPDFReaderFunc func(ctx context.Context, reader io.Reader) ([]vs.Document, error) = func(ctx context.Context, reader io.Reader) ([]vs.Document, error) {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/llm"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/llm"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const ContentFilterPostprocessorName = "content_filter"

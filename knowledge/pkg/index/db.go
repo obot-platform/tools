@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/postgres"
-	"github.com/gptscript-ai/knowledge/pkg/index/sqlite"
+	"github.com/obot-platform/tools/knowledge/pkg/index/postgres"
+	"github.com/obot-platform/tools/knowledge/pkg/index/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )

@@ -2,7 +2,7 @@ package documentloader
 
 import (
 	"context"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/gopdf"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/gopdf"
 	"strings"
 	"testing"
 

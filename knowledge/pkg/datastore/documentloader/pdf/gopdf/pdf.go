@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/ledongthuc/pdf"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/pdf-parser"
 )
 
 /*

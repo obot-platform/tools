@@ -1,7 +1,7 @@
 package defaults
 
 import (
-	"github.com/gptscript-ai/knowledge/pkg/env"
+	"github.com/obot-platform/tools/knowledge/pkg/env"
 )
 
 const (

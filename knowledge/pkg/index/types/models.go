@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
 )
 
 type DatasetCreateOpts struct {

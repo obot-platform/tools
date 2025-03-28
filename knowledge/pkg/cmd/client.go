@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/client"
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/client"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 )
 
 type Client struct {

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	acmd "github.com/acorn-io/cmd"
-	"github.com/gptscript-ai/knowledge/pkg/cmd"
+	"github.com/obot-platform/tools/knowledge/pkg/cmd"
 )
 
 func main() {

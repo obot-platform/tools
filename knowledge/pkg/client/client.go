@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
-	types2 "github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	dstypes "github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	types2 "github.com/obot-platform/tools/knowledge/pkg/index/types"
 )
 
 type IngestWorkspaceOpts struct {

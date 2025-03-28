@@ -11,15 +11,14 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/gptscript-ai/knowledge/pkg/env"
-	dbtypes "github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore/helper"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/env"
+	dbtypes "github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore/helper"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
-	cg "github.com/philippgille/chromem-go"
 )
 
 const (
@@ -64,7 +63,7 @@ type CloseNoErr interface {
 }
 
 type VectorStore struct {
-	embeddingFunc        cg.EmbeddingFunc
+	embeddingFunc        vs.EmbeddingFunc
 	embeddingConcurrency int
 	conn                 PGXConn
 	embeddingTableName   string
@@ -91,7 +90,7 @@ var DefaultHNSWIndex = &HNSWIndex{
 	distanceFunction: "vector_l2_ops",
 }
 
-func New(ctx context.Context, dsn string, embeddingFunc cg.EmbeddingFunc) (*VectorStore, error) {
+func New(ctx context.Context, dsn string, embeddingFunc vs.EmbeddingFunc) (*VectorStore, error) {
 	dsn = "postgres://" + strings.TrimPrefix(dsn, "pgvector://")
 
 	store := &VectorStore{
@@ -375,7 +374,7 @@ SimilaritySearch performs a similarity search on the given query and returns the
 *   - `<~>` - Hamming distance (binary vectors, added in 0.7.0)
 *   - `<%>` - Jaccard distance (binary vectors, added in 0.7.0)
 */
-func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []cg.WhereDocument, embeddingFunc cg.EmbeddingFunc) ([]vs.Document, error) {
+func (v VectorStore) SimilaritySearch(ctx context.Context, query string, numDocuments int, collection string, where map[string]string, whereDocument []vs.WhereDocument, embeddingFunc vs.EmbeddingFunc) ([]vs.Document, error) {
 	slog.Debug("Similarity search", "query", query, "numDocuments", numDocuments, "collection", collection, "where", where, "whereDocument", whereDocument, "store", "pgvector")
 
 	ef := v.embeddingFunc
@@ -459,7 +458,7 @@ func (v VectorStore) RemoveCollection(ctx context.Context, collection string) er
 	return tx.Commit(ctx)
 }
 
-func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []cg.WhereDocument) error {
+func (v VectorStore) RemoveDocument(ctx context.Context, documentID string, collection string, where map[string]string, whereDocument []vs.WhereDocument) error {
 	cid, err := v.getCollectionUUID(ctx, collection)
 	if err != nil {
 		return fmt.Errorf("collection %s not found: %w", collection, err)
@@ -511,7 +510,7 @@ func (v VectorStore) GetDocument(ctx context.Context, documentID, collection str
 	return doc, nil
 }
 
-func (v VectorStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []cg.WhereDocument) ([]vs.Document, error) {
+func (v VectorStore) GetDocuments(ctx context.Context, collection string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	var args []any
 	var whereCol string
 	if collection != "" {
@@ -558,7 +557,7 @@ func (v VectorStore) ExportCollectionsToFile(ctx context.Context, path string, c
 	return fmt.Errorf("function ExportCollectionsToFile not implemented for vectorstore pgvector")
 }
 
-func buildWhereClause(args []any, where map[string]string, whereDocument []cg.WhereDocument) (string, []any, error) {
+func buildWhereClause(args []any, where map[string]string, whereDocument []vs.WhereDocument) (string, []any, error) {
 	if len(where)+len(whereDocument) == 0 {
 		return "TRUE", args, nil
 	}

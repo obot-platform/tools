@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/gptscript-ai/knowledge/pkg/llm"
+	"github.com/obot-platform/tools/knowledge/pkg/llm"
 )
 
 const EnhanceQueryModifierName = "enhance"

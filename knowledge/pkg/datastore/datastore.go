@@ -11,16 +11,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	etypes "github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	"github.com/gptscript-ai/knowledge/pkg/output"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	etypes "github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
 
 	"github.com/adrg/xdg"
-	"github.com/gptscript-ai/knowledge/pkg/index"
-	"github.com/gptscript-ai/knowledge/pkg/vectorstore"
-	cg "github.com/philippgille/chromem-go"
+	"github.com/obot-platform/tools/knowledge/pkg/index"
+	"github.com/obot-platform/tools/knowledge/pkg/vectorstore"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 type Datastore struct {
@@ -56,7 +56,7 @@ func GetDefaultDSNs(indexDSN, vectorDSN string) (string, string, bool, error) {
 	return indexDSN, vectorDSN, isArchive, nil
 }
 
-func LogEmbeddingFunc(embeddingFunc cg.EmbeddingFunc) cg.EmbeddingFunc {
+func LogEmbeddingFunc(embeddingFunc vs.EmbeddingFunc) vs.EmbeddingFunc {
 	return func(ctx context.Context, text string) ([]float32, error) {
 		l := log.FromCtx(ctx).With("stage", "embedding")
 

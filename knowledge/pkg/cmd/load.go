@@ -14,12 +14,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/client"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
-	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
+	"github.com/obot-platform/tools/knowledge/pkg/client"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/structured"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/filetypes"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
 	"github.com/spf13/cobra"
 )
 

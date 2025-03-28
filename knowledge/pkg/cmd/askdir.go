@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/client"
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
+	"github.com/obot-platform/tools/knowledge/pkg/client"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
 	"github.com/spf13/cobra"
 )
 

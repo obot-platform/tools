@@ -8,12 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	"github.com/gptscript-ai/knowledge/pkg/llm"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/philippgille/chromem-go"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	"github.com/obot-platform/tools/knowledge/pkg/llm"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const SubqueryRetrieverName = "subquery"
@@ -50,7 +49,7 @@ type subqueryResp struct {
 	Results []string `json:"results"`
 }
 
-func (s *SubqueryRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
+func (s *SubqueryRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	if len(datasetIDs) == 0 {
 		return nil, fmt.Errorf("no dataset specified for retrieval")
 	}

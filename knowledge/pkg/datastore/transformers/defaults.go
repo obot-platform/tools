@@ -1,7 +1,7 @@
 package transformers
 
 import (
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 )
 
 func DefaultDocumentTransformers(filetype string) (transformers []types.DocumentTransformer) {

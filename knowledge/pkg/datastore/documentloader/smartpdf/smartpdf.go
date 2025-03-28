@@ -10,11 +10,11 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/ocr/openai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/mupdf"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	"github.com/gptscript-ai/knowledge/pkg/log"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/ocr/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/mupdf"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/log"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -138,7 +138,7 @@ func (s *SmartPDF) Load(ctx context.Context) ([]vs.Document, error) {
 	ctx = log.ToCtx(ctx, logger)
 
 	// We need a lock here, since MuPDF is not thread-safe and there are some edge cases that can cause a CGO panic.
-	// See https://github.com/gptscript-ai/knowledge/issues/135
+	// See https://github.com/obot-platform/tools/knowledge/issues/135
 	mupdf.MuPDFLock.Lock()
 	defer mupdf.MuPDFLock.Unlock()
 	g, childCtx := errgroup.WithContext(ctx)

@@ -27,7 +27,7 @@ This project is a Go application that synchronizes files and folders from shared
 3. Run the application:
 
    ```sh
-   gptscript github.com/gptscript-ai/knowledge-onedrive-sync
+   gptscript github.com/obot-platform/tools/knowledge-onedrive-sync
    ```
 
 4. You will have output and files written into the working directory.

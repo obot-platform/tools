@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
 	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader"
 	"github.com/pkoukk/tiktoken-go"
 )
 

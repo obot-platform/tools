@@ -2,7 +2,7 @@ package textsplitter
 
 import (
 	"github.com/acorn-io/z"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 )
 
 func DefaultTextSplitter(filetype string, textSplitterOpts *TextSplitterOpts) types.TextSplitter {
