@@ -290,16 +290,19 @@ def create_event(service):
         try:
             recurrence_list = json.loads(recurrence)
         except json.JSONDecodeError:
-            raise ValueError(
-                f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
-            )
-        finally:
-            for r in recurrence_list:
-                if not _validate_rrule(r):
-                    raise ValueError(
-                        f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
-                    )
-            event_body["recurrence"] = recurrence_list
+            if _validate_rrule(recurrence): # even if it's not a list,  check if it's a valid recurrence rule, if yes, wrap it in a list
+                recurrence_list = [recurrence]
+            else: # if it's not a valid recurrence rule, raise an error
+                raise ValueError(
+                    f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
+                )
+
+        for r in recurrence_list:
+            if not _validate_rrule(r):
+                raise ValueError(
+                    f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
+                )
+        event_body["recurrence"] = recurrence_list
 
     attendees = os.getenv(
         "ATTENDEES"
