@@ -338,6 +338,18 @@ def _get_current_user_email(service) -> str:
     return user_info["id"]
 
 
+def _has_calendar_write_access(service, calendar_id: str) -> bool:
+    "Validate if the user has writer access to the calendar"
+    try:
+        calendar = service.calendarList().get(calendarId=calendar_id).execute()
+        return calendar.get("accessRole") in ("owner", "writer")
+    except HttpError as e:
+        if e.resp.status == 403:
+            return False
+        raise
+
+
+
 def update_event(service):
     """Updates an existing event."""
     calendar_id = os.getenv("CALENDAR_ID")
@@ -437,13 +449,9 @@ def update_event(service):
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
-        current_user_email = _get_current_user_email(service)
-        organizer_email = event.get("organizer", {}).get("email")
+        if not _has_calendar_write_access(service, calendar_id):
+            raise PermissionError("You do not have write access to this calendar.")
 
-        if current_user_email.lower() != organizer_email.lower():
-            raise PermissionError(
-                f"You are not the organizer of this event. Only the organizer ({organizer_email}) can update it."
-            )
         event.update(event_body)
 
         updated_event = (
