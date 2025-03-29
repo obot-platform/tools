@@ -53,7 +53,7 @@ Param: text: (Required) Text string to add to the calendar.
 
 ---
 Name: Create Event
-Description: Create a new event in a google calendar
+Description: Create a new event in a google calendar. The event type is always set to "default".
 Credential: ./credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to create event in. Set to `primary` to create event in the primary calendar.
@@ -86,7 +86,8 @@ Param: start_date: (Optional) The date, in the format "yyyy-mm-dd", only used if
 Param: start_datetime: (Optional) Start date and time of the event to update. Must be a valid RFC 3339 formatted date/time string. A time zone offset is required unless a time zone is explicitly specified in timeZone.
 Param: end_date: (Optional) The date, in the format "yyyy-mm-dd", if this is an all-day event.
 Param: end_datetime: (Optional) End date and time of the event to update. Must be a valid RFC 3339 formatted date/time string. A time zone offset is required unless a time zone is explicitly specified in timeZone.
-Param: attendees: (Optional) A comma separated list of email addresses of the attendees.
+Param: add_attendees: (Optional) A comma separated list of email addresses of the attendees. This will add the new attendees to the existing attendees list.
+Param: replace_attendees: (Optional) A comma separated list of email addresses of the attendees. This is only valid when add_attendees is empty. This will replace the existing attendees list with the new list.
 Param: recurrence: (Optional) A JSON array of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. Note that DTSTART and DTEND lines are not allowed in this field, because they are already specified in the start_datetime and end_datetime fields.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py update_event

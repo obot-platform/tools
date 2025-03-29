@@ -15,6 +15,200 @@ from dateutil.rrule import rrulestr
 logger = setup_logger(__name__)
 
 DEFAULT_MAX_RESULTS = 250
+GOOGLE_EVENT_TYPE_OPTIONS = [
+    "birthday",
+    "default",
+    "focusTime",
+    "fromGmail",
+    "outOfOffice",
+    "workingLocation",
+]
+MOVABLE_EVENT_TYPES = ["default"]
+CALENDAR_EVENT_TYPE_RULES = {
+    "default": {
+        "fully_updatable": True,
+        "updatable_properties": [
+            "summary",
+            "description",
+            "location",
+            "start",
+            "end",
+            "attendees",
+            "recurrence",
+            "reminders",
+            "colorId",
+            "visibility",
+            "transparency",
+            "status",
+            "extendedProperties",
+            "attachments",
+            "guestsCanInviteOthers",
+            "guestsCanModify",
+            "guestsCanSeeOtherGuests",
+            "source",
+            "sequence",
+            # All standard properties can be updated
+        ],
+        "restrictions": [],
+        "notes": "Most flexible event type with virtually no restrictions on updates.",
+    },
+    "fromGmail": {
+        "fully_updatable": False,
+        "updatable_properties": [],
+        "restrictions": [
+            "Cannot create new fromGmail events via the API",
+            "Cannot change the organizer",
+            "Cannot modify core properties like summary, description, location, or times",
+        ],
+        "notes": "Limited to updating UI and preference properties only.",
+    },
+    "birthday": {
+        "fully_updatable": False,
+        "updatable_properties": [
+            "colorId",
+            "summary",
+            "reminders",
+            "start",
+            "end",
+        ],
+        "restrictions": [
+            "Cannot modify birthdayProperties",
+            "Start/end time updates must remain all-day events spanning exactly one day",
+            "Timing updates are restricted if linked to a contact",
+            "Cannot change the organizer",
+            "Cannot create custom birthday properties via the API",
+        ],
+        "notes": "Use People API for comprehensive contact birthday management.",
+    },
+    "focusTime": {
+        "fully_updatable": False,
+        "updatable_properties": [
+            # Standard properties
+            "summary",
+            "description",
+            "start",
+            "end",
+            "reminders",
+            "colorId",
+            "visibility",
+            "transparency",
+            # Focus time specific properties
+            "focusTimeProperties",
+            "focusTimeProperties.autoDeclineMode",
+            "focusTimeProperties.chatStatus",
+            "focusTimeProperties.declineMessage",
+        ],
+        "restrictions": [
+            "Only available on primary calendars",
+            "Only for specific Google Workspace users",
+            "Cannot be created on secondary calendars",
+        ],
+        "notes": "Used for dedicated focus periods.",
+    },
+    "outOfOffice": {
+        "fully_updatable": False,
+        "updatable_properties": [
+            # Standard properties
+            "summary",
+            "description",
+            "start",
+            "end",
+            "reminders",
+            "colorId",
+            "visibility",
+            "transparency",
+            # Out of office specific properties
+            "outOfOfficeProperties",
+            "outOfOfficeProperties.autoDeclineMode",
+            "outOfOfficeProperties.declineMessage",
+        ],
+        "restrictions": [
+            "Only available on primary calendars",
+            "Only for specific Google Workspace users",
+            "Cannot be created on secondary calendars",
+        ],
+        "notes": "Represents time away from work.",
+    },
+    "workingLocation": {
+        "fully_updatable": False,
+        "updatable_properties": [
+            # Standard properties
+            "summary",
+            "description",
+            "start",
+            "end",
+            "reminders",
+            "colorId",
+            "visibility",
+            "transparency",
+            # Working location specific properties
+            "workingLocationProperties",
+            "workingLocationProperties.type",
+            "workingLocationProperties.homeOffice",
+            "workingLocationProperties.customLocation",
+            "workingLocationProperties.customLocation.label",
+            "workingLocationProperties.officeLocation",
+            "workingLocationProperties.officeLocation.buildingId",
+            "workingLocationProperties.officeLocation.floorId",
+            "workingLocationProperties.officeLocation.floorSectionId",
+            "workingLocationProperties.officeLocation.deskId",
+            "workingLocationProperties.officeLocation.label",
+        ],
+        "restrictions": [
+            "Only available on primary calendars",
+            "Only for specific Google Workspace users",
+            "Cannot be created on secondary calendars",
+        ],
+        "notes": "Indicates where someone is working.",
+    },
+}
+
+
+def _can_update_property(event_type, property_name):
+    """
+    Check if a specific property can be updated for a given event type.
+
+    Args:
+        event_type (str): The event type ('default', 'fromGmail', etc.)
+        property_name (str): The property to check
+
+    Returns:
+        bool: True if the property can be updated, False otherwise
+    """
+    if event_type not in CALENDAR_EVENT_TYPE_RULES:
+        raise ValueError(f"Unknown event type: {event_type}")
+
+    # Default events can update all standard properties
+    if event_type == "default":
+        return True
+
+    # For other event types, check the specific list
+    return (
+        property_name in CALENDAR_EVENT_TYPE_RULES[event_type]["updatable_properties"]
+    )
+
+
+def _get_event_type_restrictions(event_type):
+    """
+    Get the list of restrictions for a given event type.
+
+    Args:
+        event_type (str): The event type ('default', 'fromGmail', etc.)
+
+    Returns:
+        list: List of restriction strings
+    """
+    if event_type not in CALENDAR_EVENT_TYPE_RULES:
+        raise ValueError(f"Unknown event type: {event_type}")
+
+    return CALENDAR_EVENT_TYPE_RULES[event_type]["restrictions"]
+
+
+def _get_updatable_properties(event_type):
+    if event_type not in CALENDAR_EVENT_TYPE_RULES:
+        raise ValueError(f"Unknown event type: {event_type}")
+
+    return CALENDAR_EVENT_TYPE_RULES[event_type]["updatable_properties"]
 
 
 # Private helper functions
@@ -58,14 +252,7 @@ def list_events(service):
     # optional parameters
     params = {}
     event_type = os.getenv("EVENT_TYPE")
-    event_type_options = [
-        "birthday",
-        "default",
-        "focusTime",
-        "fromGmail",
-        "outOfOffice",
-        "workingLocation",
-    ]
+    event_type_options = GOOGLE_EVENT_TYPE_OPTIONS
     single_event = str_to_bool(os.getenv("SINGLE_EVENT", "false"))
     params["singleEvents"] = single_event
 
@@ -74,7 +261,7 @@ def list_events(service):
             raise ValueError(
                 f"Invalid event type: {event_type}. Valid options are: {event_type_options}"
             )
-        params["eventType"] = event_type
+        params["eventTypes"] = event_type
     time_min = os.getenv("TIME_MIN")
     if time_min:
         if not validate_rfc3339(time_min):
@@ -183,6 +370,16 @@ def move_event(service):
         raise ValueError("NEW_CALENDAR_ID environment variable is not set properly")
 
     try:
+        existing_event = (
+            service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+        )
+        if (
+            existing_event_type := existing_event.get("eventType")
+        ) not in MOVABLE_EVENT_TYPES:
+            raise ValueError(
+                f"Events with type '{existing_event_type}' can not be moved."
+            )
+
         event = (
             service.events()
             .move(calendarId=calendar_id, eventId=event_id, destination=new_calendar_id)
@@ -290,16 +487,21 @@ def create_event(service):
         try:
             recurrence_list = json.loads(recurrence)
         except json.JSONDecodeError:
-            raise ValueError(
-                f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
-            )
-        finally:
-            for r in recurrence_list:
-                if not _validate_rrule(r):
-                    raise ValueError(
-                        f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
-                    )
-            event_body["recurrence"] = recurrence_list
+            if _validate_rrule(
+                recurrence
+            ):  # even if it's not a list,  check if it's a valid recurrence rule, if yes, wrap it in a list
+                recurrence_list = [recurrence]
+            else:  # if it's not a valid recurrence rule, raise an error
+                raise ValueError(
+                    f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
+                )
+
+        for r in recurrence_list:
+            if not _validate_rrule(r):
+                raise ValueError(
+                    f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
+                )
+        event_body["recurrence"] = recurrence_list
 
     attendees = os.getenv(
         "ATTENDEES"
@@ -335,6 +537,19 @@ def _get_current_user_email(service) -> str:
     return user_info["id"]
 
 
+def _has_calendar_write_access(service, calendar_id: str) -> bool:
+    "Validate if the user has writer access to the calendar"
+    try:
+        calendar = service.calendarList().get(calendarId=calendar_id).execute()
+        return calendar.get("accessRole") in ("owner", "writer")
+    except HttpError as e:
+        if e.resp.status == 403:
+            return False
+        raise Exception(
+            f"HttpError retrieving calendar For validating user access to {calendar_id}: {e}"
+        )
+
+
 def update_event(service):
     """Updates an existing event."""
     calendar_id = os.getenv("CALENDAR_ID")
@@ -344,15 +559,37 @@ def update_event(service):
     if not event_id:
         raise ValueError("EVENT_ID environment variable is not set properly")
 
+    try:
+        existing_event = (
+            service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+        )
+        existing_event_type = existing_event.get("eventType")
+    except HttpError as err:
+        raise Exception(f"HttpError retrieving event {event_id}: {err}")
+    except Exception as e:
+        raise Exception(f"Exception retrieving event {event_id}: {e}")
+
+    def raise_field_update_error(field: str, event_type: str):
+        raise PermissionError(
+            f"Updating property '{field}' for event type '{event_type}' is not allowed."
+        )
+
     event_body = {}
     summary = os.getenv("SUMMARY")
     if summary:
+        if not _can_update_property(existing_event_type, "summary"):
+            raise_field_update_error("summary", existing_event_type)
+
         event_body["summary"] = summary
     location = os.getenv("LOCATION")
     if location:
+        if not _can_update_property(existing_event_type, "location"):
+            raise_field_update_error("location", existing_event_type)
         event_body["location"] = location
     description = os.getenv("DESCRIPTION")
     if description:
+        if not _can_update_property(existing_event_type, "description"):
+            raise_field_update_error("description", existing_event_type)
         event_body["description"] = description
 
     time_zone = os.getenv("TIME_ZONE")
@@ -362,6 +599,9 @@ def update_event(service):
         )
 
     start = {}
+    if not _can_update_property(existing_event_type, "start"):
+        raise_field_update_error("start", existing_event_type)
+
     start_date = os.getenv("START_DATE")
     start_datetime = os.getenv("START_DATETIME")
     if start_date:
@@ -382,6 +622,9 @@ def update_event(service):
         event_body["start"] = start
 
     end = {}
+    if not _can_update_property(existing_event_type, "end"):
+        raise_field_update_error("end", existing_event_type)
+
     end_date = os.getenv("END_DATE")
     end_datetime = os.getenv("END_DATETIME")
     if end_date:
@@ -403,6 +646,9 @@ def update_event(service):
 
     recurrence = os.getenv("RECURRENCE")
     if recurrence:
+        if not _can_update_property(existing_event_type, "recurrence"):
+            raise_field_update_error("recurrence", existing_event_type)
+
         try:
             recurrence_list = json.loads(recurrence)
         except json.JSONDecodeError:
@@ -417,35 +663,55 @@ def update_event(service):
                     )
             event_body["recurrence"] = recurrence_list
 
-    attendees = os.getenv(
-        "ATTENDEES"
-    )  # comma separated list of email addresses FOR NOW. TODO: support other types of attendees
-    if attendees:
-        try:
-            final_attendees = []
-            attendees_list = attendees.split(",")
-            for attendee in attendees_list:
-                final_attendees.append({"email": attendee})
-            event_body["attendees"] = final_attendees
-        except Exception as e:
-            raise ValueError(
-                f"Invalid attendees list: {attendees}. It must be a valid comma-separated list of email addresses."
-            )
+    add_attendees = os.getenv("ADD_ATTENDEES")
+    replace_attendees = os.getenv("REPLACE_ATTENDEES")
+
+    if add_attendees or replace_attendees:
+        if not _can_update_property(existing_event_type, "attendees"):
+            raise_field_update_error("attendees", existing_event_type)
+
+        existing_attendees = existing_event.get("attendees", [])
+        existing_attendee_map = {
+            a["email"]: a for a in existing_attendees if "email" in a
+        }
+        final_attendees = []
+
+        if add_attendees:
+            # ADD mode takes priority if both are present
+            new_emails = {
+                email.strip() for email in add_attendees.split(",") if email.strip()
+            }
+            existing_emails = set(existing_attendee_map.keys())
+
+            final_attendees = existing_attendees.copy()  # preserve full metadata
+
+            for email in new_emails:
+                if email not in existing_emails:
+                    final_attendees.append({"email": email})
+
+        elif replace_attendees:
+            new_emails = {
+                email.strip() for email in replace_attendees.split(",") if email.strip()
+            }
+            for email in new_emails:
+                if email in existing_attendee_map:
+                    final_attendees.append(existing_attendee_map[email])
+                else:
+                    final_attendees.append({"email": email})
+
+        event_body["attendees"] = final_attendees
 
     try:
-        event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
-        current_user_email = _get_current_user_email(service)
-        organizer_email = event.get("organizer", {}).get("email")
+        existing_event_type = existing_event.get("eventType")
 
-        if current_user_email.lower() != organizer_email.lower():
-            raise PermissionError(
-                f"You are not the organizer of this event. Only the organizer ({organizer_email}) can update it."
-            )
-        event.update(event_body)
+        if not _has_calendar_write_access(service, calendar_id):
+            raise PermissionError("You do not have write access to this calendar.")
+
+        existing_event.update(event_body)
 
         updated_event = (
             service.events()
-            .update(calendarId=calendar_id, eventId=event_id, body=event)
+            .update(calendarId=calendar_id, eventId=event_id, body=existing_event)
             .execute()
         )
         return updated_event
