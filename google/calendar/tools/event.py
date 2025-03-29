@@ -663,23 +663,43 @@ def update_event(service):
                     )
             event_body["recurrence"] = recurrence_list
 
-    attendees = os.getenv(
-        "ATTENDEES"
-    )  # comma separated list of email addresses FOR NOW. TODO: support other types of attendees
-    if attendees:
+    add_attendees = os.getenv("ADD_ATTENDEES")
+    replace_attendees = os.getenv("REPLACE_ATTENDEES")
+
+    if add_attendees or replace_attendees:
         if not _can_update_property(existing_event_type, "attendees"):
             raise_field_update_error("attendees", existing_event_type)
 
-        try:
-            final_attendees = []
-            attendees_list = attendees.split(",")
-            for attendee in attendees_list:
-                final_attendees.append({"email": attendee})
-            event_body["attendees"] = final_attendees
-        except Exception as e:
-            raise ValueError(
-                f"Invalid attendees list: {attendees}. It must be a valid comma-separated list of email addresses."
-            )
+        existing_attendees = existing_event.get("attendees", [])
+        existing_attendee_map = {
+            a["email"]: a for a in existing_attendees if "email" in a
+        }
+        final_attendees = []
+
+        if add_attendees:
+            # ADD mode takes priority if both are present
+            new_emails = {
+                email.strip() for email in add_attendees.split(",") if email.strip()
+            }
+            existing_emails = set(existing_attendee_map.keys())
+
+            final_attendees = existing_attendees.copy()  # preserve full metadata
+
+            for email in new_emails:
+                if email not in existing_emails:
+                    final_attendees.append({"email": email})
+
+        elif replace_attendees:
+            new_emails = {
+                email.strip() for email in replace_attendees.split(",") if email.strip()
+            }
+            for email in new_emails:
+                if email in existing_attendee_map:
+                    final_attendees.append(existing_attendee_map[email])
+                else:
+                    final_attendees.append({"email": email})
+
+        event_body["attendees"] = final_attendees
 
     try:
         existing_event_type = existing_event.get("eventType")
