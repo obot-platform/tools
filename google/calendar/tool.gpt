@@ -53,7 +53,7 @@ Param: text: (Required) Text string to add to the calendar.
 
 ---
 Name: Create Event
-Description: Create a new event in a google calendar
+Description: Create a new event in a google calendar. The event type is always set to "default".
 Credential: ./credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to create event in. Set to `primary` to create event in the primary calendar.
