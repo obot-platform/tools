@@ -569,27 +569,27 @@ def update_event(service):
     except Exception as e:
         raise Exception(f"Exception retrieving event {event_id}: {e}")
 
-    def raise_field_update_error(field: str, event_type: str):
-        raise PermissionError(
-            f"Updating property '{field}' for event type '{event_type}' is not allowed."
+    def return_field_update_error(field: str, event_type: str):
+        return (
+            f"Error: Updating property '{field}' for event type '{event_type}' is not allowed."
         )
 
     event_body = {}
     summary = os.getenv("SUMMARY")
     if summary:
         if not _can_update_property(existing_event_type, "summary"):
-            raise_field_update_error("summary", existing_event_type)
+            return return_field_update_error("summary", existing_event_type)
 
         event_body["summary"] = summary
     location = os.getenv("LOCATION")
     if location:
         if not _can_update_property(existing_event_type, "location"):
-            raise_field_update_error("location", existing_event_type)
+            return return_field_update_error("location", existing_event_type)
         event_body["location"] = location
     description = os.getenv("DESCRIPTION")
     if description:
         if not _can_update_property(existing_event_type, "description"):
-            raise_field_update_error("description", existing_event_type)
+            return return_field_update_error("description", existing_event_type)
         event_body["description"] = description
 
     time_zone = os.getenv("TIME_ZONE")
@@ -600,7 +600,7 @@ def update_event(service):
 
     start = {}
     if not _can_update_property(existing_event_type, "start"):
-        raise_field_update_error("start", existing_event_type)
+        return return_field_update_error("start", existing_event_type)
 
     start_date = os.getenv("START_DATE")
     start_datetime = os.getenv("START_DATETIME")
@@ -623,7 +623,7 @@ def update_event(service):
 
     end = {}
     if not _can_update_property(existing_event_type, "end"):
-        raise_field_update_error("end", existing_event_type)
+        return return_field_update_error("end", existing_event_type)
 
     end_date = os.getenv("END_DATE")
     end_datetime = os.getenv("END_DATETIME")
@@ -647,7 +647,7 @@ def update_event(service):
     recurrence = os.getenv("RECURRENCE")
     if recurrence:
         if not _can_update_property(existing_event_type, "recurrence"):
-            raise_field_update_error("recurrence", existing_event_type)
+            return return_field_update_error("recurrence", existing_event_type)
 
         try:
             recurrence_list = json.loads(recurrence)
@@ -668,7 +668,7 @@ def update_event(service):
 
     if add_attendees or replace_attendees:
         if not _can_update_property(existing_event_type, "attendees"):
-            raise_field_update_error("attendees", existing_event_type)
+            return return_field_update_error("attendees", existing_event_type)
 
         existing_attendees = existing_event.get("attendees", [])
         existing_attendee_map = {
