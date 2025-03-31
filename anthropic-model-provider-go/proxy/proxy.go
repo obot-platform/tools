@@ -64,10 +64,7 @@ type ThinkingRequestBody struct {
 }
 
 func isThinkingModel(model string) bool {
-	if strings.HasSuffix(model, "-thinking") {
-		return true
-	}
-	return false
+	return strings.HasSuffix(model, "-thinking")
 }
 
 func needsModification(reqBody openai.ChatCompletionRequest) bool {
