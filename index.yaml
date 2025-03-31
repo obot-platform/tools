@@ -136,7 +136,7 @@ modelProviders:
   openai-model-provider:
     reference: ./openai-model-provider
   anthropic-model-provider:
-    reference: ./anthropic-model-provider
+    reference: ./anthropic-model-provider-go
   ollama-model-provider:
     reference: ./ollama-model-provider
   groq-model-provider:
