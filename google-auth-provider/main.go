@@ -70,7 +70,7 @@ func main() {
 	if opts.PostgresConnectionURL != "" {
 		oauthProxyOpts.Session.Type = options.PostgresSessionStoreType
 		oauthProxyOpts.Session.Postgres.ConnectionURL = opts.PostgresConnectionURL
-		oauthProxyOpts.Session.Postgres.TableNamePrefix = "google"
+		oauthProxyOpts.Session.Postgres.TableNamePrefix = "google_"
 	}
 	oauthProxyOpts.Cookie.Refresh = refreshDuration
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
