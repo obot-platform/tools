@@ -45,7 +45,7 @@ func (s *Server) AnthropicProxyRedirect(req *http.Request) {
 	var reqBody openai.ChatCompletionRequest
 	if err := json.Unmarshal(bodyBytes, &reqBody); err == nil && needsModification(reqBody) {
 		if err := modifyRequestBody(req, &reqBody); err != nil {
-			fmt.Println("failed to modify request body for o1, error: ", err.Error())
+			fmt.Println("failed to modify request body for claude, error: ", err.Error())
 			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		}
 	} else {
