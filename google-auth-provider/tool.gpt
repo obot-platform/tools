@@ -42,7 +42,7 @@ Credential: ../placeholder-credential as google-auth-provider
     ],
     "optionalEnvVars": [
         {
-            "name": "OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_URL",
+            "name": "OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN",
             "friendlyName": "PostgreSQL connection string (DSN)",
             "description": "The connection string for a PostgreSQL database to use for session storage. If unset, cookies will be used for session storage instead.",
             "sensitive": true,

@@ -23,7 +23,7 @@ type Options struct {
 	ClientID                 string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID"`
 	ClientSecret             string `env:"OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_SECRET"`
 	ObotServerURL            string `env:"OBOT_SERVER_URL"`
-	PostgresConnectionURL    string `env:"OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_URL" optional:"true"`
+	PostgresConnectionDSN    string `env:"OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN" optional:"true"`
 	AuthCookieSecret         string `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
 	AuthEmailDomains         string `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
 	AuthTokenRefreshDuration string `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
@@ -67,9 +67,9 @@ func main() {
 
 	oauthProxyOpts.Server.BindAddress = ""
 	oauthProxyOpts.MetricsServer.BindAddress = ""
-	if opts.PostgresConnectionURL != "" {
+	if opts.PostgresConnectionDSN != "" {
 		oauthProxyOpts.Session.Type = options.PostgresSessionStoreType
-		oauthProxyOpts.Session.Postgres.ConnectionURL = opts.PostgresConnectionURL
+		oauthProxyOpts.Session.Postgres.ConnectionDSN = opts.PostgresConnectionDSN
 		oauthProxyOpts.Session.Postgres.TableNamePrefix = "google_"
 	}
 	oauthProxyOpts.Cookie.Refresh = refreshDuration
