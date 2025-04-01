@@ -12,6 +12,7 @@ Credential: ../placeholder-credential as google-auth-provider
     "icon": "/admin/assets/google_icon_small.png",
     "iconDark": "/admin/assets/google_icon_small.png",
     "link": "https://google.com/",
+    "postgresTablePrefix": "google_",
     "envVars": [
         {
             "name": "OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID",

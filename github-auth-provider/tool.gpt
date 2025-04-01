@@ -10,6 +10,7 @@ Credential: ../placeholder-credential as github-auth-provider
 {
     "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg",
     "link": "https://github.com/",
+    "postgresTablePrefix": "github_",
     "envVars": [
         {
             "name": "OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID",
