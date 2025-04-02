@@ -21,10 +21,13 @@ import (
 
 type authType string
 
+var (
+	obotAuthToken = gptscript.GetEnv("OBOT_TOKEN", "")
+)
+
 const (
 	authTypePAT   authType = "Personal Access Token (PAT)"
 	authTypeOAuth authType = "OAuth"
-	obotAuthToken = gptscript.GetEnv("OBOT_TOKEN", "")
 )
 
 type input struct {
