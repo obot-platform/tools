@@ -309,8 +309,6 @@ def get_meeting():
         )
         res_json["start_time_utc"] = res_json.pop("start_time")
 
-    if "uuid" in res_json:
-        res_json.pop("uuid", None)
     return _remove_meeting_series_uuid(res_json)
 
 
@@ -367,8 +365,7 @@ def list_meetings():
             )
             meeting["start_time_utc"] = meeting.pop("start_time")
 
-        if "uuid" in meeting:
-            meeting.pop("uuid", None)
+
     return _remove_meeting_series_uuid(res_json)
 
 
