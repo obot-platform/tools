@@ -106,6 +106,30 @@ def _trim_meeting_id(meeting_id_or_uuid: str) -> str:
     return "".join(meeting_id_or_uuid.split())
 
 
+def _remove_meeting_series_uuid(response_json: dict) -> dict:
+    """
+    Remove the meeting series uuid from the response json if APIs:
+    - Get Meeting
+    - List Meetings
+    - List Upcoming Meetings
+    - Create Meeting
+    - Update Meeting
+    """
+
+    if "uuid" in response_json:
+        response_json.pop("uuid", None)
+    elif "meetings" in response_json:
+        for meeting in response_json["meetings"]:
+            if "uuid" in meeting:
+                meeting.pop("uuid", None)
+
+    return response_json
+
+
+def _is_meeting_id(value: str) -> bool:
+    return value.isdigit() and 9 <= len(value) <= 11
+
+
 _meeting_types = {
     1: "An instant meeting",
     2: "A scheduled meeting",
@@ -253,7 +277,9 @@ def create_meeting():
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 201:
         return {"message": f"Error creating meeting: {response.text}"}
-    return response.json()
+
+    cleaned_json = _remove_meeting_series_uuid(response.json())
+    return cleaned_json
 
 
 def _get_meeting():
@@ -282,7 +308,10 @@ def get_meeting():
             res_json["start_time"], res_json["timezone"]
         )
         res_json["start_time_utc"] = res_json.pop("start_time")
-    return res_json
+
+    if "uuid" in res_json:
+        res_json.pop("uuid", None)
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("DeleteMeeting")
@@ -337,7 +366,10 @@ def list_meetings():
                 meeting["start_time"], meeting["timezone"]
             )
             meeting["start_time_utc"] = meeting.pop("start_time")
-    return res_json
+
+        if "uuid" in meeting:
+            meeting.pop("uuid", None)
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("ListUpcomingMeetings")
@@ -362,7 +394,7 @@ def list_upcoming_meetings():
                 meeting["start_time"], meeting["timezone"]
             )
             meeting["start_time_utc"] = meeting.pop("start_time")
-    return res_json
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("GetMeetingInvitation")
@@ -498,6 +530,11 @@ def get_meeting_summary():
             "The `Get Meeting Summary` feature is only available for licensed users."
         )
     meeting_uuid = _trim_meeting_id(os.environ["MEETING_UUID"])
+    if _is_meeting_id(meeting_uuid):
+        return {
+            "message": "ValueError: Meeting UUID must be provided instead of meeting ID."
+        }
+
     url = f"{ZOOM_API_URL}/meetings/{meeting_uuid}/meeting_summary"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",

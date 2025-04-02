@@ -2,7 +2,7 @@
 Name: Zoom
 Description: Tools for interacting with Zoom
 Metadata: bundle: true
-Share Tools: Get Zoom User, Create Meeting, Update Meeting, List Meeting Templates, Get Meeting, Delete Meeting, List Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get Meeting Summary, List Available Timezones
+Share Tools: Get Zoom User, Create Meeting, Update Meeting, List Meeting Templates, Get Hosted Meeting, Delete Meeting, List Hosted Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get AI Meeting Summary, List Available Timezones
 
 ---
 Name: Get Zoom User
@@ -14,7 +14,7 @@ Share Context: Zoom Context
 
 ---
 Name: Create Meeting
-Description: Use this tool to create a Zoom meeting.
+Description: Use this tool to create a Zoom meeting. The user will be the host of the meeting.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_invitees: Optional. A list of emails separated by commas
@@ -73,8 +73,8 @@ Share Context: Zoom Context
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListMeetingTemplates
 
 ---
-Name: Get Meeting
-Description: Get a Zoom meeting's details information. The meeting must be hosted by the current Zoom user.
+Name: Get Hosted Meeting
+Description: Get details of a Zoom meeting hosted by the current Zoom user.
 Credential: ./credential
 Share Context: Zoom Context
 Param: meeting_id: The ID of the meeting to get
@@ -91,7 +91,7 @@ Param: meeting_id: The ID of the meeting to delete
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py DeleteMeeting
 
 ---
-Name: List Meetings
+Name: List Hosted Meetings
 Description: List all scheduled meetings hosted by the current Zoom user. This does not return information about instant meetings.
 Credential: ./credential
 Share Context: Zoom Context
@@ -152,11 +152,11 @@ Param: meeting_id: The ID of the meeting to get the instances for
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ListPastMeetingInstances
 
 ---
-Name: Get Meeting Summary
+Name: Get AI Meeting Summary
 Description: Retrieve the Zoom AI-generated summary of a Zoom meeting. This feature is available exclusively to licensed users. To access it, the host must ensure that the `Meeting Summary with AI Companion` feature is enabled in their account settings. The meeting summary's accessibility depends on the host's sharing settings, by default only the host has the access.
 Credential: ./credential
 Share Context: Zoom Context
-Param: meeting_uuid: The UUID of the meeting to get the summary for, NOT the meeting ID. Must use the UUID obtained from `Get Past Meeting Details` tool.
+Param: meeting_uuid: The UUID of the meeting to get the summary for, NOT the meeting ID.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetMeetingSummary
 
@@ -171,6 +171,7 @@ Share Context: Zoom Context
 ---
 Name: Zoom Context
 Type: context
+Share Context: ../time
 
 #!sys.echo
 
