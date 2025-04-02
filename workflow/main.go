@@ -14,6 +14,7 @@ const (
 important headers.`
 	emailContext = `This workflow is being called from an email receiver. The input is a JSON structure of the email message body and any
 important email headers (from, to, subject, etc).`
+	slackContext = `This workflow is being called on an slack event. The input is a JSON structure of incoming slack message.`
 )
 
 type workflowInput struct {
@@ -29,6 +30,8 @@ func main() {
 			context = emailContext
 		case "webhook":
 			context = webhookContext
+		case "slack":
+			context = slackContext
 		}
 		if context != "" {
 			fmt.Printf("START WORKFLOW CONTEXT:\n%s\nEND START WORKFLOW CONTEXT\n\n", context)

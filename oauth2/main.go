@@ -24,6 +24,7 @@ type authType string
 const (
 	authTypePAT   authType = "Personal Access Token (PAT)"
 	authTypeOAuth authType = "OAuth"
+	obotAuthToken = gptscript.GetEnv("OBOT_TOKEN", "")
 )
 
 type input struct {
@@ -353,6 +354,9 @@ func makeTokenRequest(tokenURL, state, verifier string) (*oauthResponse, bool, e
 	q.Set("state", state)
 	q.Set("verifier", verifier)
 	req.URL.RawQuery = q.Encode()
+	if obotAuthToken != "" {
+		req.Header.Add("Authorization", "Bearer "+obotAuthToken)
+	}
 
 	// Send the request
 	resp, err := http.DefaultClient.Do(req)
