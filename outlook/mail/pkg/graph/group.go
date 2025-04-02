@@ -11,6 +11,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/gptscript-ai/go-gptscript"
+	users "github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
 func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) ([]models.Postable, error) {
@@ -56,12 +57,31 @@ func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 	return result.GetValue(), nil
 }
 
+
+func GetUserType(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (string, error) {
+	opts := &users.UserItemRequestBuilderGetRequestConfiguration{
+		QueryParameters: &users.UserItemRequestBuilderGetQueryParameters{
+			Select: []string{"displayName", "userType", "userPrincipalName"},
+		},
+	}
+	me, err := client.Me().Get(ctx, opts) // Note: In the future, if we ever updated the SDK to a version that the /me doesn't have userType, we can use the /users/{upn} endpoint to get userType instead
+	if err != nil {
+		return "", fmt.Errorf("failed to get current user: %v", err)
+	}
+
+	userType := me.GetUserType()
+	if userType == nil {
+		return "", fmt.Errorf("userType is nil in response")
+	}
+
+	return *userType, nil
+}
+
 // ListGroups retrieves all Microsoft 365 groups the authenticated user has access to
 func ListGroups(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.Groupable, error) {
 
 	// Fetch groups where the user is a member
 	result, err := client.Me().MemberOf().Get(ctx, nil)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to list user groups: %w", err)
 	}

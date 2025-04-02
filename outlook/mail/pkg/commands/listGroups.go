@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
@@ -18,6 +19,11 @@ func ListGroups(ctx context.Context) error {
 
 	groups, err := graph.ListGroups(ctx, c)
 	if err != nil {
+		userType, getUserTypeErr := graph.GetUserType(ctx, c)
+		if getUserTypeErr == nil && strings.EqualFold(userType, "Guest") {
+			fmt.Printf("UserType '%s' does not have enough permissions to list groups.\n", userType)
+			return nil
+		}
 		return fmt.Errorf("failed to list groups: %w", err)
 	}
 
@@ -31,7 +37,7 @@ func ListGroups(ctx context.Context) error {
 	}
 
 	for _, group := range groups {
-		fmt.Printf("ID: %s\nName: %s\nDescription: %s\nMail: %s\n",
+		fmt.Printf("ID: %s\nName: %s\nDescription: %s\nMail: %s\n\n",
 			util.Deref(group.GetId()),
 			util.Deref(group.GetDisplayName()),
 			util.Deref(group.GetDescription()),
