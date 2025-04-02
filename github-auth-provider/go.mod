@@ -5,7 +5,7 @@ go 1.23.7
 toolchain go1.24.1
 
 replace (
-	github.com/oauth2-proxy/oauth2-proxy/v7 => ../../oauth2-proxy
+	github.com/oauth2-proxy/oauth2-proxy/v7 => github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250402151943-8bfeb682f4c4
 	github.com/obot-platform/tools/auth-providers-common => ../auth-providers-common
 )
 
