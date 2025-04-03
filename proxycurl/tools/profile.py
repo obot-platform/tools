@@ -2,8 +2,7 @@ from tools.helper import tool_registry, format_url, api_key_headers
 import os
 import requests
 
-
-@tool_registry.register("GetCompanyProfile")
+@tool_registry.decorator("GetCompanyProfile")
 def get_company_profile():
     company_name = os.getenv("COMPANY")
 
@@ -20,11 +19,10 @@ def get_company_profile():
     }
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-
     print(response.json())
 
 
-@tool_registry.register("GetSchoolProfile")
+@tool_registry.decorator("GetSchoolProfile")
 def get_school_profile():
     school_name = os.getenv("SCHOOL")
 
@@ -35,11 +33,10 @@ def get_school_profile():
     }
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-
     print(response.json())
 
 
-@tool_registry.register("GetUserProfile")
+@tool_registry.decorator("GetUserProfile")
 def get_user_profile():
     user = os.getenv("USER")
 
@@ -59,6 +56,5 @@ def get_user_profile():
     }
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-
     print(response.json())
 

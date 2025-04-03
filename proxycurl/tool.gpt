@@ -8,7 +8,6 @@ Share Tools: Get Company Profile, Get School Profile, Get User Profile, Company 
 Name: Get Company Profile
 Description: Get company profile from Linkedin
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: url: URL of Linkedin company profile. Provide only if available
 Param: company: Company name.
 
@@ -18,7 +17,6 @@ Param: company: Company name.
 Name: Get School Profile
 Description: Get school profile from Linkedin
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: school: School name
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetSchoolProfile
@@ -27,7 +25,6 @@ Param: school: School name
 Name: Get User Profile
 Description: Get user profile from Linkedin
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: user: User name
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetUserProfile
@@ -36,7 +33,6 @@ Param: user: User name
 Name: Company Search
 Description: Search for company profile
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: country: Optional. Filter by country using a case-insensitive Alpha-2 ISO3166 code.
 Param: region: Optional. Filter by region; supports case-insensitive matching. Use "OR" to match multiple regions.
 Param: city: Optional. Filter by city; supports case-insensitive matching. Use "OR" to match multiple cities.
@@ -56,9 +52,6 @@ Param: funding_raised_after: Optional. Filter for companies that raised funding 
 Param: funding_raised_before: Optional. Filter for companies that raised funding before this date (YYYY-MM-DD).
 Param: public_identifier_in_list: Optional. Comma-separated list of public identifiers; includes only these companies.
 Param: public_identifier_not_in_list: Optional. Comma-separated list of public identifiers; excludes these companies.
-Param: page_size: Optional. Number of results per page (1–100). Default is 10.
-Param: enrich_profiles: Optional. If set to 'enrich', enriches company profiles with additional data.
-Param: use_cache: Optional. Determines data freshness. Set to 'if-present' to use cached data if available.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchCompany
 
@@ -66,14 +59,12 @@ Param: use_cache: Optional. Determines data freshness. Set to 'if-present' to us
 Name: User Search
 Description: Search for user profile
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: country: Optional. Filter by country using a case-insensitive Alpha-2 ISO3166 code.
 Param: first_name: Optional. Filter by first name. Use "OR" to match multiple names.
 Param: last_name: Optional. Filter by last name. Use "OR" to match multiple names.
 Param: education_field_of_study: Optional. Filter by field of study. Use "OR" to match multiple fields.
 Param: education_degree_name: Optional. Filter by degree name. Use "OR" to match multiple degrees.
 Param: education_school_name: Optional. Filter by school name. Use "OR" to match multiple schools.
-Param: education_school_linkedin_profile_url: Optional. Filter by school's LinkedIn profile URL.
 Param: current_role_title: Optional. Filter by current job title. Use "OR" to match multiple titles.
 Param: past_role_title: Optional. Filter by past job title. Use "OR" to match multiple titles.
 Param: current_role_before: Optional. Filter for roles starting before this date (YYYY-MM-DD).
@@ -118,7 +109,6 @@ Param: follower_count_max: Optional. Filter people with a LinkedIn follower coun
 Name: Job Search
 Description: Search for a job listings
 Credential: ./credential
-Share Context: Proxycurl Context
 Param: job_type: Optional. Specifies the nature of the job. Accepts the following values: full-time, part-time, contract, internship, temporary, volunteer, or anything (default).
 Param: experience_level: Optional. Specifies the experience level required for the job. Accepts the following values: internship, entry_level, associate, mid_senior_level, director, or anything (default).
 Param: when: Optional. Specifies when the job was posted. Accepts the following values: yesterday, past-week, past-month, or anytime (default).
