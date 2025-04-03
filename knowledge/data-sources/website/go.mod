@@ -2,8 +2,7 @@
 module github.com/obot-platform/tools/knowledge-website-integration
 
 go 1.23.1
-
-toolchain go1.23.2
+toolchain go1.24.1
 
 require (
 	github.com/gocolly/colly v1.2.0
@@ -37,6 +36,6 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

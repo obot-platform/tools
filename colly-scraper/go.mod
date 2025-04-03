@@ -1,7 +1,6 @@
 module github.com/obot-platform/tools/colly-scraper
 
 go 1.24.0
-
 require (
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/gocolly/colly v1.2.0
@@ -24,5 +23,5 @@ require (
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
