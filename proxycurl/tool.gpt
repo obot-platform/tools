@@ -9,7 +9,7 @@ Name: Get Company Profile
 Description: Get company profile from Linkedin
 Credential: ./credential
 Param: url: URL of Linkedin company profile. Provide only if available
-Param: company: Company name.
+Param: company: Company name, always provide if given.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetCompanyProfile
 
@@ -17,15 +17,17 @@ Param: company: Company name.
 Name: Get School Profile
 Description: Get school profile from Linkedin
 Credential: ./credential
+Param: url: URL of Linkedin school profile. Provide only if available
 Param: school: School name
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetSchoolProfile
 
 ---
 Name: Get User Profile
-Description: Get user profile from Linkedin
+Description: Get user profile from Linkedin. Do NOT use if given any information beyond name (such as company), use 'User Search' instead.
 Credential: ./credential
-Param: user: User name
+Param: url: URL of Linkedin user profile. Provide only if available
+Param: user: User name, always provide if given.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetUserProfile
 
@@ -46,12 +48,6 @@ Param: employee_count_max: Optional. Maximum number of employees in the company.
 Param: description: Optional. Filter by company description; supports case-insensitive matching. Use "OR" to match multiple descriptions.
 Param: founded_after_year: Optional. Filter for companies founded after this year.
 Param: founded_before_year: Optional. Filter for companies founded before this year.
-Param: funding_amount_min: Optional. Minimum funding amount (USD) raised by the company.
-Param: funding_amount_max: Optional. Maximum funding amount (USD) raised by the company.
-Param: funding_raised_after: Optional. Filter for companies that raised funding after this date (YYYY-MM-DD).
-Param: funding_raised_before: Optional. Filter for companies that raised funding before this date (YYYY-MM-DD).
-Param: public_identifier_in_list: Optional. Comma-separated list of public identifiers; includes only these companies.
-Param: public_identifier_not_in_list: Optional. Comma-separated list of public identifiers; excludes these companies.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchCompany
 
@@ -86,22 +82,6 @@ Param: current_company_country: Optional. Filter by current company's country us
 Param: current_company_region: Optional. Filter by current company's region. Use "OR" to match multiple regions.
 Param: current_company_city: Optional. Filter by current company's city. Use "OR" to match multiple cities.
 Param: current_company_type: Optional. Filter by current company's type (e.g., NON_PROFIT).
-Param: current_company_follower_count_min: Optional. Minimum follower count for current company.
-Param: current_company_follower_count_max: Optional. Maximum follower count for current company.
-Param: current_company_industry: Optional. Filter by current company's industry. Use "AND" to match multiple industries.
-Param: current_company_employee_count_min: Optional. Minimum number of employees in current company.
-Param: current_company_employee_count_max: Optional. Maximum number of employees in current company.
-Param: current_company_description: Optional. Filter by current company's description. Use "OR" to match multiple descriptions.
-Param: current_company_founded_after_year: Optional. Filter for companies founded after this year.
-Param: current_company_founded_before_year: Optional. Filter for companies founded before this year.
-Param: current_company_funding_amount_min: Optional. Minimum funding amount (USD) raised by current company.
-Param: current_company_funding_amount_max: Optional. Maximum funding amount (USD) raised by current company.
-Param: current_company_funding_raised_after: Optional. Filter for companies that raised funding after this date (YYYY-MM-DD).
-Param: current_company_funding_raised_before: Optional. Filter for companies that raised funding before this date (YYYY-MM-DD).
-Param: public_identifier_in_list: Optional. Comma-separated list of public identifiers; includes only these profiles.
-Param: public_identifier_not_in_list: Optional. Comma-separated list of public identifiers; excludes these profiles.
-Param: follower_count_min: Optional. Filter people with a LinkedIn follower count greater than this value.
-Param: follower_count_max: Optional. Filter people with a LinkedIn follower count less than this value.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchUser
 

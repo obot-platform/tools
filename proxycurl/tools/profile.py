@@ -1,60 +1,54 @@
 from tools.helper import tool_registry, format_url, api_key_headers
+from tools.search import search_company, search_user
+from tools.api import school_profile_from_url, user_profile_from_url, company_profile_from_url
 import os
 import requests
 
+
 @tool_registry.decorator("GetCompanyProfile")
 def get_company_profile():
+    env_url = os.getenv("URL")
     company_name = os.getenv("COMPANY")
+    url = env_url if env_url else f'https://www.linkedin.com/company/{format_url(company_name)}/'
 
-    api_endpoint = 'https://nubela.co/proxycurl/api/linkedin/company'
-    params = {
-        'url': f'https://www.linkedin.com/company/{format_url(company_name)}/',
-        'categories': 'exclude',
-        'funding_data': 'exclude',
-        'exit_data': 'exclude',
-        'acquisitions': 'exclude',
-        'extra': 'exclude',
-        'use_cache': 'if-present',
-        'fallback_to_cache': 'on-error',
-    }
+    response = company_profile_from_url(url)
 
-    response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-    print(response.json())
+    # Search for URL with company name
+    if response.status_code == 404 and company_name:
+        print("Initial request 404. Searching for profile URL...")
+
+        os.environ["NAME"] = company_name
+        return search_company()
+
+    return response.json()
 
 
 @tool_registry.decorator("GetSchoolProfile")
 def get_school_profile():
+    env_url = os.getenv("URL")
     school_name = os.getenv("SCHOOL")
+    url = env_url if env_url else f'https://www.linkedin.com/school/{format_url(school_name)}/'
 
-    api_endpoint = 'https://nubela.co/proxycurl/api/linkedin/school'
-    params = {
-        'url': f'https://www.linkedin.com/school/{format_url(school_name)}/',
-        'use_cache': 'if-present',
-    }
-
-    response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-    print(response.json())
+    return school_profile_from_url(url).json()
 
 
 @tool_registry.decorator("GetUserProfile")
 def get_user_profile():
-    user = os.getenv("USER")
+    env_url = os.getenv("URL")
+    user_name = os.getenv("USER")
+    url = env_url if env_url else f'https://linkedin.com/in/{format_url(user_name)}/'
 
-    api_endpoint = 'https://nubela.co/proxycurl/api/v2/linkedin'
-    params = {
-        'linkedin_profile_url': f'https://linkedin.com/in/{format_url(user)}/',
-        'extra': 'exclude',
-        'github_profile_id': 'exclude',
-        'facebook_profile_id': 'exclude',
-        'twitter_profile_id': 'exclude',
-        'personal_contact_number': 'exclude',
-        'personal_email': 'exclude',
-        'inferred_salary': 'exclude',
-        'skills': 'exclude',
-        'use_cache': 'if-present',
-        'fallback_to_cache': 'on-error',
-    }
+    response = user_profile_from_url(url)
 
-    response = requests.get(api_endpoint, params=params, headers=api_key_headers)
-    print(response.json())
+    # Search for URL with name
+    if response.status_code == 404 and user_name:
+        print("Initial request 404. Searching for profile URL...")
+        user_name = user_name.split()
 
+        os.environ["FIRST_NAME"] = user_name[0]
+        if len(user_name) > 1:
+            os.environ["LAST_NAME"] = user_name[1]
+
+        return search_user()
+
+    return response.json()
