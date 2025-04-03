@@ -1,6 +1,7 @@
 module github.com/gptscript-ai/tools/word
 
 go 1.23.1
+toolchain go1.24.1
 
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
@@ -59,6 +60,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
