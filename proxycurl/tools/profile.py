@@ -2,7 +2,6 @@ from tools.helper import tool_registry, format_url, api_key_headers
 from tools.search import search_company, search_user
 from tools.api import school_profile_from_url, user_profile_from_url, company_profile_from_url
 import os
-import requests
 
 
 @tool_registry.decorator("GetCompanyProfile")
@@ -35,20 +34,7 @@ def get_school_profile():
 @tool_registry.decorator("GetUserProfile")
 def get_user_profile():
     env_url = os.getenv("URL")
-    user_name = os.getenv("USER")
-    url = env_url if env_url else f'https://linkedin.com/in/{format_url(user_name)}/'
 
-    response = user_profile_from_url(url)
-
-    # Search for URL with name
-    if response.status_code == 404 and user_name:
-        print("Initial request 404. Searching for profile URL...")
-        user_name = user_name.split()
-
-        os.environ["FIRST_NAME"] = user_name[0]
-        if len(user_name) > 1:
-            os.environ["LAST_NAME"] = user_name[1]
-
-        return search_user()
+    response = user_profile_from_url(env_url)
 
     return response.json()

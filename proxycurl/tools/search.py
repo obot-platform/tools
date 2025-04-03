@@ -8,7 +8,7 @@ from tools.api import company_profile_from_url, user_profile_from_url
 def search_company() -> dict:
     api_endpoint = 'https://nubela.co/proxycurl/api/v2/search/company'
 
-    ai_params = ["COUNTRY", "REGION", "CITY", "TYPE", "FOLLOWER_COUNT_MIN", "FOLLOWER_COUNT_MAX",
+    ai_params = ["COUNTRY", "REGION", "CITY", "TYPE",
                  "NAME", "INDUSTRY", "EMPLOYEE_COUNT_MIN", "EMPLOYEE_COUNT_MAX", "DESCRIPTION",
                  "FOUNDED_AFTER_YEAR", "FOUNDED_BEFORE_YEAR"]
 
@@ -33,7 +33,7 @@ def search_user() -> dict:
 
     ai_params = ["COUNTRY", "FIRST_NAME", "LAST_NAME", "EDUCATION_FIELD_OF_STUDY", "EDUCATION_DEGREE_NAME",
                  "EDUCATION_SCHOOL_NAME", "CURRENT_ROLE_TITLE", "PAST_ROLE_TITLE", "CURRENT_ROLE_BEFORE",
-                 "CURRENT_ROLE_AFTER", "CURRENT_JOB_DESCRIPTION", "PAST_JOB_DESCRIPTION", "CURRENT_COMPANY_NAME",
+                 "CURRENT_ROLE_AFTER", "CURRENT_COMPANY_NAME",
                  "PAST_COMPANY_NAME", "LINKEDIN_GROUPS", "LANGUAGES",
                  "REGION", "CITY", "HEADLINE", "SUMMARY", "INDUSTRIES", "INTERESTS", "SKILLS",
                  "CURRENT_COMPANY_COUNTRY", "CURRENT_COMPANY_REGION", "CURRENT_COMPANY_CITY", "CURRENT_COMPANY_TYPE"]
@@ -65,3 +65,17 @@ def search_job() -> dict:
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
     return response.json()
+
+
+@tool_registry.decorator("SearchRole")
+def search_role() -> dict:
+    api_endpoint = 'https://nubela.co/proxycurl/api/find/company/role/'
+    role = os.getenv("ROLE")
+    company = os.getenv("COMPANY")
+
+    params = {
+        'role': role,
+        'company_name': company,
+    }
+
+    return requests.get(api_endpoint, params=params, headers=api_key_headers).json()

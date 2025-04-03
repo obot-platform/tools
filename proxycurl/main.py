@@ -1,6 +1,5 @@
 import json
 import sys
-from tools import profile, search
 from tools.helper import tool_registry
 
 
