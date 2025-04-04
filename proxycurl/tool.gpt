@@ -82,7 +82,7 @@ Param: current_company_type: Optional. Filter by current company's type (e.g., N
 
 ---
 Name: Job Search
-Description: Search for a job listings
+Description: Search for job listings
 Credential: ./credential
 Param: job_type: Optional. Specifies the nature of the job. Accepts the following values: full-time, part-time, contract, internship, temporary, volunteer, or anything (default).
 Param: experience_level: Optional. Specifies the experience level required for the job. Accepts the following values: internship, entry_level, associate, mid_senior_level, director, or anything (default).
