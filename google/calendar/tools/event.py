@@ -10,7 +10,6 @@ from googleapiclient.errors import HttpError
 from rfc3339_validator import validate_rfc3339
 from zoneinfo import available_timezones, ZoneInfo
 import json
-from dateutil.rrule import rrulestr
 
 logger = setup_logger(__name__)
 
@@ -224,13 +223,10 @@ def _is_valid_iana_timezone(timezone: str) -> bool:
     return timezone in available_timezones()
 
 
-def _validate_rrule(rrule_str: str) -> bool:
-    """Validates an RRULE string for recurrence rules"""
-    try:
-        rrulestr(rrule_str)  # If it doesn't raise an error, it's valid
-        return True
-    except ValueError:
-        return False
+def _is_valid_recurrence_line_syntax(line: str) -> bool:
+    return any(
+        line.startswith(prefix) for prefix in ("RRULE:", "EXRULE:", "RDATE", "EXDATE")
+    )
 
 
 def _get_current_time_rfc3339():
@@ -417,6 +413,47 @@ def quick_add_event(service):
         raise Exception(f"Exception quick adding event to calendar {calendar_id}: {e}")
 
 
+def _get_recurrence_list(recurrence: str) -> list:
+    """
+    Parse a string into a list of recurrence rules.
+
+    Args:
+        recurrence (str): The recurrence string to parse
+
+    Raises:
+        ValueError: If the recurrence string is not a valid JSON array of strings, where each string is an RRULE, EXRULE, RDATE, or EXDATE line as defined by the RFC5545.
+        ValueError: If the recurrence string is not a valid recurrence rule syntax.
+
+    Returns:
+        list: A list of recurrence rules
+    """
+    try:
+        recurrence_list = json.loads(recurrence)
+    except json.JSONDecodeError:
+        try:
+            fixed_recurrence = recurrence.encode().decode(
+                "unicode_escape"
+            )  # try to fix the recurrence string if it's not a valid JSON array of strings, for example a bad input like "[\\\"RRULE:FREQ=YEARLY\\\"]"
+            recurrence_list = json.loads(fixed_recurrence)
+        except json.JSONDecodeError:
+            if _is_valid_recurrence_line_syntax(
+                recurrence
+            ):  # even if it's not a list,  check if it's a valid recurrence rule syntax, if yes, wrap it in a list
+                recurrence_list = [recurrence]
+            else:  # if it's not a valid recurrence rule syntax, raise an error
+                raise ValueError(
+                    f"Invalid recurrence list: {recurrence}. It must be a valid JSON array of strings, where each string is an RRULE, EXRULE, RDATE, or EXDATE line as defined by the RFC5545.."
+                )
+
+    for r in recurrence_list:
+        if not _is_valid_recurrence_line_syntax(r):
+            raise ValueError(
+                f"Invalid recurrence rule: {r}. It must be a valid RRULE, EXRULE, RDATE, or EXDATE string."
+            )
+
+    return recurrence_list
+
+
 def create_event(service):
     """Creates an event in the calendar."""
     calendar_id = os.getenv("CALENDAR_ID")
@@ -483,25 +520,9 @@ def create_event(service):
         },
     }
     recurrence = os.getenv("RECURRENCE")
-    if recurrence:
-        try:
-            recurrence_list = json.loads(recurrence)
-        except json.JSONDecodeError:
-            if _validate_rrule(
-                recurrence
-            ):  # even if it's not a list,  check if it's a valid recurrence rule, if yes, wrap it in a list
-                recurrence_list = [recurrence]
-            else:  # if it's not a valid recurrence rule, raise an error
-                raise ValueError(
-                    f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
-                )
 
-        for r in recurrence_list:
-            if not _validate_rrule(r):
-                raise ValueError(
-                    f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
-                )
-        event_body["recurrence"] = recurrence_list
+    if recurrence:
+        event_body["recurrence"] = _get_recurrence_list(recurrence)
 
     attendees = os.getenv(
         "ATTENDEES"
@@ -570,9 +591,7 @@ def update_event(service):
         raise Exception(f"Exception retrieving event {event_id}: {e}")
 
     def return_field_update_error(field: str, event_type: str):
-        return (
-            f"Error: Updating property '{field}' for event type '{event_type}' is not allowed."
-        )
+        return f"Error: Updating property '{field}' for event type '{event_type}' is not allowed."
 
     event_body = {}
     summary = os.getenv("SUMMARY")
@@ -649,19 +668,7 @@ def update_event(service):
         if not _can_update_property(existing_event_type, "recurrence"):
             return return_field_update_error("recurrence", existing_event_type)
 
-        try:
-            recurrence_list = json.loads(recurrence)
-        except json.JSONDecodeError:
-            raise ValueError(
-                f"Invalid recurrence list: {recurrence}. It must be a valid JSON array."
-            )
-        finally:
-            for r in recurrence_list:
-                if not _validate_rrule(r):
-                    raise ValueError(
-                        f"Invalid recurrence rule: {r}. It must be a valid RRULE string."
-                    )
-            event_body["recurrence"] = recurrence_list
+        event_body["recurrence"] = _get_recurrence_list(recurrence)
 
     add_attendees = os.getenv("ADD_ATTENDEES")
     replace_attendees = os.getenv("REPLACE_ATTENDEES")
