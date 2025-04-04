@@ -45,6 +45,7 @@ Param: employee_count_max: Optional. Maximum number of employees in the company.
 Param: description: Optional. Filter by company description; supports case-insensitive matching. Use "OR" to match multiple descriptions.
 Param: founded_after_year: Optional. Filter for companies founded after this year.
 Param: founded_before_year: Optional. Filter for companies founded before this year.
+Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchCompany
 
@@ -77,6 +78,7 @@ Param: current_company_country: Optional. Filter by current company's country us
 Param: current_company_region: Optional. Filter by current company's region. Use "OR" to match multiple regions.
 Param: current_company_city: Optional. Filter by current company's city. Use "OR" to match multiple cities.
 Param: current_company_type: Optional. Filter by current company's type (e.g., NON_PROFIT).
+Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchUser
 

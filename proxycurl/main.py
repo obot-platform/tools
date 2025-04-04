@@ -1,6 +1,7 @@
 import json
 import sys
 from tools.helper import tool_registry
+import tools.profile, tools.search
 
 
 def main():

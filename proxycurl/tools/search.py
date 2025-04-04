@@ -13,18 +13,12 @@ def search_company() -> dict:
                  "FOUNDED_AFTER_YEAR", "FOUNDED_BEFORE_YEAR"]
 
     params = {k.lower(): os.getenv(k) for k in ai_params if os.getenv(k) is not None}
-    params["page_size"] = 1  # limit results to 1
+    params["enrich_profiles"] = "enrich"
+    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default only 1 result
 
-    search_results = requests.get(api_endpoint, params=params, headers=api_key_headers).json()
+    response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
-    if search_results.get("results"):
-        company_url = search_results["results"][0].get("linkedin_profile_url")
-        print("Found URL: ", company_url)
-
-        if company_url:
-            return company_profile_from_url(company_url).json()
-
-    return {"Err": "Could not find company profile with given search criteria"}
+    return response.json()
 
 
 @tool_registry.decorator("SearchUser")
@@ -39,28 +33,19 @@ def search_user() -> dict:
                  "CURRENT_COMPANY_COUNTRY", "CURRENT_COMPANY_REGION", "CURRENT_COMPANY_CITY", "CURRENT_COMPANY_TYPE"]
 
     params = {k.lower(): os.getenv(k) for k in ai_params if os.getenv(k) is not None}
-    params["page_size"] = 1  # limit results to 1
+    params["enrich_profiles"] = "enrich"
+    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default only 1 result
 
-    search_results = requests.get(api_endpoint, params=params, headers=api_key_headers).json()
+    response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
-    if search_results.get("results"):
-        user_url = search_results["results"][0].get("linkedin_profile_url")
-        print("Found URL: ", user_url)
-
-        if user_url:
-            return user_profile_from_url(user_url).json()
-
-    return {"Err": "Could not find user profile with given search criteria"}
+    return response.json()
 
 
 @tool_registry.decorator("SearchJob")
 def search_job() -> dict:
     api_endpoint = 'https://nubela.co/proxycurl/api/v2/linkedin/company/job'
-
     ai_params = ["JOB_TYPE", "EXPERIENCE_LEVEL", "WHEN", "FLEXIBILITY", "GEO_ID", "KEYWORD", "SEARCH_ID"]
-
     params = {k.lower(): os.getenv(k) for k in ai_params if os.getenv(k) is not None}
-    params["page_size"] = 1  # limit results to 1
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
@@ -76,6 +61,7 @@ def search_role() -> dict:
     params = {
         'role': role,
         'company_name': company,
+        'enrich_profile': 'enrich'
     }
 
     return requests.get(api_endpoint, params=params, headers=api_key_headers).json()

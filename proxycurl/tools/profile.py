@@ -17,6 +17,7 @@ def get_company_profile():
         print("Initial request 404. Searching for profile URL...")
 
         os.environ["NAME"] = company_name
+        os.environ["PAGE_SIZE"] = "1"
         return search_company()
 
     return response.json()
