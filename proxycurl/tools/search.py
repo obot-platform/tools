@@ -20,8 +20,8 @@ def search_company() -> dict:
     return remove_images_from_search_result(response.json())
 
 
-@tool_registry.decorator("SearchUser")
-def search_user() -> dict:
+@tool_registry.decorator("SearchPerson")
+def search_person() -> dict:
     api_endpoint = 'https://nubela.co/proxycurl/api/v2/search/person'
 
     ai_params = ["COUNTRY", "FIRST_NAME", "LAST_NAME", "EDUCATION_FIELD_OF_STUDY", "EDUCATION_DEGREE_NAME",

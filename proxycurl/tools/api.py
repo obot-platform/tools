@@ -18,7 +18,7 @@ def company_profile_from_url(url: str) -> requests.Response:
     return requests.get(api_endpoint, params=params, headers=api_key_headers)
 
 
-def user_profile_from_url(url: str) -> requests.Response:
+def person_profile_from_url(url: str) -> requests.Response:
     api_endpoint = 'https://nubela.co/proxycurl/api/v2/linkedin'
     params = {
         'url': url,

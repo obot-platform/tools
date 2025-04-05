@@ -2,7 +2,7 @@
 Name: Proxycurl
 Description: Tools for Proxycurl
 Metadata: bundle: true
-Share Tools: Get Company Profile, Get School Profile, Get User Profile, Company Search, User Search, Job Search, Search by Role
+Share Tools: Get Company Profile, Get School Profile, Get Person Profile, Company Search, Person Search, Job Search, Search by Role
 
 ---
 Name: Get Company Profile
@@ -23,12 +23,12 @@ Param: school: School name
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetSchoolProfile
 
 ---
-Name: Get User Profile
-Description: Get user profile from Linkedin URL
+Name: Get Person Profile
+Description: Get person's profile from Linkedin URL
 Credential: ./credential
-Param: url: Required. URL of Linkedin user profile.
+Param: url: Required. URL of Linkedin profile.
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetUserProfile
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py GetPersonProfile
 
 ---
 Name: Company Search
@@ -50,8 +50,8 @@ Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchCompany
 
 ---
-Name: User Search
-Description: Search for user profile
+Name: Person Search
+Description: Search for person's profile
 Credential: ./credential
 Param: country: Optional. Filter by country using a case-insensitive Alpha-2 ISO3166 code.
 Param: first_name: Optional. Filter by first name. Use "OR" to match multiple names.
@@ -80,7 +80,7 @@ Param: current_company_city: Optional. Filter by current company's city. Use "OR
 Param: current_company_type: Optional. Filter by current company's type (e.g., NON_PROFIT).
 Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchUser
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchPerson
 
 ---
 Name: Job Search
@@ -97,7 +97,7 @@ Param: search_id: Optional. Specifies the search_id of the company on LinkedIn. 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py SearchJob
 ---
 Name: Search by Role
-Description: Search for user by role at company
+Description: Search for person by role at company
 Credential: ./credential
 Param: company: Required. Company name
 Param: role: Required. Role at company (e.g. CEO, Software engineer)

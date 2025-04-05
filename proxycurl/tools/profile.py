@@ -1,6 +1,6 @@
 from tools.helper import tool_registry, format_url, remove_images_from_profile
 from tools.search import search_company
-from tools.api import school_profile_from_url, user_profile_from_url, company_profile_from_url
+from tools.api import school_profile_from_url, person_profile_from_url, company_profile_from_url
 import os
 
 
@@ -32,10 +32,10 @@ def get_school_profile():
     return remove_images_from_profile(school_profile_from_url(url).json())
 
 
-@tool_registry.decorator("GetUserProfile")
-def get_user_profile():
+@tool_registry.decorator("GetPersonProfile")
+def get_person_profile():
     env_url = os.getenv("URL")
 
-    response = user_profile_from_url(env_url)
+    response = person_profile_from_url(env_url)
 
     return remove_images_from_profile(response.json())
