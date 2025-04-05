@@ -1,7 +1,6 @@
-from tools.helper import tool_registry, api_key_headers
+from tools.helper import tool_registry, api_key_headers, remove_images_from_profile, remove_images_from_search_result
 import os
 import requests
-from tools.api import company_profile_from_url, user_profile_from_url
 
 
 @tool_registry.decorator("SearchCompany")
@@ -14,11 +13,11 @@ def search_company() -> dict:
 
     params = {k.lower(): os.getenv(k) for k in ai_params if os.getenv(k) is not None}
     params["enrich_profiles"] = "enrich"
-    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default only 1 result
+    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default to 1 result
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
-    return response.json()
+    return remove_images_from_search_result(response.json())
 
 
 @tool_registry.decorator("SearchUser")
@@ -27,18 +26,17 @@ def search_user() -> dict:
 
     ai_params = ["COUNTRY", "FIRST_NAME", "LAST_NAME", "EDUCATION_FIELD_OF_STUDY", "EDUCATION_DEGREE_NAME",
                  "EDUCATION_SCHOOL_NAME", "CURRENT_ROLE_TITLE", "PAST_ROLE_TITLE", "CURRENT_ROLE_BEFORE",
-                 "CURRENT_ROLE_AFTER", "CURRENT_COMPANY_NAME",
-                 "PAST_COMPANY_NAME", "LINKEDIN_GROUPS", "LANGUAGES",
-                 "REGION", "CITY", "HEADLINE", "SUMMARY", "INDUSTRIES", "INTERESTS", "SKILLS",
+                 "CURRENT_ROLE_AFTER", "CURRENT_COMPANY_NAME", "PAST_COMPANY_NAME", "LINKEDIN_GROUPS",
+                 "LANGUAGES", "REGION", "CITY", "HEADLINE", "SUMMARY", "INDUSTRIES", "INTERESTS", "SKILLS",
                  "CURRENT_COMPANY_COUNTRY", "CURRENT_COMPANY_REGION", "CURRENT_COMPANY_CITY", "CURRENT_COMPANY_TYPE"]
 
     params = {k.lower(): os.getenv(k) for k in ai_params if os.getenv(k) is not None}
     params["enrich_profiles"] = "enrich"
-    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default only 1 result
+    params["page_size"] = os.getenv("PAGE_SIZE") if os.getenv("PAGE_SIZE") else 1  # default to 1 result
 
     response = requests.get(api_endpoint, params=params, headers=api_key_headers)
 
-    return response.json()
+    return remove_images_from_search_result(response.json())
 
 
 @tool_registry.decorator("SearchJob")
@@ -64,4 +62,7 @@ def search_role() -> dict:
         'enrich_profile': 'enrich'
     }
 
-    return requests.get(api_endpoint, params=params, headers=api_key_headers).json()
+    result = requests.get(api_endpoint, params=params, headers=api_key_headers).json()
+    result["profile"] = remove_images_from_profile(result["profile"])
+
+    return result

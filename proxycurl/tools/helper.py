@@ -9,6 +9,7 @@ if API_KEY is None or API_KEY == "":
 
 api_key_headers = {'Authorization': 'Bearer ' + API_KEY}
 
+
 def setup_logger(name):
     """Setup a logger that writes to sys.stderr. This will eventually show up in GPTScript's debugging logs.
 
@@ -51,6 +52,34 @@ def format_url(text: str) -> str:
     """
 
     return text.replace(" ", "-")
+
+
+def remove_images_from_profile(data: dict) -> dict:
+    """
+    Removes images from a get profile result
+    """
+    fields_to_remove = ["background_cover_image_url", "profile_pic_url"]
+
+    for field in fields_to_remove:
+        data.pop(field, None)
+
+    return data
+
+
+def remove_images_from_search_result(data: dict) -> dict:
+    """
+    Removes images from a search result
+    """
+    if "results" not in data:
+        print("results not in data")
+        return data
+
+    results = data["results"]
+
+    for i in range(len(results)):
+        results[i]["profile"] = remove_images_from_profile(results[i]["profile"])
+
+    return data
 
 
 class ToolRegistry:
