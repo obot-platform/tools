@@ -1,6 +1,6 @@
 ---
-Name: Proxycurl
-Description: Tools for Proxycurl
+Name: LinkedIn Search
+Description: Search LinkedIn for companies, users, and jobs
 Metadata: bundle: true
 Share Tools: Get Company Profile, Get School Profile, Get Person Profile, Company Search, Person Search, Job Search, Search by Role
 
@@ -32,7 +32,7 @@ Param: url: Required. URL of Linkedin profile.
 
 ---
 Name: Company Search
-Description: Search for company profile
+Description: Search LinkedIn for matching company profiles
 Credential: ./credential
 Param: country: Optional. Filter by country using a case-insensitive Alpha-2 ISO3166 code.
 Param: region: Optional. Filter by region; supports case-insensitive matching. Use "OR" to match multiple regions.
@@ -51,7 +51,7 @@ Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 
 ---
 Name: Person Search
-Description: Search for person's profile
+Description: Search LinkedIn for matching user profiles
 Credential: ./credential
 Param: country: Optional. Filter by country using a case-insensitive Alpha-2 ISO3166 code.
 Param: first_name: Optional. Filter by first name. Use "OR" to match multiple names.
@@ -84,7 +84,7 @@ Param: page_size: Optional. Number of results to apppear (1-10). Default is 1.
 
 ---
 Name: Job Search
-Description: Search for job listings
+Description: Search LinkedIn for job listings
 Credential: ./credential
 Param: job_type: Optional. Specifies the nature of the job. Accepts the following values: full-time, part-time, contract, internship, temporary, volunteer, or anything (default).
 Param: experience_level: Optional. Specifies the experience level required for the job. Accepts the following values: internship, entry_level, associate, mid_senior_level, director, or anything (default).
@@ -106,4 +106,4 @@ Param: role: Required. Role at company (e.g. CEO, Software engineer)
 
 ---
 !metadata:*:icon
-https://avatars.githubusercontent.com/u/77481475?s=200&v=4
+/admin/assets/linkedin_icon.png
