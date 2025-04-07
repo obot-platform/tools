@@ -1,163 +1,164 @@
 tools:
-    sendgrid:
-        reference: ./sendgrid
-    file-summarizer:
-        reference: ./file-summarizer
-    google-calendar:
-        reference: ./google/calendar
-    database:
-        reference: ./database
-    zoom:
-        reference: ./zoom
-    atlassian-jira:
-        reference: ./atlassian/jira
-    wordpress:
-        reference: ./wordpress
-    excel:
-        reference: ./excel
-    browser:
-        reference: ./browser
-    bluesky:
-        reference: ./bluesky
-    slack:
-        reference: ./slack
-    slack-bot:
-        reference: ./slack/tool-bot.gpt
-    linkedin-publishing:
-        reference: ./linkedin-publishing
-    notion:
-        reference: ./notion
-    google-docs:
-        reference: ./google/docs
-    google-gmail:
-        reference: ./google/gmail
-    google-search:
-        reference: ./google/search
-    google-search-console:
-        reference: ./google/search-console
-    google-sheets:
-        reference: ./google/sheets
-    gitlab:
-        reference: ./gitlab
-    images:
-        reference: ./images
-    outlook-mail:
-        reference: ./outlook/mail
-    outlook-calender:
-        reference: ./outlook/calendar
-    github:
-        reference: ./github
-    time:
-        reference: ./time
-    workspace-files:
-        reference: ./workspace-files
-    tasks:
-        reference: ./tasks
-    threads:
-        reference: ./threads
-    knowledge:
-        reference: ./knowledge
-    shell:
-        reference: ./shell
-    word:
-        reference: ./word
-    tavily:
-        reference: ./search/tavily
-    googlecustomsearch:
-        reference: ./search/google/googlecustomsearch
-    pagerduty:
-        reference: ./pagerduty
-    postgres:
-        reference: ./postgres
-    survey:
-        reference: ./survey
-    weather:
-        reference: ./weather
-    die-roller:
-        reference: ./die-roller
-    smartthings:
-        reference: ./smartthings
-    gemini-image-generator:
-        reference: ./gemini/image-generator.gpt
-    firecrawl:
-        reference: ./firecrawl
-    colly-scraper:
-        reference: ./colly-scraper
-    obot-search:
-        reference: ./search/tavily/obot-search.gpt
-    search-combo:
-        reference: ./search-combo
-    aws-s3:
-        reference: ./aws/s3
-    aws-ec2:
-        reference: ./aws/ec2
-    discord:
-        reference: ./discord
-    proxycurl:
-        reference: ./proxycurl
+  sendgrid:
+    reference: ./sendgrid
+  file-summarizer:
+    reference: ./file-summarizer
+  google-calendar:
+    reference: ./google/calendar
+  database:
+    reference: ./database
+  zoom:
+    reference: ./zoom
+  atlassian-jira:
+    reference: ./atlassian/jira
+  wordpress:
+    reference: ./wordpress
+  excel:
+    reference: ./excel
+  browser:
+    reference: ./browser
+  bluesky:
+    reference: ./bluesky
+  slack:
+    reference: ./slack
+  slack-bot:
+    reference: ./slack/tool-bot.gpt
+  linkedin-publishing:
+    reference: ./linkedin-publishing
+  notion:
+    reference: ./notion
+  google-docs:
+    reference: ./google/docs
+  google-gmail:
+    reference: ./google/gmail
+  google-search:
+    reference: ./google/search
+  google-search-console:
+    reference: ./google/search-console
+  google-sheets:
+    reference: ./google/sheets
+  gitlab:
+    reference: ./gitlab
+  images:
+    reference: ./images
+  outlook-mail:
+    reference: ./outlook/mail
+  outlook-calender:
+    reference: ./outlook/calendar
+  github:
+    reference: ./github
+  time:
+    reference: ./time
+  workspace-files:
+    reference: ./workspace-files
+  tasks:
+    reference: ./tasks
+  threads:
+    reference: ./threads
+  knowledge:
+    reference: ./knowledge
+  shell:
+    reference: ./shell
+  word:
+    reference: ./word
+  tavily:
+    reference: ./search/tavily
+  googlecustomsearch:
+    reference: ./search/google/googlecustomsearch
+  pagerduty:
+    reference: ./pagerduty
+  postgres:
+    reference: ./postgres
+  survey:
+    reference: ./survey
+  weather:
+    reference: ./weather
+  die-roller:
+    reference: ./die-roller
+  smartthings:
+    reference: ./smartthings
+  gemini-image-generator:
+    reference: ./gemini/image-generator.gpt
+  firecrawl:
+    reference: ./firecrawl
+  colly-scraper:
+    reference: ./colly-scraper
+  obot-search:
+    reference: ./search/tavily/obot-search.gpt
+  search-combo:
+    reference: ./search-combo
+  aws-s3:
+    reference: ./aws/s3
+  aws-ec2:
+    reference: ./aws/ec2
+  discord:
+    reference: ./discord
+  proxycurl:
+    reference: ./proxycurl
+
 
 knowledgeDataSources:
-    notion-data-source:
-        reference: ./knowledge/data-sources/notion
-    onedrive-data-source:
-        reference: ./knowledge/data-sources/onedrive
-    website-data-source:
-        reference: ./knowledge/data-sources/website
+  notion-data-source:
+    reference: ./knowledge/data-sources/notion
+  onedrive-data-source:
+    reference: ./knowledge/data-sources/onedrive
+  website-data-source:
+    reference: ./knowledge/data-sources/website
 
 system:
-    knowledge-retrieval:
-        reference: ./knowledge
-    knowledge-ingest:
-        reference: ./knowledge/ingest.gpt
-    knowledge-load:
-        reference: ./knowledge/load.gpt
-    knowledge-delete:
-        reference: ./knowledge/delete.gpt
-    knowledge-delete-file:
-        reference: ./knowledge/delete-file.gpt
-    website-cleaner:
-        reference: ./website-cleaner
-    workflow:
-        reference: ./workflow
-    result-formatter:
-        reference: ./result-formatter
-    obot-model-provider:
-        reference: ./obot-model-provider
-    existing-credential:
-        reference: ./existing-credential
-    database-ui:
-        reference: ./database/ui.gpt
-    docker-shell-id:
-        reference: ./docker-shell-id
-    docker:
-        reference: ./docker
-    tasks-workflow:
-        reference: ./tasks-workflow
-    task-invoke:
-        reference: ./task-invoke
+  knowledge-retrieval:
+    reference: ./knowledge
+  knowledge-ingest:
+    reference: ./knowledge/ingest.gpt
+  knowledge-load:
+    reference: ./knowledge/load.gpt
+  knowledge-delete:
+    reference: ./knowledge/delete.gpt
+  knowledge-delete-file:
+    reference: ./knowledge/delete-file.gpt
+  website-cleaner:
+    reference: ./website-cleaner
+  workflow:
+    reference: ./workflow
+  result-formatter:
+    reference: ./result-formatter
+  obot-model-provider:
+    reference: ./obot-model-provider
+  existing-credential:
+    reference: ./existing-credential
+  database-ui:
+    reference: ./database/ui.gpt
+  docker-shell-id:
+    reference: ./docker-shell-id
+  docker:
+    reference: ./docker
+  tasks-workflow:
+    reference: ./tasks-workflow
+  task-invoke:
+    reference: ./task-invoke
 
 modelProviders:
-    openai-model-provider:
-        reference: ./openai-model-provider
-    anthropic-model-provider:
-        reference: ./anthropic-model-provider
-    ollama-model-provider:
-        reference: ./ollama-model-provider
-    groq-model-provider:
-        reference: ./groq-model-provider
-    voyage-model-provider:
-        reference: ./voyage-model-provider
-    vllm-model-provider:
-        reference: ./vllm-model-provider
-    xai-model-provider:
-        reference: ./xai-model-provider
-    deepseek-model-provider:
-        reference: ./deepseek-model-provider
-    generic-openai-model-provider:
-        reference: ./generic-openai-model-provider
+  openai-model-provider:
+    reference: ./openai-model-provider
+  anthropic-model-provider:
+    reference: ./anthropic-model-provider
+  ollama-model-provider:
+    reference: ./ollama-model-provider
+  groq-model-provider:
+    reference: ./groq-model-provider
+  voyage-model-provider:
+    reference: ./voyage-model-provider
+  vllm-model-provider:
+    reference: ./vllm-model-provider
+  xai-model-provider:
+    reference: ./xai-model-provider
+  deepseek-model-provider:
+    reference: ./deepseek-model-provider
+  generic-openai-model-provider:
+    reference: ./generic-openai-model-provider
 
 authProviders:
-    github-auth-provider:
-        reference: ./github-auth-provider
-    google-auth-provider:
-        reference: ./google-auth-provider
+  github-auth-provider:
+    reference: ./github-auth-provider
+  google-auth-provider:
+    reference: ./google-auth-provider
