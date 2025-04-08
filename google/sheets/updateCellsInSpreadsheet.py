@@ -25,6 +25,8 @@ def main():
     cells = []
     try:
         for cell in update_cells_object:
+            if not all(key in cell for key in ("row", "column", "value")):
+                raise ValueError(f"Missing required keys in cell dictionary: {cell}")
             cell_object = Cell(row=cell["row"], col=cell["column"], value=cell["value"])
             cells.append(cell_object)
     except Exception as err:
