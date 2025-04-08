@@ -2,7 +2,7 @@
 Name: Slack Bot
 Description: Tools for interacting with Slack as an App
 Metadata: bundle: true
-Share Tools: Send Direct Message As Bot, List Channels As Bot, Search Channels As Bot, Get Channel History As Bot, Get Channel History By Time As Bot, Get Thread History From Link As Bot, Get Thread History As Bot, Send Message As Bot, Send Message in Thread As Bot, List Users As Bot, Search Users As Bot, Send DM in Thread As Bot, Send Direct Message As Bot, Get Message Link As Bot, Get DM History As Bot, Get DM Thread History As Bot
+Share Tools: Send Direct Message As Bot, List Channels As Bot, Search Channels As Bot, Get Channel History As Bot, Get Channel History By Time As Bot, Get Thread History From Link As Bot, Get Thread History As Bot, Send Message As Bot, Send Message in Thread As Bot, List Users As Bot, Search Users As Bot, Send DM in Thread As Bot, Send Direct Message As Bot, Get Message Link As Bot, Get DM History As Bot, Get DM Thread History As Bot,  Format Message from ./tool.gpt
 
 ---
 Name: List Channels As Bot
@@ -200,6 +200,8 @@ Do not provide channel, thread, or message IDs in the output, as these are not h
 When you use the search-messages tool, you can use normal Slack search filters. If you filter by user, use the full username, which can be obtained from the search-users or list-users tools.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
+
+Before you are sending a message, call the Format Message tool to format the message.
 
 Use the following guidelines when constructing `query` arguments for the search-messages tool:
 - `*` (Wildcard): Matches any number of characters in a term. Example: `dev*` matches "developer", "development", etc.
