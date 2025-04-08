@@ -17,7 +17,7 @@ def main():
     try:
         update_cells_object = json.loads(update_cells)
     except json.JSONDecodeError as err:
-        print(err)
+        print(f"JSON parsing error for update_cells input: {err}")
         exit(1)
 
     service = gspread_client()
