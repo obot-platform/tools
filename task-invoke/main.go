@@ -6,17 +6,20 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/obot-platform/obot/apiclient"
 )
 
 var (
-	taskID   = strings.TrimSpace(os.Getenv("TOOL_CALL_BODY"))
-	input    = os.Getenv("GPTSCRIPT_INPUT")
-	url      = os.Getenv("OBOT_SERVER_URL") + "/api"
-	token    = os.Getenv("OBOT_TOKEN")
-	threadID = os.Getenv("OBOT_THREAD_ID")
+	callingTaskID  = os.Getenv("OBOT_WORKFLOW_ID")
+	taskID         = strings.TrimSpace(os.Getenv("TOOL_CALL_BODY"))
+	taskBreadCrumb = strings.TrimSpace(os.Getenv("OBOT_TASK_BREAD_CRUMB"))
+	input          = os.Getenv("GPTSCRIPT_INPUT")
+	url            = os.Getenv("OBOT_SERVER_URL") + "/api"
+	token          = os.Getenv("OBOT_TOKEN")
+	threadID       = os.Getenv("OBOT_THREAD_ID")
 )
 
 func main() {
@@ -36,6 +39,16 @@ func chatFinish(data string) error {
 func mainErr() error {
 	if taskID == "" {
 		return fmt.Errorf("task ID is empty")
+	}
+
+	if slices.Contains(strings.Split(taskBreadCrumb, ","), taskID) {
+		return fmt.Errorf("task cycle detected: %s in %s", taskID, taskBreadCrumb)
+	}
+
+	if taskBreadCrumb == "" {
+		taskBreadCrumb = callingTaskID
+	} else {
+		taskBreadCrumb = taskBreadCrumb + "," + callingTaskID
 	}
 
 	data := map[string]any{}
@@ -62,7 +75,8 @@ func mainErr() error {
 	}
 
 	run, err := client.RunTask(context.Background(), taskID, input, apiclient.TaskRunOptions{
-		ThreadID: threadID,
+		ThreadID:       threadID,
+		TaskBreadCrumb: taskBreadCrumb,
 	})
 	if err != nil {
 		return err
