@@ -1,19 +1,19 @@
-import { client } from './client.js';
-import { listChannels } from './tools/listChannels.js';
-import { searchChannels } from './tools/searchChannels.js';
-import { getChannelHistory } from './tools/getChannelHistory.js';
-import { getChannelHistoryByTime } from './tools/getChannelHistoryByTime.js';
-import { getThreadHistory } from './tools/getThreadHistory.js';
-import { listUsers } from './tools/listUsers.js';
-import { searchUsers } from './tools/searchUsers.js';
-import { sendMessage } from './tools/sendMessage.js';
-import { sendMessageInThread } from './tools/sendMessageInThread.js';
+import { client } from "./client.js";
+import { listChannels } from "./tools/listChannels.js";
+import { searchChannels } from "./tools/searchChannels.js";
+import { getChannelHistory } from "./tools/getChannelHistory.js";
+import { getChannelHistoryByTime } from "./tools/getChannelHistoryByTime.js";
+import { getThreadHistory } from "./tools/getThreadHistory.js";
+import { listUsers } from "./tools/listUsers.js";
+import { searchUsers } from "./tools/searchUsers.js";
+import { sendMessage } from "./tools/sendMessage.js";
+import { sendMessageInThread } from "./tools/sendMessageInThread.js";
 
 async function login(): Promise<void> {
   try {
     await client.login(process.env.DISCORD_TOKEN);
   } catch (error: any) {
-    console.log('Discord login failed:', error);
+    console.log("Discord login failed:", error);
     process.exit(1);
   }
 }
@@ -25,35 +25,35 @@ async function main() {
     const command = process.argv[2];
 
     switch (command) {
-      case 'listChannels':
+      case "listChannels":
         console.log(await listChannels());
         break;
-      case 'searchChannels':
+      case "searchChannels":
         console.log(await searchChannels());
         break;
-      case 'getChannelHistory':
+      case "getChannelHistory":
         console.log(await getChannelHistory());
         break;
-      case 'getChannelHistoryByTime':
+      case "getChannelHistoryByTime":
         console.log(await getChannelHistoryByTime());
         break;
-      case 'getThreadHistory':
+      case "getThreadHistory":
         console.log(await getThreadHistory());
         break;
-      case 'listUsers':
+      case "listUsers":
         console.log(await listUsers());
         break;
-      case 'searchUsers':
+      case "searchUsers":
         console.log(await searchUsers());
         break;
-      case 'sendMessage':
+      case "sendMessage":
         console.log(await sendMessage());
         break;
-      case 'sendMessageInThread':
+      case "sendMessageInThread":
         console.log(await sendMessageInThread());
         break;
-      case 'login':
-        console.log('Successfully logged in to Discord'); // login happens earlier in this function
+      case "login":
+        console.log("Successfully logged in to Discord"); // login happens earlier in this function
         break;
       default:
         throw new Error(`Unknown command: ${command}`);
@@ -61,9 +61,9 @@ async function main() {
 
     process.exit(0);
   } catch (error) {
-    console.error('Error:', error);
+    console.log("Error:", error);
     process.exit(1);
   }
 }
 
-main(); 
+main();

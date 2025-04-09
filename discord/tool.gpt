@@ -106,8 +106,8 @@ Share Tools: List Channels, Search Channels, Get Channel History, Get Thread His
 Share Context: Discord Context
 Param: channelid: the ID of the channel containing the thread
 Param: guildid: the ID of the guild that the channel belongs to
-Param: threadid: the ID of the thread to send the message to
 Param: text: the text content to send
+Param: messageid: the ID of the message to create a thread on
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- sendMessageInThread
 
