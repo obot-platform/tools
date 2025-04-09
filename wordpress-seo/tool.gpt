@@ -1,0 +1,40 @@
+---
+Name: Wordpress SEO
+Description: Search engine optimization tools for wordpress sites. This helps you optimize the content of a post.
+Metadata: bundle: true
+Share Tools: Keywords Suggestions, Content Optimize Metrics
+---
+Name: Keywords Suggestions
+Description: Suggest keywords for a given content.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: content: (required) the content to suggest keywords for.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordsSuggestions
+
+---
+Name: Content Optimize Metrics
+Description: Get the metrics that measures the current content in terms of SEO. includes the keyword density, readability.
+Credential: ./credential
+Share Context: Wordpress Context
+Param: content: (required) the content to optimize.
+Param: primary_keyword: (required) the primary keyword to optimize for.
+Param: secondary_keywords: (optional) the secondary keywords to optimize for.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ContentOptimizeMetrics
+
+
+
+---
+Name: Wordpress SEO Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using WordPress SEO tools
+
+## End of instructions for using WordPress SEO tools
+
+---
+!metadata:*:icon
+/admin/assets/wordpress-logo.png

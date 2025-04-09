@@ -6,3 +6,4 @@ yake
 openai
 markdownify
 html2text
+requests
