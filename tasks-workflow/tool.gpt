@@ -1,6 +1,7 @@
 Name: Abort Current Task
 Description: Aborts the current step/task/workflow such that no further steps will execute
+Args: return: The instructed value to return indicating why the chat is being aborted
 
 #!/bin/bash
 
-${GPTSCRIPT_BIN} sys.chat.finish
+${GPTSCRIPT_BIN} sys.chat.finish ${RETURN}
