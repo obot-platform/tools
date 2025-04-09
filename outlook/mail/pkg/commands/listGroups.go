@@ -20,9 +20,11 @@ func ListGroups(ctx context.Context) error {
 	groups, err := graph.ListGroups(ctx, c)
 	if err != nil {
 		userType, getUserTypeErr := graph.GetUserType(ctx, c)
-		if getUserTypeErr == nil && strings.EqualFold(userType, "Guest") {
-			fmt.Printf("User has type '%s', which does not have enough permissions to list groups.\n", userType)
-			return nil
+		if getUserTypeErr == nil {
+			if strings.EqualFold(userType, "Guest") || strings.EqualFold(userType, "Personal") { // Guest or Personal accounts don't have enough permissions to list groups
+				fmt.Printf("User has type '%s', which does not have enough permissions to list groups.\n", userType)
+				return nil
+			}
 		}
 		return fmt.Errorf("failed to list groups: %w", err)
 	}
