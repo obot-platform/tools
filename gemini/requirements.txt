@@ -12,7 +12,7 @@ frozenlist==1.5.0
 google==3.0.0
 google-auth==2.38.0
 google-genai==1.2.0
-gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@0cebee3afa51b8c56006e479a990c262bd693ba6
+gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@5c00a24fc28af472202df8763d2e99b10d6db097
 h11==0.14.0
 httpcore==1.0.7
 httpx==0.27.0

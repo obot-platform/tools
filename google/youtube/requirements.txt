@@ -18,4 +18,4 @@ typing_extensions==4.13.1
 urllib3==2.2.2
 youtube-transcript-api==0.6.2
 yt-dlp==2024.11.4
-git+https://github.com/gptscript-ai/py-gptscript.git@0cebee3afa51b8c56006e479a990c262bd693ba6#egg=gptscript
+git+https://github.com/gptscript-ai/py-gptscript.git@5c00a24fc28af472202df8763d2e99b10d6db097#egg=gptscript

@@ -1,3 +1,3 @@
 requests==2.32.2
-git+https://github.com/gptscript-ai/py-gptscript.git@0cebee3afa51b8c56006e479a990c262bd693ba6#egg=gptscript
+git+https://github.com/gptscript-ai/py-gptscript.git@5c00a24fc28af472202df8763d2e99b10d6db097#egg=gptscript
 mistune==3.1.1 # BSD-3-Clause License

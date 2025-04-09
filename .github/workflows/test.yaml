@@ -1,12 +1,16 @@
 name: Test
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   pull_request:
     branches:
       - main
 
 jobs:
-  test:
+  go-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,3 +26,19 @@ jobs:
 
       - name: Run build
         run: make build
+
+  image-build:
+    runs-on: depot-ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        uses: depot/build-push-action@v1
+        with:
+          project: bbqjs4tj1g
+          context: .
+          platforms: linux/amd64,linux/arm64
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GHCR_TOKEN }}
+          build-args: |
+            TOOL_REGISTRY_REPOS=github.com/${{ github.event.pull_request.head.repo.full_name }}@${{ github.event.pull_request.head.ref }}
