@@ -11,6 +11,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from bs4 import BeautifulSoup
 
+
 async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
     gptscript_client = gptscript.GPTScript()
     message = MIMEMultipart()
@@ -245,8 +246,8 @@ def extract_message_headers(message):
                 cc = header['value']
             if header['name'].lower() == 'bcc':
                 bcc = header['value']
-            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone().strftime(
-                '%Y-%m-%d %H:%M:%S')
+            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone(obot_user_tz).strftime(
+                '%Y-%m-%d %H:%M:%S %Z')
 
     return subject, sender, to, cc, bcc, date
 
@@ -387,8 +388,7 @@ def format_query_dates(query):
     if not query:
         return query
 
-    # Get user's timezone and replace dates in query with timestamps
-    user_tz = get_user_timezone()
+    # Replace dates in query with timestamps
     def replace_date(match):
         operator, quote1, date_str, quote2 = match.groups()
         date_str = date_str.replace('/', '-')
@@ -399,10 +399,10 @@ def format_query_dates(query):
 
             if operator == "before":
                 # For 'before:', use beginning of day (00:00:00)
-                dt = datetime(year, month, day, 0, 0, 0, tzinfo=user_tz)
+                dt = datetime(year, month, day, 0, 0, 0, tzinfo=obot_user_tz)
             else:  # after
                 # For 'after:', use end of day (23:59:59)
-                dt = datetime(year, month, day, 23, 59, 59, tzinfo=user_tz)
+                dt = datetime(year, month, day, 23, 59, 59, tzinfo=obot_user_tz)
 
             timestamp = int(dt.timestamp())
             return f"{operator}:{quote1}{timestamp}{quote2}"
@@ -415,11 +415,13 @@ def format_query_dates(query):
 
 
 def get_user_timezone():
-    obot_user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+    user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
 
     try:
-        user_tz = ZoneInfo(obot_user_tz)
+        tz = ZoneInfo(user_tz)
     except:
-        user_tz = timezone.utc
+        tz = timezone.utc
 
-    return user_tz
+    return tz
+
+obot_user_tz = get_user_timezone()
