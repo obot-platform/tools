@@ -110,8 +110,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25 h1:9bCMuD3TcnjeqjPT2gSlha4asp8NvgcFRYExCaikCxk=
 github.com/oauth2-proxy/mockoidc v0.0.0-20240214162133-caebfff84d25/go.mod h1:eDjgYHYDJbPLBLsyZ6qRaugP0mX8vePOhZ5id1fdzJw=
-github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250402151943-8bfeb682f4c4 h1:P25630HNYdk42f9LrTpcxOM1J8xMTW2idxTuV2lWBLw=
-github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250402151943-8bfeb682f4c4/go.mod h1:BlSghhlE4b+Xwhp2EPfsUV1CPb1w2JtDtqBoA8D8pBw=
+github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250410192101-57fa66b17604 h1:AcRCh5GfCB/Kmdh1wjiZlpyL5S/L/9+XS5PWqEMu4gg=
+github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250410192101-57fa66b17604/go.mod h1:BlSghhlE4b+Xwhp2EPfsUV1CPb1w2JtDtqBoA8D8pBw=
 github.com/onsi/ginkgo/v2 v2.23.3 h1:edHxnszytJ4lD9D5Jjc4tiDkPBZ3siDeJJkUZJJVkp0=
 github.com/onsi/ginkgo/v2 v2.23.3/go.mod h1:zXTP6xIp3U8aVuXN8ENK9IXRaTjFnpVB9mGmaSRvxnM=
 github.com/onsi/gomega v1.36.3 h1:hID7cr8t3Wp26+cYnfcjR6HpJ00fdogN6dqZ1t6IylU=
