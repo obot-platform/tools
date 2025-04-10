@@ -1,6 +1,7 @@
 import { GPTScript } from "@gptscript-ai/gptscript"
 import { Mutex } from "async-mutex"
 import Fuse from "fuse.js"
+import slackifyMarkdown from 'slackify-markdown';
 
 export async function userContext(webClient) {
   const result = await webClient.auth.test({})
@@ -219,10 +220,37 @@ export async function search(webClient, query, sortByTime) {
   }
 }
 
+function removeBoldInHeadings(markdownText) {
+  // Both headings and bold text will get converted to bold in slack.
+  // This function removes the bold markers from headings to help the parser to return the correct text
+  // without this , # Welcome to *Markdown* → Slack **Test** --> *Welcome to ​_Markdown_​ → Slack *Test** , which is incorrect.
+  return markdownText
+    .split('\n')
+    .map(line => {
+      const headingMatch = line.match(/^(\s{0,3}#+\s)(.*)$/);
+      if (headingMatch) {
+        const prefix = headingMatch[1]; // "# ", "## ", etc.
+        let content = headingMatch[2];
+        content = content.replace(/\*\*(.+?)\*\*/g, '$1');
+        content = content.replace(/__(.+?)__/g, '$1');
+        return prefix + content;
+      }
+      return line;
+    })
+    .join('\n');
+}
+
+function markdownToSlack(text) {
+  // Convert markdown format text to slack format text. 
+  text = removeBoldInHeadings(text)
+  return slackifyMarkdown(text)
+}
+
+
 export async function sendMessage(webClient, channelId, text) {
   const result = await webClient.chat.postMessage({
     channel: channelId,
-    text: text,
+    text: markdownToSlack(text),
   })
 
   if (!result.ok) {
@@ -235,7 +263,7 @@ export async function sendMessage(webClient, channelId, text) {
 export async function sendMessageInThread(webClient, channelId, threadTs, text) {
   const result = await webClient.chat.postMessage({
     channel: channelId,
-    text: text,
+    text: markdownToSlack(text),
     thread_ts: threadTs,
   })
 
@@ -304,10 +332,9 @@ export async function sendDM(webClient, userIds, text) {
   const res = await webClient.conversations.open({
     users: userIds,
   })
-
   await webClient.chat.postMessage({
     channel: res.channel.id,
-    text,
+    text: markdownToSlack(text),
   })
 
   console.log("Message sent successfully")
@@ -320,7 +347,7 @@ export async function sendDMInThread(webClient, userIds, threadId, text) {
 
   await webClient.chat.postMessage({
     channel: res.channel.id,
-    text,
+    text: markdownToSlack(text),
     thread_ts: threadId,
   })
 
