@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	"dario.cat/mergo"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/load"
-	dstypes "github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/load"
+	dstypes "github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
 	lcgosplitter "github.com/tmc/langchaingo/textsplitter"
 )

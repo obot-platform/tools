@@ -10,6 +10,7 @@ Credential: ../placeholder-credential as github-auth-provider
 {
     "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/github.svg",
     "link": "https://github.com/",
+    "postgresTablePrefix": "github_",
     "envVars": [
         {
             "name": "OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID",
@@ -38,6 +39,13 @@ Credential: ../placeholder-credential as github-auth-provider
         }
     ],
     "optionalEnvVars": [
+        {
+            "name": "OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN",
+            "friendlyName": "PostgreSQL connection string (DSN)",
+            "description": "The connection string for a PostgreSQL database to use for session storage. If unset, cookies will be used for session storage instead.",
+            "sensitive": true,
+            "hidden": true
+        },
     	{
     		"name": "OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION",
     		"friendlyName": "Token Refresh Duration",

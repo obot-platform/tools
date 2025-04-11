@@ -1,0 +1,14 @@
+---
+Name: Search Combo
+Description: Search the web with Google and scrape the results using Firecrawl or Colly
+Param: query: The search query
+Param: scraper: (Optional) The scraper to use: firecrawl or colly (default: firecrawl)
+Param: scrapeMode: (Optional) The scrape mode to use: "all" to scrape all results or llm to let an LLM decide which results to scrape (default: all)
+Param: answerMode: (Optional) The answer mode to use: "all" to return all scraped content or "llm" to return a LLM generated summary (default: all)
+Credentials: ../search/google/googlecustomsearch/credential,../firecrawl/credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:*:icon
+/admin/assets/obot_search_icon.png

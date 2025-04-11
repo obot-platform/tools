@@ -17,6 +17,7 @@ import {
   sendMessage,
   sendMessageInThread,
   userContext,
+  sendTypingEvent,
 } from "./src/tools.js"
 
 if (process.argv.length !== 3) {
@@ -86,6 +87,9 @@ switch (command) {
     break
   case "userContext":
     await userContext(webClient)
+    break
+  case "sendTypingEvent":
+    await sendTypingEvent(webClient, process.env.CHANNELID, process.env.THREADID, process.env.STATUS)
     break
   default:
     console.error(`Unknown command: ${command}`)

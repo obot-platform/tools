@@ -1,0 +1,30 @@
+Name: Anthropic
+Description: Model provider for Anthropic hosted Claude models
+Model Provider: true
+Credential: ../placeholder-credential as anthropic-model-provider with OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY as env_vars
+Metadata: noUserAuth: anthropic-model-provider
+
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:Anthropic:providerMeta
+{
+    "icon": "/admin/assets/anthropic_icon.svg",
+    "link": "https://www.anthropic.com",
+    "description": "Note: Anthropic does not have an embeddings model and [recommends](https://docs.anthropic.com/en/docs/build-with-claude/embeddings) Voyage AI.",
+    "envVars": [
+        {
+            "name": "OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY",
+            "friendlyName": "API Key",
+            "description": "Anthropic API Key",
+            "sensitive": true
+        }
+    ]
+}
+
+---
+Name: validate
+Description: Validate Anthropic credentials
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate

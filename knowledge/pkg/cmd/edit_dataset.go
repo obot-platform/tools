@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 	"github.com/spf13/cobra"
 )
 

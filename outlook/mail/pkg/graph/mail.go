@@ -12,6 +12,7 @@ import (
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 	"github.com/gptscript-ai/go-gptscript"
+	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
@@ -125,6 +126,8 @@ type DraftInfo struct {
 	Subject, Body       string
 	Recipients, CC, BCC []string // slice of email addresses
 	Attachments         []string // slice of workspace file paths
+	ReplyAll            bool
+	ReplyToMessageID    string
 }
 
 var (
@@ -174,6 +177,52 @@ func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	}
 
 	return draft, nil
+}
+
+func CreateDraftReply(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, info DraftInfo) (models.Messageable, error) {
+	trueMessageID, err := id.GetOutlookID(ctx, info.ReplyToMessageID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message ID: %w", err)
+	}
+
+	toReplyMessageDetail, err := client.Me().Messages().ByMessageId(trueMessageID).Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message: %w", err)
+	}
+
+	requestBody := models.NewMessage()
+	requestBody.SetIsDraft(util.Ptr(true))
+	requestBody.SetSubject(util.Ptr(info.Subject))
+	requestBody.SetToRecipients(emailAddressesToRecipientable(info.Recipients))
+
+	if len(info.CC) > 0 {
+		requestBody.SetCcRecipients(emailAddressesToRecipientable(info.CC))
+	}
+
+	if len(info.BCC) > 0 {
+		requestBody.SetBccRecipients(emailAddressesToRecipientable(info.BCC))
+	}
+
+	for _, file := range info.Attachments {
+		if file == "" {
+			return nil, fmt.Errorf("attachment file path cannot be empty")
+		}
+	}
+
+	replyRequestBody := users.NewItemMessagesItemCreateReplyPostRequestBody()
+	replyRequestBody.SetMessage(requestBody)
+	replyRequestBody.SetComment(util.Ptr(strings.ReplaceAll(info.Body, "\n", "<br>")))
+
+	if info.ReplyAll {
+		requestBody.SetCcRecipients(toReplyMessageDetail.GetCcRecipients())
+		reply, err := client.Me().Messages().ByMessageId(trueMessageID).CreateReplyAll().Post(ctx, replyRequestBody, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create reply all: %w", err)
+		}
+		return reply, nil
+	}
+
+	return client.Me().Messages().ByMessageId(trueMessageID).CreateReply().Post(ctx, replyRequestBody, nil)
 }
 
 func emailAddressesToRecipientable(addresses []string) []models.Recipientable {
@@ -318,4 +367,37 @@ func MoveMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, m
 	}
 
 	return message, nil
+}
+
+func GetMe(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (models.Userable, error) {
+	user, err := client.Me().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get me: %w", err)
+	}
+	return user, nil
+}
+
+func ListAttachments(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) ([]models.Attachmentable, error) {
+	attachments, err := client.Me().Messages().ByMessageId(messageID).Attachments().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list attachments: %w", err)
+	}
+
+	// Filter to only include file attachments
+	var fileAttachments []models.Attachmentable
+	for _, attachment := range attachments.GetValue() {
+		if *attachment.GetOdataType() == "#microsoft.graph.fileAttachment" && !*attachment.GetIsInline() {
+			fileAttachments = append(fileAttachments, attachment)
+		}
+	}
+
+	return fileAttachments, nil
+}
+
+func GetAttachment(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID, attachmentID string) (models.Attachmentable, error) {
+	attachment, err := client.Me().Messages().ByMessageId(messageID).Attachments().ByAttachmentId(attachmentID).Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get attachment: %w", err)
+	}
+	return attachment, nil
 }

@@ -3,7 +3,7 @@ package index
 import (
 	"context"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 )
 
 type Index interface {

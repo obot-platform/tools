@@ -14,12 +14,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/client"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/structured"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/filetypes"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
-	flowconfig "github.com/gptscript-ai/knowledge/pkg/flows/config"
+	"github.com/obot-platform/tools/knowledge/pkg/client"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/structured"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/filetypes"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
 	"github.com/spf13/cobra"
 )
 
@@ -80,9 +80,16 @@ func (s *ClientLoad) run(ctx context.Context, input, output string) error {
 			filetype = stat.MimeType
 		}
 	} else {
-		inputBytes, err = os.ReadFile(input)
-		if err != nil {
-			return fmt.Errorf("failed to read input file %q: %w", input, err)
+		if input == "-" {
+			inputBytes, err = io.ReadAll(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("failed to read input file %q: %w", input, err)
+			}
+		} else {
+			inputBytes, err = os.ReadFile(input)
+			if err != nil {
+				return fmt.Errorf("failed to read input file %q: %w", input, err)
+			}
 		}
 		filetype, err = filetypes.GetFiletype(input, inputBytes)
 		if err != nil {

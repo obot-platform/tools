@@ -1,14 +1,14 @@
 package embeddings
 
 import (
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/vertex"
+	"os"
+	"testing"
+
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func TestLoadConfOpenAI(t *testing.T) {
@@ -35,26 +35,6 @@ func TestLoadConfOpenAI(t *testing.T) {
 
 	assert.Equal(t, "https://foo.bar.spam", conf.BaseURL) // this is in config and env, so env should take precedence
 	assert.Equal(t, "sk-1234567890abcdef", conf.APIKey)   // this should come from config
-}
-
-func TestLoadConfVertex(t *testing.T) {
-	dotenv := "test_assets/vertex_env"
-	require.NoError(t, godotenv.Load(dotenv))
-
-	cfg, err := config.LoadConfig("")
-	require.NoError(t, err)
-
-	// Load the configuration
-	p, err := GetSelectedEmbeddingsModelProvider("vertex", cfg.EmbeddingsConfig)
-	require.NoError(t, err)
-	require.Equal(t, "vertex", p.Name())
-
-	t.Logf("Config: %#v", p.Config())
-
-	conf := p.Config().(*vertex.EmbeddingProviderVertex)
-
-	require.Equal(t, "foo-embedding-001", conf.EmbeddingModelName)
-	require.Equal(t, "foo-project", conf.Project)
 }
 
 func TestExportConfigWithValidStruct(t *testing.T) {

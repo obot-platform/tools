@@ -21,6 +21,11 @@ func ListDocs(ctx context.Context) error {
 		return fmt.Errorf("failed to list word docs: %w", err)
 	}
 
+	if len(infos) == 0 {
+		fmt.Println("No word docs found")
+		return nil
+	}
+
 	gptscriptClient, err := gptscript.NewGPTScript()
 	if err != nil {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/glebarez/sqlite"
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 	"gorm.io/gorm"
 )
 

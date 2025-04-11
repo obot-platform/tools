@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const ContentSubstringFilterPostprocessorName = "content_substring_filter"

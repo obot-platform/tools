@@ -2,7 +2,6 @@
 Name: Google Custom Search
 Description: Search the Web using a Google Custom Search Engine.
 Credential: ./credential
-Share Context: ../../../time
 Param: query: The search query
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

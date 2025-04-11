@@ -12,6 +12,7 @@ Credential: ../placeholder-credential as google-auth-provider
     "icon": "/admin/assets/google_icon_small.png",
     "iconDark": "/admin/assets/google_icon_small.png",
     "link": "https://google.com/",
+    "postgresTablePrefix": "google_",
     "envVars": [
         {
             "name": "OBOT_GOOGLE_AUTH_PROVIDER_CLIENT_ID",
@@ -40,6 +41,13 @@ Credential: ../placeholder-credential as google-auth-provider
         }
     ],
     "optionalEnvVars": [
+        {
+            "name": "OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN",
+            "friendlyName": "PostgreSQL connection string (DSN)",
+            "description": "The connection string for a PostgreSQL database to use for session storage. If unset, cookies will be used for session storage instead.",
+            "sensitive": true,
+            "hidden": true
+        },
 		{
 			"name": "OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION",
 			"friendlyName": "Token Refresh Duration",

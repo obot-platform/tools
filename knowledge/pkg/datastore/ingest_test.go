@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
-	"github.com/gptscript-ai/knowledge/pkg/flows"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/transformers"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
 	"github.com/stretchr/testify/require"
 )
 

@@ -7,18 +7,16 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/scores"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	"github.com/gptscript-ai/knowledge/pkg/output"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/scores"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
-	"github.com/philippgille/chromem-go"
-
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
 )
 
 type Retriever interface {
-	Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error)
+	Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error)
 	Name() string
 	DecodeConfig(cfg map[string]any) error
 	NormalizedScores() bool // whether the retriever returns normalized scores
@@ -77,7 +75,7 @@ func (r *BasicRetriever) DecodeConfig(cfg map[string]any) error {
 	return DefaultConfigDecoder(r, cfg)
 }
 
-func (r *BasicRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
+func (r *BasicRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	if len(datasetIDs) == 0 {
 		return nil, fmt.Errorf("no dataset specified for retrieval")
 	}

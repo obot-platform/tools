@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/store"
-	"github.com/gptscript-ai/knowledge/pkg/llm"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
-	"github.com/philippgille/chromem-go"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/store"
+	"github.com/obot-platform/tools/knowledge/pkg/llm"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const RoutingRetrieverName = "routing"
@@ -45,7 +44,7 @@ type routingResp struct {
 	Result string `json:"result"`
 }
 
-func (r *RoutingRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []chromem.WhereDocument) ([]vs.Document, error) {
+func (r *RoutingRetriever) Retrieve(ctx context.Context, store store.Store, query string, datasetIDs []string, where map[string]string, whereDocument []vs.WhereDocument) ([]vs.Document, error) {
 	log := slog.With("component", "RoutingRetriever")
 
 	// TODO: properly handle the datasetIDs input

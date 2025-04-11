@@ -1,0 +1,121 @@
+---
+Name: AWS EC2
+Description: Tools for interacting with AWS EC2
+Metadata: bundle: true
+Share Tools: List Instances, Search Instances By Name, Search Instances By Tag, Get Instance Info, Start Instance, Stop Instance, Reboot Instance, Terminate Instance, Launch New Instance, List VPCs, List Subnets, List Security Groups
+
+---
+Name: List Instances
+Description: List EC2 Instances in the specified Region
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listInstances
+
+---
+Name: Search Instances by Name
+Description: Allows searching for instance details based on the value of the 'Name' tag
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_name: The full name to search for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchInstancesByName
+
+---
+Name: Search Instances by Tag
+Description: Allows searching for instance details based on the value of the specified tag
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: tag_key: The Tag Key to search for.
+Param: tag_value: The Tag Value to search for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchInstancesByTag
+
+---
+Name: Get Instance Info
+Description: Get information about an EC2 Instance
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_id: The Instance ID of the EC2 Instance to look up
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getInstanceInfo
+
+---
+Name: Start Instance
+Description: Start an EC2 Instance that is in the 'stopped' state
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_id: The Instance ID of the EC2 Instance to start
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool startInstance
+
+---
+Name: Stop Instance
+Description: Stop an EC2 Instance that is in the 'running' state
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_id: The Instance ID of the EC2 Instance to stop
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool stopInstance
+
+---
+Name: Reboot Instance
+Description: Reboot an EC2 Instance
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_id: The Instance ID of the EC2 Instance to reboot
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool rebootInstance
+
+---
+Name: Terminate Instance
+Description: Terminate an EC2 Instance
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_id: The Instance ID of the EC2 Instance to terminate
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool terminateInstance
+
+---
+Name: Launch New Instance
+Description: Launches a new EC2 Instance
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: instance_type: A valid EC2 instance type, such as t2.micro. If blank, defaults to t2.micro
+Param: image_id: The AMI ID to use for the new instance. Must be set.
+Param: subnet_id: The subnet ID of the subnet to launch the instance in. Must be set. This determines what VPC is used as well.
+Param: key_name: The name of the existing SSH keypair to configure the instance with.
+Param: security_group_ids: A comma-delimited list of security group Ids. Must be set. Example: "sg-27384659182756476,sg-34950182744632718"
+Param: tags: A comma-delimited list of key=value pairs that define tags for the instance. Use `Name` as the key to configure a name for the instance. Must be set. Example: "Name=test-instance,Environment=demo"
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool launchInstance
+
+---
+Name: List VPCs
+Description: Lists available VPCs in the configured region
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listVPCs
+
+---
+Name: List Subnets
+Description: Lists available Subnets in the specified VPC
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: vpc_id: The id of a VPC to enumerate subnets in.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listSubnets
+
+---
+Name: List Security Groups
+Description: Lists Security Groups in the specified VPC
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: vpc_id: The id of a VPC to enumerate Security Groups in.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listSecurityGroups
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/amazonec2.svg

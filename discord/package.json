@@ -1,0 +1,21 @@
+{
+  "name": "discord",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "tool": "node --loader ts-node/esm src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "description": "GPTScript tools for interacting with Discord",
+  "dependencies": {
+    "@gptscript-ai/gptscript": "github:gptscript-ai/node-gptscript#d4b222c34e757b62429dc43ae9cc44aa3f6c9700",
+    "@types/node": "^20.11.24",
+    "discord.js": "^14.14.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

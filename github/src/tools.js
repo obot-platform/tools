@@ -206,29 +206,110 @@ export async function addCommentToPR(octokit, owner, repo, prNumber, comment) {
     console.log(`Added comment to PR #${prNumber}: ${prComment.data.body} - https://github.com/${owner}/${repo}/pull/${prNumber}`);
 }
 
+// Private helper functions for repository listing
+async function _fetchUserRepos(octokit, username) {
+    const allRepos = [];
+    for await (const response of octokit.paginate.iterator(octokit.repos.listForUser, {
+        username,
+        per_page: 100
+    })) {
+        allRepos.push(...response.data);
+    }
+    return allRepos;
+}
+
+async function _fetchAuthenticatedUserRepos(octokit) {
+    const allRepos = [];
+    for await (const response of octokit.paginate.iterator(octokit.repos.listForAuthenticatedUser, {
+        per_page: 100
+    })) {
+        allRepos.push(...response.data);
+    }
+    return allRepos;
+}
+
+async function _fetchOrgRepos(octokit, org) {
+    const allRepos = [];
+    for await (const response of octokit.paginate.iterator(octokit.repos.listForOrg, {
+        org,
+        per_page: 100
+    })) {
+        allRepos.push(...response.data);
+    }
+    return allRepos;
+}
 
 export async function listRepos(octokit, owner) {
-    const repos = await octokit.repos.listForUser({
-        username: owner,
-        per_page: 100
-    });
-
     try {
-        const gptscriptClient = new GPTScript();
-        const elements = repos.data.map(repo => {
-            return {
-                name: `${repo.id}`,
-                description: '',
-                contents: `${repo.name} (ID: ${repo.id}) - https://github.com/${owner}/${repo.name}`
+        let allRepos = [];
+        let description = "";
+        let datasetName = "";
+        const authenticatedUser = await octokit.users.getAuthenticated();
+        const username = authenticatedUser.data.login;
+
+        // Determine what type of repository listing we need to perform
+        if (!owner) {
+            // List authenticated user's repos
+            allRepos = await _fetchAuthenticatedUserRepos(octokit);
+            description = `GitHub repos for authenticated user ${username}`;
+            datasetName = "my_github_repos";
+            console.log(`Found ${allRepos.length} repositories for authenticated user ${username}`);
+        } else {
+            try {
+                // Check if the owner is a user or an organization
+                const { data: ownerData } = await octokit.users.getByUsername({ username: owner });
+
+                if (ownerData.type === 'Organization') {
+                    // List organization repos
+                    allRepos = await _fetchOrgRepos(octokit, owner);
+                    description = `GitHub repos for organization ${owner}`;
+                    datasetName = `${owner}_github_repos`;
+                    console.log(`Found ${allRepos.length} repositories for organization ${owner}`);
+                } else {
+                    // List user repos
+                    allRepos = await _fetchUserRepos(octokit, owner);
+                    description = `GitHub repos for user ${owner}`;
+                    datasetName = `${owner}_github_repos`;
+                    console.log(`Found ${allRepos.length} repositories for user ${owner}`);
+                }
+            } catch (error) {
+                if (error.status === 404) {
+                    // If not found as user, try as organization
+                    try {
+                        allRepos = await _fetchOrgRepos(octokit, owner);
+                        description = `GitHub repos for organization ${owner}`;
+                        datasetName = `${owner}_github_repos`;
+                        console.log(`Found ${allRepos.length} repositories for organization ${owner}`);
+                    } catch (orgError) {
+                        throw new Error(`Could not find repos for '${owner}' as either a user or organization`);
+                    }
+                } else {
+                    throw error;
+                }
             }
-        });
-        const datasetID = await gptscriptClient.addDatasetElements(elements, {
-            name: `${owner}_github_repos`,
-            description: `GitHub repos for ${owner}`
-        });
-        console.log(`Created dataset with ID ${datasetID} with ${elements.length} repositories`);
+        }
+
+        if (allRepos.length > 0) {
+            const gptscriptClient = new GPTScript();
+            const elements = allRepos.map(repo => {
+                const repoOwner = repo.owner ? repo.owner.login : owner || username;
+                return {
+                    name: `${repo.id}`,
+                    description: '',
+                    contents: `${repoOwner}/${repo.name} (ID: ${repo.id}) - ${repo.description || 'No description'} - https://github.com/${repoOwner}/${repo.name}`
+                };
+            });
+
+            const datasetID = await gptscriptClient.addDatasetElements(elements, {
+                name: datasetName,
+                description
+            });
+            console.log(`Created dataset with ID ${datasetID} with ${elements.length} repositories`);
+        } else {
+            console.log('No repositories found');
+        }
     } catch (e) {
-        console.log('Failed to create dataset:', e);
+        console.log('Failed to list repositories:', e);
     }
 }
 
@@ -353,4 +434,40 @@ export async function getJobLogs(octokit, owner, repo, jobId) {
         job_id: jobId
     });
     console.log(response.data);
+}
+
+export async function listUserOrgs(octokit) {
+    try {
+        const allOrgs = [];
+
+        // Use Octokit pagination to get all organizations
+        for await (const response of octokit.paginate.iterator(octokit.orgs.listForAuthenticatedUser, {
+            per_page: 100
+        })) {
+            allOrgs.push(...response.data);
+        }
+
+        console.log(`Found ${allOrgs.length} organizations for authenticated user`);
+
+        const gptscriptClient = new GPTScript();
+        const elements = allOrgs.map(org => {
+            return {
+                name: `${org.id}`,
+                description: '',
+                contents: `${org.login} (ID: ${org.id}) - https://github.com/${org.login}`
+            }
+        });
+
+        if (elements.length > 0) {
+            const datasetID = await gptscriptClient.addDatasetElements(elements, {
+                name: `user_github_orgs`,
+                description: `GitHub organizations for authenticated user`
+            });
+            console.log(`Created dataset with ID ${datasetID} with ${elements.length} organizations`);
+        } else {
+            console.log('No organizations found for authenticated user');
+        }
+    } catch (e) {
+        console.log('Failed to create dataset:', e);
+    }
 }

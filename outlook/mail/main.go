@@ -35,6 +35,22 @@ func main() {
 			fmt.Printf("failed to list mail: %v\n", err)
 			os.Exit(1)
 		}
+	case "listGroupThreads":
+		if err := commands.ListGroupThreads(
+			context.Background(),
+			os.Getenv("GROUP_ID"),
+			os.Getenv("START"),
+			os.Getenv("END"),
+			os.Getenv("LIMIT"),
+		); err != nil {
+			fmt.Printf("failed to list group threads: %v\n", err)
+			os.Exit(1)
+		}
+	case "listGroups":
+		if err := commands.ListGroups(context.Background()); err != nil {
+			fmt.Printf("failed to list groups: %v\n", err)
+			os.Exit(1)
+		}
 	case "getMessageDetails":
 		if err := commands.GetMessageDetails(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
 			fmt.Printf("failed to get message details: %v\n", err)
@@ -59,6 +75,11 @@ func main() {
 			fmt.Printf("failed to create draft: %v\n", err)
 			os.Exit(1)
 		}
+	case "createGroupThreadMessage":
+		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), getDraftInfoFromEnv()); err != nil {
+			fmt.Printf("failed to create group thread message: %v\n", err)
+			os.Exit(1)
+		}
 	case "sendDraft":
 		if err := commands.SendDraft(context.Background(), os.Getenv("DRAFT_ID")); err != nil {
 			fmt.Printf("failed to send draft: %v\n", err)
@@ -69,9 +90,29 @@ func main() {
 			fmt.Printf("failed to delete message: %v\n", err)
 			os.Exit(1)
 		}
+	case "deleteGroupThread":
+		if err := commands.DeleteGroupThread(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("THREAD_ID")); err != nil {
+			fmt.Printf("failed to delete group thread: %v\n", err)
+			os.Exit(1)
+		}
 	case "moveMessage":
 		if err := commands.MoveMessage(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("DESTINATION_FOLDER_ID")); err != nil {
 			fmt.Printf("failed to move message: %v\n", err)
+			os.Exit(1)
+		}
+	case "getMyEmailAddress":
+		if err := commands.GetMyEmailAddress(context.Background()); err != nil {
+			fmt.Printf("failed to get my email address: %v\n", err)
+			os.Exit(1)
+		}
+	case "listAttachments":
+		if err := commands.ListAttachments(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
+			fmt.Printf("failed to list attachments: %v\n", err)
+			os.Exit(1)
+		}
+	case "getAttachment":
+		if err := commands.GetAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID")); err != nil {
+			fmt.Printf("failed to get attachment: %v\n", err)
 			os.Exit(1)
 		}
 	default:
@@ -80,19 +121,28 @@ func main() {
 	}
 }
 
+func smartSplit(s, sep string) []string {
+	if s == "" {
+		return []string{} // Return an empty slice if the input is empty
+	}
+	return strings.Split(s, sep)
+}
+
 func getDraftInfoFromEnv() graph.DraftInfo {
 	var attachments []string
 	if os.Getenv("ATTACHMENTS") != "" {
-		attachments = strings.Split(os.Getenv("ATTACHMENTS"), ",")
+		attachments = smartSplit(os.Getenv("ATTACHMENTS"), ",")
 	}
 
 	info := graph.DraftInfo{
-		Subject:     os.Getenv("SUBJECT"),
-		Body:        os.Getenv("BODY"),
-		Recipients:  strings.Split(os.Getenv("RECIPIENTS"), ","),
-		CC:          strings.Split(os.Getenv("CC"), ","),
-		BCC:         strings.Split(os.Getenv("BCC"), ","),
-		Attachments: attachments,
+		Subject:          os.Getenv("SUBJECT"),
+		Body:             os.Getenv("BODY"),
+		Recipients:       smartSplit(os.Getenv("RECIPIENTS"), ","),
+		CC:               smartSplit(os.Getenv("CC"), ","),
+		BCC:              smartSplit(os.Getenv("BCC"), ","),
+		Attachments:      attachments,
+		ReplyAll:         os.Getenv("REPLY_ALL") == "true",
+		ReplyToMessageID: os.Getenv("REPLY_MESSAGE_ID"),
 	}
 
 	// We need to unset BODY, because if it's still set when we try to write files to the workspace,

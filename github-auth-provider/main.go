@@ -23,6 +23,7 @@ type Options struct {
 	ClientID                 string  `env:"OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID"`
 	ClientSecret             string  `env:"OBOT_GITHUB_AUTH_PROVIDER_CLIENT_SECRET"`
 	ObotServerURL            string  `env:"OBOT_SERVER_URL"`
+	PostgresConnectionDSN    string  `env:"OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN" optional:"true"`
 	AuthCookieSecret         string  `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
 	AuthEmailDomains         string  `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
 	AuthTokenRefreshDuration string  `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
@@ -88,10 +89,16 @@ func main() {
 
 	oauthProxyOpts.Server.BindAddress = ""
 	oauthProxyOpts.MetricsServer.BindAddress = ""
+	if opts.PostgresConnectionDSN != "" {
+		oauthProxyOpts.Session.Type = options.PostgresSessionStoreType
+		oauthProxyOpts.Session.Postgres.ConnectionDSN = opts.PostgresConnectionDSN
+		oauthProxyOpts.Session.Postgres.TableNamePrefix = "github_"
+	}
 	oauthProxyOpts.Cookie.Refresh = refreshDuration
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
 	oauthProxyOpts.Cookie.Secret = string(cookieSecret)
 	oauthProxyOpts.Cookie.Secure = strings.HasPrefix(opts.ObotServerURL, "https://")
+	oauthProxyOpts.Cookie.CSRFExpire = 30 * time.Minute
 	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/../auth-providers-common/templates"
 	oauthProxyOpts.RawRedirectURL = opts.ObotServerURL + "/"
 	if opts.AuthEmailDomains != "" {

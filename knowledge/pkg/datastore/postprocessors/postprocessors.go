@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/transformers"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/transformers"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
 	"github.com/mitchellh/mapstructure"
 )
 

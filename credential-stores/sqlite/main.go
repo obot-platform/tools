@@ -82,5 +82,11 @@ func NewSqlite(ctx context.Context) (common.Database, error) {
 		return common.Database{}, fmt.Errorf("failed to open database: %w", err)
 	}
 
+	// We always migrate the gptscript_credentials table for sqlite, because it is a separate database
+	// from the one managed by the main obot server.
+	if err := db.AutoMigrate(&common.GptscriptCredential{}); err != nil {
+		return common.Database{}, fmt.Errorf("failed to migrate database: %w", err)
+	}
+
 	return common.NewDatabase(ctx, db)
 }

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/index/types"
+	"github.com/obot-platform/tools/knowledge/pkg/index/types"
 )
 
 // IsDuplicateFunc is a function that determines whether a document is a duplicate or if it should be ingested.

@@ -6,12 +6,12 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/ocr/openai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/defaults"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/pdf/mupdf"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/documentloader/smartpdf"
-	"github.com/gptscript-ai/knowledge/pkg/output"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/ocr/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/defaults"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/pdf/mupdf"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader/smartpdf"
+	"github.com/obot-platform/tools/knowledge/pkg/output"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 	"github.com/mitchellh/mapstructure"
 )
 

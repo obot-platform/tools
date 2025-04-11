@@ -2,7 +2,7 @@
 Name: Google Sheets
 Description: Tools for accessing, creating, and modifying Google Sheets
 Metadata: bundle: true
-Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cell In Spreadsheet
+Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cells In Spreadsheet
 
 ---
 Name: Read Spreadsheet
@@ -59,16 +59,15 @@ Param: data: The data to append to the Spreadsheet. Columns are separated by com
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/appendCellsToSpreadsheet.py
 
 ---
-Name: Update Cell In Spreadsheet
-Description: Update data within a specific cell in a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
+Name: Update Cells In Spreadsheet
+Description: Update data within one or more cells in a Google Sheet. Spreadsheet ID is required if the spreadsheet does not belong to the user.
 Share Context: Google Sheets Context
 Credential: ../credential
 Share Tools: Read Spreadsheet, Read Tables From Spreadsheet
 Param: spreadsheet_id: The ID of the Spreadsheet
-Param: cell: The cell to update in A1 notation (e.g. A1, B2, C3)
-Param: data: The data to update to the Spreadsheet. The data must be wrapped in double quotes and escape any characters that would break csv parsing (e.g. "this is a quoted string")
+Param: update_cells: A json list of objects that contains the row, column. and the data to put in that cell. Each object in the list should have the following format: `{"row": 1,"column":1,"value": "New Value"}`. Row and Column indexes start at 1.
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateCellInSpreadsheet.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/updateCellsInSpreadsheet.py
 
 ---
 Name: Google Sheets Context

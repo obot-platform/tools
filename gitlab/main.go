@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gptscript-ai/tools/gitlab/pkg/commands"
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -19,15 +20,36 @@ func main() {
 
 	command := os.Args[1]
 
-	baseURL := os.Getenv("GITLAB_BASE_URL")
+	baseURL := os.Getenv("GPTSCRIPT_GITLAB_BASEURL")
 	if baseURL == "" {
 		baseURL = "https://gitlab.com/api/v4"
+	} else if !strings.HasSuffix(baseURL, "api/v4") {
+		// Ensure the URL ends with api/v4
+		baseURL = strings.TrimSuffix(baseURL, "/")
+		baseURL = baseURL + "/api/v4"
 	}
 
-	git, err := gitlab.NewClient(os.Getenv("GITLAB_TOKEN"), gitlab.WithBaseURL(baseURL))
+	var git *gitlab.Client
+	var err error
+
+	// Check for OAuth token first
+	oauthToken := os.Getenv("GITLAB_OAUTH_TOKEN")
+	if oauthToken != "" {
+		// Use OAuth client if OAuth token is available
+		git, err = gitlab.NewOAuthClient(oauthToken, gitlab.WithBaseURL(baseURL))
+	} else {
+		// Fall back to PAT
+		patToken := os.Getenv("GITLAB_TOKEN")
+		if patToken == "" {
+			exit("Authentication error", errors.New("no GitLab token found, please set GITLAB_TOKEN or authenticate with OAuth"))
+		}
+		git, err = gitlab.NewClient(patToken, gitlab.WithBaseURL(baseURL))
+	}
+
 	if err != nil {
 		exit("Failed to create gitlab client", err)
 	}
+
 	user, _, err := git.Users.CurrentUser()
 	if err != nil {
 		exit("Error getting current user. This could potentially be an authentication issue", err)
@@ -36,6 +58,10 @@ func main() {
 	switch command {
 	case "myUserName":
 		fmt.Printf("Current username is %s\n", user.Username)
+	case "listUserProjects":
+		if err := commands.ListUserProjects(git); err != nil {
+			exit("Failed to list user projects", err)
+		}
 	// Issues
 	case "queryIssues":
 		rawQuery := os.Getenv("ISSUE_QUERY")

@@ -21,6 +21,7 @@ import {
     removeIssueLabels,
     getUser,
     getJobLogs,
+    listUserOrgs,
 } from './src/tools.js';
 
 if (process.argv.length !== 3) {
@@ -102,6 +103,9 @@ try {
             break;
         case 'getJobLogs':
             await getJobLogs(octokit, process.env.OWNER, process.env.REPO, process.env.JOBID);
+            break;
+        case 'listUserOrgs':
+            await listUserOrgs(octokit);
             break;
         default:
             throw new Error(`Unknown command: ${command}`);

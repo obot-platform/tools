@@ -19,6 +19,17 @@ import (
 	"github.com/pkg/browser"
 )
 
+type authType string
+
+var (
+	obotAuthToken = gptscript.GetEnv("OBOT_TOKEN", "")
+)
+
+const (
+	authTypePAT   authType = "Personal Access Token (PAT)"
+	authTypeOAuth authType = "OAuth"
+)
+
 type input struct {
 	OAuthInfo      oauthInfo   `json:"oauthInfo"`
 	PromptInfo     *promptInfo `json:"promptInfo,omitempty"`
@@ -68,18 +79,28 @@ type cred struct {
 	RefreshToken string            `json:"refreshToken"`
 }
 
+type urls struct {
+	authorizeURL string
+	refreshURL   string
+	tokenURL     string
+}
+
 func normalizeForEnv(appName string) string {
 	return strings.ToUpper(strings.ReplaceAll(appName, "-", "_"))
 }
 
-func getURLs(appName string) (string, string, string) {
+func getURLs(appName string) urls {
 	var (
 		normalizedAppName = normalizeForEnv(appName)
 		authorizeURL      = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_AUTH_URL", normalizedAppName))
 		refreshURL        = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_REFRESH_URL", normalizedAppName))
 		tokenURL          = os.Getenv(fmt.Sprintf("GPTSCRIPT_OAUTH_%s_TOKEN_URL", normalizedAppName))
 	)
-	return authorizeURL, refreshURL, tokenURL
+	return urls{
+		authorizeURL: authorizeURL,
+		refreshURL:   refreshURL,
+		tokenURL:     tokenURL,
+	}
 }
 
 func main() {
@@ -118,22 +139,35 @@ func mainErr() (err error) {
 		}
 	}()
 
-	authorizeURL, refreshURL, tokenURL := getURLs(in.OAuthInfo.Integration)
-	if authorizeURL == "" || refreshURL == "" || tokenURL == "" {
-		// The URLs aren't set for this credential. Check to see if we should prompt the user for other tokens
-		if in.PromptInfo == nil {
-			fmt.Printf("All the following environment variables must be set: GPTSCRIPT_OAUTH_%s_AUTH_URL, GPTSCRIPT_OAUTH_%[1]s_REFRESH_URL, GPTSCRIPT_OAUTH_%[1]s_TOKEN_URL", normalizeForEnv(in.OAuthInfo.Integration))
-			fmt.Printf("Or the promptInfo configuration must be provided for token prompting.")
-			os.Exit(1)
+	urls := getURLs(in.OAuthInfo.Integration)
+
+	if in.PromptInfo != nil && os.Getenv("GPTSCRIPT_EXISTING_CREDENTIAL") == "" {
+		if urls.authorizeURL == "" && urls.refreshURL == "" && urls.tokenURL == "" {
+			credJSON, err = promptForTokens(ctx, gs, in.OAuthInfo.Integration, in.PromptInfo)
+			if err != nil {
+				return fmt.Errorf("main: failed to prompt for tokens: %w", err)
+			}
+			return nil
 		}
 
-		credJSON, err = promptForTokens(ctx, gs, in.OAuthInfo.Integration, in.PromptInfo)
+		authType, err := promptForSelect(ctx, gs)
 		if err != nil {
-			return fmt.Errorf("main: failed to prompt for tokens: %w", err)
+			return fmt.Errorf("main: failed to prompt for auth type: %w", err)
 		}
-		return nil
+
+		if authType == authTypePAT {
+			credJSON, err = promptForTokens(ctx, gs, in.OAuthInfo.Integration, in.PromptInfo)
+			if err != nil {
+				return fmt.Errorf("main: failed to prompt for tokens: %w", err)
+			}
+			return nil
+		}
 	}
 
+	return promptForOauth(gs, &urls, &in, &credJSON)
+}
+
+func promptForOauth(gs *gptscript.GPTScript, urls *urls, in *input, credJSON *[]byte) error {
 	// Refresh existing credential if there is one.
 	existing := os.Getenv("GPTSCRIPT_EXISTING_CREDENTIAL")
 	if existing != "" {
@@ -142,7 +176,7 @@ func mainErr() (err error) {
 			return fmt.Errorf("main: failed to unmarshal existing credential: %w", err)
 		}
 
-		u, err := url.Parse(refreshURL)
+		u, err := url.Parse(urls.refreshURL)
 		if err != nil {
 			return fmt.Errorf("main: failed to parse refresh URL: %w", err)
 		}
@@ -195,7 +229,7 @@ func mainErr() (err error) {
 			out.ExpiresAt = &expiresAt
 		}
 
-		credJSON, err = json.Marshal(out)
+		*credJSON, err = json.Marshal(out)
 		if err != nil {
 			return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
 		}
@@ -217,7 +251,7 @@ func mainErr() (err error) {
 	h.Write([]byte(verifier))
 	challenge := hex.EncodeToString(h.Sum(nil))
 
-	u, err := url.Parse(authorizeURL)
+	u, err := url.Parse(urls.authorizeURL)
 	if err != nil {
 		return fmt.Errorf("main: failed to parse authorize URL: %w", err)
 	}
@@ -274,7 +308,7 @@ func mainErr() (err error) {
 	t := time.NewTicker(2 * time.Second)
 	for range t.C {
 		now := time.Now()
-		oauthResp, retry, err := makeTokenRequest(tokenURL, state, verifier)
+		oauthResp, retry, err := makeTokenRequest(urls.tokenURL, state, verifier)
 		if err != nil {
 			if !retry {
 				return err
@@ -301,7 +335,7 @@ func mainErr() (err error) {
 			out.ExpiresAt = &expiresAt
 		}
 
-		credJSON, err = json.Marshal(out)
+		*credJSON, err = json.Marshal(out)
 		if err != nil {
 			return fmt.Errorf("main: failed to marshal token credential: %w", err)
 		}
@@ -323,6 +357,9 @@ func makeTokenRequest(tokenURL, state, verifier string) (*oauthResponse, bool, e
 	q.Set("state", state)
 	q.Set("verifier", verifier)
 	req.URL.RawQuery = q.Encode()
+	if obotAuthToken != "" {
+		req.Header.Add("Authorization", "Bearer "+obotAuthToken)
+	}
 
 	// Send the request
 	resp, err := http.DefaultClient.Do(req)
@@ -355,6 +392,40 @@ func generateString() (string, error) {
 		b[i] = charset[b[i]%byte(len(charset))]
 	}
 	return string(b), nil
+}
+
+func promptForSelect(ctx context.Context, g *gptscript.GPTScript) (authType, error) {
+	fieldName := "Authentication Method"
+
+	fields := gptscript.Fields{gptscript.Field{Name: fieldName, Description: "The authentication method to use for this tool.", Options: []string{string(authTypePAT), string(authTypeOAuth)}}}
+	sysPromptIn, err := json.Marshal(sysPromptInput{
+		Message: "This tool supports two ways to authenticate: personal access tokens (PAT) and OAuth. Select the method you'd like to use.",
+		Fields:  fields,
+	})
+	if err != nil {
+		return "", fmt.Errorf("promptForSelect: error marshalling sys prompt input: %w", err)
+	}
+
+	run, err := g.Run(ctx, "sys.prompt", gptscript.Options{
+		Input: string(sysPromptIn),
+	})
+	if err != nil {
+		return "", fmt.Errorf("promptForSelect: failed to run sys.prompt: %w", err)
+	}
+
+	out, err := run.Text()
+	if err != nil {
+		return "", fmt.Errorf("promptForSelect: failed to get prompt response: %w", err)
+	}
+
+	m := make(map[string]string)
+	if err = json.Unmarshal([]byte(out), &m); err != nil {
+		return "", fmt.Errorf("promptForSelect: failed to unmarshal prompt response: %w", err)
+	}
+
+	selectedAuthType := authType(m[fieldName])
+
+	return selectedAuthType, nil
 }
 
 func promptForTokens(ctx context.Context, g *gptscript.GPTScript, integration string, prompt *promptInfo) ([]byte, error) {

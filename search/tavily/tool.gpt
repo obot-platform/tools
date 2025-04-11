@@ -34,7 +34,6 @@ Tavily Search
 ---
 Name: Tavily Context
 Type: context
-Share Context: ../../time
 
 #!sys.echo
 

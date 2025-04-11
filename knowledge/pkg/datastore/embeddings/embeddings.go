@@ -6,16 +6,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gptscript-ai/knowledge/pkg/config"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/cohere"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/jina"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/localai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/mistral"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/mixedbread"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/ollama"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/openai"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/types"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/embeddings/vertex"
+	"github.com/obot-platform/tools/knowledge/pkg/config"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/openai"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/embeddings/types"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -61,20 +54,6 @@ func GetProviderConfig(providerType string) (types.EmbeddingModelProvider, error
 	switch strings.ToLower(providerType) {
 	case openai.EmbeddingModelProviderOpenAIName:
 		return &openai.EmbeddingModelProviderOpenAI{}, nil
-	case cohere.EmbeddingModelProviderCohereName:
-		return &cohere.EmbeddingModelProviderCohere{}, nil
-	case vertex.EmbeddingProviderVertexName:
-		return &vertex.EmbeddingProviderVertex{}, nil
-	case jina.EmbeddingProviderJinaName:
-		return &jina.EmbeddingProviderJina{}, nil
-	case mistral.EmbeddingProviderMistralName:
-		return &mistral.EmbeddingProviderMistral{}, nil
-	case mixedbread.EmbeddingProviderMixedbreadName:
-		return &mixedbread.EmbeddingProviderMixedbread{}, nil
-	case localai.EmbeddingProviderLocalAIName:
-		return &localai.EmbeddingProviderLocalAI{}, nil
-	case ollama.EmbeddingProviderOllamaName:
-		return &ollama.EmbeddingProviderOllama{}, nil
 	default:
 		return nil, fmt.Errorf("unknown embedding model provider %q", providerType)
 	}

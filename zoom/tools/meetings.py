@@ -18,6 +18,9 @@ import json
 logger = setup_logger(__name__)
 
 
+# ------------------------------------------------------------------------------------------------
+# Helper functions
+# ------------------------------------------------------------------------------------------------
 def _convert_utc_to_local_time(utc_time_str: str, timezone: str) -> str:
     try:
         # Parse ISO 8601 string into a naive datetime object
@@ -96,6 +99,37 @@ def _generate_password():
     return password
 
 
+def _trim_meeting_id(meeting_id_or_uuid: str) -> str:
+    """
+    Trims the meeting ID or UUID to remove any whitespace
+    """
+    return "".join(meeting_id_or_uuid.split())
+
+
+def _remove_meeting_series_uuid(response_json: dict) -> dict:
+    """
+    Remove the meeting series uuid from the response json if APIs:
+    - Get Meeting
+    - List Meetings
+    - List Upcoming Meetings
+    - Create Meeting
+    - Update Meeting
+    """
+
+    if "uuid" in response_json:
+        response_json.pop("uuid", None)
+    elif "meetings" in response_json:
+        for meeting in response_json["meetings"]:
+            if "uuid" in meeting:
+                meeting.pop("uuid", None)
+
+    return response_json
+
+
+def _is_meeting_id(value: str) -> bool:
+    return value.isdigit() and 9 <= len(value) <= 11
+
+
 _meeting_types = {
     1: "An instant meeting",
     2: "A scheduled meeting",
@@ -105,6 +139,9 @@ _meeting_types = {
 }
 
 
+# ------------------------------------------------------------------------------------------------
+# Tool functions
+# ------------------------------------------------------------------------------------------------
 @tool_registry.decorator("CreateMeeting")
 def create_meeting():
     url = f"{ZOOM_API_URL}/users/me/meetings"
@@ -240,11 +277,13 @@ def create_meeting():
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 201:
         return {"message": f"Error creating meeting: {response.text}"}
-    return response.json()
+
+    cleaned_json = _remove_meeting_series_uuid(response.json())
+    return cleaned_json
 
 
 def _get_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -269,12 +308,13 @@ def get_meeting():
             res_json["start_time"], res_json["timezone"]
         )
         res_json["start_time_utc"] = res_json.pop("start_time")
-    return res_json
+
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("DeleteMeeting")
 def delete_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -324,7 +364,9 @@ def list_meetings():
                 meeting["start_time"], meeting["timezone"]
             )
             meeting["start_time_utc"] = meeting.pop("start_time")
-    return res_json
+
+
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("ListUpcomingMeetings")
@@ -349,12 +391,12 @@ def list_upcoming_meetings():
                 meeting["start_time"], meeting["timezone"]
             )
             meeting["start_time_utc"] = meeting.pop("start_time")
-    return res_json
+    return _remove_meeting_series_uuid(res_json)
 
 
 @tool_registry.decorator("GetMeetingInvitation")
 def get_meeting_invitation():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}/invitation"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -367,7 +409,7 @@ def get_meeting_invitation():
 
 @tool_registry.decorator("UpdateMeeting")
 def update_meeting():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/meetings/{meeting_id}"
 
     payload = {}
@@ -484,7 +526,12 @@ def get_meeting_summary():
         raise ValueError(
             "The `Get Meeting Summary` feature is only available for licensed users."
         )
-    meeting_uuid = os.environ["MEETING_UUID"]
+    meeting_uuid = _trim_meeting_id(os.environ["MEETING_UUID"])
+    if _is_meeting_id(meeting_uuid):
+        return {
+            "message": "ValueError: Meeting UUID must be provided instead of meeting ID."
+        }
+
     url = f"{ZOOM_API_URL}/meetings/{meeting_uuid}/meeting_summary"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -499,7 +546,7 @@ def get_meeting_summary():
 
 @tool_registry.decorator("GetPastMeetingDetails")
 def get_past_meeting_details():
-    meeting_id_or_uuid = os.environ["MEETING_ID_OR_UUID"]
+    meeting_id_or_uuid = _trim_meeting_id(os.environ["MEETING_ID_OR_UUID"])
     url = f"{ZOOM_API_URL}/past_meetings/{meeting_id_or_uuid}"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
@@ -514,7 +561,7 @@ def get_past_meeting_details():
 
 @tool_registry.decorator("ListPastMeetingInstances")
 def list_past_meeting_instances():
-    meeting_id = os.environ["MEETING_ID"]
+    meeting_id = _trim_meeting_id(os.environ["MEETING_ID"])
     url = f"{ZOOM_API_URL}/past_meetings/{meeting_id}/instances"
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",

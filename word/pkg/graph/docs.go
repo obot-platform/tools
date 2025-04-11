@@ -11,7 +11,6 @@ import (
 	"code.sajari.com/docconv/v2"
 	kiota "github.com/microsoft/kiota-abstractions-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
-	"github.com/microsoftgraph/msgraph-sdk-go/drives"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 )
@@ -222,35 +221,75 @@ func CreateDoc(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, nam
 	return name, deref(uploadedItem.GetId()), nil
 }
 
+// ListDocs lists all documents in the user's OneDrive.
+// It recursively traverses folders to find all documents.
 func ListDocs(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]DocInfo, error) {
 	drive, err := c.Me().Drive().Get(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get drive: %w", err)
 	}
 
-	opts := &drives.ItemSearchWithQRequestBuilderGetRequestConfiguration{
-		QueryParameters: &drives.ItemSearchWithQRequestBuilderGetQueryParameters{
-			// Request that these fields are returned in the response.
-			Select: []string{"id", "name", "parentReference"},
-		},
-	}
-	docs, err := c.Drives().
+	// Start from the root folder
+	root, err := c.Drives().
 		ByDriveId(deref(drive.GetId())).
-		SearchWithQ(ptr("docx")).
-		GetAsSearchWithQGetResponse(ctx, opts)
+		Root().
+		Get(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get root folder: %w", err)
 	}
 
 	var infos []DocInfo
-	for _, info := range docs.GetValue() {
-		infos = append(infos, DocInfo{
-			ID:   deref(info.GetId()),
-			Name: deref(info.GetName()),
-		})
+	err = listDocsInFolder(ctx, c, deref(drive.GetId()), deref(root.GetId()), &infos)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list docs: %w", err)
 	}
 
 	return infos, nil
+}
+
+// listDocsInFolder recursively lists all documents in a folder and its subfolders.
+func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, driveID, folderID string, infos *[]DocInfo) error {
+	items, err := c.Drives().
+		ByDriveId(driveID).
+		Items().
+		ByDriveItemId(folderID).
+		Children().
+		Get(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get items in folder: %w", err)
+	}
+
+	// Process this page of items
+	for _, item := range items.GetValue() {
+		// Skip folders, but process their contents
+		if item.GetFolder() != nil {
+			err = listDocsInFolder(ctx, c, driveID, deref(item.GetId()), infos)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Only include Word documents
+		file := item.GetFile()
+		if file == nil || !isWordDocument(deref(item.GetName())) {
+			continue
+		}
+
+		// Add Word documents to our list
+		*infos = append(*infos, DocInfo{
+			ID:   deref(item.GetId()),
+			Name: deref(item.GetName()),
+		})
+	}
+
+	return nil
+}
+
+// isWordDocument checks if a file is a Microsoft Word document based on its extension.
+func isWordDocument(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	return ext == ".docx" || ext == ".doc"
 }
 
 func GetDocByPath(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, path string) (string, error) {

@@ -36,6 +36,9 @@ type Config struct {
 	// RewriteModelsFn is a function that can be used to rewrite the response from the upstream API on the /models endpoint
 	RewriteModelsFn func(*http.Response) error
 
+	// RewriteHeaderFn is a function that can be used to rewrite the request header
+	RewriteHeaderFn func(header http.Header)
+
 	// CustomPathHandleFuncs is a map of paths to custom handle funcs to completely override the default reverse proxy behavior for a given path
 	CustomPathHandleFuncs map[string]http.HandlerFunc
 }
@@ -44,7 +47,7 @@ type server struct {
 	cfg *Config
 }
 
-func (cfg *Config) ensureURL() error {
+func (cfg *Config) EnsureURL() error {
 	if cfg.URL != nil {
 		return nil
 	}
@@ -69,7 +72,7 @@ func (cfg *Config) ensureURL() error {
 }
 
 func Run(cfg *Config) error {
-	if err := cfg.ensureURL(); err != nil {
+	if err := cfg.EnsureURL(); err != nil {
 		return fmt.Errorf("failed to ensure URL: %w", err)
 	}
 
@@ -137,6 +140,9 @@ func (s *server) proxyDirector(req *http.Request) {
 	req.Host = req.URL.Host
 
 	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
+	if s.cfg.RewriteHeaderFn != nil {
+		s.cfg.RewriteHeaderFn(req.Header)
+	}
 }
 
 func Validate(cfg *Config) error {

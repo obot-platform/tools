@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"sort"
 
-	"github.com/gptscript-ai/knowledge/pkg/datastore/lib/bm25"
-	"github.com/gptscript-ai/knowledge/pkg/datastore/types"
-	vs "github.com/gptscript-ai/knowledge/pkg/vectorstore/types"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/lib/bm25"
+	"github.com/obot-platform/tools/knowledge/pkg/datastore/types"
+	vs "github.com/obot-platform/tools/knowledge/pkg/vectorstore/types"
 )
 
 const BM25PostprocessorName = "bm25"
