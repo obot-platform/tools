@@ -4,6 +4,20 @@ import sys
 from datetime import datetime
 import asyncio
 import logging
+import openai
+
+API_KEY = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=API_KEY)
+MODEL = os.getenv("OBOT_DEFAULT_LLM_MODEL", "gpt-4o")
+
+
+def llm_chat_completion(messages, model=MODEL):
+    return client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0.1,
+        max_tokens=3000
+    )
 
 
 def setup_logger(name):
@@ -35,4 +49,5 @@ def setup_logger(name):
 
 
 logger = setup_logger(__name__)
+
 

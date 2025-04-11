@@ -7,8 +7,7 @@ import yake
 import numpy as np
 import openai
 import os
-
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from helper import llm_chat_completion
 
 
 def _preprocess_text(text):
@@ -130,12 +129,7 @@ def generate_seo_keywords(content, num_keywords=10, model="gpt-4o"):
     {content} 
     """
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
-        max_tokens=1000
-    )
+    response = llm_chat_completion(messages=[{"role": "user", "content": prompt}])
 
     keywords_text = response.choices[0].message.content
     keywords = [kw.strip().lower() for kw in keywords_text.split(',')]

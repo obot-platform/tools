@@ -1,7 +1,6 @@
 textstat
 scikit-learn
 pandas
-tabulate
 yake
 openai
 markdownify

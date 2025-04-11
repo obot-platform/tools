@@ -6,8 +6,8 @@ Share Tools: Keywords Suggestions, Content Optimize Metrics
 ---
 Name: Keywords Suggestions
 Description: Suggest keywords for a given content.
-Credential: ./credential
-Share Context: Wordpress Context
+Credential: sys.model.provider.credential
+Share Context: Wordpress SEO Context
 Param: content: (required) the content to suggest keywords for.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordsSuggestions
@@ -15,11 +15,10 @@ Param: content: (required) the content to suggest keywords for.
 ---
 Name: Content Optimize Metrics
 Description: Get the metrics that measures the current content in terms of SEO. includes the keyword density, readability.
-Credential: ./credential
-Share Context: Wordpress Context
+Share Context: Wordpress SEO Context
 Param: content: (required) the content to optimize.
 Param: primary_keyword: (required) the primary keyword to optimize for.
-Param: secondary_keywords: (optional) the secondary keywords to optimize for.
+Param: secondary_keywords: (optional) the secondary keywords to optimize for. Should be a JSON array of strings, e.g. ["keyword1", "keyword2", "keyword3"].
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ContentOptimizeMetrics
 

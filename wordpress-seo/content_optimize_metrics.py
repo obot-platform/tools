@@ -7,7 +7,6 @@ from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 import yake
 import numpy as np
-import openai
 import os
 
 
