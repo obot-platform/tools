@@ -399,7 +399,7 @@ func promptForSelect(ctx context.Context, g *gptscript.GPTScript) (authType, err
 
 	fields := gptscript.Fields{gptscript.Field{Name: fieldName, Description: "The authentication method to use for this tool.", Options: []string{string(authTypePAT), string(authTypeOAuth)}}}
 	sysPromptIn, err := json.Marshal(sysPromptInput{
-		Message: "This tool has personal access token (PAT) and OAuth support. Select the authentication method you would like to use for this tool.",
+		Message: "This tool supports two ways to authenticate: personal access tokens (PAT) and OAuth. Select the method you'd like to use.",
 		Fields:  fields,
 	})
 	if err != nil {

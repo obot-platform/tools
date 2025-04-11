@@ -1,0 +1,69 @@
+name: Build release tools
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  oss-build:
+    runs-on: depot-ubuntu-22.04
+    concurrency:
+      group: oss-build
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: depot/build-push-action@v1
+        id: build-and-push
+        with:
+          project: bbqjs4tj1g
+          context: .
+          push: true
+          pull: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GHCR_TOKEN }}
+          build-args: |
+            TOOL_REGISTRY_REPOS=github.com/obot-platform/tools
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.1
+        with:
+          cosign-release: 'v2.4.3'
+
+      - name: Sign Images
+        env:
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: ghcr.io/${{ github.repository }}:latest
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
+
+  enterprise-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger enterprise build
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DISPATCH_PAT }}
+          repository: obot-platform/enterprise-tools
+          event-type: tools

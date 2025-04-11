@@ -2,7 +2,7 @@
 Name: Slack
 Description: Tools for interacting with Slack
 Metadata: bundle: true
-Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History From Link, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History
+Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History From Link, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History, Send Typing Event
 
 ---
 Name: List Channels
@@ -206,6 +206,17 @@ You have a message in input. Look at the text field and convert it to the approp
 - For [your text](https://www.google.com), convert it to a link <https://www.google.com|your text>
 
 Print the modified message back to the user.
+
+---
+Name: Send Typing Event
+Description: Send a typing event to a channel in the Slack workspace
+Credential: ./credential
+Share Tools: List Channels, Search Channels
+Param: channelid: the ID of the channel to send the typing event to
+Param: threadid: the ID of the thread to send the typing event to
+Param: status: the status to set the typing event that shows in the slack thread
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendTypingEvent
 
 ---
 Name: Slack Context

@@ -2,7 +2,7 @@
 Name: GitLab
 Description: Tools for interacting with GitLab.
 Metadata: bundle: true
-Share Tools: Search Issues, List Project Issues, List My Assigned Issues, List My Created Issues, Get Issue Details, Create Issue, Update Issue, Delete Issue, Add Issue Comment, Search Merge Requests, List Project Merge Requests, List My Assigned Merge Requests, List My Opened Merge Requests, Get Merge Request Details, Create Merge Request, Update Merge Request, Delete Merge Request, Add Merge Request Comment, Approve Merge Request, Lookup User ID
+Share Tools: Search Issues, List Project Issues, List My Assigned Issues, List My Created Issues, Get Issue Details, Create Issue, Update Issue, Delete Issue, Add Issue Comment, Search Merge Requests, List Project Merge Requests, List My Assigned Merge Requests, List My Opened Merge Requests, Get Merge Request Details, Create Merge Request, Update Merge Request, Delete Merge Request, Add Merge Request Comment, Approve Merge Request, Lookup User ID, List User Projects
 
 ---
 Name: Search Issues
@@ -215,13 +215,20 @@ Param: gitlab_username: A GitLab username.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool lookupUserID
 
 ---
+Name: List User Projects
+Description: Lists all projects accessible to the currently authenticated user.
+Share Context: GitLab Context
+Credential: ./credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listUserProjects
+
+---
 Name: Get Current UserName
 Description: Gets the username of the currently authenticated user.
 Share Context: GitLab Context
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool myUserName
-
 ---
 Name: GitLab Context
 Type: context
@@ -238,9 +245,18 @@ Do not guess at the correct spelling of projects, usernames, etc. Report to the 
 A `project_id` must be in the format of `namespace/project_name`, where `namespace` can be a path including `/` characters.
 If the namespace is not specified, assume the namespace should be the current user's username unless context suggests otherwise.
 
+A user might refer to repos because of GitHub, these are called projects in GitLab.
 
 ## End of instructions for using the GitLab tools
 
 ---
 !metadata:*:icon
 https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/gitlab.svg
+
+---
+!metadata:*:oauth
+gitlab
+
+---
+!metadata:*:supportsOAuthTokenPrompt
+true

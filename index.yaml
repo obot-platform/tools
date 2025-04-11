@@ -93,6 +93,9 @@ tools:
     reference: ./aws/ec2
   discord:
     reference: ./discord
+  proxycurl:
+    reference: ./proxycurl
+
 
 knowledgeDataSources:
   notion-data-source:

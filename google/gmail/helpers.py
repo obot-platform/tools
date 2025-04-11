@@ -11,6 +11,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from bs4 import BeautifulSoup
 
+
 async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
     gptscript_client = gptscript.GPTScript()
     message = MIMEMultipart()
@@ -107,7 +108,7 @@ from gptscript.datasets import DatasetElement
 async def list_messages(service, query, max_results):
     all_messages = []
     next_page_token = None
-    query = format_query_dates(service, query)
+    query = format_query_dates(query)
     try:
         while True:
             if next_page_token:
@@ -245,8 +246,8 @@ def extract_message_headers(message):
                 cc = header['value']
             if header['name'].lower() == 'bcc':
                 bcc = header['value']
-            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone().strftime(
-                '%Y-%m-%d %H:%M:%S')
+            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone(obot_user_tz).strftime(
+                '%Y-%m-%d %H:%M:%S %Z')
 
     return subject, sender, to, cc, bcc, date
 
@@ -378,7 +379,7 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
 
     return reply_html
 
-def format_query_dates(service, query):
+def format_query_dates(query):
     """
     Converts date strings in Gmail search queries to Unix timestamps for correct timezone handling.
     - before: uses beginning of day (00:00:00)
@@ -387,15 +388,7 @@ def format_query_dates(service, query):
     if not query:
         return query
 
-    # Get user's timezone
-    user_tz_str = get_user_timezone(service)
-
-    # Use UTC if timezone is invalid
-    try:
-        user_tz = ZoneInfo(user_tz_str)
-    except:
-        user_tz = timezone.utc
-
+    # Replace dates in query with timestamps
     def replace_date(match):
         operator, quote1, date_str, quote2 = match.groups()
         date_str = date_str.replace('/', '-')
@@ -406,10 +399,10 @@ def format_query_dates(service, query):
 
             if operator == "before":
                 # For 'before:', use beginning of day (00:00:00)
-                dt = datetime(year, month, day, 0, 0, 0, tzinfo=user_tz)
+                dt = datetime(year, month, day, 0, 0, 0, tzinfo=obot_user_tz)
             else:  # after
                 # For 'after:', use end of day (23:59:59)
-                dt = datetime(year, month, day, 23, 59, 59, tzinfo=user_tz)
+                dt = datetime(year, month, day, 23, 59, 59, tzinfo=obot_user_tz)
 
             timestamp = int(dt.timestamp())
             return f"{operator}:{quote1}{timestamp}{quote2}"
@@ -421,17 +414,14 @@ def format_query_dates(service, query):
     return re.sub(pattern, replace_date, query)
 
 
-def get_obot_user_timezone():
-    return os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+def get_user_timezone():
+    user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
 
-def get_user_timezone(service):
-    """Fetches the authenticated user's time zone from User's Gmail settings."""
     try:
-        settings = service.settings().get(setting="timezone").execute()
-        return settings.get("value", get_obot_user_timezone())  # Default to Obot's user timezone if not found
-    except HttpError as err:
-        if err.status_code == 403:
-            raise Exception(f"HttpError retrieving user timezone: {err}")
-        return "UTC"
-    except Exception as e:
-        return "UTC"
+        tz = ZoneInfo(user_tz)
+    except:
+        tz = timezone.utc
+
+    return tz
+
+obot_user_tz = get_user_timezone()
