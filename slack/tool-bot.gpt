@@ -180,7 +180,7 @@ Credential: ./credential/bot.gpt
 Share Tools: List Channels As Bot, Search Channels As Bot
 Param: channelid: the ID of the channel to send the typing event to
 Param: threadid: the ID of the thread to send the typing event to
-Param: status: the status to set the typing event to. It will be displayed in the thread indicating that the user is typing.
+Param: status: the status to set the typing event that shows in the slack thread
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendTypingEvent
 
