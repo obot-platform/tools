@@ -2,7 +2,7 @@
 Name: Slack Bot
 Description: Tools for interacting with Slack as an App
 Metadata: bundle: true
-Share Tools: Send Direct Message As Bot, List Channels As Bot, Search Channels As Bot, Get Channel History As Bot, Get Channel History By Time As Bot, Get Thread History From Link As Bot, Get Thread History As Bot, Send Message As Bot, Send Message in Thread As Bot, List Users As Bot, Search Users As Bot, Send DM in Thread As Bot, Send Direct Message As Bot, Get Message Link As Bot, Get DM History As Bot, Get DM Thread History As Bot,  Format Message from ./tool.gpt
+Share Tools: Send Direct Message As Bot, List Channels As Bot, Search Channels As Bot, Get Channel History As Bot, Get Channel History By Time As Bot, Get Thread History From Link As Bot, Get Thread History As Bot, Send Message As Bot, Send Message in Thread As Bot, List Users As Bot, Search Users As Bot, Send DM in Thread As Bot, Send Direct Message As Bot, Get Message Link As Bot, Get DM History As Bot, Get DM Thread History As Bot, Send Typing Event As Bot, Format Message from ./tool.gpt
 
 ---
 Name: List Channels As Bot
@@ -172,6 +172,17 @@ Param: threadid: the ID of the thread to get the history for
 Param: limit: the number of messages to return
 
 #!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js getDMThreadHistory
+
+---
+Name: Send Typing Event As Bot
+Description: Send a typing event to a channel in the Slack workspace as a bot
+Credential: ./credential/bot.gpt
+Share Tools: List Channels As Bot, Search Channels As Bot
+Param: channelid: the ID of the channel to send the typing event to
+Param: threadid: the ID of the thread to send the typing event to
+Param: status: the status to set the typing event to
+
+#!/usr/bin/env node ${GPTSCRIPT_TOOL_DIR}/index.js sendTypingEvent
 
 ---
 Name: User Context

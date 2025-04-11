@@ -570,3 +570,11 @@ async function printHistory(webClient, channelId, history) {
     console.log("Failed to create dataset:", e)
   }
 }
+
+export async function sendTypingEvent(webClient, channelId, threadId, status) {
+  await webClient.assistant.threads.setStatus({
+    thread_ts: threadId,
+    channel_id: channelId,
+    status: status,
+  })
+}
