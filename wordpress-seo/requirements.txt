@@ -1,0 +1,8 @@
+textstat
+scikit-learn
+pandas
+yake
+openai
+markdownify
+html2text
+requests

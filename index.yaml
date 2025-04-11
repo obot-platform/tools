@@ -13,6 +13,8 @@ tools:
     reference: ./atlassian/jira
   wordpress:
     reference: ./wordpress
+  wordpress-seo:
+    reference: ./wordpress-seo
   excel:
     reference: ./excel
   browser:
