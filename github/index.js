@@ -37,7 +37,10 @@ if (!token) {
     process.exit(1);
 }
 
-const octokit = new Octokit({ auth: token });
+const octokit = new Octokit({
+    auth: token,
+    log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} } // disable logging
+});
 
 try {
     switch (command) {
