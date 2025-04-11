@@ -38,7 +38,8 @@ Params: dir: The directory to list files from
 
 ---
 Name: workspace_read
-Description: Read the contents of a file in the workspace. Supports only plain text formats (e.g., .txt, .md).
+Description: Read the contents of a file in the workspace. For non-plain text files, it will parse the text. If the text is too long, it will summarize the text.
+Credential: sys.model.provider.credential
 Params: filename: The filename to read
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool read

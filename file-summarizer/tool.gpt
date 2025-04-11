@@ -1,10 +1,10 @@
 Name: File Summarizer
 Description: This tool summarizes the input file in the workspace, returns a text summary of the file content, either write to a file in the workspace or print to the console.
 Credential: sys.model.provider.credential
-Params: input_file: (Required) Name of the file in the workspace to summarize. Only .txt and .md files are supported, for any other file types, simply say it's not supported yet.
+Params: input_file: (Required) Name of the file in the workspace to summarize.
 Params: output_file: (Optional) Name of the file to save the summary, default to empty string. If not provided, a summary file will be created in the same directory as the input file. To print to the console, set this to "NONE".
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/summarize.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
 
 ---
 !metadata:*:category
