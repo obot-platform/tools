@@ -9,11 +9,27 @@ from tools.gptscript_workspace import read_file_in_workspace
 logger = setup_logger(__name__)
 
 SUPPORTED_KNOWLEDGE_DOC_FILE_TYPES = (
-    ".docx",
-    ".doc",
     ".pdf",
     ".pptx",
     ".ppt",
+    ".html",
+    ".css",
+    ".md",
+    ".txt",
+    ".docx",
+    ".doc",
+    ".odt",
+    ".rtf",
+    ".csv",
+    ".ipynb",
+    ".json",
+    ".cpp",
+    ".c",
+    ".go",
+    ".java",
+    ".js",
+    ".py",
+    ".ts",
 )
 
 MAX_FILE_SIZE = 100_000_000

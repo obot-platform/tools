@@ -10,7 +10,7 @@ import (
 	"path"
 	"slices"
 	"strings"
-	// "unicode/utf8"
+	"unicode/utf8"
 
 	"github.com/gptscript-ai/go-gptscript"
 )
@@ -23,8 +23,28 @@ var (
 	MaxFileSize = 250_000
 )
 
-var unsupportedFileTypes = []string{
-	".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".jpg", ".png", ".gif", ".mp3", ".mp4", ".zip", ".rar",
+var nonPlainTextFileTypes = []string{
+	".pdf",
+	".pptx",
+	".ppt",
+	".html",
+	".css",
+	".md",
+	".txt",
+	".docx",
+	".doc",
+	".odt",
+	".rtf",
+	".csv",
+	".ipynb",
+	".json",
+	".cpp",
+	".c",
+	".go",
+	".java",
+	".js",
+	".py",
+	".ts",
 }
 
 func main() {
@@ -172,11 +192,11 @@ func list(ctx context.Context, filename string) error {
 	return nil
 }
 
-func read(ctx context.Context, filename string) error {
 
+func readNonPlainOrLargeFile(ctx context.Context, filename string) (string, error) {
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
@@ -184,7 +204,7 @@ func read(ctx context.Context, filename string) error {
 
 	jsonData, err := json.Marshal(newData)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/tool.gpt", gptscript.Options{
@@ -194,16 +214,63 @@ func read(ctx context.Context, filename string) error {
 
 	text, err := run.Text()
 	if err != nil {
+		return "", err
+	}
+
+	return text, nil
+}
+
+func read(ctx context.Context, filename string) error {
+	triedNonPlain := false
+	// Check if the file extension is not plain text. If it is, forward it the a separate tool to handle it.
+	for _, ext := range nonPlainTextFileTypes {
+		if strings.HasSuffix(strings.ToLower(filename), ext) {
+			text, err := readNonPlainOrLargeFile(ctx, filename) // hand it to the tool to ingest it and potentially summarize it
+			triedNonPlain = true
+			if err == nil {
+				fmt.Println(string(text))
+				return nil
+			}
+			// if failed, fallback to plain-text attempt
+			break
+		}
+	}
+
+	client, err := gptscript.NewGPTScript()
+	if err != nil {
 		return err
 	}
 
-	fmt.Println(string(text))
-	return nil
+	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	if err != nil {
+		return err
+	}
+
+	if len(data) > MaxFileSize {
+		if triedNonPlain {
+			return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
+		}
+
+		text, err := readNonPlainOrLargeFile(ctx, filename) // hand it to the tool to summarize it
+		if err != nil {
+			return fmt.Errorf("file size exceeds %d bytes and failed to summarize it as plain text: %w", MaxFileSize, err)
+		}
+		fmt.Println(string(text))
+		return nil
+
+	}
+
+	if utf8.Valid(data) {
+		fmt.Println(string(data))
+		return nil
+	}
+
+	return fmt.Errorf("file is not valid UTF-8")
 }
 
 func write(ctx context.Context, filename, content string) error {
-	// Check if the file extension is unsupported
-	for _, ext := range unsupportedFileTypes {
+	// Check if the file extension is not plain text. We don't support writing to non-plain text files yet.
+	for _, ext := range nonPlainTextFileTypes {
 		if strings.HasSuffix(strings.ToLower(filename), ext) {
 			return fmt.Errorf("writing to files with extension %s is not supported", ext)
 		}
