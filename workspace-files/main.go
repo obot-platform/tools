@@ -194,6 +194,7 @@ func list(ctx context.Context, filename string) error {
 
 
 func readNonPlainOrLargeFile(ctx context.Context, filename string) (string, error) {
+	// forward to a tool to handle non-plain text files or large files
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return "", err
