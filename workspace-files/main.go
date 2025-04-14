@@ -23,28 +23,17 @@ var (
 	MaxFileSize = 250_000
 )
 
+var unsupportedWriteFileTypes = []string{
+	".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".jpg", ".png", ".gif", ".mp3", ".mp4", ".zip", ".rar"}
 var nonPlainTextFileTypes = []string{
 	".pdf",
 	".pptx",
 	".ppt",
-	".html",
-	".css",
-	".md",
-	".txt",
 	".docx",
 	".doc",
 	".odt",
 	".rtf",
-	".csv",
-	".ipynb",
-	".json",
-	".cpp",
-	".c",
-	".go",
-	".java",
-	".js",
-	".py",
-	".ts",
+	"ipynb", // json. we want to convert it to markdown
 }
 
 func main() {
@@ -271,7 +260,7 @@ func read(ctx context.Context, filename string) error {
 
 func write(ctx context.Context, filename, content string) error {
 	// Check if the file extension is not plain text. We don't support writing to non-plain text files yet.
-	for _, ext := range nonPlainTextFileTypes {
+	for _, ext := range unsupportedWriteFileTypes {
 		if strings.HasSuffix(strings.ToLower(filename), ext) {
 			return fmt.Errorf("writing to files with extension %s is not supported", ext)
 		}

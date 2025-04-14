@@ -63,6 +63,7 @@ async def load_text_from_workspace_file(file_path: str, max_file_size: int = MAX
 
     Args:
         file_path (str): The path to the file to load.
+        max_file_size (int): The maximum file size to load. defaults to 100MB
 
     Raises:
         ValueError: If the file is not found in the workspace.
