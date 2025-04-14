@@ -25,16 +25,8 @@ var (
 
 var unsupportedWriteFileTypes = []string{
 	".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".jpg", ".png", ".gif", ".mp3", ".mp4", ".zip", ".rar"}
-var nonPlainTextFileTypes = []string{
-	".pdf",
-	".pptx",
-	".ppt",
-	".docx",
-	".doc",
-	".odt",
-	".rtf",
-	"ipynb", // json. we want to convert it to markdown
-}
+var nonPlainTextFileTypes = []string{".pdf", ".pptx", ".ppt", ".docx", ".doc", ".odt", ".rtf", "ipynb"} // ipynb is in json. we want to convert it to markdown
+
 
 func main() {
 	if len(os.Args) == 1 {
