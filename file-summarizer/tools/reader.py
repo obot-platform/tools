@@ -51,7 +51,7 @@ async def read_file(input_file: str, max_file_size: int = MAX_FILE_SIZE):
             logger.error(f"Summarization failed: {e}")
             raise Exception(f"ERROR: Summarization failed: {e}")
 
-        response_str += f"Here is the summarization of the file {input_file}'s content:\n\n{final_summary}"
+        response_str += f"Here is the summary of the file {input_file}'s content:\n\n{final_summary}"
         return response_str
 
     # if the file has less than TOKEN_THRESHOLD tokens, directly return the file content
