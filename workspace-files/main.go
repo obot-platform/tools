@@ -201,7 +201,7 @@ func readNonPlainOrLargeFile(ctx context.Context, filename string) (string, erro
 	}
 
 	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
-	newData := map[string]string{"input_file": string(filename)}
+	newData := map[string]string{"input_file": filename}
 
 	jsonData, err := json.Marshal(newData)
 	if err != nil {
