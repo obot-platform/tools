@@ -2,7 +2,7 @@
 Name: Wordpress SEO
 Description: Search engine optimization tools for wordpress sites. This helps you optimize the content of a post.
 Metadata: bundle: true
-Share Tools: Keywords Suggestions, Content Optimize Metrics
+Share Tools: Keywords Suggestions, Keyword Density Metrics, Long Tail Keywords, Readability Metrics
 ---
 Name: Keywords Suggestions
 Description: Suggest keywords for a given content.
@@ -13,16 +13,35 @@ Param: content: (required) the content to suggest keywords for.
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordsSuggestions
 
 ---
-Name: Content Optimize Metrics
-Description: Get the metrics that measures the current content in terms of SEO. includes the keyword density, readability.
+Name: Keyword Density Metrics
+Description: Get the keyword density metrics for a given content. Primary keyword is required. Secondary keywords are optional but highly recommended.
+Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
 Param: content: (required) the content to optimize.
 Param: primary_keyword: (required) the primary keyword to optimize for.
 Param: secondary_keywords: (optional) the secondary keywords to optimize for. Should be a JSON array of strings, e.g. ["keyword1", "keyword2", "keyword3"].
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ContentOptimizeMetrics
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordDensityMetrics
+
+---
+Name: Long Tail Keywords
+Description: Suggest long tail keywords for a given keyword.
+Credential: sys.model.provider.credential
+Share Context: Wordpress SEO Context
+Param: seed_keyword: (required) the keyword to suggest long tail keywords for.
+Param: num_suggestions: (optional) the number of suggestions to return. Default is 5.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py LongTailKeywords
 
 
+---
+Name: Readability Metrics
+Description: Get the readability metrics for a given content.
+Credential: sys.model.provider.credential
+Share Context: Wordpress SEO Context
+Param: content: (required) the content to optimize.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ReadabilityMetrics
 
 ---
 Name: Wordpress SEO Context
@@ -31,6 +50,15 @@ Type: context
 #!sys.echo
 
 ## Instructions for using WordPress SEO tools
+
+To help the user to optimize the content of a post for SEO, follow these steps:
+
+1. Use the `Keywords Suggestions` tool to suggest keywords to the user for a given content.
+2. Kindly remind the user that they can use 3rd party tools/plugins to check the keyword volumes and difficulty. Also remind the user that you can suggest long tail keywords for a given keyword to help them.
+3. Confirm with the user what are the primary and secondary keywords they want to optimize for. 
+4. Use the `Keyword Density Metrics` tool to get the metrics that measures the current content in terms of SEO, based on the primary and secondary keywords provided by the user.
+5. Based on keyword density metrics, suggest the user how to optimize the content.
+6. Optionally, get the readability metrics for the content using the `Readability Metrics` tool.
 
 ## End of instructions for using WordPress SEO tools
 

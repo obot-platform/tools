@@ -1,5 +1,5 @@
 textstat
-scikit-learn
+# scikit-learn
 pandas
 yake
 openai

@@ -1,35 +1,13 @@
 
 import re
-from bs4 import BeautifulSoup
 import markdownify
-import textstat
 from collections import Counter
-from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
+from tools.helper import ENGLISH_STOP_WORDS
 import yake
 import numpy as np
 import os
 
 
-# ---------- Readability ----------
-def ideal_readability_score():
-    return {
-        "flesch_reading_ease": "60-70+",
-        "flesch_kincaid_grade": "7-8th grade or lower (lower is simpler)",
-        "gunning_fog": "8-10 or lower (lower is simpler)",
-        "smog_index": "8-10 or lower (lower is simpler)",
-        "automated_readability_index": "8-10 or lower (lower is simpler)"
-    }
-
-
-def get_readability_scores(text):
-    ideal_score = ideal_readability_score()
-    return {
-        "flesch_reading_ease": f"score: {textstat.flesch_reading_ease(text)}, ideal_value: {ideal_score['flesch_reading_ease']}",
-        "flesch_kincaid_grade": f"score: {textstat.flesch_kincaid_grade(text)}, ideal_value: {ideal_score['flesch_kincaid_grade']}",
-        "gunning_fog": f"score: {textstat.gunning_fog(text)}, ideal_value: {ideal_score['gunning_fog']}",
-        "smog_index": f"score: {textstat.smog_index(text)}, ideal_value: {ideal_score['smog_index']}",
-        "automated_readability_index": f"score: {textstat.automated_readability_index(text)}, ideal_value: {ideal_score['automated_readability_index']}"
-    }
 
 
 
@@ -112,9 +90,8 @@ def extract_markdown_parts(md_text: str):
     return headings, body
 
 
-def content_optimize_metrics(content: str, primary_keyword: str, secondary_keywords: list = []) -> dict:
+def keyword_density_metrics_tool(content: str, primary_keyword: str, secondary_keywords: list = []) -> dict:
     md_text = markdownify.markdownify(content, heading_style="ATX") # ATX: #, ##, ###, etc. This convert h2, h3, h4, etc. to ##, ###, ####, etc.
-    readability_metrics = get_readability_scores(md_text)
 
     headings, body = extract_markdown_parts(md_text)
 
@@ -135,7 +112,6 @@ def content_optimize_metrics(content: str, primary_keyword: str, secondary_keywo
         })
 
     return {
-        "readability": readability_metrics,
         "keyword_report": keyword_report
     }
 
@@ -173,6 +149,6 @@ if __name__ == "__main__":
 
     primary_keyword = "gardening tips"
     secondary_keywords = ["pest control", "compost", "soil"]
-    res = content_optimize_metrics(content, primary_keyword, secondary_keywords)
+    res = keyword_density_metrics_tool(content, primary_keyword, secondary_keywords)
     import json
     print(json.dumps(res, indent=4))
