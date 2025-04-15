@@ -45,8 +45,17 @@ const octokit = new Octokit({
 try {
     switch (command) {
         case 'validateCreds':
-            await getUser(octokit);
-            break
+            try {
+                await getUser(octokit);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.log(JSON.stringify({ error: error.message }));
+                } else {
+                    console.log(JSON.stringify({ error: String(error) }));
+                }
+                process.exit(0);
+            }
+            break;
         case 'searchIssuesAndPRs':
             await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
             break;

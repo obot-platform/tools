@@ -1,3 +1,4 @@
+import json
 import os
 from tools.helper import WORDPRESS_API_URL, tool_registry, setup_logger
 from typing import Union
@@ -74,10 +75,8 @@ def validate_credential(client):
     if response.status_code == 200:
         sys.exit(0)
     else:
-        print(
-            f"Error: Invalid Credential: {response.status_code}. Error Message: {response.text}"
-        )
-        sys.exit(1)
+        print(json.dumps({"error": response.text}))
+        sys.exit(0)
 
 
 @tool_registry.register("ListUsers")

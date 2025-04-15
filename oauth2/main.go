@@ -505,10 +505,17 @@ func validateCredential(ctx context.Context, client *gptscript.GPTScript, tool s
 		return fmt.Errorf("error running tool: %w", err)
 	}
 
-	_, err = run.Text()
+	output, err := run.Text()
 	if err != nil {
 		errStr, _, _ := strings.Cut(err.Error(), ": exit status ")
 		return errors.New(errStr)
+	}
+
+	var errResp struct {
+		Error string `json:"error"`
+	}
+	if err := json.Unmarshal([]byte(output), &errResp); err == nil && errResp.Error != "" {
+		return errors.New(errResp.Error)
 	}
 
 	return nil

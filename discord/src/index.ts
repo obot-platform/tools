@@ -10,19 +10,26 @@ import { sendMessage } from "./tools/sendMessage.js";
 import { sendMessageInThread } from "./tools/sendMessageInThread.js";
 
 async function login(): Promise<void> {
-  try {
-    await client.login(process.env.DISCORD_TOKEN);
-  } catch (error: any) {
-    console.log("Discord login failed:", error);
-    process.exit(1);
-  }
+  await client.login(process.env.DISCORD_TOKEN);
 }
 
 async function main() {
   try {
-    await login();
-
     const command = process.argv[2];
+
+    try {
+      await login();
+    } catch (error: any) {
+      if (command === "login") {
+        if (error instanceof Error) {
+          console.log(JSON.stringify({ error: error.message }));
+        } else {
+          console.log(JSON.stringify({ error: String(error) }));
+        }
+        process.exit(0);
+      }
+      throw error;
+    }
 
     switch (command) {
       case "listChannels":
