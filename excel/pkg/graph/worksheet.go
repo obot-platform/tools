@@ -85,17 +85,29 @@ func ListWorkbooks(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]W
 		return nil, err
 	}
 
-	var infos []WorkbookInfo
-	workbooks, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).SearchWithQ(util.Ptr("xlsx")).GetAsSearchWithQGetResponse(ctx, nil)
+	// Get the root folder items
+	root, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Root().Get(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	for _, workbook := range workbooks.GetValue() {
-		infos = append(infos, WorkbookInfo{
-			ID:   util.Deref(workbook.GetId()),
-			Name: util.Deref(workbook.GetName()),
-		})
+
+	var infos []WorkbookInfo
+	items, err := c.Drives().ByDriveId(util.Deref(drive.GetId())).Items().ByDriveItemId(util.Deref(root.GetId())).Children().Get(ctx, nil)
+	if err != nil {
+		return nil, err
 	}
+
+	// Filter for Excel files
+	for _, item := range items.GetValue() {
+		name := util.Deref(item.GetName())
+		if strings.HasSuffix(strings.ToLower(name), ".xlsx") {
+			infos = append(infos, WorkbookInfo{
+				ID:   util.Deref(item.GetId()),
+				Name: name,
+			})
+		}
+	}
+
 	return infos, nil
 }
 
@@ -284,7 +296,7 @@ func AddWorksheetColumn(ctx context.Context, workbookID, worksheetID, columnID s
 	re := regexp.MustCompile(`\d+$`)
 	startRow, err := strconv.Atoi(re.FindString(columnID))
 	if err != nil {
-		return fmt.Errorf("failed to parse starting row.")
+		return fmt.Errorf("failed to parse starting row: %v", err)
 	}
 	endRow := startRow + len(contents) - 1
 

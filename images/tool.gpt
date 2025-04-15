@@ -36,10 +36,8 @@ Type: context
 
 # START INSTRUCTIONS: Generate Images tool
 
-The Generate Images tool returns JSON containing the `workspaceFilePath` and `downloadUrl` of every image it generates.
-Always use the `downloadUrl` of a generated image when embedding it in markdown.
-Unless otherwise specified, always display the images you generate in embedded markdown after generating them.
-Never provide the `downloadUrl` to the user as a clickable link.
+The Generate Images tool returns a JSON object with each image’s `workspaceFilePath` and `downloadUrl`.
+Unless otherwise specified, to display images in the UI, use the `downloadUrl` in markdown format. Do NOT use `workspaceFilePath`, as it cannot be rendered by the UI.
 
 # END INSTRUCTIONS: Generate Images tool
 

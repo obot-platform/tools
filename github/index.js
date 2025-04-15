@@ -37,13 +37,25 @@ if (!token) {
     process.exit(1);
 }
 
-const octokit = new Octokit({ auth: token });
+const octokit = new Octokit({
+    auth: token,
+    log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} } // disable logging
+});
 
 try {
     switch (command) {
         case 'validateCreds':
-            await getUser(octokit);
-            break
+            try {
+                await getUser(octokit);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.log(JSON.stringify({ error: error.message }));
+                } else {
+                    console.log(JSON.stringify({ error: String(error) }));
+                }
+                process.exit(0);
+            }
+            break;
         case 'searchIssuesAndPRs':
             await searchIssuesAndPRs(octokit, process.env.OWNER, process.env.REPO, process.env.QUERY, process.env.PERPAGE, process.env.PAGE);
             break;

@@ -25,10 +25,22 @@ try {
     service: 'https://bsky.social'
   })
 
-  await agent.login({
-    identifier: BLUESKY_HANDLE,
-    password: BLUESKY_APP_PASSWORD
-  })
+  try {
+    await agent.login({
+      identifier: BLUESKY_HANDLE,
+      password: BLUESKY_APP_PASSWORD
+    })
+  } catch (error: any) {
+    if (command === 'getProfile') {
+      if (error instanceof Error) {
+        console.log(JSON.stringify({ error: error.message }))
+      } else {
+        console.log(JSON.stringify({ error: String(error) }))
+      }
+      process.exit(0)
+    }
+    throw error
+  }
 
   switch (command) {
       case 'getProfile':

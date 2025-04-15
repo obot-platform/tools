@@ -70,8 +70,8 @@ func GetUserType(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (
 	}
 
 	userType := me.GetUserType()
-	if userType == nil {
-		return "", fmt.Errorf("userType is nil in response")
+	if userType == nil { // Personal accounts don't have userType
+		return "Personal", nil
 	}
 
 	return *userType, nil

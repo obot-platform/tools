@@ -21,8 +21,12 @@ def main():
         json_response = tool_registry.get(command)(client)
         print(json.dumps(json_response, indent=4))
     except Exception as e:
-        print(f"Running command: {' '.join(sys.argv)} failed. Error: {e}")
-        sys.exit(1)
+        if command == "ValidateCredential":
+            print(json.dumps({"error": str(e)}))
+            sys.exit(0)
+        else:
+            print(f"Running command: {' '.join(sys.argv)} failed. Error: {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

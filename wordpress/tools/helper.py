@@ -1,3 +1,4 @@
+import json
 import requests
 import os
 import sys
@@ -57,12 +58,14 @@ WORDPRESS_SITE = os.environ["WORDPRESS_SITE"]
 WORDPRESS_API_PATH = "/wp-json/wp/v2"
 
 
-def clean_wordpress_site_url(site_url):
+def clean_wordpress_site_url(site_url, command):
 
     if not site_url.startswith("https://") and not site_url.startswith("http://"):
-        print(
-            f"Error: Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://"
-        )
+        if command == "ValidateCredential":
+            print(json.dumps({"error": f"Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://"}))
+            sys.exit(0)
+        else:
+            print(f"Error: Invalid site URL: [{site_url}]. No scheme supplied, must start with protocol, e.g. https:// or http://")
         sys.exit(1)
 
     site_url = site_url.rstrip("/")
@@ -73,7 +76,7 @@ def clean_wordpress_site_url(site_url):
     return site_url
 
 
-WORDPRESS_API_URL = clean_wordpress_site_url(WORDPRESS_SITE)
+WORDPRESS_API_URL = clean_wordpress_site_url(WORDPRESS_SITE, sys.argv[1] if len(sys.argv) >= 2 else "")
 
 
 def is_valid_iso8601(date_string):

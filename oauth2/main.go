@@ -399,7 +399,7 @@ func promptForSelect(ctx context.Context, g *gptscript.GPTScript) (authType, err
 
 	fields := gptscript.Fields{gptscript.Field{Name: fieldName, Description: "The authentication method to use for this tool.", Options: []string{string(authTypePAT), string(authTypeOAuth)}}}
 	sysPromptIn, err := json.Marshal(sysPromptInput{
-		Message: "This tool has personal access token (PAT) and OAuth support. Select the authentication method you would like to use for this tool.",
+		Message: "This tool supports two ways to authenticate: personal access tokens (PAT) and OAuth. Select the method you'd like to use.",
 		Fields:  fields,
 	})
 	if err != nil {
@@ -505,10 +505,17 @@ func validateCredential(ctx context.Context, client *gptscript.GPTScript, tool s
 		return fmt.Errorf("error running tool: %w", err)
 	}
 
-	_, err = run.Text()
+	output, err := run.Text()
 	if err != nil {
 		errStr, _, _ := strings.Cut(err.Error(), ": exit status ")
 		return errors.New(errStr)
+	}
+
+	var errResp struct {
+		Error string `json:"error"`
+	}
+	if err := json.Unmarshal([]byte(output), &errResp); err == nil && errResp.Error != "" {
+		return errors.New(errResp.Error)
 	}
 
 	return nil
