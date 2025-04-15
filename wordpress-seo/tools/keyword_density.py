@@ -1,15 +1,7 @@
 
 import re
 import markdownify
-from collections import Counter
 from tools.helper import ENGLISH_STOP_WORDS
-import yake
-import numpy as np
-import os
-
-
-
-
 
 # ---------- Tokenizer + Keyword Density ----------
 def tokenize(text):

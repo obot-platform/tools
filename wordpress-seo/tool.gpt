@@ -19,7 +19,7 @@ Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
 Param: content: (required) the content to optimize.
 Param: primary_keyword: (required) the primary keyword to optimize for.
-Param: secondary_keywords: (optional) the secondary keywords to optimize for. Should be a JSON array of strings, e.g. ["keyword1", "keyword2", "keyword3"].
+Param: secondary_keywords: (optional) the secondary keywords to optimize for. Must be a list of strings, e.g. ["keyword1", "keyword2", "keyword3"].
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordDensityMetrics
 
@@ -54,11 +54,13 @@ Type: context
 To help the user to optimize the content of a post for SEO, follow these steps:
 
 1. Use the `Keywords Suggestions` tool to suggest keywords to the user for a given content.
-2. Kindly remind the user that they can use 3rd party tools/plugins to check the keyword volumes and difficulty. Also remind the user that you can suggest long tail keywords for a given keyword to help them.
+2. Kindly remind the user that they can use 3rd party tools/plugins to check the keywords volumes and difficulty. Also remind the user that you can suggest long tail keywords for a given keyword to help them decide.
 3. Confirm with the user what are the primary and secondary keywords they want to optimize for. 
 4. Use the `Keyword Density Metrics` tool to get the metrics that measures the current content in terms of SEO, based on the primary and secondary keywords provided by the user.
 5. Based on keyword density metrics, suggest the user how to optimize the content.
 6. Optionally, get the readability metrics for the content using the `Readability Metrics` tool.
+
+At last, generate updated content for the user to review.
 
 ## End of instructions for using WordPress SEO tools
 
