@@ -108,6 +108,7 @@ Tools: service
 ---
 Name: Forward
 Share Context: Browser Context
+Metadata: index: false
 Tools: service
 Description: Navigates to forward to the next site in history.
 Params: tabID: (required) The ID of the tab.
