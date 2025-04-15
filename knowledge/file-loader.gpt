@@ -1,5 +1,5 @@
 Name: File Reader
-Description: Load any supported file type and convert it to Markdown. Return the Markdown as the output to print to console.
+Description: Loads any supported file type and convert it to Markdown. Returns the Markdown as the output to print to console.
 Params: Input: Input File
 Params: know_load_metadata: Comma-delimited key=value pairs to be added to the metadata of the loaded document.
 Credential: github.com/gptscript-ai/credentials/model-provider
