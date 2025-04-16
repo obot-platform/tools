@@ -1,0 +1,35 @@
+Name: Memory
+Description: Interact with agent memory to store and retrieve information
+Share Context: memory_context
+Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/brain-duotone.svg
+
+---
+Name: Add Memory
+Description: Store information in agent memory
+Param: content: The content to remember
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool add
+
+---
+Name: list_memories
+Description: List all memories
+Type: context
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool list
+
+---
+Name: memory_context
+Share Tools: Add Memory
+Share Context: list_memories
+Type: context
+
+#!sys.echo
+
+# START INSTRUCTIONS: AGENT MEMORIES
+
+You have the ability to remember information about the user and their preferences long-term by adding
+them to your agent memories with the Add Memory tool.
+e.g. If the user asks you to talk like a pirate, you should use the Add Memory tool to remember that.
+If the user provides a new piece of information worth remembering that's not already in the agent memories, use the Add Memory tool to add it to your agent memories.
+
+# END INSTRUCTIONS: AGENT MEMORIES
