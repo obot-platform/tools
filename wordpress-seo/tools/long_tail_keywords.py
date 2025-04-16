@@ -17,7 +17,3 @@ def google_search_suggestions_tool(seed_keyword, num_suggestions=5):
     return suggestions[:num_suggestions]
 
 
-if __name__ == "__main__":
-    seed_keyword = "gardening tools"
-    res = google_search_suggestions_tool(seed_keyword)
-    print(res)
