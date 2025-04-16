@@ -5,7 +5,7 @@ Metadata: bundle: true
 Share Tools: Keywords Suggestions, Keyword Density Metrics, Long Tail Keywords, Readability Metrics
 ---
 Name: Keywords Suggestions
-Description: Suggest keywords for a given content.
+Description: Suggest keywords to focus on for SEO given a content.
 Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
 Param: content: (required) the content to suggest keywords for.
@@ -17,10 +17,10 @@ Name: Keyword Density Metrics
 Description: Get the keyword density metrics for a given content. Primary keyword is required. Secondary keywords are optional but highly recommended.
 Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
-Param: title: (required) the title of the content to optimize.
-Param: content: (required) the content to optimize.
-Param: primary_keyword: (required) the primary keyword to optimize for.
-Param: secondary_keywords: (optional) the secondary keywords to optimize for. Must be an python array of keywords, e.g. ["keyword1", "keyword2", "keyword3"], NOT a string.
+Param: title: (required) the title of the content to analyze.
+Param: content: (required) the content to analyze.
+Param: primary_keyword: (required) the primary keyword to analyze.
+Param: secondary_keywords: (optional) the secondary keywords to analyze. Must be an python array of keywords, e.g. ["keyword1", "keyword2", "keyword3"], NOT a string.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordDensityMetrics
 
@@ -40,7 +40,7 @@ Name: Readability Metrics
 Description: Get the readability metrics for a given content.
 Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
-Param: content: (required) the content to optimize.
+Param: content: (required) the content to analyze.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py ReadabilityMetrics
 
