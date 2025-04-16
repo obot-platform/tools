@@ -8,6 +8,15 @@ import (
 
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/commands"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
+	"github.com/obot-platform/obot/apiclient"
+)
+
+var (
+	url         = os.Getenv("OBOT_SERVER_URL")
+	token       = os.Getenv("OBOT_TOKEN")
+	threadID    = os.Getenv("OBOT_THREAD_ID")
+	projectID   = "p1" + strings.TrimPrefix(os.Getenv("OBOT_PROJECT_ID"), "t1")
+	assistantID = os.Getenv("OBOT_AGENT_ID")
 )
 
 func main() {
@@ -108,6 +117,17 @@ func main() {
 	case "listAttachments":
 		if err := commands.ListAttachments(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
 			fmt.Printf("failed to list attachments: %v\n", err)
+			os.Exit(1)
+		}
+	case "downloadAttachment":
+		client := apiclient.NewClientFromEnv()
+
+		if err := commands.DownloadAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID"), client, &commands.DownloadAttachmentOpts{
+			ThreadID:    threadID,
+			ProjectID:   projectID,
+			AssistantID: assistantID,
+		}); err != nil {
+			fmt.Printf("failed to download attachment: %v\n", err)
 			os.Exit(1)
 		}
 	case "getAttachment":

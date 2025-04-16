@@ -2,7 +2,7 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Get Attachment
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment
 
 ---
 Name: List Mail Folders
@@ -139,7 +139,7 @@ Param: message_id: The ID of the message to list attachments for.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listAttachments
 
 ---
-Name: Get Attachment
+Name: Read Attachment
 Description: Get the markdown converted contents of an attachment from a given message.
 Share Context: Outlook Mail Context
 Credential: ./credential
@@ -148,6 +148,17 @@ Param: message_id: The ID of the message to get the attachment from. Required.
 Param: attachment_id: The ID of the attachment to get. Required.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getAttachment
+
+---
+Name: Download Attachment
+Description: Download an attachment into workspace from a message.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Attachments
+Param: message_id: The ID of the message to get the attachment from. Required.
+Param: attachment_id: The ID of the attachment to get. Required.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadAttachment
 
 ---
 Name: Delete Group Thread
@@ -201,6 +212,8 @@ When printing a single message or a list of messages, use Markdown formatting.
 When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
 
 If an email has an attachment, ask user whether they would like to read the attachment and add the contents to the context.
+
+Only dowload the attachment if the user specifically asks to download it.
 
 Do not attempt to forward emails. Email forwarding is not supported.
 
