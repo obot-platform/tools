@@ -17,9 +17,10 @@ Name: Keyword Density Metrics
 Description: Get the keyword density metrics for a given content. Primary keyword is required. Secondary keywords are optional but highly recommended.
 Credential: sys.model.provider.credential
 Share Context: Wordpress SEO Context
+Param: title: (required) the title of the content to optimize.
 Param: content: (required) the content to optimize.
 Param: primary_keyword: (required) the primary keyword to optimize for.
-Param: secondary_keywords: (optional) the secondary keywords to optimize for. Must be an python array of keywords, e.g. ["keyword1", "keyword2", "keyword3"].
+Param: secondary_keywords: (optional) the secondary keywords to optimize for. Must be an python array of keywords, e.g. ["keyword1", "keyword2", "keyword3"], NOT a string.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py KeywordDensityMetrics
 
@@ -60,14 +61,12 @@ Help the user optimize a post for SEO by following these steps:
 3. Ask the user to confirm their primary and secondary keywords for optimization.
 
 4. Use the `Keyword Density Metrics` tool to analyze the content using the confirmed keywords.
+Provide actionable suggestions to improve keyword usage based on the analysis.
 
-5. Provide actionable suggestions to improve keyword usage based on the analysis.
-
-6. (Optional) Use the `Readability Metrics` tool to assess and suggest improvements for readability. Explain the metrics to the user, also note that readability formulas aren't always a good match for well-written professional/technical content.
+5. (Optional) Use the `Readability Metrics` tool to assess and suggest improvements for readability.
+Explain the result metrics to the user, also remind the user that readability formulas aren't always a good match for well-written professional/technical content.
 
 Finally, generate an updated version of the content reflecting the SEO and readability enhancements.
-
-
 
 ## End of instructions for using WordPress SEO tools
 

@@ -6,8 +6,9 @@ from content_optimize_metrics import content_optimize_metrics
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=openai_api_key)
 
-def build_optimization_prompt( primary_keyword, secondary_keywords):
-    secondary_list = ', '.join(secondary_keywords)
+
+def build_optimization_prompt(primary_keyword, secondary_keywords):
+    secondary_list = ", ".join(secondary_keywords)
 
     prompt = f"""
 You are an expert SEO content writer.
@@ -29,16 +30,17 @@ Please return the output in HTML format with proper use of headings, paragraphs,
     return prompt
 
 
-
-
-def optimize_post_with_llm(content,  primary_keyword, secondary_keywords):
+def optimize_post_with_llm(content, primary_keyword, secondary_keywords):
     prompt = build_optimization_prompt(primary_keyword, secondary_keywords)
 
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "system", "content": prompt}, {"role": "user", "content": content}],
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": content},
+        ],
         temperature=0.7,
-        max_tokens=3000
+        max_tokens=3000,
     )
 
     return response.choices[0].message.content.strip()
@@ -72,21 +74,23 @@ if __name__ == "__main__":
 <p>Gardening is a journey of learning and growth. By following these tips, you&#8217;ll be well on your way to creating a beautiful and productive garden. Remember, every gardener experiences challenges, but with patience and persistence, you&#8217;ll reap the rewards of your efforts.</p>
     """
     import json
+
     primary_keyword = "gardening tips"
     secondary_keywords = ["pest control", "compost", "soil"]
     res = content_optimize_metrics(content, primary_keyword, secondary_keywords)
-    
+
     readability_metrics = res["readability"]
     density_metrics = res["keyword_report"]
     print(f"Current Metrics:")
     print(json.dumps(res, indent=4))
 
-    optimized_content = optimize_post_with_llm(content, primary_keyword, secondary_keywords)
+    optimized_content = optimize_post_with_llm(
+        content, primary_keyword, secondary_keywords
+    )
     print(optimized_content)
 
-    
-    new_res = content_optimize_metrics(optimized_content, primary_keyword, secondary_keywords)
+    new_res = content_optimize_metrics(
+        optimized_content, primary_keyword, secondary_keywords
+    )
     print(f"Optimized Metrics:")
     print(json.dumps(new_res, indent=4))
-    
-    

@@ -1,11 +1,12 @@
-
 import re
 import markdownify
 from tools.helper import ENGLISH_STOP_WORDS
 
+
 # ---------- Tokenizer + Keyword Density ----------
 def tokenize(text):
-    return re.findall(r'\b\w+\b', text.lower())
+    return re.findall(r"\b\w+\b", text.lower())
+
 
 def keyword_density(text, target_keywords):
     """
@@ -32,10 +33,13 @@ def keyword_density(text, target_keywords):
         matches = re.findall(pattern, text_lower)
         count = len(matches)
 
-        density = round((count / total_word_count) * 100, 2) if total_word_count else 0.0
+        density = (
+            round((count / total_word_count) * 100, 2) if total_word_count else 0.0
+        )
         density_scores[keyword] = density
 
     return density_scores
+
 
 # ---------- Density Evaluation (n-gram aware) ----------
 def evaluate_density(density_map, primary_keyword, secondary_keywords):
@@ -67,46 +71,57 @@ def keyword_in_headings(headings, keywords):
     return result
 
 
-
 # --- Extract from Markdown ---
 def extract_markdown_parts(md_text: str):
     # Headings: lines starting with #, ##, ###, etc.
-    heading_matches = re.findall(r'^#{1,6}\s+(.*)', md_text, re.MULTILINE)
+    heading_matches = re.findall(r"^#{1,6}\s+(.*)", md_text, re.MULTILINE)
     headings = [h.strip() for h in heading_matches]
 
     # Remove all headings to get body
-    body = re.sub(r'^#{1,6}\s+.*$', '', md_text, flags=re.MULTILINE)
-    body = re.sub(r'\n{2,}', '\n', body) 
+    body = re.sub(r"^#{1,6}\s+.*$", "", md_text, flags=re.MULTILINE)
+    body = re.sub(r"\n{2,}", "\n", body)
     body = body.strip()
 
     return headings, body
 
 
-def keyword_density_metrics_tool(content: str, primary_keyword: str, secondary_keywords: list = []) -> dict:
-    md_text = markdownify.markdownify(content, heading_style="ATX") # ATX: #, ##, ###, etc. This convert h2, h3, h4, etc. to ##, ###, ####, etc.
+def keyword_density_metrics_tool(
+    title: str, content: str, primary_keyword: str, secondary_keywords: list = []
+) -> dict:
+    md_text = markdownify.markdownify(
+        content, heading_style="ATX"
+    )  # ATX: #, ##, ###, etc. This convert h2, h3, h4, etc. to ##, ###, ####, etc.
 
     headings, body = extract_markdown_parts(md_text)
 
     all_keywords = [primary_keyword] + secondary_keywords
 
     density_map = keyword_density(body, all_keywords)
-    evaluation = evaluate_density(density_map, primary_keyword, secondary_keywords)
+    # evaluation = evaluate_density(density_map, primary_keyword, secondary_keywords)
     heading_presence = keyword_in_headings(headings, all_keywords)
 
     # --- Prepare Report Data ---
     keyword_report = []
-    for kw in all_keywords:
-        keyword_report.append({
-            "keyword": kw,
-            "density": round(density_map.get(kw, 0.0), 2),
-            "in_heading": heading_presence.get(kw, False),
-            "evaluation": evaluation.get(kw, "–")
-        })
 
-    return {
-        "keyword_report": keyword_report
-    }
+    keyword_report.append(
+        {
+            "primary_keyword": primary_keyword,
+            "density": round(density_map.get(primary_keyword, 0.0), 2),
+            "in_title": primary_keyword.lower() in title.lower(),
+            "in_heading": heading_presence.get(primary_keyword, False),
+        }
+    )
 
+    for kw in secondary_keywords:
+        keyword_report.append(
+            {
+                "secondary_keyword": kw,
+                "density": round(density_map.get(kw, 0.0), 2),
+                "in_heading": heading_presence.get(kw, False),
+            }
+        )
+
+    return {"keyword_report": keyword_report}
 
 
 # ---------- Main ----------
@@ -139,8 +154,12 @@ if __name__ == "__main__":
 <p>Gardening is a journey of learning and growth. By following these tips, you&#8217;ll be well on your way to creating a beautiful and productive garden. Remember, every gardener experiences challenges, but with patience and persistence, you&#8217;ll reap the rewards of your efforts.</p>
     """
 
+    title = "Gardening Tips for Beginners"
     primary_keyword = "gardening tips"
     secondary_keywords = ["pest control", "compost", "soil"]
-    res = keyword_density_metrics_tool(content, primary_keyword, secondary_keywords)
+    res = keyword_density_metrics_tool(
+        title, content, primary_keyword, secondary_keywords
+    )
     import json
+
     print(json.dumps(res, indent=4))
