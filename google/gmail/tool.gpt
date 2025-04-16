@@ -17,6 +17,8 @@ Description: List emails in the user's Gmail inbox
 Credential: ../credential
 Share Contexts: Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
+Param: label: The label of the inbox to list, options are 'inbox', 'starred', 'important', 'sent', 'drafts', 'trash', 'spam', 'all'. (Optional: Default is 'inbox')
+Param: category: The category of emails to list, options are 'primary', 'social', 'promotions', 'updates', 'forums'. (Optional: Default is 'primary')
 Param: max_results: Maximum number of emails to list (Optional: Default will list 100 emails in the inbox)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py
