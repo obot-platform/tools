@@ -1,0 +1,45 @@
+Name: Virus Total
+Description: Virus Total File Scanner
+Credential: ../placeholder-credential as virus-total-provider
+Metadata: envVars: VIRUS_TOTAL_API_KEY
+Metadata: noUserAuth: virus-total-provider
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:Virus Total:providerMeta
+{
+	"icon": "/admin/assets/virustotal.svg",
+    "link": "https://virustotal.com/",
+    "envVars": [
+        {
+            "name": "VIRUS_TOTAL_API_KEY",
+            "friendlyName": "Virus Total API Key",
+            "description": "API key for your Virus Total account.",
+            "sensitive": true
+        }
+    ],
+    "optionalEnvVars": [
+        {
+            "name": "FAIL_ON_FAILURES",
+            "friendlyName": "Fail on any failure",
+            "description": "Fail when any engine fails to analyze a file."
+        },
+        {
+            "name": "FAIL_ON_SUSPICIOUS",
+            "friendlyName": "Fail on any suspicious",
+            "description": "Fail when any engine marks the file as suspicious."
+        },
+        {
+            "name": "FAIL_ON_TIMEOUT",
+            "friendlyName": "Fail on any timeout",
+            "description": "Fail when any engine times-out when analyzing the file."
+        }
+	]
+}
+
+---
+Name: validate
+Description: Validate the Virus Total key
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate
