@@ -166,3 +166,5 @@ authProviders:
 fileScanners:
   virus-total-provider:
     reference: ./virus-total-provider
+  meta-defender-provider:
+    reference: ./meta-defender-provider

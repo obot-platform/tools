@@ -1,0 +1,40 @@
+Name: MetaDefender
+Description: MetaDefender File Scanner
+Credential: ../placeholder-credential as meta-defender-provider
+Metadata: envVars: META_DEFENDER_API_KEY
+Metadata: noUserAuth: meta-defender-provider
+
+#!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
+
+---
+!metadata:Virus Total:providerMeta
+{
+    "icon": "/admin/assets/metadefender.png",
+    "link": "https://metadefender.opswat.com/",
+    "envVars": [
+        {
+            "name": "META_DEFENDER_API_KEY",
+            "friendlyName": "Meta Defender API Key",
+            "description": "API key for your MetaDefender account",
+            "sensitive": true
+        }
+    ],
+    "optionalEnvVars": [
+        {
+            "name": "FAIL_ON_ERROR",
+            "friendlyName": "Fail on any error",
+            "description": "Fail when the scan result is an error"
+        },
+        {
+            "name": "FAIL_ON_UNKNOWN",
+            "friendlyName": "Fail on any unknown",
+            "description": "Fail when the scan result is unknown"
+        }
+	]
+}
+
+---
+Name: validate
+Description: Validate the MetaDefender key
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate
