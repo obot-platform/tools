@@ -32,6 +32,7 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 	}
 
 	if folderID != "" { // if folderID is provided, we only want to get messages from that folder
+		// TODO - handle pagination if there are more messages than can be returned in a single call
 		queryParams := &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
 			Orderby: []string{"receivedDateTime DESC"},
 		}
@@ -70,13 +71,6 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 
 		return result.GetValue(), nil
 	}
-
-	// TODO - handle pagination if there are more messages than can be returned in a single call
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to list mail: %w", err)
-	// }
-
-	// return result.GetValue(), nil
 }
 
 func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) (models.Messageable, error) {
