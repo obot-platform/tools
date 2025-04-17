@@ -19,7 +19,6 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
 		if err := validate(context.Background(), apiKey); err != nil {
 			fmt.Printf(`{"error":"%v"}\n`, err.Error())
-			os.Exit(1)
 		}
 		return
 	}
