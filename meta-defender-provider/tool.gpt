@@ -7,7 +7,7 @@ Metadata: noUserAuth: meta-defender-provider
 #!sys.daemon ${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 
 ---
-!metadata:Virus Total:providerMeta
+!metadata:MetaDefender:providerMeta
 {
     "icon": "/admin/assets/metadefender.png",
     "link": "https://metadefender.opswat.com/",
