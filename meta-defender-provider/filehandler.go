@@ -154,8 +154,12 @@ func doMultipartRequest(ctx context.Context, apiKey, url, method string, body ma
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var e apiError
 		bodyText, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("HTTP request failed with status %d: %s", resp.StatusCode, string(bodyText))
+		if err = json.Unmarshal(bodyText, &e); err != nil || len(e.Error.Messages) == 0 {
+			return fmt.Errorf("HTTP request failed with status %d: %s", resp.StatusCode, string(bodyText))
+		}
+		return fmt.Errorf("HTTP request failed with status %d: %s", resp.StatusCode, e.Error.Messages[0])
 	}
 
 	if responseBody != nil {
@@ -173,6 +177,13 @@ type maliciousErr struct {
 
 func (e *maliciousErr) Error() string {
 	return e.msg
+}
+
+type apiError struct {
+	Error struct {
+		Code     int      `json:"code"`
+		Messages []string `json:"messages"`
+	} `json:"error"`
 }
 
 type scanResultResponse struct {
