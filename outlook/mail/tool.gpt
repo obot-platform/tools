@@ -22,9 +22,9 @@ Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/fil
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Mail Folders
-Param: folder_id: The ID of the folder to list messages in.
-Param: start: The RFC3339 formatted start date and time of the time frame to list messages within.
-Param: end: The RFC3339 formatted end date and time of the time frame to list messages within.
+Param: folder_id: (Optional) The ID of the folder to list messages in. If unset, lists messages from all folders.
+Param: start: (Optional) The RFC3339 formatted start date and time of the time frame to list messages within.
+Param: end: (Optional) The RFC3339 formatted end date and time of the time frame to list messages within.
 Param: limit: (Optional) The maximum number of messages to return. If unset, returns up to 100 messages.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages

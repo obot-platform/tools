@@ -22,13 +22,6 @@ import (
 )
 
 func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID, start, end string, limit int) ([]models.Messageable, error) {
-	queryParams := &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-		Orderby: []string{"receivedDateTime DESC"},
-	}
-
-	if limit > 0 {
-		queryParams.Top = util.Ptr(int32(limit))
-	}
 
 	var filters []string
 	if start != "" {
@@ -38,19 +31,52 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 		filters = append(filters, fmt.Sprintf("receivedDateTime le %s", end))
 	}
 
-	if len(filters) > 0 {
-		queryParams.Filter = util.Ptr(strings.Join(filters, " and "))
+	if folderID != "" { // if folderID is provided, we only want to get messages from that folder
+		queryParams := &users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
+			Orderby: []string{"receivedDateTime DESC"},
+		}
+
+		if limit > 0 {
+			queryParams.Top = util.Ptr(int32(limit))
+		}
+		if len(filters) > 0 {
+			queryParams.Filter = util.Ptr(strings.Join(filters, " and "))
+		}
+		result, err := client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
+			QueryParameters: queryParams,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to list mail for folder %s: %w", folderID, err)
+		}
+
+		return result.GetValue(), nil
+	} else { // if folderID is not provided, we want to get messages from all folders
+		requestParameters := &users.ItemMessagesRequestBuilderGetQueryParameters{
+			Orderby: []string{"receivedDateTime DESC"},
+		}
+		if limit > 0 {
+			requestParameters.Top = util.Ptr(int32(limit))
+		}
+		if len(filters) > 0 {
+			requestParameters.Filter = util.Ptr(strings.Join(filters, " and "))
+		}
+		configuration := &users.ItemMessagesRequestBuilderGetRequestConfiguration{
+			QueryParameters: requestParameters,
+		}
+		result, err := client.Me().Messages().Get(ctx, configuration)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list messages from all folders: %w", err)
+		}
+
+		return result.GetValue(), nil
 	}
 
-	result, err := client.Me().MailFolders().ByMailFolderId(folderID).Messages().Get(ctx, &users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
-		QueryParameters: queryParams,
-	})
 	// TODO - handle pagination if there are more messages than can be returned in a single call
-	if err != nil {
-		return nil, fmt.Errorf("failed to list mail: %w", err)
-	}
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to list mail: %w", err)
+	// }
 
-	return result.GetValue(), nil
+	// return result.GetValue(), nil
 }
 
 func GetMessageDetails(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID string) (models.Messageable, error) {
