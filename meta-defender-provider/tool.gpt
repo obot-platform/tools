@@ -9,7 +9,6 @@ Metadata: noUserAuth: meta-defender-provider
 ---
 !metadata:MetaDefender:providerMeta
 {
-    "icon": "/admin/assets/metadefender.png",
     "link": "https://metadefender.opswat.com/",
     "envVars": [
         {
