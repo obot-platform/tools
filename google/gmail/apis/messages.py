@@ -6,7 +6,6 @@ from datetime import datetime
 from googleapiclient.errors import HttpError
 import gptscript
 import base64
-import re
 import gptscript
 from filetype import guess_mime
 from datetime import datetime
@@ -16,6 +15,8 @@ from email.mime.base import MIMEBase
 from email import encoders
 from bs4 import BeautifulSoup
 from googleapiclient.errors import HttpError
+from datetime import datetime
+
 
 logger = setup_logger(__name__)
 
@@ -120,7 +121,7 @@ async def list_messages(
         query = f"after:{format_query_timestamp(after)} {query}"
     if before:
         query = f"before:{format_query_timestamp(before)} {query}"
-    logger.info(f"Query: {query}")  # log query to server logs
+    logger.info(f"Query: {query}\nlabels: {labels}")  # log query to server logs
     try:
         while True:
             if next_page_token:
@@ -154,32 +155,31 @@ async def list_messages(
             next_page_token = results.get("nextPageToken")
             if not next_page_token:
                 break
-
-        try:
-            gptscript_client = gptscript.GPTScript()
-
-            elements = []
-            for message in all_messages:
-                msg_id, msg_str = message_to_string(service, message)
-                elements.append(
-                    DatasetElement(name=msg_id, description="", contents=msg_str)
-                )
-
-            dataset_id = await gptscript_client.add_dataset_elements(
-                elements,
-                name=f"gmail_{query}",
-                description=f"list of emails in Gmail for query {query}",
-            )
-
-            print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
-        except Exception as e:
-            print("An error occurred while creating the dataset:", e)
-
     except HttpError as err:
         print(err)
+    except Exception as e:
+        print(f"Error listing messages: {e}")
+        logger.error(f"Error listing messages: {e}")
 
+    try:
+        gptscript_client = gptscript.GPTScript()
 
-from datetime import datetime, timezone
+        elements = []
+        for message in all_messages:
+            msg_id, msg_str = message_to_string(service, message)
+            elements.append(
+                DatasetElement(name=msg_id, description="", contents=msg_str)
+            )
+
+        dataset_id = await gptscript_client.add_dataset_elements(
+            elements,
+            name=f"gmail_{query}",
+            description=f"list of emails in Gmail for query {query}",
+        )
+
+        print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
+    except Exception as e:
+        print("An error occurred while creating the dataset:", e)
 
 
 def message_to_string(service, message):

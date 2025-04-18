@@ -10,16 +10,21 @@ async def list_emails():
     if max_results is not None:
         max_results = int(max_results)
 
-    labels = os.getenv("LABELS", "INBOX")
+    query = os.getenv("QUERY", "")
+    default_inbox = "INBOX"
+    if query != "":
+        default_inbox = ""  # if query is not empty, don't set inbox as default
+    labels = os.getenv("LABELS", default_inbox)
     category = os.getenv("CATEGORY", "primary")
     valid_categories = ["primary", "social", "promotions", "updates", "forums"]
     if category not in valid_categories:
         print(f"Invalid category: {category}. Valid categories are: {valid_categories}")
         sys.exit(1)
 
-    query = os.getenv("QUERY", "")
     try:
-        label_ids = [label.strip().upper() for label in labels.split(",")]
+        label_ids = [
+            label.strip().upper() for label in labels.split(",") if label.strip() != ""
+        ]
     except Exception as e:
         print(
             f"Input labels: {labels} must be a comma separated list of labels. Exception: {e}"
