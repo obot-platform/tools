@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
@@ -86,7 +87,7 @@ func ListGroupThreads(ctx context.Context, groupID, start, end, limit string) er
 
 		// Add unique senders
 		senders := thread.GetUniqueSenders()
-		threadContent += "Unique Senders: " + util.JoinStrings(senders, ", ") + "\n\n"
+		threadContent += "Unique Senders: " + strings.Join(senders, ", ") + "\n\n"
 
 		// Fetch and add messages
 		posts, err := graph.ListThreadMessages(ctx, c, groupID, threadID)

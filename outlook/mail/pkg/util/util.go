@@ -1,7 +1,5 @@
 package util
 
-import "strings"
-
 func Ptr[T any](v T) *T {
 	return &v
 }
@@ -29,9 +27,4 @@ func Filter[T any](arr []T, f func(T) bool) []T {
 		}
 	}
 	return out
-}
-
-// JoinStrings joins a slice of strings with the given separator
-func JoinStrings(strs []string, sep string) string {
-	return strings.Join(strs, sep)
 }
