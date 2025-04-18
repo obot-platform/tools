@@ -6,7 +6,7 @@ import json
 import base64
 import requests
 
-from helpers import client
+from apis.helpers import client
 
 class ObotClient:
     def __init__(self, server_url, token):

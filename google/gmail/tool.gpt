@@ -2,7 +2,7 @@
 Name: Gmail
 Description: Tools for interacting with a user's Gmail account
 Metadata: bundle: true
-Share Tools: Current Email, List Inbox, Read Email, Search Emails, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft, List Attachments, Download Attachment, Read Attachment
+Share Tools: Current Email, List Inbox, Read Email, Send Email, Delete Email, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft, List Attachments, Download Attachment, Read Attachment
 
 ---
 Name: Current Email
@@ -19,6 +19,7 @@ Share Contexts: Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
 Param: label: The label of the inbox to list, options are 'inbox', 'starred', 'important', 'sent', 'drafts', 'trash', 'spam', 'all'. (Optional: Default is 'inbox')
 Param: category: The category of emails to list, options are 'primary', 'social', 'promotions', 'updates', 'forums'. (Optional: Default is 'primary')
+Param: query: Search query to find emails in the user's Gmail account. Uses Gmail search syntax (e.g., "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread")
 Param: max_results: Maximum number of emails to list (Optional: Default will list 100 emails in the inbox)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listInbox.py

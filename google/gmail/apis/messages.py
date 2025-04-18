@@ -1,15 +1,58 @@
 import base64
-import os
+from bs4 import BeautifulSoup
+from gptscript.datasets import DatasetElement
+from apis.helpers import obot_user_tz, setup_logger, extract_message_headers, prepend_base_path
+import re
+from datetime import datetime
+from googleapiclient.errors import HttpError
+import gptscript
+import base64
 import re
 import gptscript
 from filetype import guess_mime
-from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
+from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from bs4 import BeautifulSoup
+from googleapiclient.errors import HttpError
+
+logger = setup_logger(__name__)
+
+def format_query_dates(query):
+    """
+    Converts date strings in Gmail search queries to Unix timestamps for correct timezone handling.
+    - before: uses beginning of day (00:00:00)
+    - after: uses end of day (23:59:59)
+    """
+    if not query:
+        return query
+
+    # Replace dates in query with timestamps
+    def replace_date(match):
+        operator, quote1, date_str, quote2 = match.groups()
+        date_str = date_str.replace('/', '-')
+
+        try:
+            # Parse date parts
+            year, month, day = map(int, date_str.split('-'))
+
+            if operator == "before":
+                # For 'before:', use beginning of day (00:00:00)
+                dt = datetime(year, month, day, 0, 0, 0, tzinfo=obot_user_tz)
+            else:  # after
+                # For 'after:', use end of day (23:59:59)
+                dt = datetime(year, month, day, 23, 59, 59, tzinfo=obot_user_tz)
+
+            timestamp = int(dt.timestamp())
+            return f"{operator}:{quote1}{timestamp}{quote2}"
+        except:
+            return match.group(0)
+
+    # Replace dates with timestamps
+    pattern = r'(before|after):(["\']?)(\d{4}[-/]\d{1,2}[-/]\d{1,2})(["\']?)'
+    return re.sub(pattern, replace_date, query)
 
 
 async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
@@ -83,28 +126,6 @@ async def create_message(service, to, cc, bcc, subject, message_text, attachment
     return data
 
 
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
-
-def client(service_name: str, version: str):
-    token = os.getenv('GOOGLE_OAUTH_TOKEN')
-    if token is None:
-        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
-
-    creds = Credentials(token=token)
-    try:
-        service = build(serviceName=service_name, version=version, credentials=creds)
-        return service
-    except HttpError as err:
-        print(err)
-        exit(1)
-
-
-from gptscript.datasets import DatasetElement
-
-
 async def list_messages(service, query, max_results):
     all_messages = []
     next_page_token = None
@@ -171,87 +192,6 @@ def display_list_messages(service, messages: list):
         print(msg_str)
 
 
-async def list_drafts(service, max_results=None):
-    all_drafts = []
-    next_page_token = None
-    try:
-        while True:
-            if next_page_token:
-                results = service.users().drafts().list(userId='me', pageToken=next_page_token, maxResults=10).execute()
-            else:
-                results = service.users().drafts().list(userId='me', maxResults=10).execute()
-
-            drafts = results.get('drafts', [])
-            if not drafts:
-                break
-
-            all_drafts.extend(drafts)
-            if max_results is not None and len(all_drafts) >= max_results:
-                break
-
-            next_page_token = results.get('nextPageToken')
-            if not next_page_token:
-                break
-
-        try:
-            gptscript_client = gptscript.GPTScript()
-
-            elements = []
-            for draft in all_drafts:
-                draft_id, draft_str = draft_to_string(service, draft)
-                elements.append(DatasetElement(name=draft_id, description="", contents=draft_str))
-
-            dataset_id = await gptscript_client.add_dataset_elements(elements, name=f"gmail_drafts")
-
-            print(f"Created dataset with ID {dataset_id} with {len(elements)} drafts")
-        except Exception as e:
-            print("An error occurred while creating the dataset:", e)
-
-    except HttpError as err:
-        print(f"An error occurred: {err}")
-
-
-def draft_to_string(service, draft):
-    draft_id = draft['id']
-    draft_msg = service.users().drafts().get(userId='me', id=draft_id).execute()
-    msg = draft_msg['message']
-    subject, sender, to, cc, bcc, date = extract_message_headers(msg)
-    return draft_id, f"Draft ID: {draft_id}, From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Saved: {date}"
-
-
-def display_list_drafts(service, drafts: list):
-    print('Drafts:')
-    for draft in drafts:
-        _, draft_str = draft_to_string(service, draft)
-        print(draft_str)
-
-
-def extract_message_headers(message):
-    subject = None
-    sender = None
-    to = None
-    cc = None
-    bcc = None
-    date = None
-
-    if message is not None:
-        for header in message['payload']['headers']:
-            if header['name'].lower() == 'subject':
-                subject = header['value']
-            if header['name'].lower() == 'from':
-                sender = header['value']
-            if header['name'].lower() == 'to':
-                to = header['value']
-            if header['name'].lower() == 'cc':
-                cc = header['value']
-            if header['name'].lower() == 'bcc':
-                bcc = header['value']
-            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone(obot_user_tz).strftime(
-                '%Y-%m-%d %H:%M:%S %Z')
-
-    return subject, sender, to, cc, bcc, date
-
-
 def fetch_email_or_draft(service, obj_id):
     try:
         # Try fetching as an email first
@@ -263,82 +203,6 @@ def fetch_email_or_draft(service, obj_id):
             return draft_msg['message']
         else:
             raise email_err  # Reraise the error if it's not a 404 (not found)
-
-
-def has_attachment(message):
-    def parse_parts(parts):
-        for part in parts:
-            if part['filename'] and part['body'].get('attachmentId'):
-                return True
-        return False
-
-    parts = message['payload'].get('parts', [])
-    if parts:
-        return parse_parts(parts)
-    else:
-        return False
-
-
-def get_email_body(message):
-    def parse_parts(parts):
-        for part in parts:
-            mime_type = part['mimeType']
-            if mime_type == 'text/plain' or mime_type == 'text/html':
-                body_data = part['body']['data']
-                decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-                return decoded_body
-            if mime_type == 'multipart/alternative' or mime_type == 'multipart/mixed':
-                return parse_parts(part['parts'])
-        return None
-
-    try:
-        parts = message['payload'].get('parts', [])
-        if parts:
-            return parse_parts(parts)
-        else:
-            body_data = message['payload']['body']['data']
-            decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
-            return decoded_body
-    except Exception as e:
-        print(f'Error while decoding the email body: {e}')
-        return None
-
-async def prepend_base_path(base_path: str, file_path: str):
-    """
-    Prepend a base path to a file path if it's not already rooted in the base path.
-
-    Args:
-        base_path (str): The base path to prepend.
-        file_path (str): The file path to check and modify.
-
-    Returns:
-        str: The modified file path with the base path prepended if necessary.
-
-    Examples:
-      >>> prepend_base_path("files", "my-file.txt")
-      'files/my-file.txt'
-
-      >>> prepend_base_path("files", "files/my-file.txt")
-      'files/my-file.txt'
-
-      >>> prepend_base_path("files", "foo/my-file.txt")
-      'files/foo/my-file.txt'
-
-      >>> prepend_base_path("files", "bar/files/my-file.txt")
-      'files/bar/files/my-file.txt'
-
-      >>> prepend_base_path("files", "files/bar/files/my-file.txt")
-      'files/bar/files/my-file.txt'
-    """
-    # Split the file path into parts for checking
-    file_parts = os.path.normpath(file_path).split(os.sep)
-
-    # Check if the base path is already at the root
-    if file_parts[0] == base_path:
-        return file_path
-
-    # Prepend the base path
-    return os.path.join(base_path, file_path)
 
 
 def extract_email_body(payload):
@@ -379,49 +243,41 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
 
     return reply_html
 
-def format_query_dates(query):
-    """
-    Converts date strings in Gmail search queries to Unix timestamps for correct timezone handling.
-    - before: uses beginning of day (00:00:00)
-    - after: uses end of day (23:59:59)
-    """
-    if not query:
-        return query
 
-    # Replace dates in query with timestamps
-    def replace_date(match):
-        operator, quote1, date_str, quote2 = match.groups()
-        date_str = date_str.replace('/', '-')
+def has_attachment(message):
+    def parse_parts(parts):
+        for part in parts:
+            if part['filename'] and part['body'].get('attachmentId'):
+                return True
+        return False
 
-        try:
-            # Parse date parts
-            year, month, day = map(int, date_str.split('-'))
-
-            if operator == "before":
-                # For 'before:', use beginning of day (00:00:00)
-                dt = datetime(year, month, day, 0, 0, 0, tzinfo=obot_user_tz)
-            else:  # after
-                # For 'after:', use end of day (23:59:59)
-                dt = datetime(year, month, day, 23, 59, 59, tzinfo=obot_user_tz)
-
-            timestamp = int(dt.timestamp())
-            return f"{operator}:{quote1}{timestamp}{quote2}"
-        except:
-            return match.group(0)
-
-    # Replace dates with timestamps
-    pattern = r'(before|after):(["\']?)(\d{4}[-/]\d{1,2}[-/]\d{1,2})(["\']?)'
-    return re.sub(pattern, replace_date, query)
+    parts = message['payload'].get('parts', [])
+    if parts:
+        return parse_parts(parts)
+    else:
+        return False
 
 
-def get_user_timezone():
-    user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+def get_email_body(message):
+    def parse_parts(parts):
+        for part in parts:
+            mime_type = part['mimeType']
+            if mime_type == 'text/plain' or mime_type == 'text/html':
+                body_data = part['body']['data']
+                decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+                return decoded_body
+            if mime_type == 'multipart/alternative' or mime_type == 'multipart/mixed':
+                return parse_parts(part['parts'])
+        return None
 
     try:
-        tz = ZoneInfo(user_tz)
-    except:
-        tz = timezone.utc
-
-    return tz
-
-obot_user_tz = get_user_timezone()
+        parts = message['payload'].get('parts', [])
+        if parts:
+            return parse_parts(parts)
+        else:
+            body_data = message['payload']['body']['data']
+            decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+            return decoded_body
+    except Exception as e:
+        print(f'Error while decoding the email body: {e}')
+        return None

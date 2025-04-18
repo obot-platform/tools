@@ -3,8 +3,8 @@ import os
 
 from googleapiclient.errors import HttpError
 
-from helpers import client, fetch_email_or_draft, extract_message_headers, get_email_body, has_attachment
-
+from apis.helpers import client
+from apis.messages import fetch_email_or_draft, extract_message_headers, get_email_body, has_attachment
 
 def main():
     email_id = os.getenv('EMAIL_ID')

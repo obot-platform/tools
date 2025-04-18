@@ -1,5 +1,5 @@
 import asyncio
-from helpers import client
+from apis.helpers import client
 
 async def main():
     service = client('gmail', 'v1')

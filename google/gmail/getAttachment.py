@@ -9,7 +9,7 @@ from gptscript import gptscript
 import tiktoken
 import subprocess
 
-from helpers import client
+from apis.helpers import client
 
 TIKTOKEN_MODEL = "gpt-4o"
 enc = tiktoken.encoding_for_model(TIKTOKEN_MODEL)

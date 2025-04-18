@@ -3,7 +3,8 @@ import asyncio
 
 from googleapiclient.errors import HttpError
 
-from helpers import client, create_message
+from apis.helpers import client
+from apis.messages import create_message
 
 
 async def main():

@@ -1,6 +1,7 @@
 import asyncio
 import os
-from helpers import client, list_drafts
+from apis.helpers import client
+from apis.drafts import list_drafts
 
 async def main():
     max_results = os.getenv('MAX_RESULTS', '100')

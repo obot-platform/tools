@@ -2,8 +2,7 @@ import os
 
 from googleapiclient.errors import HttpError
 
-from helpers import client
-
+from apis.helpers import client
 
 def main():
     draft_id = os.getenv('DRAFT_ID')
