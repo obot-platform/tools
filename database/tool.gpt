@@ -2,6 +2,7 @@
 Name: Database
 Description: Tools for interacting with a database
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/database-duotone.svg
+Metadata: category: Capability
 Share Tools: Run Database SQL
 
 ---
