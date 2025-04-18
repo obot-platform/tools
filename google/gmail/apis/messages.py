@@ -1,8 +1,7 @@
 import base64
 from bs4 import BeautifulSoup
 from gptscript.datasets import DatasetElement
-from apis.helpers import obot_user_tz, setup_logger, extract_message_headers, prepend_base_path
-import re
+from apis.helpers import setup_logger, extract_message_headers, prepend_base_path
 from datetime import datetime
 from googleapiclient.errors import HttpError
 import gptscript
@@ -20,88 +19,71 @@ from googleapiclient.errors import HttpError
 
 logger = setup_logger(__name__)
 
-def format_query_dates(query):
-    """
-    Converts date strings in Gmail search queries to Unix timestamps for correct timezone handling.
-    - before: uses beginning of day (00:00:00)
-    - after: uses end of day (23:59:59)
-    """
-    if not query:
-        return query
 
-    # Replace dates in query with timestamps
-    def replace_date(match):
-        operator, quote1, date_str, quote2 = match.groups()
-        date_str = date_str.replace('/', '-')
-
-        try:
-            # Parse date parts
-            year, month, day = map(int, date_str.split('-'))
-
-            if operator == "before":
-                # For 'before:', use beginning of day (00:00:00)
-                dt = datetime(year, month, day, 0, 0, 0, tzinfo=obot_user_tz)
-            else:  # after
-                # For 'after:', use end of day (23:59:59)
-                dt = datetime(year, month, day, 23, 59, 59, tzinfo=obot_user_tz)
-
-            timestamp = int(dt.timestamp())
-            return f"{operator}:{quote1}{timestamp}{quote2}"
-        except:
-            return match.group(0)
-
-    # Replace dates with timestamps
-    pattern = r'(before|after):(["\']?)(\d{4}[-/]\d{1,2}[-/]\d{1,2})(["\']?)'
-    return re.sub(pattern, replace_date, query)
-
-
-async def create_message(service, to, cc, bcc, subject, message_text, attachments, reply_to_email_id=None, reply_all=False):
+async def create_message(
+    service,
+    to,
+    cc,
+    bcc,
+    subject,
+    message_text,
+    attachments,
+    reply_to_email_id=None,
+    reply_all=False,
+):
     gptscript_client = gptscript.GPTScript()
     message = MIMEMultipart()
-    message_text_html = message_text.replace('\n', '<br>')
-    message.attach(MIMEText(message_text_html, 'html'))
+    message_text_html = message_text.replace("\n", "<br>")
+    message.attach(MIMEText(message_text_html, "html"))
 
     thread_id = None
     if reply_to_email_id:
         # Get the original message and extract sender's email
-        existing_message = service.users().messages().get(userId='me', id=reply_to_email_id, format='full').execute()
-        payload = existing_message['payload']
-        thread_id = existing_message['threadId']
-        headers = {header['name']: header['value'] for header in payload['headers']}
-    
-        original_from = headers.get('From', '')  # Sender of the original email
-        sender_email = headers.get('From', '') 
-        subject = headers.get('Subject', '')     # Subject line
-        references = headers.get('References', '')  # References for threading
-        in_reply_to = headers.get('Message-ID', '') # Message ID for threading
-        original_date = headers.get('Date', '')  # Date of the original email
+        existing_message = (
+            service.users()
+            .messages()
+            .get(userId="me", id=reply_to_email_id, format="full")
+            .execute()
+        )
+        payload = existing_message["payload"]
+        thread_id = existing_message["threadId"]
+        headers = {header["name"]: header["value"] for header in payload["headers"]}
+
+        original_from = headers.get("From", "")  # Sender of the original email
+        sender_email = headers.get("From", "")
+        subject = headers.get("Subject", "")  # Subject line
+        references = headers.get("References", "")  # References for threading
+        in_reply_to = headers.get("Message-ID", "")  # Message ID for threading
+        original_date = headers.get("Date", "")  # Date of the original email
         original_body_html = extract_email_body(payload)
-        reply_html = format_reply_gmail_style(original_from, original_date, original_body_html)
+        reply_html = format_reply_gmail_style(
+            original_from, original_date, original_body_html
+        )
         final_reply_html = f"<br>{reply_html}"
-        message['to'] = sender_email
+        message["to"] = sender_email
         if reply_all:
-            message['cc'] = headers.get('CC', '')
+            message["cc"] = headers.get("CC", "")
         message.attach(MIMEText(final_reply_html, "html"))
-        message['References'] = references
-        message['In-Reply-To'] = in_reply_to
+        message["References"] = references
+        message["In-Reply-To"] = in_reply_to
     else:
-        message['to'] = to
+        message["to"] = to
         if cc is not None:
-            message['cc'] = cc
-    message['subject'] = subject
+            message["cc"] = cc
+    message["subject"] = subject
     if bcc is not None:
-        message['bcc'] = bcc
+        message["bcc"] = bcc
 
     # Read and attach any workspace files if provided
     for filepath in attachments:
         try:
             # Get the file bytes from the workspace
-            wksp_file_path = await prepend_base_path('files', filepath)
+            wksp_file_path = await prepend_base_path("files", filepath)
             file_content = await gptscript_client.read_file_in_workspace(wksp_file_path)
 
             # Determine the MIME type and subtype
             mime = guess_mime(file_content) or "application/octet-stream"
-            main_type, sub_type = mime.split('/', 1)
+            main_type, sub_type = mime.split("/", 1)
 
             # Create the appropriate MIMEBase object for the attachment
             mime_base = MIMEBase(main_type, sub_type)
@@ -110,8 +92,8 @@ async def create_message(service, to, cc, bcc, subject, message_text, attachment
 
             # Add header with the file name
             mime_base.add_header(
-                'Content-Disposition',
-                f'attachment; filename="{filepath.split("/")[-1]}"'
+                "Content-Disposition",
+                f'attachment; filename="{filepath.split("/")[-1]}"',
             )
             message.attach(mime_base)
         except Exception as e:
@@ -119,25 +101,49 @@ async def create_message(service, to, cc, bcc, subject, message_text, attachment
             raise Exception(f"Error attaching {filepath}: {e}")
 
     # Encode the message as a base64 string
-    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
-    data = {'raw': raw_message}
+    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
+    data = {"raw": raw_message}
     if thread_id:
-        data['threadId'] = thread_id
+        data["threadId"] = thread_id
     return data
 
 
-async def list_messages(service, query, max_results):
+from apis.helpers import format_query_timestamp
+
+
+async def list_messages(
+    service, query, labels, max_results=100, after=None, before=None
+):
     all_messages = []
     next_page_token = None
-    query = format_query_dates(query)
+    if after:
+        query = f"after:{format_query_timestamp(after)} {query}"
+    if before:
+        query = f"before:{format_query_timestamp(before)} {query}"
+    logger.info(f"Query: {query}")  # log query to server logs
     try:
         while True:
             if next_page_token:
-                results = service.users().messages().list(userId='me', q=query, pageToken=next_page_token,
-                                                          maxResults=10).execute()
+                results = (
+                    service.users()
+                    .messages()
+                    .list(
+                        userId="me",
+                        q=query,
+                        labelIds=labels,
+                        pageToken=next_page_token,
+                        maxResults=10,
+                    )
+                    .execute()
+                )
             else:
-                results = service.users().messages().list(userId='me', q=query, maxResults=10).execute()
-            messages = results.get('messages', [])
+                results = (
+                    service.users()
+                    .messages()
+                    .list(userId="me", q=query, labelIds=labels, maxResults=10)
+                    .execute()
+                )
+            messages = results.get("messages", [])
             if not messages:
                 break
 
@@ -145,7 +151,7 @@ async def list_messages(service, query, max_results):
             if max_results is not None and len(all_messages) >= max_results:
                 break
 
-            next_page_token = results.get('nextPageToken')
+            next_page_token = results.get("nextPageToken")
             if not next_page_token:
                 break
 
@@ -155,12 +161,14 @@ async def list_messages(service, query, max_results):
             elements = []
             for message in all_messages:
                 msg_id, msg_str = message_to_string(service, message)
-                elements.append(DatasetElement(name=msg_id, description="", contents=msg_str))
+                elements.append(
+                    DatasetElement(name=msg_id, description="", contents=msg_str)
+                )
 
             dataset_id = await gptscript_client.add_dataset_elements(
                 elements,
                 name=f"gmail_{query}",
-                description=f"list of emails in Gmail for query {query}"
+                description=f"list of emails in Gmail for query {query}",
             )
 
             print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
@@ -175,18 +183,27 @@ from datetime import datetime, timezone
 
 
 def message_to_string(service, message):
-    msg = (service.users().messages().get(userId='me',
-                                          id=message['id'],
-                                          format='metadata',
-                                          metadataHeaders=['From', 'Subject'])
-           .execute())
-    msg_id = msg['id']
+    msg = (
+        service.users()
+        .messages()
+        .get(
+            userId="me",
+            id=message["id"],
+            format="metadata",
+            metadataHeaders=["From", "Subject"],
+        )
+        .execute()
+    )
+    msg_id = msg["id"]
     subject, sender, to, cc, bcc, date = extract_message_headers(msg)
-    return msg_id, f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}"
+    return (
+        msg_id,
+        f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}",
+    )
 
 
 def display_list_messages(service, messages: list):
-    print('Messages:')
+    print("Messages:")
     for message in messages:
         _, msg_str = message_to_string(service, message)
         print(msg_str)
@@ -195,12 +212,17 @@ def display_list_messages(service, messages: list):
 def fetch_email_or_draft(service, obj_id):
     try:
         # Try fetching as an email first
-        return service.users().messages().get(userId='me', id=obj_id, format='full').execute()
+        return (
+            service.users()
+            .messages()
+            .get(userId="me", id=obj_id, format="full")
+            .execute()
+        )
     except HttpError as email_err:
         if email_err.resp.status == 404 or email_err.resp.status == 400:
             # If email not found, try fetching as a draft
-            draft_msg = service.users().drafts().get(userId='me', id=obj_id).execute()
-            return draft_msg['message']
+            draft_msg = service.users().drafts().get(userId="me", id=obj_id).execute()
+            return draft_msg["message"]
         else:
             raise email_err  # Reraise the error if it's not a 404 (not found)
 
@@ -209,14 +231,18 @@ def extract_email_body(payload):
     """Extracts the email body and formats it as HTML."""
     body_html = None
 
-    if 'parts' in payload:  # Multipart email
-        for part in payload['parts']:
-            if part['mimeType'] == 'text/html':
-                body_html = base64.urlsafe_b64decode(part['body']['data']).decode("utf-8")
+    if "parts" in payload:  # Multipart email
+        for part in payload["parts"]:
+            if part["mimeType"] == "text/html":
+                body_html = base64.urlsafe_b64decode(part["body"]["data"]).decode(
+                    "utf-8"
+                )
                 break
     else:  # Single-part email
-        if payload['mimeType'] == 'text/html':
-            body_html = base64.urlsafe_b64decode(payload['body']['data']).decode("utf-8")
+        if payload["mimeType"] == "text/html":
+            body_html = base64.urlsafe_b64decode(payload["body"]["data"]).decode(
+                "utf-8"
+            )
 
     return body_html
 
@@ -239,7 +265,7 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
     soup = BeautifulSoup(original_body_html, "html.parser")
     quoted_body_html = f'<blockquote style="border-left:2px solid gray;margin-left:10px;padding-left:10px;">{soup.prettify()}</blockquote>'
 
-    reply_html = f'<br><br>On {formatted_date}, <b>{original_from}</b> wrote:<br>{quoted_body_html}'
+    reply_html = f"<br><br>On {formatted_date}, <b>{original_from}</b> wrote:<br>{quoted_body_html}"
 
     return reply_html
 
@@ -247,11 +273,11 @@ def format_reply_gmail_style(original_from, original_date, original_body_html):
 def has_attachment(message):
     def parse_parts(parts):
         for part in parts:
-            if part['filename'] and part['body'].get('attachmentId'):
+            if part["filename"] and part["body"].get("attachmentId"):
                 return True
         return False
 
-    parts = message['payload'].get('parts', [])
+    parts = message["payload"].get("parts", [])
     if parts:
         return parse_parts(parts)
     else:
@@ -261,23 +287,23 @@ def has_attachment(message):
 def get_email_body(message):
     def parse_parts(parts):
         for part in parts:
-            mime_type = part['mimeType']
-            if mime_type == 'text/plain' or mime_type == 'text/html':
-                body_data = part['body']['data']
-                decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+            mime_type = part["mimeType"]
+            if mime_type == "text/plain" or mime_type == "text/html":
+                body_data = part["body"]["data"]
+                decoded_body = base64.urlsafe_b64decode(body_data).decode("utf-8")
                 return decoded_body
-            if mime_type == 'multipart/alternative' or mime_type == 'multipart/mixed':
-                return parse_parts(part['parts'])
+            if mime_type == "multipart/alternative" or mime_type == "multipart/mixed":
+                return parse_parts(part["parts"])
         return None
 
     try:
-        parts = message['payload'].get('parts', [])
+        parts = message["payload"].get("parts", [])
         if parts:
             return parse_parts(parts)
         else:
-            body_data = message['payload']['body']['data']
-            decoded_body = base64.urlsafe_b64decode(body_data).decode('utf-8')
+            body_data = message["payload"]["body"]["data"]
+            decoded_body = base64.urlsafe_b64decode(body_data).decode("utf-8")
             return decoded_body
     except Exception as e:
-        print(f'Error while decoding the email body: {e}')
+        print(f"Error while decoding the email body: {e}")
         return None

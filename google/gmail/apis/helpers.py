@@ -1,4 +1,3 @@
-
 import logging
 import os
 import sys
@@ -43,7 +42,9 @@ def setup_logger(name):
 
     return logger
 
+
 logger = setup_logger(__name__)
+
 
 def get_user_timezone():
     user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
@@ -55,12 +56,12 @@ def get_user_timezone():
 
     return tz
 
+
 obot_user_tz = get_user_timezone()
 
 
-
-def client(service_name: str, version: str):
-    token = os.getenv('GOOGLE_OAUTH_TOKEN')
+def client(service_name: str = "gmail", version: str = "v1"):
+    token = os.getenv("GOOGLE_OAUTH_TOKEN")
     if token is None:
         raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
 
@@ -72,6 +73,7 @@ def client(service_name: str, version: str):
         print(err)
         exit(1)
 
+
 def extract_message_headers(message):
     subject = None
     sender = None
@@ -81,19 +83,24 @@ def extract_message_headers(message):
     date = None
 
     if message is not None:
-        for header in message['payload']['headers']:
-            if header['name'].lower() == 'subject':
-                subject = header['value']
-            if header['name'].lower() == 'from':
-                sender = header['value']
-            if header['name'].lower() == 'to':
-                to = header['value']
-            if header['name'].lower() == 'cc':
-                cc = header['value']
-            if header['name'].lower() == 'bcc':
-                bcc = header['value']
-            date = datetime.fromtimestamp(int(message['internalDate']) / 1000, timezone.utc).astimezone(obot_user_tz).strftime(
-                '%Y-%m-%d %H:%M:%S %Z')
+        for header in message["payload"]["headers"]:
+            if header["name"].lower() == "subject":
+                subject = header["value"]
+            if header["name"].lower() == "from":
+                sender = header["value"]
+            if header["name"].lower() == "to":
+                to = header["value"]
+            if header["name"].lower() == "cc":
+                cc = header["value"]
+            if header["name"].lower() == "bcc":
+                bcc = header["value"]
+            date = (
+                datetime.fromtimestamp(
+                    int(message["internalDate"]) / 1000, timezone.utc
+                )
+                .astimezone(obot_user_tz)
+                .strftime("%Y-%m-%d %H:%M:%S %Z")
+            )
 
     return subject, sender, to, cc, bcc, date
 
@@ -134,3 +141,28 @@ async def prepend_base_path(base_path: str, file_path: str):
 
     # Prepend the base path
     return os.path.join(base_path, file_path)
+
+
+from datetime import datetime
+import pytz
+
+
+def format_query_timestamp(time_str: str):
+    try:
+        # Require full ISO 8601 with time and timezone offset
+        # Example: 2024-04-16T00:00:00-07:00
+        dt = datetime.fromisoformat(time_str)
+
+        if dt.tzinfo is None:
+            raise ValueError(
+                "Datetime must include a timezone offset (e.g. -07:00 or Z)"
+            )
+
+        # Convert to UTC
+        dt_utc = dt.astimezone(pytz.UTC)
+
+        # Return UNIX timestamp (int, in seconds)
+        return int(dt_utc.timestamp())
+
+    except ValueError as e:
+        raise ValueError(f"Invalid datetime format: {e}")

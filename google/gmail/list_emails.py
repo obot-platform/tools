@@ -1,0 +1,40 @@
+import asyncio
+import os
+import sys
+from apis.helpers import client
+from apis.messages import list_messages
+
+
+async def list_emails():
+    max_results = os.getenv("MAX_RESULTS", "100")
+    if max_results is not None:
+        max_results = int(max_results)
+
+    labels = os.getenv("LABELS", "INBOX")
+    category = os.getenv("CATEGORY", "primary")
+    valid_categories = ["primary", "social", "promotions", "updates", "forums"]
+    if category not in valid_categories:
+        print(f"Invalid category: {category}. Valid categories are: {valid_categories}")
+        sys.exit(1)
+
+    query = os.getenv("QUERY", "")
+    try:
+        label_ids = [label.strip().upper() for label in labels.split(",")]
+    except Exception as e:
+        print(
+            f"Input labels: {labels} must be a comma separated list of labels. Exception: {e}"
+        )
+        sys.exit(1)
+
+    if "INBOX" in label_ids:
+        query = f"{query} category:{category.lower()}"
+
+    after = os.getenv("AFTER", "")
+    before = os.getenv("BEFORE", "")
+
+    service = client("gmail", "v1")
+    await list_messages(service, query, label_ids, max_results, after, before)
+
+
+if __name__ == "__main__":
+    asyncio.run(list_emails())

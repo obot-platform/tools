@@ -1,17 +1,16 @@
 import os
-
 from googleapiclient.errors import HttpError
-
 from apis.helpers import client
 
+
 def main():
-    draft_id = os.getenv('DRAFT_ID')
+    draft_id = os.getenv("DRAFT_ID")
     if draft_id is None:
         raise ValueError("draft_id must be set")
 
-    service = client('gmail', 'v1')
+    service = client("gmail", "v1")
     try:
-        service.users().drafts().delete(userId='me', id=draft_id).execute()
+        service.users().drafts().delete(userId="me", id=draft_id).execute()
         print(f"Draft Id: {draft_id} deleted successfully!")
     except HttpError as err:
         print(err)

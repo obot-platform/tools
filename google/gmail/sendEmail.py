@@ -5,25 +5,28 @@ from googleapiclient.errors import HttpError
 from apis.helpers import client
 from apis.messages import create_message
 
+
 async def main():
-    to_emails = os.getenv('TO_EMAILS')
+    to_emails = os.getenv("TO_EMAILS")
     if to_emails is None:
         raise ValueError("At least one recipient must be specified with 'to_emails'")
 
-    cc_emails = os.getenv('CC_EMAILS')
-    bcc_emails = os.getenv('BCC_EMAILS')
-    subject = os.getenv('SUBJECT')
+    cc_emails = os.getenv("CC_EMAILS")
+    bcc_emails = os.getenv("BCC_EMAILS")
+    subject = os.getenv("SUBJECT")
     if subject is None:
         raise ValueError("Email subject must be set")
 
-    message = os.getenv('MESSAGE')
+    message = os.getenv("MESSAGE")
     if message is None:
         raise ValueError("Email message must be set")
 
-    attachments = os.getenv('ATTACHMENTS', '').split(',')
-    attachments = [attachment.strip() for attachment in attachments if attachment.strip()]
+    attachments = os.getenv("ATTACHMENTS", "").split(",")
+    attachments = [
+        attachment.strip() for attachment in attachments if attachment.strip()
+    ]
 
-    service = client('gmail', 'v1')
+    service = client("gmail", "v1")
     try:
         await send_message(
             service=service,
@@ -32,7 +35,7 @@ async def main():
             bcc=bcc_emails,
             subject=subject,
             body=message,
-            attachments=attachments
+            attachments=attachments,
         )
     except HttpError as err:
         print(err)
@@ -49,12 +52,14 @@ async def send_message(service, to, cc, bcc, subject, body, attachments):
             bcc=bcc,
             subject=subject,
             message_text=body,
-            attachments=attachments
+            attachments=attachments,
         )
-        sent_message = service.users().messages().send(userId='me', body=message).execute()
+        sent_message = (
+            service.users().messages().send(userId="me", body=message).execute()
+        )
         print(f"Message Id: {sent_message['id']} - Message sent successfully!")
     except HttpError as error:
-        print(f'An error occurred: {error}')
+        print(f"An error occurred: {error}")
 
 
 if __name__ == "__main__":
