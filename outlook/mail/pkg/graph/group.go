@@ -3,14 +3,13 @@ package graph
 import (
 	"context"
 	"fmt"
-	"strings"
 	"path/filepath"
 
+	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	"github.com/gptscript-ai/go-gptscript"
 	users "github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
@@ -24,25 +23,13 @@ func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceCl
 	return result.GetValue(), nil
 }
 
-func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, start, end string, limit int) ([]models.ConversationThreadable, error) {
+func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, limit int) ([]models.ConversationThreadable, error) {
 	queryParams := &groups.ItemThreadsRequestBuilderGetQueryParameters{
 		Orderby: []string{"lastDeliveredDateTime DESC"},
 	}
 
 	if limit > 0 {
 		queryParams.Top = util.Ptr(int32(limit))
-	}
-
-	var filters []string
-	if start != "" {
-		filters = append(filters, fmt.Sprintf("lastDeliveredDateTime ge %s", start))
-	}
-	if end != "" {
-		filters = append(filters, fmt.Sprintf("lastDeliveredDateTime le %s", end))
-	}
-
-	if len(filters) > 0 {
-		queryParams.Filter = util.Ptr(strings.Join(filters, " and "))
 	}
 
 	// Fetch messages from the group mailbox
@@ -56,7 +43,6 @@ func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 
 	return result.GetValue(), nil
 }
-
 
 func GetUserType(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (string, error) {
 	opts := &users.UserItemRequestBuilderGetRequestConfiguration{
@@ -107,7 +93,6 @@ func getGroup(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, grou
 	return groups, nil
 }
 
-
 func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, info DraftInfo) (models.ConversationThreadable, error) {
 
 	for _, file := range info.Attachments {
@@ -117,12 +102,12 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 	}
 
 	requestBody := models.NewConversationThread()
-	requestBody.SetTopic(util.Ptr(info.Subject)) 
+	requestBody.SetTopic(util.Ptr(info.Subject))
 
 	post := models.NewPost()
 	body := models.NewItemBody()
-	body.SetContentType(util.Ptr(models.HTML_BODYTYPE)) 
-	body.SetContent(util.Ptr(info.Body)) 
+	body.SetContentType(util.Ptr(models.HTML_BODYTYPE))
+	body.SetContent(util.Ptr(info.Body))
 	post.SetBody(body)
 
 	if len(info.Recipients) > 0 {
@@ -130,7 +115,7 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 	}
 
 	// models.Post() doesn't support cc and bcc
-	
+
 	if len(info.Attachments) > 0 {
 		attachments, err := setAttachments(ctx, info.Attachments)
 		if err != nil {
@@ -138,7 +123,7 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 		}
 		post.SetAttachments(attachments)
 	}
-	posts := []models.Postable {
+	posts := []models.Postable{
 		post,
 	}
 
@@ -152,20 +137,18 @@ func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSer
 	return threads, nil
 }
 
-
-
-func ReplyToGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string, info DraftInfo) ( error) {
+func ReplyToGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string, info DraftInfo) error {
 	for _, file := range info.Attachments {
 		if file == "" {
 			return fmt.Errorf("attachment file path cannot be empty")
 		}
 	}
-	
+
 	requestBody := groups.NewItemConversationsItemThreadsItemReplyPostRequestBody()
 	post := models.NewPost()
 	body := models.NewItemBody()
-	body.SetContentType(util.Ptr(models.HTML_BODYTYPE)) 
-	body.SetContent(util.Ptr(info.Body)) 
+	body.SetContentType(util.Ptr(models.HTML_BODYTYPE))
+	body.SetContent(util.Ptr(info.Body))
 	post.SetBody(body)
 
 	if len(info.Recipients) > 0 {
@@ -173,7 +156,7 @@ func ReplyToGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphSe
 	}
 
 	// models.Post() doesn't support cc and bcc
-	
+
 	if len(info.Attachments) > 0 {
 		attachments, err := setAttachments(ctx, info.Attachments)
 		if err != nil {
@@ -200,14 +183,14 @@ func setAttachments(ctx context.Context, attachment_filenames []string) ([]model
 
 	for _, filename := range attachment_filenames {
 		attachment := models.NewFileAttachment()
-		attachment.SetName(util.Ptr(filename)) 
+		attachment.SetName(util.Ptr(filename))
 
 		data, err := gsClient.ReadFileInWorkspace(ctx, filepath.Join("files", filename))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read attachment file %s from workspace: %v", filename, err)
 		}
 
-		attachment.SetContentBytes(data) 
+		attachment.SetContentBytes(data)
 		attachments = append(attachments, attachment)
 	}
 

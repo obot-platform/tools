@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
@@ -38,14 +39,39 @@ func ListGroups(ctx context.Context) error {
 		return fmt.Errorf("failed to create GPTScript client: %w", err)
 	}
 
+	var elements []gptscript.DatasetElement
 	for _, group := range groups {
-		fmt.Printf("ID: %s\nName: %s\nDescription: %s\nMail: %s\n\n",
-			util.Deref(group.GetId()),
-			util.Deref(group.GetDisplayName()),
-			util.Deref(group.GetDescription()),
-			util.Deref(group.GetMail()),
-		)
+		elements = append(elements, gptscript.DatasetElement{
+			DatasetElementMeta: gptscript.DatasetElementMeta{
+				Name:        util.Deref(group.GetDisplayName()),
+				Description: util.Deref(group.GetDescription()),
+			},
+			Contents: fmt.Sprintf("ID: %s\nName: %s\nDescription: %s\nMail: %s\n",
+				util.Deref(group.GetId()),
+				util.Deref(group.GetDisplayName()),
+				util.Deref(group.GetDescription()),
+				util.Deref(group.GetMail()),
+			),
+		})
 	}
 
+	if len(elements) == 0 {
+		return nil
+	}
+
+	gptscriptClient, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("failed to create GPTScript client: %w", err)
+	}
+
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name:        "outlook_groups",
+		Description: "Outlook groups",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create dataset: %w", err)
+	}
+
+	fmt.Printf("Created dataset with ID %s with %d groups\n", datasetID, len(groups))
 	return nil
 }

@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
+	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/graph"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
-	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
-
-
 
 func ListGroupThreads(ctx context.Context, groupID, start, end, limit string) error {
 	var (
@@ -38,71 +39,139 @@ func ListGroupThreads(ctx context.Context, groupID, start, end, limit string) er
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	threads, err := graph.ListGroupThreads(ctx, c, groupID, start, end, limitInt)
+	threads, err := graph.ListGroupThreads(ctx, c, groupID, limitInt)
 	if err != nil {
 		return fmt.Errorf("failed to list group threads: %w", err)
 	}
 
+	if len(threads) == 0 {
+		fmt.Println("No threads found")
+		return nil
+	}
+
+	if start != "" || end != "" {
+		threads, err = filterThreadsByTimeFrame(threads, start, end)
+		if err != nil {
+			return fmt.Errorf("failed to filter threads by time frame: %w", err)
+		}
+
+		if len(threads) == 0 {
+			fmt.Println("No threads found within specified time frame")
+			return nil
+		}
+	}
+
+	gptscriptClient, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("failed to create GPTScript client: %w", err)
+	}
+
+	var (
+		elements  []gptscript.DatasetElement
+		converter = md.NewConverter("", true, nil)
+	)
+
 	for _, thread := range threads {
 		threadID := util.Deref(thread.GetId())
-
-		fmt.Printf("📩 Thread ID: %s\n", threadID)
-		if thread.GetTopic() != nil {
-			fmt.Printf("📌 Subject: %s\n", util.Deref(thread.GetTopic()))
-		} else {
-			fmt.Println("📌 Subject: (No Subject)")
+		threadSubject := util.Deref(thread.GetTopic())
+		if threadSubject == "" {
+			threadSubject = "(No Subject)"
 		}
-		fmt.Printf("📅 Last Delivered: %s\n", thread.GetLastDeliveredDateTime().String())
 
-		// Print unique senders
+		// Build thread content string
+		var threadContent string
+		threadContent += fmt.Sprintf("Thread ID: %s\n", threadID)
+		threadContent += fmt.Sprintf("Subject: %s\n", threadSubject)
+		threadContent += fmt.Sprintf("Last Delivered: %s\n", thread.GetLastDeliveredDateTime().String())
+
+		// Add unique senders
 		senders := thread.GetUniqueSenders()
-		fmt.Print("👥 Unique Senders: ")
-		for _, sender := range senders {
-			fmt.Printf("%s, ", sender) 
-		}
-		fmt.Println()
+		threadContent += "Unique Senders: " + util.JoinStrings(senders, ", ") + "\n\n"
 
-		// Fetch posts (individual emails/messages) inside the thread and then print them
+		// Fetch and add messages
 		posts, err := graph.ListThreadMessages(ctx, c, groupID, threadID)
 		if err != nil {
 			return fmt.Errorf("failed to list thread messages: %w", err)
 		}
 
-		fmt.Println("\n✉️ Messages:")
+		threadContent += "Messages:\n"
 		for i, post := range posts {
 			messageID := util.Deref(post.GetId())
-			fmt.Printf("📧 Message %d, ID: %s\n", i+1, messageID)
+			threadContent += fmt.Sprintf("\nMessage %d (ID: %s)\n", i+1, messageID)
 
-			// Check if sender information is available
 			if post.GetFrom() != nil && post.GetFrom().GetEmailAddress() != nil {
-				fmt.Printf("👤 From: %s <%s>\n",
+				threadContent += fmt.Sprintf("From: %s <%s>\n",
 					util.Deref(post.GetFrom().GetEmailAddress().GetName()),
 					util.Deref(post.GetFrom().GetEmailAddress().GetAddress()),
 				)
 			} else {
-				fmt.Println("👤 Sender: Unknown")
+				threadContent += "From: Unknown\n"
 			}
 
-			fmt.Printf("📅 Sent: %s\n", post.GetReceivedDateTime().String())
+			threadContent += fmt.Sprintf("Sent: %s\n", post.GetReceivedDateTime().String())
 
-			// Print message body if available
 			if post.GetBody() != nil && post.GetBody().GetContent() != nil {
-				fmt.Println("📝 Message Body:")
-				converter := md.NewConverter("", true, nil)
 				bodyHTML := util.Deref(post.GetBody().GetContent())
 				bodyMarkdown, err := converter.ConvertString(bodyHTML)
 				if err != nil {
 					return fmt.Errorf("failed to convert email body HTML to markdown: %w", err)
 				}
-				fmt.Println(bodyMarkdown)
-
+				threadContent += fmt.Sprintf("Body:\n%s\n", bodyMarkdown)
 			} else {
-				fmt.Println("📭 (No content in this message)")
+				threadContent += "(No content in this message)\n"
 			}
-			fmt.Println()
 		}
 
-		fmt.Println("\n")
+		elements = append(elements, gptscript.DatasetElement{
+			DatasetElementMeta: gptscript.DatasetElementMeta{
+				Name:        threadID,
+				Description: threadSubject,
+			},
+			Contents: threadContent,
+		})
 	}
+
+	datasetID, err := gptscriptClient.CreateDatasetWithElements(ctx, elements, gptscript.DatasetOptions{
+		Name:        fmt.Sprintf("outlook_group_%s_threads", groupID),
+		Description: fmt.Sprintf("Threads from Outlook group %s", groupID),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create dataset: %w", err)
+	}
+
+	fmt.Printf("Created dataset with ID %s with %d threads\n", datasetID, len(elements))
 	return nil
-} 
+}
+
+func filterThreadsByTimeFrame(threads []models.ConversationThreadable, start, end string) ([]models.ConversationThreadable, error) {
+	var (
+		startTime time.Time
+		endTime   time.Time
+		err       error
+	)
+	if start != "" {
+		startTime, err = time.Parse(time.RFC3339, start)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse start date: %w", err)
+		}
+	}
+	if end != "" {
+		endTime, err = time.Parse(time.RFC3339, end)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse end date: %w", err)
+		}
+	}
+
+	var filteredThreads []models.ConversationThreadable
+	for _, thread := range threads {
+		if start != "" && thread.GetLastDeliveredDateTime().Before(startTime) {
+			continue
+		}
+		if end != "" && thread.GetLastDeliveredDateTime().After(endTime) {
+			continue
+		}
+		filteredThreads = append(filteredThreads, thread)
+	}
+
+	return filteredThreads, nil
+}

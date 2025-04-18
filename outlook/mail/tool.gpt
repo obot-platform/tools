@@ -175,6 +175,7 @@ Param: thread_id: The ID of the thread to delete.
 Name: List Groups
 Description: Lists all groups the user is a member of.
 Share Context: Outlook Mail Context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroups
@@ -183,6 +184,7 @@ Credential: ./credential
 Name: List Group Threads
 Description: Lists all group mailbox threads in a Microsoft 365 group. This will also return messages in the threads.
 Share Context: Outlook Mail Context
+Tools: github.com/gptscript-ai/datasets/filter
 Credential: ./credential
 Share Tools: List Groups
 Param: group_id: The ID of the group to list threads in.
