@@ -2,6 +2,7 @@ Name: Memory
 Description: Interact with agent memory to store and retrieve information
 Share Context: memory_context
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/brain-duotone.svg
+Metadata: category: Capability
 
 ---
 Name: Add Memory
