@@ -6,3 +6,4 @@ git+https://github.com/gptscript-ai/py-gptscript.git@5c00a24fc28af472202df8763d2
 tiktoken==0.9.0
 beautifulsoup4==4.13.3
 requests==2.32.2
+pytz==2025.2
