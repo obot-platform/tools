@@ -51,6 +51,10 @@ async def list_drafts(service, max_results=None):
             gptscript_client = gptscript.GPTScript()
 
             elements = []
+            if len(all_drafts) == 0:
+                print("No drafts found")
+                return
+
             for draft in all_drafts:
                 draft_id, draft_str = draft_to_string(service, draft)
                 elements.append(

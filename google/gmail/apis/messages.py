@@ -165,6 +165,10 @@ async def list_messages(
         gptscript_client = gptscript.GPTScript()
 
         elements = []
+        if len(all_messages) == 0:
+            print("No messages found")
+            return
+
         for message in all_messages:
             msg_id, msg_str = message_to_string(service, message)
             elements.append(
