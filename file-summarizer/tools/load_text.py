@@ -44,6 +44,7 @@ async def load_from_knowledge_tool(input_file: str) -> str:
     Returns:
         str: The content of the file.
     """
+    logger.info("Calling knowledge file-loader tool...")
     gptscript_client = gptscript.GPTScript()
     run = gptscript_client.run(
         "github.com/obot-platform/tools/knowledge/file-loader.gpt",
@@ -51,7 +52,7 @@ async def load_from_knowledge_tool(input_file: str) -> str:
             input=json.dumps({"input": input_file}),
             workspace=os.environ.get("GPTSCRIPT_WORKSPACE_ID"),
             env=[
-                f"OPENAI_EMBEDDING_MODEL={os.environ.get('OBOT_DEFAULT_TEXT_EMBEDDING_MODEL')}",
+                f"OPENAI_MODEL={os.environ.get('OBOT_DEFAULT_VISION_MODEL')}", # knowledge tool expects the model env variable to be OPENAI_MODEL
             ],
         ),
     )
