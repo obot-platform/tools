@@ -36,15 +36,6 @@ Param: email_subject: Email subject to read (Optional: If not provided, email_id
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/readEmail.py
 
----
-Name: Search Emails
-Description: Search a user's Gmail account for emails. Will return the email_id for each message. Can also be used to list emails in a folder or with a label.
-Credential: ../credential
-Tools: github.com/gptscript-ai/datasets/filter
-Param: query: Search query to find emails in the user's Gmail account. Uses Gmail search syntax (e.g., "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread")
-Param: max_results: Maximum number of emails to list (Optional: Default will list 100 emails that match the query)
-
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/searchEmails.py
 
 ---
 Name: Send Email

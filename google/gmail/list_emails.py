@@ -7,8 +7,11 @@ from apis.messages import list_messages
 
 async def list_emails():
     max_results = os.getenv("MAX_RESULTS", "100")
-    if max_results is not None:
+    if max_results.isdigit():
         max_results = int(max_results)
+    else:
+        print(f"Invalid max_results: {max_results}. Must be a positive integer.")
+        sys.exit(1)
 
     query = os.getenv("QUERY", "")
     default_inbox = "INBOX"
@@ -21,15 +24,10 @@ async def list_emails():
         print(f"Invalid category: {category}. Valid categories are: {valid_categories}")
         sys.exit(1)
 
-    try:
-        label_ids = [
-            label.strip().upper() for label in labels.split(",") if label.strip() != ""
-        ]
-    except Exception as e:
-        print(
-            f"Input labels: {labels} must be a comma separated list of labels. Exception: {e}"
-        )
-        sys.exit(1)
+    label_ids = [
+        label.strip().upper() for label in labels.split(",") if label.strip() != ""
+    ]
+
 
     if "INBOX" in label_ids:
         query = f"{query} category:{category.lower()}"
