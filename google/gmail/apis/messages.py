@@ -11,7 +11,7 @@ from filetype import guess_mime
 from googleapiclient.errors import HttpError
 from gptscript.datasets import DatasetElement
 
-from apis.helpers import extract_message_headers, prepend_base_path, setup_logger
+from apis.helpers import format_query_timestamp, extract_message_headers, prepend_base_path, setup_logger
 
 logger = setup_logger(__name__)
 
@@ -104,9 +104,6 @@ async def create_message(
     return data
 
 
-from apis.helpers import format_query_timestamp
-
-
 async def list_messages(
     service, query, labels, max_results=100, after=None, before=None
 ):
@@ -151,10 +148,10 @@ async def list_messages(
             if not next_page_token:
                 break
     except HttpError as err:
-        print(err)
+        raise Exception(f"Error listing messages: {err}")
     except Exception as e:
-        print(f"Error listing messages: {e}")
         logger.error(f"Error listing messages: {e}")
+        raise Exception(f"Error listing messages: {e}")
 
     try:
         gptscript_client = gptscript.GPTScript()
@@ -220,8 +217,13 @@ def fetch_email_or_draft(service, obj_id):
     except HttpError as email_err:
         if email_err.resp.status == 404 or email_err.resp.status == 400:
             # If email not found, try fetching as a draft
-            draft_msg = service.users().drafts().get(userId="me", id=obj_id).execute()
-            return draft_msg["message"]
+            try:
+                draft_msg = (
+                    service.users().drafts().get(userId="me", id=obj_id).execute()
+                )
+                return draft_msg["message"]
+            except HttpError as draft_err:
+                raise Exception(f"Error fetching draft: {draft_err}")
         else:
             raise email_err  # Reraise the error if it's not a 404 (not found)
 
