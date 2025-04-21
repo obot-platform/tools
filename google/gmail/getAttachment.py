@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import json
 import base64
+import json
+import os
+import subprocess
+import sys
+
+import tiktoken
 from googleapiclient.errors import HttpError
 from gptscript import gptscript
-import tiktoken
-import subprocess
 
 from apis.helpers import client
 

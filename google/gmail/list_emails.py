@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+
 from apis.helpers import client
 from apis.messages import list_messages
 
@@ -27,7 +28,6 @@ async def list_emails():
     label_ids = [
         label.strip().upper() for label in labels.split(",") if label.strip() != ""
     ]
-
 
     if "INBOX" in label_ids:
         query = f"{query} category:{category.lower()}"

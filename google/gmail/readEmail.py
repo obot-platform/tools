@@ -5,8 +5,8 @@ from googleapiclient.errors import HttpError
 
 from apis.helpers import client
 from apis.messages import (
-    fetch_email_or_draft,
     extract_message_headers,
+    fetch_email_or_draft,
     get_email_body,
     has_attachment,
 )

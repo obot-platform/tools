@@ -1,20 +1,8 @@
-import base64
-import os
-import re
 import gptscript
-from filetype import guess_mime
-from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-from bs4 import BeautifulSoup
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from apis.helpers import extract_message_headers
 from gptscript.datasets import DatasetElement
+
+from apis.helpers import extract_message_headers
 from apis.messages import create_message
 
 

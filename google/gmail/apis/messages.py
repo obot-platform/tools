@@ -1,22 +1,17 @@
 import base64
-from bs4 import BeautifulSoup
-from gptscript.datasets import DatasetElement
-from apis.helpers import setup_logger, extract_message_headers, prepend_base_path
 from datetime import datetime
-from googleapiclient.errors import HttpError
-import gptscript
-import base64
-import gptscript
-from filetype import guess_mime
-from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
 from email import encoders
-from bs4 import BeautifulSoup
-from googleapiclient.errors import HttpError
-from datetime import datetime
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
+import gptscript
+from bs4 import BeautifulSoup
+from filetype import guess_mime
+from googleapiclient.errors import HttpError
+from gptscript.datasets import DatasetElement
+
+from apis.helpers import extract_message_headers, prepend_base_path, setup_logger
 
 logger = setup_logger(__name__)
 

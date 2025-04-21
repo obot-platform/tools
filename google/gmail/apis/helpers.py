@@ -1,20 +1,9 @@
 import logging
 import os
 import sys
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from datetime import timezone
-import base64
-import os
-import re
-import gptscript
-from filetype import guess_mime
-from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-from bs4 import BeautifulSoup
+
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -84,23 +73,22 @@ def extract_message_headers(message):
 
     if message is not None:
         for header in message["payload"]["headers"]:
-            if header["name"].lower() == "subject":
-                subject = header["value"]
-            if header["name"].lower() == "from":
-                sender = header["value"]
-            if header["name"].lower() == "to":
-                to = header["value"]
-            if header["name"].lower() == "cc":
-                cc = header["value"]
-            if header["name"].lower() == "bcc":
-                bcc = header["value"]
-            date = (
-                datetime.fromtimestamp(
-                    int(message["internalDate"]) / 1000, timezone.utc
-                )
-                .astimezone(obot_user_tz)
-                .strftime("%Y-%m-%d %H:%M:%S %Z")
-            )
+            match header["name"].lower():
+                case "subject":
+                    subject = header["value"]
+                case "from":
+                    sender = header["value"]
+                case "to":
+                    to = header["value"]
+                case "cc":
+                    cc = header["value"]
+                case "bcc":
+                    bcc = header["value"]
+        date = (
+            datetime.fromtimestamp(int(message["internalDate"]) / 1000, timezone.utc)
+            .astimezone(obot_user_tz)
+            .strftime("%Y-%m-%d %H:%M:%S %Z")
+        )
 
     return subject, sender, to, cc, bcc, date
 
@@ -144,6 +132,7 @@ async def prepend_base_path(base_path: str, file_path: str):
 
 
 from datetime import datetime
+
 import pytz
 
 
