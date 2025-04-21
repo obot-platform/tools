@@ -15,6 +15,11 @@ async def list_emails():
         sys.exit(1)
 
     query = os.getenv("QUERY", "")
+    if "after:" in query or "before:" in query:
+        print(
+            "Error: Please use the parameters `after` and `before` instead of having them in the `query`."
+        )
+        sys.exit(1)
     default_inbox = "INBOX"
     if query != "":
         default_inbox = ""  # if query is not empty, don't set inbox as default
