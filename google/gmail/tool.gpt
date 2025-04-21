@@ -30,7 +30,7 @@ Param: max_results: (Optional) Maximum number of emails to list, default is 100
 Name: Read Email
 Description: Read an email or draft from the user's Gmail account
 Credential: ../credential
-Share Tools: Search Emails, List Inbox, List Drafts
+Share Tools: List Inbox, List Drafts
 Param: email_id: Email or Draft ID to read (Optional: If not provided, email_subject is required)
 Param: email_subject: Email subject to read (Optional: If not provided, email_id is required)
 
@@ -53,7 +53,7 @@ Param: message: Message body of the email.
 Name: Delete Email
 Description: Delete an email in a user's Gmail account.
 Credential: ../credential
-Share Tools: Search Emails, List Inbox
+Share Tools: List Inbox
 Param: email_id: The ID of the email to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/deleteEmail.py
