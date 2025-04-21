@@ -44,10 +44,13 @@ func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
 		return
 	}
 
-	if reqBody.StreamOptions == nil {
-		reqBody.StreamOptions = new(openai.StreamOptions)
+	if reqBody.Stream {
+		if reqBody.StreamOptions == nil {
+			reqBody.StreamOptions = new(openai.StreamOptions)
+		}
+		reqBody.StreamOptions.IncludeUsage = true
 	}
-	reqBody.StreamOptions.IncludeUsage = true
+
 	if isModelO1(reqBody.Model) {
 		modifyRequestBodyForO1(&reqBody)
 	}
