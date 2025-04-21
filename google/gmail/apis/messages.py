@@ -46,22 +46,19 @@ async def create_message(
         headers = {header["name"]: header["value"] for header in payload["headers"]}
 
         original_from = headers.get("From", "")  # Sender of the original email
-        sender_email = headers.get("From", "")
         subject = headers.get("Subject", "")  # Subject line
-        references = headers.get("References", "")  # References for threading
-        in_reply_to = headers.get("Message-ID", "")  # Message ID for threading
         original_date = headers.get("Date", "")  # Date of the original email
         original_body_html = extract_email_body(payload)
         reply_html = format_reply_gmail_style(
             original_from, original_date, original_body_html
         )
         final_reply_html = f"<br>{reply_html}"
-        message["to"] = sender_email
+        message["to"] = headers.get("From", "")
         if reply_all:
             message["cc"] = headers.get("CC", "")
         message.attach(MIMEText(final_reply_html, "html"))
-        message["References"] = references
-        message["In-Reply-To"] = in_reply_to
+        message["References"] = headers.get("References", "")
+        message["In-Reply-To"] = headers.get("Message-ID", "")
     else:
         message["to"] = to
         if cc is not None:
