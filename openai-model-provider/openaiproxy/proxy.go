@@ -39,30 +39,36 @@ func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
 	}
 
 	var reqBody openai.ChatCompletionRequest
-	if err := json.Unmarshal(bodyBytes, &reqBody); err == nil && isModelO1(reqBody.Model) {
-		if err := modifyRequestBodyForO1(req, &reqBody); err != nil {
-			fmt.Println("failed to modify request body for o1, error: ", err.Error())
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-		}
-	} else {
+	if err := json.Unmarshal(bodyBytes, &reqBody); err != nil {
 		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+		return
+	}
+
+	if reqBody.StreamOptions == nil {
+		reqBody.StreamOptions = new(openai.StreamOptions)
+	}
+	reqBody.StreamOptions.IncludeUsage = true
+	if isModelO1(reqBody.Model) {
+		modifyRequestBodyForO1(&reqBody)
+	}
+
+	modifiedBodyBytes, err := json.Marshal(reqBody)
+	if err != nil {
+		fmt.Println("failed to modify request body: ", err.Error())
+		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	} else {
+		req.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
+		req.ContentLength = int64(len(modifiedBodyBytes))
 	}
 }
 
-func modifyRequestBodyForO1(req *http.Request, reqBody *openai.ChatCompletionRequest) error {
+func modifyRequestBodyForO1(reqBody *openai.ChatCompletionRequest) {
 	reqBody.Temperature = nil
 	for i, msg := range reqBody.Messages {
 		if msg.Role == "system" {
 			reqBody.Messages[i].Role = "developer"
 		}
 	}
-	modifiedBodyBytes, err := json.Marshal(reqBody)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request body after modification: %w", err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
-	req.ContentLength = int64(len(modifiedBodyBytes))
-	return nil
 }
 
 func isModelO1(model string) bool {
