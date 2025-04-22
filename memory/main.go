@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/obot-platform/obot/apiclient"
-	"github.com/obot-platform/obot/apiclient/types"
 	"github.com/obot-platform/obot/pkg/system"
 )
 
@@ -20,6 +18,7 @@ var (
 	parentThreadID = os.Getenv("OBOT_PROJECT_ID")
 	assistantID    = os.Getenv("OBOT_AGENT_ID")
 	content        = os.Getenv("CONTENT")
+	memoryID       = os.Getenv("MEMORY_ID")
 )
 
 func main() {
@@ -30,47 +29,72 @@ func main() {
 	}
 }
 
-func add(ctx context.Context, c *apiclient.Client, projectID, content string) error {
+func create(ctx context.Context, c *apiclient.Client, projectID, content string) error {
 	if content == "" {
 		return fmt.Errorf("missing content to remember")
 	}
 
-	if _, err := c.AddMemories(ctx, assistantID, projectID, types.Memory{
-		Content: content,
-	}); err != nil {
-		return fmt.Errorf("failed to add memory: %v", err)
+	memory, err := c.CreateMemory(ctx, assistantID, projectID, content)
+	if err != nil {
+		return fmt.Errorf("failed to create memory: %v", err)
 	}
 
-	fmt.Printf("memory added")
+	fmt.Printf("memory %q created", memory.ID)
+
+	return nil
+}
+
+func update(ctx context.Context, c *apiclient.Client, projectID, content string) error {
+	if memoryID == "" {
+		return fmt.Errorf("missing memory_id")
+	}
+
+	if content == "" {
+		return fmt.Errorf("missing content to remember")
+	}
+
+	memory, err := c.UpdateMemory(ctx, assistantID, projectID, memoryID, content)
+	if err != nil {
+		return fmt.Errorf("failed to update memory: %v", err)
+	}
+
+	fmt.Printf("memory %q updated", memory.ID)
+
+	return nil
+}
+
+func delete(ctx context.Context, c *apiclient.Client, projectID string) error {
+	if memoryID == "" {
+		return fmt.Errorf("missing memory_id")
+	}
+
+	if err := c.DeleteMemory(ctx, assistantID, projectID, memoryID); err != nil {
+		return fmt.Errorf("failed to delete memory: %v", err)
+	}
+
+	fmt.Printf("memory %q deleted", memoryID)
 
 	return nil
 }
 
 func list(ctx context.Context, c *apiclient.Client, projectID string) error {
-	result, err := c.GetMemories(ctx, assistantID, projectID)
+	result, err := c.ListMemories(ctx, assistantID, projectID)
 	if err != nil && !strings.Contains(err.Error(), "404") {
 		return fmt.Errorf("failed to list memories: %v", err)
 	}
 
 	var sb strings.Builder
 	sb.WriteString("Below are memories for you to reference when crafting responses to the user:\n")
-	sb.WriteString("<MEMORIES>")
+	sb.WriteString("<MEMORIES>\n")
 
-	if result != nil && len(result.Memories) > 0 {
-		// Extract memory contents
-		contents := make([]string, 0, len(result.Memories))
-		for _, memory := range result.Memories {
-			contents = append(contents, memory.Content)
+	// Add header row
+	sb.WriteString("memory_id, content\n")
+
+	// Add each memory as a CSV row
+	if result != nil && len(result.Items) > 0 {
+		for _, memory := range result.Items {
+			sb.WriteString(fmt.Sprintf("%s, %s\n", memory.ID, memory.Content))
 		}
-
-		// Marshal memory contents to JSON
-		jsonData, err := json.Marshal(contents)
-		if err != nil {
-			return fmt.Errorf("failed to marshal memory contents: %v", err)
-		}
-
-		// Append JSON data to string builder
-		sb.Write(jsonData)
 	}
 
 	// Add closing tag and output
@@ -93,7 +117,7 @@ func mainErr(ctx context.Context) error {
 	}
 
 	if len(os.Args) == 1 {
-		fmt.Printf("incorrect usage: %s [add|list]\n", os.Args[0])
+		fmt.Printf("incorrect usage: %s [create|update|delete|list]\n", os.Args[0])
 		return nil
 	}
 
@@ -109,8 +133,12 @@ func mainErr(ctx context.Context) error {
 	}
 
 	switch os.Args[1] {
-	case "add":
-		return add(ctx, client, projectID, content)
+	case "create":
+		return create(ctx, client, projectID, content)
+	case "update":
+		return update(ctx, client, projectID, content)
+	case "delete":
+		return delete(ctx, client, projectID)
 	case "list":
 		return list(ctx, client, projectID)
 	}
