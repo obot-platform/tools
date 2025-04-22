@@ -99,7 +99,7 @@ def modify_message_labels(
         raise ValueError(f"Conflicting labelIds in add and remove: {conflict_labels}")
 
     if not add_labels and not remove_labels:
-        print(f"Warning: No labels to modify for message {message_id}")
+        raise ValueError(f"Warning: No labels to modify for message {message_id}")
 
     body = {
         "addLabelIds": list(add_labels),

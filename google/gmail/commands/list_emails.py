@@ -1,10 +1,8 @@
-import asyncio
 import os
 import sys
 
-from apis.helpers import client
+from apis.helpers import client, parse_label_ids
 from apis.messages import list_messages
-
 
 async def list_emails_tool():
     max_results = os.getenv("MAX_RESULTS", "100")
@@ -23,16 +21,14 @@ async def list_emails_tool():
     default_inbox = "INBOX"
     if query != "":
         default_inbox = ""  # if query is not empty, don't set inbox as default
-    labels = os.getenv("LABELS", default_inbox)
+    labels = os.getenv("LABEL_IDS", default_inbox)
     category = os.getenv("CATEGORY", "primary")
     valid_categories = ["primary", "social", "promotions", "updates", "forums"]
     if category not in valid_categories:
         print(f"Invalid category: {category}. Valid categories are: {valid_categories}")
         sys.exit(1)
 
-    label_ids = [
-        label.strip().upper() for label in labels.split(",") if label.strip() != ""
-    ]
+    label_ids = parse_label_ids(labels)
     if "ALL" in label_ids:
         label_ids = []
     elif "INBOX" in label_ids:

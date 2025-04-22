@@ -1,25 +1,20 @@
 import os
 import sys
 from apis.messages import modify_message_labels
-from apis.helpers import client, str_to_bool
-
+from apis.helpers import client, str_to_bool, parse_label_ids
 
 def modify_message_labels_tool():
-    message_id = os.getenv("MESSAGE_ID")
-    if not message_id:
-        print(f"required environment variable MESSAGE_ID not set")
+    email_id = os.getenv("EMAIL_ID")
+    if not email_id:
+        print(f"required environment variable EMAIL_ID not set")
         sys.exit(1)
 
-    add_labels = os.getenv("ADD_LABELS", None)
+    add_labels = os.getenv("ADD_LABEL_IDS", None)
     if add_labels:
-        add_labels = add_labels.upper().split(
-            ","
-        )  # convert to uppercase and split by comma for label_ids
-    remove_labels = os.getenv("REMOVE_LABELS", None)
+        add_labels = parse_label_ids(add_labels)
+    remove_labels = os.getenv("REMOVE_LABEL_IDS", None)
     if remove_labels:
-        remove_labels = remove_labels.upper().split(
-            ","
-        )  # convert to uppercase and split by comma for label_ids
+        remove_labels = parse_label_ids(remove_labels)
 
     env_flags = {
         "archive": "ARCHIVE",
@@ -42,7 +37,7 @@ def modify_message_labels_tool():
     service = client()
     res = modify_message_labels(
         service,
-        message_id,
+        email_id,
         add_labels,
         remove_labels,
         archive,

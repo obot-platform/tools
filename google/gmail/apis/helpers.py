@@ -35,6 +35,21 @@ def setup_logger(name):
 logger = setup_logger(__name__)
 
 
+GMAIL_BUILTIN_LABELS = {
+    "INBOX", "SPAM", "TRASH", "DRAFT", "SENT", "IMPORTANT", "STARRED", "UNREAD", "CATEGORY_PERSONAL",
+    "CATEGORY_SOCIAL", "CATEGORY_PROMOTIONS", "CATEGORY_UPDATES", "CATEGORY_FORUMS"
+}
+
+def parse_label_ids(label_ids_input: str) -> list[str]:
+    label_ids = []
+    for label in label_ids_input.split(","):
+        label = label.strip()
+        if label.upper() in GMAIL_BUILTIN_LABELS:
+            label_ids.append(label.upper())
+        else:
+            label_ids.append(label)  # preserve custom labels
+    return label_ids
+
 def get_user_timezone():
     user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
 

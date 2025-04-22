@@ -17,7 +17,7 @@ Description: List emails in the user's Gmail account. By default, this will list
 Credential: ../credential
 Share Contexts: Email List Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: labels: (Optional: Default is 'inbox') The labels to list emails from, must be a comma separated list of labels. Valid built-in labels are 'inbox', 'starred', 'important', 'sent', 'drafts', 'trash', 'spam', 'all', as well as any custom labels the user has created. 
+Param: label_ids: (Optional: Default is 'inbox') The label_ids to list emails from, must be a comma separated list of label_ids. Valid built-in labels are 'inbox', 'starred', 'important', 'sent', 'drafts', 'trash', 'spam', 'all', as well as any custom label_ids the user has created. 
 Param: category: (Optional: Default is 'primary') The category of emails to list, only valid when `inbox` is in the labels list. Valid options are 'primary', 'social', 'promotions', 'updates', 'forums'. 
 Param: after: (Optional) Return only emails received strictly **after** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset). 
 Param: before: (Optional) Return only emails received strictly **before** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset). Time and timezone are required. (Optional)
@@ -70,8 +70,8 @@ Param: archive: (Optional) Set to true to archive the email (remove it from Inbo
 Param: mark_as_read: (Optional) Set to true to mark the email as read, or false to mark it as unread. Default is None (no change).
 Param: mark_as_starred: (Optional) Set to true to star the email, or false to remove the star. Default is None (no change).
 Param: mark_as_important: (Optional) Set to true to mark the email as important, or false to remove the important label. Default is None (no change).
-Param: add_labels: (Optional) A comma-separated list of custom label names to add to the email. Default is an empty list.
-Param: remove_labels: (Optional) A comma-separated list of custom label names to remove from the email. Default is an empty list.
+Param: add_label_ids: (Optional) A comma-separated list of custom label_ids to add to the email. Default is an empty list.
+Param: remove_label_ids: (Optional) A comma-separated list of custom label_ids to remove from the email. Default is an empty list.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py modify_message_labels
 
@@ -182,13 +182,32 @@ Param: label_id: (Optional) The ID of the label to return. Default to empty stri
 
 ---
 Name: Create Label
-Description: Create a custom label in a user's Gmail account.
+Description: Create a custom label in the user's Gmail account.
 Credential: ../credential
 Param: label_name: The name of the label to create.
 Param: label_list_visibility: (Optional) This controls whether and how the label appears in the Gmail sidebar (left panel). Must be one of 'labelShow', 'labelHide', 'labelShowIfUnread', default is 'labelShow'.
 Param: message_list_visibility: (Optional) This controls whether the label appears in the message list view. Must be one of 'show', 'hide', default is 'show'.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py create_label
+
+---
+Name: Update Label
+Description: Update a custom label in the user's Gmail account. Only fields that are provided will be updated.
+Credential: ../credential
+Param: label_id: The ID of the label to update.
+Param: label_name: (Optional) The new name of the label. 
+Param: label_list_visibility: (Optional) This controls whether and how the label appears in the Gmail sidebar (left panel). Must be one of 'labelShow', 'labelHide', 'labelShowIfUnread'.
+Param: message_list_visibility: (Optional) This controls whether the label appears in the message list view. Must be one of 'show', 'hide'.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py update_label
+
+---
+Name: Delete Label
+Description: Delete a custom label in the user's Gmail account.
+Credential: ../credential
+Param: label_id: The ID of the label to delete.
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py delete_label
 
 ---
 Name: Draft Context

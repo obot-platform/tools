@@ -31,10 +31,10 @@ def main():
         body = get_email_body(msg)
         attachment = has_attachment(msg)
 
-        subject, sender, to, cc, bcc, date = extract_message_headers(msg)
+        subject, sender, to, cc, bcc, date, labels = extract_message_headers(msg)
 
         print(
-            f"From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Date: {date}"
+            f"From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Date: {date}, Labels: {labels}"
         )
         print(f"Body:\n{body}")
         if attachment:
