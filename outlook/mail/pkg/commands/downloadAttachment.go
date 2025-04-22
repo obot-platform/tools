@@ -9,32 +9,64 @@ import (
 	"github.com/gptscript-ai/tools/outlook/common/id"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/client"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/global"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	"github.com/obot-platform/obot/apiclient"
 )
 
 type DownloadAttachmentOpts struct {
+	// Message fields
+	MessageID string
+
+	// Group message fields
+	GroupID       string
+	PostID        string
+	GroupThreadID string
+
+	// Obot client parameters
 	ThreadID    string
 	ProjectID   string
 	AssistantID string
 }
 
-func DownloadAttachment(ctx context.Context, messageID, attachmentID string, obotClient *apiclient.Client, opts *DownloadAttachmentOpts) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
-	if err != nil {
-		return fmt.Errorf("failed to get outlook ID: %w", err)
-	}
-
+func DownloadAttachment(ctx context.Context, attachmentID string, obotClient *apiclient.Client, opts *DownloadAttachmentOpts) error {
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	requestInfo, err := c.Me().Messages().ByMessageId(trueMessageID).Attachments().ByAttachmentId(attachmentID).ToGetRequestInformation(ctx, nil)
+	var requestInfo *abstractions.RequestInformation
+	if opts.GroupID != "" && opts.GroupThreadID != "" && opts.PostID != "" {
+		// Group thread post attachment
+		requestInfo, err = c.Groups().
+			ByGroupId(opts.GroupID).
+			Threads().
+			ByConversationThreadId(opts.GroupThreadID).
+			Posts().
+			ByPostId(opts.PostID).
+			Attachments().
+			ByAttachmentId(attachmentID).
+			ToGetRequestInformation(ctx, nil)
+	} else {
+		// Regular message attachment
+		var trueMessageID string
+		trueMessageID, err = id.GetOutlookID(ctx, opts.MessageID)
+		if err != nil {
+			return fmt.Errorf("failed to get outlook ID: %w", err)
+		}
+
+		requestInfo, err = c.Me().
+			Messages().
+			ByMessageId(trueMessageID).
+			Attachments().
+			ByAttachmentId(attachmentID).
+			ToGetRequestInformation(ctx, nil)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to create request info: %w", err)
 	}
 
-	response, err := c.BaseRequestBuilder.RequestAdapter.SendPrimitive(ctx, requestInfo, "[]byte", nil)
+	response, err := c.GetAdapter().SendPrimitive(ctx, requestInfo, "[]byte", nil)
 	if err != nil {
 		return fmt.Errorf("failed to get attachment: %w", err)
 	}

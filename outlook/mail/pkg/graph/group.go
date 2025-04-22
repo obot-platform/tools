@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"slices"
 
 	"github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/tools/outlook/mail/pkg/util"
@@ -94,11 +95,8 @@ func getGroup(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, grou
 }
 
 func CreateGroupThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, info DraftInfo) (models.ConversationThreadable, error) {
-
-	for _, file := range info.Attachments {
-		if file == "" {
-			return nil, fmt.Errorf("attachment file path cannot be empty")
-		}
+	if slices.Contains(info.Attachments, "") {
+		return nil, fmt.Errorf("attachment file path cannot be empty")
 	}
 
 	requestBody := models.NewConversationThread()
@@ -201,8 +199,46 @@ func setAttachments(ctx context.Context, attachment_filenames []string) ([]model
 func DeleteGroupThread(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) error {
 	err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Delete(ctx, nil)
 	if err != nil {
-		fmt.Errorf("failed to delete group thread: %w", err)
-		return err
+		return fmt.Errorf("failed to delete group thread: %w", err)
 	}
 	return nil
+}
+
+func ListGroupThreadMessageAttachments(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID, postID string) ([]models.Attachmentable, error) {
+	result, err := client.Groups().
+		ByGroupId(groupID).
+		Threads().
+		ByConversationThreadId(threadID).
+		Posts().
+		ByPostId(postID).
+		Attachments().
+		Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list attachments for group thread message: %w", err)
+	}
+
+	return result.GetValue(), nil
+}
+
+func GetGroupThreadMessageAttachment(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID, postID, attachmentID string) (string, error) {
+	// Get attachment as a Parsable object
+	requestInfo, err := client.Groups().
+		ByGroupId(groupID).
+		Threads().
+		ByConversationThreadId(threadID).
+		Posts().
+		ByPostId(postID).
+		Attachments().
+		ByAttachmentId(attachmentID).
+		ToGetRequestInformation(ctx, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request info: %w", err)
+	}
+
+	result, err := GetAttachmentContent(ctx, client, requestInfo)
+	if err != nil {
+		return "", fmt.Errorf("failed to get attachment content: %w", err)
+	}
+
+	return result, nil
 }

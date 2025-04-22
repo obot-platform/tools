@@ -12,8 +12,6 @@ import (
 )
 
 var (
-	url         = os.Getenv("OBOT_SERVER_URL")
-	token       = os.Getenv("OBOT_TOKEN")
 	threadID    = os.Getenv("OBOT_THREAD_ID")
 	projectID   = "p1" + strings.TrimPrefix(os.Getenv("OBOT_PROJECT_ID"), "t1")
 	assistantID = os.Getenv("OBOT_AGENT_ID")
@@ -122,10 +120,14 @@ func main() {
 	case "downloadAttachment":
 		client := apiclient.NewClientFromEnv()
 
-		if err := commands.DownloadAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID"), client, &commands.DownloadAttachmentOpts{
-			ThreadID:    threadID,
-			ProjectID:   projectID,
-			AssistantID: assistantID,
+		if err := commands.DownloadAttachment(context.Background(), os.Getenv("ATTACHMENT_ID"), client, &commands.DownloadAttachmentOpts{
+			MessageID:     os.Getenv("MESSAGE_ID"),
+			ThreadID:      threadID,
+			ProjectID:     projectID,
+			AssistantID:   assistantID,
+			GroupID:       os.Getenv("GROUP_ID"),
+			GroupThreadID: os.Getenv("THREAD_ID"),
+			PostID:        os.Getenv("POST_ID"),
 		}); err != nil {
 			fmt.Printf("failed to download attachment: %v\n", err)
 			os.Exit(1)
@@ -133,6 +135,27 @@ func main() {
 	case "getAttachment":
 		if err := commands.GetAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID")); err != nil {
 			fmt.Printf("failed to get attachment: %v\n", err)
+			os.Exit(1)
+		}
+	case "listGroupThreadMessageAttachments":
+		if err := commands.ListGroupThreadMessageAttachments(
+			context.Background(),
+			os.Getenv("GROUP_ID"),
+			os.Getenv("THREAD_ID"),
+			os.Getenv("POST_ID"),
+		); err != nil {
+			fmt.Printf("failed to list group thread message attachments: %v\n", err)
+			os.Exit(1)
+		}
+	case "getGroupThreadMessageAttachment":
+		if err := commands.GetGroupThreadMessageAttachment(
+			context.Background(),
+			os.Getenv("GROUP_ID"),
+			os.Getenv("THREAD_ID"),
+			os.Getenv("POST_ID"),
+			os.Getenv("ATTACHMENT_ID"),
+		); err != nil {
+			fmt.Printf("failed to get group thread message attachment: %v\n", err)
 			os.Exit(1)
 		}
 	default:

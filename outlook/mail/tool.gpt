@@ -2,7 +2,7 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment
+Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Message Attachments, Get Group Thread Message Attachment, Download Group Thread Message Attachment
 
 ---
 Name: List Mail Folders
@@ -193,6 +193,44 @@ Param: end: (Optional) The RFC3339 formatted end date and time of the time frame
 Param: limit: (Optional) The maximum number of threads to return. If unset, returns up to 100 threads.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroupThreads
+
+---
+Name: List Group Thread Message Attachments
+Description: Lists all attachments in a specific group thread message/post.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Groups, List Group Threads
+Param: group_id: The ID of the group containing the thread.
+Param: thread_id: The ID of the thread containing the message.
+Param: post_id: The ID of the post/message to list attachments for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroupThreadMessageAttachments
+
+---
+Name: Get Group Thread Message Attachment
+Description: Get the markdown converted contents of an attachment from a group thread message.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Groups, List Group Threads, List Group Thread Message Attachments
+Param: group_id: The ID of the group containing the thread.
+Param: thread_id: The ID of the thread containing the message.
+Param: post_id: The ID of the post/message containing the attachment.
+Param: attachment_id: The ID of the attachment to get.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getGroupThreadMessageAttachment
+
+---
+Name: Download Group Thread Message Attachment
+Description: Download an attachment from a group thread message/post into the workspace.
+Share Context: Outlook Mail Context
+Credential: ./credential
+Share Tools: List Groups, List Group Threads, List Group Thread Message Attachments
+Param: group_id: The ID of the group containing the thread.
+Param: thread_id: The ID of the thread containing the post.
+Param: post_id: The ID of the post containing the attachment.
+Param: attachment_id: The ID of the attachment to download.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadAttachment
 
 ---
 Name: Outlook Mail Context

@@ -413,11 +413,3 @@ func ListAttachments(ctx context.Context, client *msgraphsdkgo.GraphServiceClien
 
 	return fileAttachments, nil
 }
-
-func GetAttachment(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, messageID, attachmentID string) (models.Attachmentable, error) {
-	attachment, err := client.Me().Messages().ByMessageId(messageID).Attachments().ByAttachmentId(attachmentID).Get(ctx, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get attachment: %w", err)
-	}
-	return attachment, nil
-}
