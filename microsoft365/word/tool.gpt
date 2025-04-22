@@ -1,0 +1,55 @@
+---
+Name: Word
+Description: Tools for interacting with Microsoft Word documents in OneDrive
+Metadata: bundle: true
+Share Tools: List Docs, Read Doc, Write Doc
+
+---
+Name: List Docs
+Description: List all Microsoft Word documents available to the user in OneDrive
+Share Context: Word Context
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ../credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listDocs
+
+---
+Name: Read Doc
+Description: Read the contents of a Microsoft Word document from OneDrive
+Share Context: Word Context
+Credential: ../credential
+Share Tools: List Docs
+Param: doc_id: ID or Path of the Microsoft Word document to get. Prefer ID if available, path only if given by user.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getDoc
+
+---
+Name: Write Doc
+Description: Write a Microsoft Word document in OneDrive with the specified title and optional content. The file will be created if it doesn't exist. It will be overwritten if it already exists.
+Share Context: Word Context
+Credential: ../credential
+Param: doc_name: The name of the document to write to. This might be the OneDrive ID of an existing document or a filepath in OneDrive.
+Param: doc_content: Optional markdown formatted content to write to the document.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool writeDoc
+
+---
+Name: Word Context
+Type: context
+
+#!sys.echo
+
+## Instructions for using Microsoft Word tools
+
+Do not output Microsoft Word document IDs because they are not helpful for the user.
+Microsoft Word document names are not considered document IDs.
+
+## End of instructions for using Microsoft Word tools
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/microsoft-word-logo-duotone.svg
+
+---
+!metadata:*:oauth
+microsoft365
