@@ -99,6 +99,8 @@ tools:
     reference: ./proxycurl
   memory:
     reference: ./memory
+  loop-data:
+    reference: ./loop-data
 
 
 knowledgeDataSources:
