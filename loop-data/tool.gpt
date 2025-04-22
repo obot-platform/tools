@@ -1,5 +1,5 @@
 Name: Loop Data
-Description: Please provide either the data_list or dataset_id parameter, but not both.
+Description: Provide either the data_list or dataset_id parameter, but not both.
 Metadata: index: false
 Param: data_list: JSON list of data described by the user
 Param: dataset_id: ID of the dataset that contains the data described by the user
