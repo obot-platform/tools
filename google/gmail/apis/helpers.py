@@ -72,6 +72,9 @@ def extract_message_headers(message):
     date = None
 
     if message is not None:
+        # label_ids = [l for l in message.get("labelIds", []) if not l.startswith("CATEGORY_")]
+        label_ids = message.get("labelIds", [])
+
         for header in message["payload"]["headers"]:
             match header["name"].lower():
                 case "subject":
@@ -90,7 +93,7 @@ def extract_message_headers(message):
             .strftime("%Y-%m-%d %H:%M:%S %Z")
         )
 
-    return subject, sender, to, cc, bcc, date
+    return subject, sender, to, cc, bcc, date, label_ids
 
 
 async def prepend_base_path(base_path: str, file_path: str):
@@ -155,3 +158,8 @@ def format_query_timestamp(time_str: str):
 
     except ValueError as e:
         raise ValueError(f"Invalid datetime format: {e}")
+
+
+def str_to_bool(value):
+    """Convert a string to a boolean."""
+    return str(value).lower() in ("true", "1", "yes")

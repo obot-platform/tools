@@ -4,6 +4,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Optional
 
 import gptscript
 from bs4 import BeautifulSoup
@@ -11,9 +12,106 @@ from filetype import guess_mime
 from googleapiclient.errors import HttpError
 from gptscript.datasets import DatasetElement
 
-from apis.helpers import format_query_timestamp, extract_message_headers, prepend_base_path, setup_logger
+from apis.helpers import (
+    format_query_timestamp,
+    extract_message_headers,
+    prepend_base_path,
+    setup_logger,
+)
 
 logger = setup_logger(__name__)
+
+
+def modify_message_labels(
+    service,
+    message_id,
+    add_labels=None,
+    remove_labels=None,
+    archive: Optional[
+        bool
+    ] = None,  # True = remove 'INBOX', False = add 'INBOX', None = leave unchanged
+    mark_as_read: Optional[
+        bool
+    ] = None,  # True = read, False = unread, None = leave unchanged
+    mark_as_starred: Optional[
+        bool
+    ] = None,  # True = star, False = unstar, None = leave unchanged
+    mark_as_important: Optional[
+        bool
+    ] = None,  # True = important, False = not important, None = leave unchanged
+):
+    add_labels = set(add_labels or [])
+    remove_labels = set(remove_labels or [])
+
+    # Validate UNREAD usage with mark_as_read
+    if mark_as_read is not None and (
+        "UNREAD" in add_labels or "UNREAD" in remove_labels
+    ):
+        raise ValueError(
+            "Do not include 'UNREAD' in add_labels/remove_labels when using mark_as_read"
+        )
+
+    # Validate INBOX usage with archive
+    if archive is not None and ("INBOX" in add_labels or "INBOX" in remove_labels):
+        raise ValueError(
+            "Do not include 'INBOX' in add_labels/remove_labels when using archive flag"
+        )
+
+    if mark_as_starred is not None and (
+        "STARRED" in add_labels or "STARRED" in remove_labels
+    ):
+        raise ValueError(
+            "Do not include 'STARRED' in add_labels/remove_labels when using mark_as_starred"
+        )
+
+    if mark_as_important is not None and (
+        "IMPORTANT" in add_labels or "IMPORTANT" in remove_labels
+    ):
+        raise ValueError(
+            "Do not include 'IMPORTANT' in add_labels/remove_labels when using mark_as_important"
+        )
+
+    # Apply archive behavior
+    if archive is True:
+        remove_labels.add("INBOX")
+    elif archive is False:
+        add_labels.add("INBOX")
+
+    # Apply read/unread behavior
+    if mark_as_read is True:
+        remove_labels.add("UNREAD")
+    elif mark_as_read is False:
+        add_labels.add("UNREAD")
+
+    if mark_as_starred is True:
+        add_labels.add("STARRED")
+    elif mark_as_starred is False:
+        remove_labels.add("STARRED")
+
+    if mark_as_important is True:
+        add_labels.add("IMPORTANT")
+    elif mark_as_important is False:
+        remove_labels.add("IMPORTANT")
+
+    # Optional: fail on conflicting labels
+    conflict_labels = add_labels & remove_labels
+    if conflict_labels:
+        raise ValueError(f"Conflicting labelIds in add and remove: {conflict_labels}")
+
+    if not add_labels and not remove_labels:
+        print(f"Warning: No labels to modify for message {message_id}")
+
+    body = {
+        "addLabelIds": list(add_labels),
+        "removeLabelIds": list(remove_labels),
+    }
+
+    return (
+        service.users()
+        .messages()
+        .modify(userId="me", id=message_id, body=body)
+        .execute()
+    )
 
 
 async def create_message(
@@ -167,7 +265,7 @@ async def list_messages(
         dataset_id = await gptscript_client.add_dataset_elements(
             elements,
             name=f"gmail_{query}",
-            description=f"list of emails in Gmail for query {query}",
+            description=f"list of emails in Gmail for query: [{query}], labels: [{labels}]",
         )
 
         print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
@@ -188,10 +286,10 @@ def message_to_string(service, message):
         .execute()
     )
     msg_id = msg["id"]
-    subject, sender, to, cc, bcc, date = extract_message_headers(msg)
+    subject, sender, to, cc, bcc, date, label_ids = extract_message_headers(msg)
     return (
         msg_id,
-        f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}",
+        f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}, Labels: {label_ids}",
     )
 
 
