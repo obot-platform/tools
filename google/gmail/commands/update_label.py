@@ -31,6 +31,6 @@ def update_label_tool():
         )
         return
     label = update_label(
-        service, label_name, label_list_visibility, message_list_visibility
+        service, label_id, label_name, label_list_visibility, message_list_visibility
     )
     print(f"Label updated: {label}")
