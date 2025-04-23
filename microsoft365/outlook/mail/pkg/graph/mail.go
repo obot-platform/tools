@@ -147,7 +147,7 @@ type DraftInfo struct {
 	Recipients, CC, BCC []string // slice of email addresses
 	Attachments         []string // slice of workspace file paths
 	ReplyAll            bool
-	ReplyToMessageID    string
+	ReplyToEmailID      string
 }
 
 var (
@@ -200,7 +200,7 @@ func CreateDraft(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 }
 
 func CreateDraftReply(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, info DraftInfo) (models.Messageable, error) {
-	trueMessageID, err := id.GetOutlookID(ctx, info.ReplyToMessageID)
+	trueMessageID, err := id.GetOutlookID(ctx, info.ReplyToEmailID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message ID: %w", err)
 	}

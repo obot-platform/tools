@@ -10,8 +10,8 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 )
 
-func GetAttachment(ctx context.Context, messageID, attachmentID string) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
+func ReadAttachment(ctx context.Context, emailID, attachmentID string) error {
+	trueEmailID, err := id.GetOutlookID(ctx, emailID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
@@ -22,7 +22,7 @@ func GetAttachment(ctx context.Context, messageID, attachmentID string) error {
 	}
 
 	// Get attachment as a Parsable object
-	requestInfo, err := c.Me().Messages().ByMessageId(trueMessageID).Attachments().ByAttachmentId(attachmentID).ToGetRequestInformation(ctx, nil)
+	requestInfo, err := c.Me().Messages().ByMessageId(trueEmailID).Attachments().ByAttachmentId(attachmentID).ToGetRequestInformation(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request info: %w", err)
 	}

@@ -10,8 +10,8 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 )
 
-func ListAttachments(ctx context.Context, messageID string) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
+func ListAttachments(ctx context.Context, emailID string) error {
+	trueEmailID, err := id.GetOutlookID(ctx, emailID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
@@ -21,7 +21,7 @@ func ListAttachments(ctx context.Context, messageID string) error {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	attachments, err := graph.ListAttachments(ctx, c, trueMessageID)
+	attachments, err := graph.ListAttachments(ctx, c, trueEmailID)
 	if err != nil {
 		return fmt.Errorf("failed to list attachments: %w", err)
 	}

@@ -19,7 +19,7 @@ func CreateDraft(ctx context.Context, info graph.DraftInfo) error {
 	}
 
 	var draft models.Messageable
-	if info.ReplyToMessageID != "" {
+	if info.ReplyToEmailID != "" {
 		draft, err = graph.CreateDraftReply(ctx, c, info)
 		if err != nil {
 			return fmt.Errorf("failed to create draft reply: %w", err)

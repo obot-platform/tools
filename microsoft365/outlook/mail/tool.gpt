@@ -2,11 +2,11 @@
 Name: Outlook Mail
 Description: Tools for interacting with Microsoft Outlook Mail.
 Metadata: bundle: true
-Share Tools: List Mail Folders, List Messages, Get Message Details, Search Messages, Create Draft, Create Group Thread Message, Send Draft, Delete Message, Move Message, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Message Attachments, Get Group Thread Message Attachment, Download Group Thread Message Attachment
+Share Tools: List Mail Folders, List Emails, Get Email Details, Search Emails, Create Draft, Create Group Thread Email, Send Draft, Delete Email, Move Email, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Email Attachments, Get Group Thread Email Attachment, Download Group Thread Email Attachment
 
 ---
 Name: List Mail Folders
-Description: Lists all available mail folders.
+Description: Lists all available Outlook mail folders.
 Share Context: Outlook Mail Context
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
@@ -15,83 +15,83 @@ Credential: ../../credential
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMailFolders
 
 ---
-Name: List Messages
-Description: Lists messages in a folder.
+Name: List Emails
+Description: Lists emails in an Outlook folder.
 Share Context: Outlook Mail Context
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ../../credential
 Share Tools: List Mail Folders
-Param: folder_id: (Optional) The ID of the folder to list messages in. If unset, lists messages from all folders.
-Param: start: (Optional) The RFC3339 formatted start date and time of the time frame to list messages within.
-Param: end: (Optional) The RFC3339 formatted end date and time of the time frame to list messages within.
-Param: limit: (Optional) The maximum number of messages to return. If unset, returns up to 100 messages.
+Param: folder_id: (Optional) The ID of the folder to list emails in. If unset, lists emails from all folders.
+Param: start: (Optional) The RFC3339 formatted start date and time of the time frame to list emails within.
+Param: end: (Optional) The RFC3339 formatted end date and time of the time frame to list emails within.
+Param: limit: (Optional) The maximum number of emails to return. If unset, returns up to 100 emails.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listMessages
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEmails
 
 ---
-Name: Get Message Details
-Description: Get the details of a message.
+Name: Get Email Details
+Description: Get the details of an Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
-Share Tools: List Messages, Search Messages
-Param: message_id: The ID of the message to get details for.
+Share Tools: List Emails, Search Emails
+Param: email_id: The ID of the email to get details for.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getMessageDetails
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEmailDetails
 
 ---
-Name: Search Messages
-Description: Search for messages. At least one of subject, from_address, or from_name must be specified.
+Name: Search Emails
+Description: Search for emails in Outlook. At least one of subject, from_address, or from_name must be specified.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Context: Datasets Output Context from github.com/gptscript-ai/datasets/filter
 Tools: github.com/gptscript-ai/datasets/filter
 Share Tools: List Mail Folders
-Param: subject: (Optional) Search query for the subject of the message.
+Param: subject: (Optional) Search query for the subject of the email.
 Param: from_address: (Optional) Search query for the email address of the sender.
 Param: from_name: (Optional) Search query for the name of the sender.
 Param: folder_id: (Optional) The ID of the folder to search in. If unset, will search all folders.
 Param: start: (Optional) The start date and time of the time frame to search within, in RFC 3339 format.
 Param: end: (Optional) The end date and time of the time frame to search within, in RFC 3339 format.
-Param: limit: (Optional, default 10) The maximum number of messages to return.
+Param: limit: (Optional, default 10) The maximum number of emails to return.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchMessages
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool searchEmails
 
 ---
 Name: Create Draft
-Description: Create (but do not send) a draft individual message.
+Description: Create (but do not send) a draft individual Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: Send Draft
-Param: subject: The subject of the message.
-Param: body: The body of the message in markdown format.
-Param: recipients: A comma-separated list of email addresses to send the message to. No spaces. Example: person1@example.com,person2@example.com
-Param: cc: (Optional) A comma-separated list of email addresses to CC on the message. No spaces. Example: person1@example.com,person2@example.com
-Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the message. No spaces. Example: person1@example.com,person2@example.com
+Param: subject: The subject of the email.
+Param: body: The body of the email in markdown format.
+Param: recipients: A comma-separated list of email addresses to send the email to. No spaces. Example: person1@example.com,person2@example.com
+Param: cc: (Optional) A comma-separated list of email addresses to CC on the email. No spaces. Example: person1@example.com,person2@example.com
+Param: bcc: (Optional) A comma-separated list of email addresses to BCC on the email. No spaces. Example: person1@example.com,person2@example.com
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
-Param: reply_message_id: (Optional) The ID of the message to reply to.
-Param: reply_all: (Optional, default false) Whether to reply to all. If true, CC will be the original message's CC.
+Param: reply_email_id: (Optional) The ID of the email to reply to.
+Param: reply_all: (Optional, default false) Whether to reply to all. If true, CC will be the original email's CC.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createDraft
 
 ---
-Name: Create Group Thread Message
-Description: Compose a group thread message that is always sent to the microsoft365 group email address. Allow the user to add additional recipients who are not part of the group. Before sending, you MUST politely confirm the subject and body of the message with the user.
+Name: Create Group Thread Email
+Description: Compose a group thread email in Outlook that is always sent to the Microsoft 365 group email address. Allow the user to add additional recipients who are not part of the group. Before sending, you MUST politely confirm the subject and body of the email with the user.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: Create Draft
-Param: group_id: (Required) The ID of the group to create the thread message in.
-Param: subject: (Required) The subject of the message.
-Param: body: (Required) The body of the message in markdown format.
+Param: group_id: (Required) The ID of the group to create the thread email in.
+Param: subject: (Required) The subject of the email.
+Param: body: (Required) The body of the email in markdown format.
 Param: reply_to_thread_id: (Optional) The ID of the thread to reply to. If unset, a new thread will be created.
-Param: recipients: (Optional) The additional recipients to send the message to, must be a comma-separated list of email addresses. 
+Param: recipients: (Optional) The additional recipients to send the email to, must be a comma-separated list of email addresses.
 Param: attachments: (Optional) A comma separated list of workspace file paths to attach to the email.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createGroupThreadMessage
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createGroupThreadEmail
 
 ---
 Name: Send Draft
-Description: Send an existing draft message.
+Description: Send an existing draft email in Outlook.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: Create Draft
@@ -100,29 +100,29 @@ Param: draft_id: The ID of the draft to send.
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool sendDraft
 
 ---
-Name: Delete Message
-Description: Delete a message.
+Name: Delete Email
+Description: Delete an Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
-Share Tools: List Messages, Search Messages
-Param: message_id: The ID of the message to delete. This is NOT a mail folder ID.
+Share Tools: List Emails, Search Emails
+Param: email_id: The ID of the email to delete. This is NOT a mail folder ID.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteMessage
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteEmail
 
 ---
-Name: Move Message
-Description: Moves a message to a folder.
+Name: Move Email
+Description: Moves an email to a different Outlook folder.
 Share Context: Outlook Mail Context
 Credential: ../../credential
-Share Tools: List Mail Folders, List Messages, Search Messages
-Param: message_id: The ID of the message to move.
-Param: destination_folder_id: The ID of the folder to move the message into.
+Share Tools: List Mail Folders, List Emails, Search Emails
+Param: email_id: The ID of the email to move.
+Param: destination_folder_id: The ID of the folder to move the email into.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveMessage
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool moveEmail
 
 ---
 Name: Current Email
-Description: Get the email address of the currently authenticated user.
+Description: Get the email address of the currently authenticated Outlook user.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 
@@ -130,39 +130,39 @@ Credential: ../../credential
 
 ---
 Name: List Attachments
-Description: List the attachments of a message.
+Description: List the attachments of an Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
-Share Tools: List Messages
-Param: message_id: The ID of the message to list attachments for.
+Share Tools: List Emails
+Param: email_id: The ID of the email to list attachments for.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listAttachments
 
 ---
 Name: Read Attachment
-Description: Get the markdown converted contents of an attachment from a given message.
+Description: Get the markdown converted contents of an attachment from an Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: List Attachments
-Param: message_id: The ID of the message to get the attachment from. Required.
+Param: email_id: The ID of the email to get the attachment from. Required.
 Param: attachment_id: The ID of the attachment to get. Required.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getAttachment
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool readAttachment
 
 ---
 Name: Download Attachment
-Description: Download an attachment into workspace from a message.
+Description: Download an attachment from an Outlook email into workspace.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: List Attachments
-Param: message_id: The ID of the message to get the attachment from. Required.
+Param: email_id: The ID of the email to get the attachment from. Required.
 Param: attachment_id: The ID of the attachment to get. Required.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadAttachment
 
 ---
 Name: Delete Group Thread
-Description: Delete a group mailbox thread.
+Description: Delete a group mailbox thread in Outlook.
 Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: List Group Threads
@@ -173,7 +173,7 @@ Param: thread_id: The ID of the thread to delete.
 
 ---
 Name: List Groups
-Description: Lists all groups the user is a member of.
+Description: Lists all Microsoft 365 groups the user is a member of.
 Share Context: Outlook Mail Context
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ../../credential
@@ -182,7 +182,7 @@ Credential: ../../credential
 
 ---
 Name: List Group Threads
-Description: Lists all group mailbox threads in a Microsoft 365 group. This will also return messages in the threads.
+Description: Lists all group mailbox threads in a Microsoft 365 group. This will also return emails in the threads.
 Share Context: Outlook Mail Context
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ../../credential
@@ -195,39 +195,39 @@ Param: limit: (Optional) The maximum number of threads to return. If unset, retu
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroupThreads
 
 ---
-Name: List Group Thread Message Attachments
-Description: Lists all attachments in a specific group thread message/post.
+Name: List Group Thread Email Attachments
+Description: Lists all attachments in a specific Outlook group thread email.
 Share Context: Outlook Mail Context
-Credential:../../credential
+Credential: ../../credential
 Share Tools: List Groups, List Group Threads
 Param: group_id: The ID of the group containing the thread.
-Param: thread_id: The ID of the thread containing the message.
-Param: post_id: The ID of the post/message to list attachments for.
+Param: thread_id: The ID of the thread containing the email.
+Param: email_id: The ID of the email to list attachments for.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroupThreadMessageAttachments
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listGroupThreadEmailAttachments
 
 ---
-Name: Get Group Thread Message Attachment
-Description: Get the markdown converted contents of an attachment from a group thread message.
+Name: Get Group Thread Email Attachment
+Description: Get the markdown converted contents of an attachment from an Outlook group thread email.
 Share Context: Outlook Mail Context
-Credential:../../credential
-Share Tools: List Groups, List Group Threads, List Group Thread Message Attachments
+Credential: ../../credential
+Share Tools: List Groups, List Group Threads, List Group Thread Email Attachments
 Param: group_id: The ID of the group containing the thread.
-Param: thread_id: The ID of the thread containing the message.
-Param: post_id: The ID of the post/message containing the attachment.
+Param: thread_id: The ID of the thread containing the email.
+Param: email_id: The ID of the email containing the attachment.
 Param: attachment_id: The ID of the attachment to get.
 
-#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getGroupThreadMessageAttachment
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getGroupThreadEmailAttachment
 
 ---
-Name: Download Group Thread Message Attachment
-Description: Download an attachment from a group thread message/post into the workspace.
+Name: Download Group Thread Email Attachment
+Description: Download an attachment from an Outlook group thread email into the workspace.
 Share Context: Outlook Mail Context
-Credential:../../credential
-Share Tools: List Groups, List Group Threads, List Group Thread Message Attachments
+Credential: ../../credential
+Share Tools: List Groups, List Group Threads, List Group Thread Email Attachments
 Param: group_id: The ID of the group containing the thread.
-Param: thread_id: The ID of the thread containing the post.
-Param: post_id: The ID of the post containing the attachment.
+Param: thread_id: The ID of the thread containing the email.
+Param: email_id: The ID of the email containing the attachment.
 Param: attachment_id: The ID of the attachment to download.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadAttachment
@@ -242,14 +242,14 @@ Type: context
 
 You have access to tools for the Microsoft Outlook Mail API.
 
-Display the recieved and sent datetimes of all messages in the user's preferred timezone.
+Display the recieved and sent datetimes of all emails in the user's preferred timezone.
 When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
 When the user uses relative terms like "today", "tomorrow", or "last week", assume the date is the current day in the user's preferred timezone.
 
-Do not output mail folder IDs or message IDs because they are not helpful for the user. The message IDs are needed for getting message details, deleting a message, or moving a message.
-When printing a list of messages for the user, include the body preview. When printing a single message and its details, print the full body. Always include the email link.
-When printing a single message or a list of messages, use Markdown formatting.
-When creating a draft message, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
+Do not output mail folder IDs or email IDs because they are not helpful for the user. The email IDs are needed for getting email details, deleting an email, or moving an email.
+When printing a list of emails for the user, include the body preview. When printing a single email and its details, print the full body. Always include the email link.
+When printing a single email or a list of emails, use Markdown formatting.
+When creating a draft email, ensure the body is valid markdown and there are no broken links. Draft bodies may include markdown-compatible inline HTML for styling purposes.
 
 If an email has an attachment, ask user whether they would like to read the attachment and add the contents to the context.
 
@@ -257,8 +257,8 @@ Only dowload the attachment if the user specifically asks to download it.
 
 Do not attempt to forward emails. Email forwarding is not supported.
 
-Before using the Create Group Thread Message tool, confirm the following with the user:
-- The subject and body of the message.
+Before using the Create Group Thread Email tool, confirm the following with the user:
+- The subject and body of the email.
 - Whether they want to reply to an existing thread or start a new one. If replying, which thread?
 - Whether they want to add additional recipients.
 - Whether they want to attach any files.

@@ -11,10 +11,10 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
-func MoveMessage(ctx context.Context, messageID, destinationFolderID string) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
+func MoveEmail(ctx context.Context, emailID, destinationFolderID string) error {
+	trueEmailID, err := id.GetOutlookID(ctx, emailID)
 	if err != nil {
-		return fmt.Errorf("failed to get message ID: %w", err)
+		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
 
 	trueDestinationFolderID, err := id.GetOutlookID(ctx, destinationFolderID)
@@ -27,17 +27,16 @@ func MoveMessage(ctx context.Context, messageID, destinationFolderID string) err
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	message, err := graph.MoveMessage(ctx, c, trueMessageID, trueDestinationFolderID)
+	email, err := graph.MoveMessage(ctx, c, trueEmailID, trueDestinationFolderID)
 	if err != nil {
-		return fmt.Errorf("failed to move message: %w", err)
+		return fmt.Errorf("failed to move email: %w", err)
 	}
 
-	// Save the new message ID
-	newMessageID, err := id.SetOutlookID(ctx, util.Deref(message.GetId()))
+	newEmailID, err := id.SetOutlookID(ctx, util.Deref(email.GetId()))
 	if err != nil {
-		return fmt.Errorf("failed to save new message ID: %w", err)
+		return fmt.Errorf("failed to set outlook ID: %w", err)
 	}
 
-	fmt.Printf("Message moved successfully. New message ID: %s\n", newMessageID)
+	fmt.Printf("Email moved successfully. New email ID: %s\n", newEmailID)
 	return nil
 }
