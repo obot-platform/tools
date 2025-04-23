@@ -7,7 +7,7 @@ Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, 
 ---
 Name: List Events
 Description: Retrieves events from a Google Calendar. By default, it sets `time_min` to the current time, returning all upcoming and recurring events scheduled for the future.
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to list events from. Set to `primary` to list events from the primary calendar.
 Param: event_type: (Optional) Type of events to list. Valid options are: birthday, default, focusTime, fromGmail, outOfOffice, workingLocation. If not set, will list all events.
@@ -23,7 +23,7 @@ Param: q: (Optional) Free text search terms to find events by.
 ---
 Name: Get Event
 Description: Get details of a specific event
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to get event from. Set to `primary` to get event from the primary calendar.
 Param: event_id: (Required) ID of the event to get details of
@@ -33,7 +33,7 @@ Param: event_id: (Required) ID of the event to get details of
 ---
 Name: Move Event
 Description: Move an event to a different calendar
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to move event from.
 Param: event_id: (Required) ID of the event to move.
@@ -44,7 +44,7 @@ Param: new_calendar_id: (Required) ID of the calendar to move the event to.
 ---
 Name: Quick Add Event
 Description: Quickly add an event to a google calendar based on a simple text string
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to add event to. Set to `primary` to add event to the primary calendar.
 Param: text: (Required) Text string to add to the calendar.
@@ -54,7 +54,7 @@ Param: text: (Required) Text string to add to the calendar.
 ---
 Name: Create Event
 Description: Create a new event in a google calendar. The event type is always set to "default".
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to create event in. Set to `primary` to create event in the primary calendar.
 Param: summary: (Optional) Title of the event to create. Defaults to "My Event"
@@ -74,7 +74,7 @@ Param: recurrence: (Optional) For a recurring event, provide a JSON array of str
 ---
 Name: Update Event
 Description: Updates an existing event in a Google Calendar. Only the event organizer is allowed to make changes. Only the fields that are provided will be updated.
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to update event in.
 Param: event_id: (Required) ID of the event to update
@@ -95,7 +95,7 @@ Param: recurrence: (Optional) For a recurring event, provide a JSON array of str
 ---
 Name: Delete Event
 Description: Delete an existing event from a google calendar
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to delete event from.
 Param: event_id: (Required) ID of the event to delete
@@ -105,7 +105,7 @@ Param: event_id: (Required) ID of the event to delete
 ---
 Name: List Recurring Event Instances
 Description: List all instances of a recurring event
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to list instances from.
 Param: event_id: (Required) ID of the recurring event to list instances of.
@@ -117,7 +117,7 @@ Param: time_max: (Optional) Lower bound (exclusive) for an event's end time to f
 ---
 Name: Respond To Event
 Description: Respond to an Google Calendar event invitation.
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to respond to event in.
 Param: event_id: (Required) ID of the event to respond to.
@@ -128,7 +128,7 @@ Param: response: (Required) Response to the event invitation. Must be one of 'ac
 ---
 Name: List Calendars
 Description: List all google calendars for the user
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_calendars
@@ -136,7 +136,7 @@ Share Context: Google Calendar Context
 ---
 Name: Get Calendar
 Description: Get details of a specific google calendar
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to get details of
 
@@ -145,7 +145,7 @@ Param: calendar_id: (Required) ID of the calendar to get details of
 ---
 Name: Create Calendar
 Description: Create a new google calendar
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: summary: (Required) Title of the calendar to create.
 Param: time_zone: (Optional) Time zone of the calendar to create. Default is the user's timezone, if the user's timezone is not known, it will be set to UTC.
@@ -155,7 +155,7 @@ Param: time_zone: (Optional) Time zone of the calendar to create. Default is the
 ---
 Name: Update Calendar
 Description: Update an existing google calendar. Only the fields that are provided will be updated.
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to update
 Param: summary: (Optional) Title of the calendar to update.
@@ -168,7 +168,7 @@ Param: description: (Optional) Description of the calendar to update.
 ---
 Name: Delete Calendar
 Description: Delete an existing google calendar
-Credential: ./credential
+Credential: ../credential
 Share Context: Google Calendar Context
 Param: calendar_id: (Required) ID of the calendar to delete
 
@@ -203,4 +203,4 @@ If displaying recurring events, kindly remind the user that recurring events are
 
 ---
 !metadata:*:oauth
-google-calendar
+google
