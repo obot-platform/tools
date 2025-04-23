@@ -30,7 +30,14 @@ flows:
       - filetypes: [".pdf"]
         documentloader:
           name: smartpdf
-      - filetypes: [ ".pptx", ".doc", ".ppt", ".pages" ]
+      - filetypes:
+          [
+            ".pptx",
+            ".doc",
+            ".ppt",
+            ".pages",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          ]
         converter:
           name: soffice
           targetFormat: pdf
@@ -41,6 +48,3 @@ flows:
               onImageCount: 1
               onTable: true
               onEmptyContent: true
-
-
-

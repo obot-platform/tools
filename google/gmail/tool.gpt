@@ -169,6 +169,7 @@ Share Context: Email List Context
 Share Tools: List Attachments
 Param: email_id: The ID of the email containing the attachment
 Param: attachment_id: The ID of the attachment to read
+Credential: sys.model.provider.credential
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/getAttachment.py
 

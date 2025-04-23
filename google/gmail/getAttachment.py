@@ -44,6 +44,8 @@ def main():
                 os.getenv("GPTSCRIPT_TOOL_DIR")
                 + "/../../knowledge/bin/gptscript-go-tool",
                 "load",
+                "--flows-file=blueprint:obot",
+                "--flow=obotload",
                 "--format",
                 "markdown",
                 "-",

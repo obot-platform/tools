@@ -143,7 +143,7 @@ Name: Read Attachment
 Description: Get the markdown converted contents of an attachment from an Outlook email.
 Share Context: Outlook Mail Context
 Credential: ../../credential
-Share Tools: List Attachments
+Credential: sys.model.provider.credential
 Param: email_id: The ID of the email to get the attachment from. Required.
 Param: attachment_id: The ID of the attachment to get. Required.
 
@@ -210,7 +210,7 @@ Param: email_id: The ID of the email to list attachments for.
 Name: Get Group Thread Email Attachment
 Description: Get the markdown converted contents of an attachment from an Outlook group thread email.
 Share Context: Outlook Mail Context
-Credential: ../../credential
+Credential: sys.model.provider.credential
 Share Tools: List Groups, List Group Threads, List Group Thread Email Attachments
 Param: group_id: The ID of the group containing the thread.
 Param: thread_id: The ID of the thread containing the email.

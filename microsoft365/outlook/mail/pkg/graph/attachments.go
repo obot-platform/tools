@@ -11,6 +11,8 @@ import (
 	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/obot-platform/tools/knowledge/pkg/datastore/documentloader"
+	"github.com/obot-platform/tools/knowledge/pkg/flows"
+	flowconfig "github.com/obot-platform/tools/knowledge/pkg/flows/config"
 	"github.com/pkoukk/tiktoken-go"
 )
 
@@ -43,7 +45,38 @@ func GetAttachmentContent(ctx context.Context, client *msgraphsdkgo.GraphService
 
 	filetype := data["contentType"].(string)
 
-	loader := documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{})
+	flowCfg, err := flowconfig.Load("blueprint:obot")
+	if err != nil {
+		return "", fmt.Errorf("failed to load flow config: %w", err)
+	}
+
+	var flow *flowconfig.FlowConfigEntry
+	flow, err = flowCfg.GetFlow("obotload")
+	if err != nil {
+		return "", fmt.Errorf("failed to get flow: %w", err)
+	}
+
+	var loader documentloader.LoaderFunc
+	var ingestionFlow *flows.IngestionFlow
+	for _, ingestionFlowConfig := range flow.Ingestion {
+		flow, err := ingestionFlowConfig.AsIngestionFlow(&flow.Globals.Ingestion)
+		if err != nil {
+			return "", fmt.Errorf("failed to create ingestion flow: %w", err)
+		}
+		if flow.SupportsFiletype(filetype) {
+			ingestionFlow = flow
+			break
+		}
+	}
+
+	if ingestionFlow != nil {
+		if err := ingestionFlow.FillDefaults(filetype); err != nil {
+			return "", fmt.Errorf("failed to fill defaults: %w", err)
+		}
+		loader = ingestionFlow.Load
+	} else {
+		loader = documentloader.DefaultDocLoaderFunc(filetype, documentloader.DefaultDocLoaderFuncOpts{})
+	}
 
 	docs, err := loader(ctx, bytes.NewReader(rawContent))
 	if err != nil {
