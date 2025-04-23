@@ -87,7 +87,6 @@ def extract_message_headers(message):
     date = None
 
     if message is not None:
-        # label_ids = [l for l in message.get("labelIds", []) if not l.startswith("CATEGORY_")]
         label_ids = message.get("labelIds", [])
 
         for header in message["payload"]["headers"]:
