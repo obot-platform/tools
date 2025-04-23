@@ -62,7 +62,7 @@ tools:
   shell:
     reference: ./shell
   word:
-    reference: ./word
+    reference: ./microsoft365/word
   tavily:
     reference: ./search/tavily
   googlecustomsearch:
