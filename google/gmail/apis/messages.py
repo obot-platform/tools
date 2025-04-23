@@ -21,6 +21,13 @@ from apis.helpers import (
 
 logger = setup_logger(__name__)
 
+CATEGORY_LABELS = {
+    "CATEGORY_PERSONAL": "primary",
+    "CATEGORY_SOCIAL": "social",
+    "CATEGORY_PROMOTIONS": "promotions",
+    "CATEGORY_UPDATES": "updates",
+    "CATEGORY_FORUMS": "forums",
+}
 
 def modify_message_labels(
     service,
@@ -273,7 +280,7 @@ async def list_messages(
         print("An error occurred while creating the dataset:", e)
 
 
-def message_to_string(service, message):
+def message_to_string(service, message) -> tuple[str, str]:
     msg = (
         service.users()
         .messages()
@@ -285,11 +292,27 @@ def message_to_string(service, message):
         )
         .execute()
     )
+    return format_message_metadata(msg)
+
+
+def format_message_metadata(msg) -> tuple[str, str]:
     msg_id = msg["id"]
     subject, sender, to, cc, bcc, date, label_ids = extract_message_headers(msg)
+    read_status = "Read" if "UNREAD" not in label_ids else "Unread"
+    category = ""
+    label_ids_set = set(label_ids)
+    if "INBOX" in label_ids_set: # Category only applies when message is in inbox
+        for category_id, category_name in CATEGORY_LABELS.items():
+            if category_id in label_ids_set:
+                category = category_name
+                break # Only one category applies
+
+    msg_str = f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date},Read_status: {read_status}"
+    if category:
+        msg_str += f", Category: {category}"
     return (
         msg_id,
-        f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}, Labels: {label_ids}",
+        msg_str,
     )
 
 
