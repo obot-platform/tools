@@ -90,30 +90,27 @@ func Run(cfg *Config) error {
 
 	mux := http.NewServeMux()
 
-	// Register default handlers only if they are not already registered
-	if _, exists := cfg.CustomPathHandleFuncs["/{$}"]; !exists {
-		mux.HandleFunc("/{$}", s.healthz)
+	if cfg.CustomPathHandleFuncs == nil {
+		cfg.CustomPathHandleFuncs = make(map[string]http.HandlerFunc)
 	}
-	if handler, exists := cfg.CustomPathHandleFuncs["/v1/models"]; !exists {
-		mux.Handle("/v1/models", &httputil.ReverseProxy{
+
+	// Register default handlers only if they are not already registered
+	if handler := cfg.CustomPathHandleFuncs["/{$}"]; handler == nil {
+		cfg.CustomPathHandleFuncs["/{$}"] = s.healthz
+	}
+	if handler := cfg.CustomPathHandleFuncs["/v1/models"]; handler == nil {
+		cfg.CustomPathHandleFuncs["/v1/models"] = (&httputil.ReverseProxy{
 			Director:       s.proxyDirector,
 			ModifyResponse: cfg.RewriteModelsFn,
-		})
-	} else {
-		mux.HandleFunc("/v1/models", handler)
+		}).ServeHTTP
 	}
-	if handler, exists := cfg.CustomPathHandleFuncs["/v1/"]; !exists {
-		mux.Handle("/v1/", &httputil.ReverseProxy{
+	if handler := cfg.CustomPathHandleFuncs["/v1/"]; handler == nil {
+		cfg.CustomPathHandleFuncs["/v1/"] = (&httputil.ReverseProxy{
 			Director: s.proxyDirector,
-		})
-	} else {
-		mux.HandleFunc("/v1/", handler)
+		}).ServeHTTP
 	}
 
 	for path, handler := range cfg.CustomPathHandleFuncs {
-		if path == "/v1/models" || path == "/v1/" {
-			continue
-		}
 		mux.HandleFunc(path, handler)
 	}
 

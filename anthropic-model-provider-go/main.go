@@ -14,10 +14,9 @@ func main() {
 	isValidate := len(os.Args) > 1 && os.Args[1] == "validate"
 
 	cfg := &proxy.Config{
-		APIKey:          os.Getenv("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY"), // optional, as e.g. Ollama doesn't require an API key
-		ListenPort:      os.Getenv("PORT"),
-		BaseURL:         "https://api.anthropic.com/v1/",
-		RewriteModelsFn: aproxy.RewriteModelsResponse,
+		APIKey:     os.Getenv("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY"), // optional, as e.g. Ollama doesn't require an API key
+		ListenPort: os.Getenv("PORT"),
+		BaseURL:    "https://api.anthropic.com/v1/",
 		RewriteHeaderFn: func(header http.Header) {
 			header.Del("Authorization")
 			header.Set("x-api-key", os.Getenv("OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY"))
