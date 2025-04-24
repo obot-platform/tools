@@ -171,70 +171,10 @@ func promptForOauth(gs *gptscript.GPTScript, urls *urls, in *input, credJSON *[]
 	// Refresh existing credential if there is one.
 	existing := os.Getenv("GPTSCRIPT_EXISTING_CREDENTIAL")
 	if existing != "" {
-		var c cred
-		if err := json.Unmarshal([]byte(existing), &c); err != nil {
-			return fmt.Errorf("main: failed to unmarshal existing credential: %w", err)
+		// If refreshing the token doesn't work, then go through the Oauth flow again.
+		if err := refreshExistingCredential(urls, in, credJSON, existing); err == nil {
+			return nil
 		}
-
-		u, err := url.Parse(urls.refreshURL)
-		if err != nil {
-			return fmt.Errorf("main: failed to parse refresh URL: %w", err)
-		}
-
-		q := u.Query()
-		q.Set("refresh_token", c.RefreshToken)
-		if len(in.OAuthInfo.Scope) != 0 {
-			q.Set("scope", strings.Join(in.OAuthInfo.Scope, " "))
-		}
-		if len(in.OAuthInfo.OptionalScope) != 0 {
-			q.Set("optional_scope", strings.Join(in.OAuthInfo.OptionalScope, " "))
-		}
-		u.RawQuery = q.Encode()
-
-		req, err := http.NewRequest("GET", u.String(), nil)
-		if err != nil {
-			return fmt.Errorf("main: failed to create refresh request: %w", err)
-		}
-
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return fmt.Errorf("main: failed to send refresh request: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("main: unexpected status code from refresh request: %d", resp.StatusCode)
-		}
-
-		var oauthResp oauthResponse
-		if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
-			return fmt.Errorf("main: failed to decode refresh response JSON: %w", err)
-		}
-
-		envVars := map[string]string{
-			in.OAuthInfo.Token: oauthResp.AccessToken,
-		}
-
-		for k, v := range oauthResp.Extras {
-			envVars[k] = v
-		}
-
-		out := cred{
-			Env:          envVars,
-			RefreshToken: oauthResp.RefreshToken,
-		}
-
-		if oauthResp.ExpiresIn > 0 {
-			expiresAt := time.Now().Add(time.Second * time.Duration(oauthResp.ExpiresIn))
-			out.ExpiresAt = &expiresAt
-		}
-
-		*credJSON, err = json.Marshal(out)
-		if err != nil {
-			return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
-		}
-
-		return nil
 	}
 
 	state, err := generateString()
@@ -341,6 +281,73 @@ func promptForOauth(gs *gptscript.GPTScript, urls *urls, in *input, credJSON *[]
 		}
 
 		break
+	}
+
+	return nil
+}
+
+func refreshExistingCredential(urls *urls, in *input, credJSON *[]byte, existing string) error {
+	var c cred
+	if err := json.Unmarshal([]byte(existing), &c); err != nil {
+		return fmt.Errorf("main: failed to unmarshal existing credential: %w", err)
+	}
+
+	u, err := url.Parse(urls.refreshURL)
+	if err != nil {
+		return fmt.Errorf("main: failed to parse refresh URL: %w", err)
+	}
+
+	q := u.Query()
+	q.Set("refresh_token", c.RefreshToken)
+	if len(in.OAuthInfo.Scope) != 0 {
+		q.Set("scope", strings.Join(in.OAuthInfo.Scope, " "))
+	}
+	if len(in.OAuthInfo.OptionalScope) != 0 {
+		q.Set("optional_scope", strings.Join(in.OAuthInfo.OptionalScope, " "))
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return fmt.Errorf("main: failed to create refresh request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("main: failed to send refresh request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("main: unexpected status code from refresh request: %d", resp.StatusCode)
+	}
+
+	var oauthResp oauthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
+		return fmt.Errorf("main: failed to decode refresh response JSON: %w", err)
+	}
+
+	envVars := map[string]string{
+		in.OAuthInfo.Token: oauthResp.AccessToken,
+	}
+
+	for k, v := range oauthResp.Extras {
+		envVars[k] = v
+	}
+
+	out := cred{
+		Env:          envVars,
+		RefreshToken: oauthResp.RefreshToken,
+	}
+
+	if oauthResp.ExpiresIn > 0 {
+		expiresAt := time.Now().Add(time.Second * time.Duration(oauthResp.ExpiresIn))
+		out.ExpiresAt = &expiresAt
+	}
+
+	*credJSON, err = json.Marshal(out)
+	if err != nil {
+		return fmt.Errorf("main: failed to marshal refreshed credential: %w", err)
 	}
 
 	return nil
