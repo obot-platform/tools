@@ -16,7 +16,7 @@ tools:
   wordpress-seo:
     reference: ./wordpress-seo
   excel:
-    reference: ./excel
+    reference: ./microsoft365/excel
   browser:
     reference: ./browser
   bluesky:
@@ -44,9 +44,9 @@ tools:
   images:
     reference: ./images
   outlook-mail:
-    reference: ./outlook/mail
+    reference: ./microsoft365/outlook/mail
   outlook-calender:
-    reference: ./outlook/calendar
+    reference: ./microsoft365/outlook/calendar
   github:
     reference: ./github
   time:
@@ -140,6 +140,8 @@ system:
     reference: ./tasks-workflow
   task-invoke:
     reference: ./task-invoke
+  loop-data:
+    reference: ./loop-data
 
 modelProviders:
   openai-model-provider:

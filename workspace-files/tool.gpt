@@ -3,7 +3,7 @@ Description: Adds the capability for users to read and write workspace files
 Type: context
 Metadata: category: Capability
 Context: workspace_list
-Share Tools: workspace_read, workspace_write, workspace_copy
+Share Tools: workspace_read, workspace_write, workspace_copy, workspace_file_download_url
 Share Input Filter: input_parse
 
 #!/bin/bash
@@ -43,6 +43,13 @@ Credential: sys.model.provider.credential
 Params: filename: The filename to read
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool read
+
+---
+Name: workspace_file_download_url
+Description: Get a URL that the current user can use to download a given workspace file. This URL is authenticated and authorized to the current user and is not appropriate for public sharing.
+Params: filename: The filename to get a download URL for
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool download-url
 
 ---
 Name: workspace_write

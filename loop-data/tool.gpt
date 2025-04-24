@@ -1,0 +1,7 @@
+Name: Loop Data
+Description: Provide either the data_list or dataset_id parameter, but not both.
+Param: data_list: JSON list of data described by the user
+Param: dataset_id: ID of the dataset that contains the data described by the user
+Param: file_name: Name of the file to write to.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
