@@ -1,6 +1,6 @@
 package global
 
-const CredentialEnv = "GPTSCRIPT_MICROSOFT_WORD_TOKEN"
+const CredentialEnv = "GPTSCRIPT_GRAPH_MICROSOFT_COM_BEARER_TOKEN"
 
 var (
 	ReadOnlyScopes  = []string{"Files.Read", "Files.Read.All", "User.Read"}
