@@ -355,7 +355,11 @@ def delete_post(client):
     response = client.delete(url, params=query_params)
     if response.status_code == 200:
         return {
-            "message": f"{response.status_code}. Post {post_id} deleted successfully"
+            "message": (
+                f"{response.status_code}. Post {post_id} deleted successfully. "
+                "Note: If this was a published post, it may still appear temporarily due to caching "
+                "by the browser, server, or CDN. This is normal and should resolve shortly. "
+            )
         }
     elif response.status_code == 401:
         print(f"Authentication failed: {response.status_code}, {response.text}")
