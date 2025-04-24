@@ -16,11 +16,6 @@ export interface DownloadInfo {
   fileContents?: string
 }
 
-/**
- * Downloads content from a URL and attempts to read it
- * For HTML content, this is handled by the browse function
- * For non-HTML content, this will download the file to the workspace
- */
 export async function download(headers: IncomingHttpHeaders, url: string): Promise<DownloadInfo> {
   const downloadedAt = Date.now()
 
