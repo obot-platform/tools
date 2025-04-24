@@ -27,9 +27,18 @@ func main() {
 			os.Exit(1)
 		}
 	case "listEventsToday":
-		now := time.Now()
-		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+		timezone := os.Getenv("OBOT_USER_TIMEZONE")
+		if timezone == "" {
+			timezone = "UTC" // default fallback
+		}
+		loc, err := time.LoadLocation(timezone)
+		if err != nil {
+			fmt.Println("Error loading location: %s. Error: %s", timezone, err)
+			os.Exit(1)
+		}
+		now := time.Now().In(loc)
+		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, loc)
 		if err := commands.ListEvents(context.Background(), start, end); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
