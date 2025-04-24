@@ -42,6 +42,7 @@ type oauthInfo struct {
 	Scope         []string `json:"scope"`
 	UserScope     []string `json:"userScope"`
 	OptionalScope []string `json:"optionalScope"`
+	CheckParam    string   `json:"checkParam"`
 }
 
 type promptInfo struct {
@@ -76,6 +77,7 @@ type oauthResponse struct {
 type cred struct {
 	Env          map[string]string `json:"env"`
 	ExpiresAt    *time.Time        `json:"expiresAt"`
+	CheckParam   string            `json:"checkParam"`
 	RefreshToken string            `json:"refreshToken"`
 }
 
@@ -268,6 +270,7 @@ func promptForOauth(gs *gptscript.GPTScript, urls *urls, in *input, credJSON *[]
 		out := cred{
 			Env:          envVars,
 			RefreshToken: oauthResp.RefreshToken,
+			CheckParam:   in.OAuthInfo.CheckParam,
 		}
 
 		if oauthResp.ExpiresIn > 0 {
@@ -338,6 +341,7 @@ func refreshExistingCredential(urls *urls, in *input, credJSON *[]byte, existing
 	out := cred{
 		Env:          envVars,
 		RefreshToken: oauthResp.RefreshToken,
+		CheckParam:   in.OAuthInfo.CheckParam,
 	}
 
 	if oauthResp.ExpiresIn > 0 {
