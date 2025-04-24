@@ -3,11 +3,11 @@ package printers
 import (
 	"context"
 	"fmt"
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	"github.com/jaytaylor/html2text"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	"os"
 	"strings"
 	"time"
@@ -73,19 +73,35 @@ func PrintEvent(event models.Eventable, detailed bool) {
 	fmt.Printf("  ID: %s\n", util.Deref(event.GetId()))
 
 	isAllDay := util.Deref(event.GetIsAllDay())
+	if isAllDay {
+		fmt.Printf("  Time: All Day Event\n")
+	} else { // display start and end times in user's timezone
+		userTZ := os.Getenv("OBOT_USER_TIMEZONE")
+		if userTZ == "" {
+			userTZ = "UTC"
+		}
 
-	startTZ, endTZ := EventDisplayTimeZone(event)
-	fmt.Printf("  Start: %s%s\n", util.Deref(event.GetStart().GetDateTime()), startTZ)
-	fmt.Printf("  End: %s%s\n", util.Deref(event.GetEnd().GetDateTime()), endTZ)
+		// Convert start time to user timezone
+		startTime := util.Deref(event.GetStart().GetDateTime())
+		startTZSource := util.Deref(event.GetStart().GetTimeZone())
+		startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
+
+		// Convert end time to user timezone
+		endTime := util.Deref(event.GetEnd().GetDateTime())
+		endTZSource := util.Deref(event.GetEnd().GetTimeZone())
+		endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
+
+		fmt.Printf("  Start Time: %s %s\n", startTimeConverted, startTZDisplay)
+		fmt.Printf("  End Time: %s %s\n", endTimeConverted, endTZDisplay)
+	}
 
 	if detailed {
 		fmt.Printf("  Location: %s\n", util.Deref(event.GetLocation().GetDisplayName()))
-		// fmt.Printf("  Is All Day: %t\n", util.Deref(event.GetIsAllDay()))
-		isRecurring := false
 		if event.GetSeriesMasterId() != nil {
-			isRecurring = true
+			fmt.Printf("  Recurrence: Yes\n")
+		} else {
+			fmt.Printf("  Recurrence: None\n")
 		}
-		fmt.Printf("  Is Recurring: %t\n", isRecurring)
 		fmt.Printf("  Is Cancelled: %t\n", util.Deref(event.GetIsCancelled()))
 		fmt.Printf("  Is Online Meeting: %t\n", util.Deref(event.GetIsOnlineMeeting()))
 		fmt.Printf("  Response Status: %s\n", event.GetResponseStatus().GetResponse().String())
