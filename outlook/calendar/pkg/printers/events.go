@@ -30,28 +30,34 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	sb.WriteString("Subject: " + util.Deref(event.GetSubject()) + "\n")
 	sb.WriteString("  ID: " + util.Deref(event.GetId()) + "\n")
 
-	// Get user timezone from environment variable
-	userTZ := os.Getenv("OBOT_USER_TIMEZONE")
-	if userTZ == "" {
-		userTZ = "UTC"
+	isAllDay := util.Deref(event.GetIsAllDay())
+	if isAllDay {
+		sb.WriteString("  Time: All Day Event\n")
+	} else {
+		// Get user timezone from environment variable
+		userTZ := os.Getenv("OBOT_USER_TIMEZONE")
+		if userTZ == "" {
+			userTZ = "UTC"
+		}
+
+		// Convert start time to user timezone
+		startTime := util.Deref(event.GetStart().GetDateTime())
+		startTZSource := util.Deref(event.GetStart().GetTimeZone())
+		startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
+
+		// Convert end time to user timezone
+		endTime := util.Deref(event.GetEnd().GetDateTime())
+		endTZSource := util.Deref(event.GetEnd().GetTimeZone())
+		endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
+
+		sb.WriteString("  Start Time: " + startTimeConverted + " " + startTZDisplay + "\n")
+		sb.WriteString("  End Time: " + endTimeConverted + " " + endTZDisplay + "\n")
 	}
 
-	// Convert start time to user timezone
-	startTime := util.Deref(event.GetStart().GetDateTime())
-	startTZSource := util.Deref(event.GetStart().GetTimeZone())
-	startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
-
-	// Convert end time to user timezone
-	endTime := util.Deref(event.GetEnd().GetDateTime())
-	endTZSource := util.Deref(event.GetEnd().GetTimeZone())
-	endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
-
-	sb.WriteString("  Start: " + startTimeConverted + " " + startTZDisplay + "\n")
-	sb.WriteString("  End: " + endTimeConverted + " " + endTZDisplay + "\n")
 	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
 	if calendar.Calendar.GetOwner() != nil {
-		fmt.Printf("  Owner: %s (%s)\n", util.Deref(calendar.Calendar.GetOwner().GetName()), util.Deref(calendar.Calendar.GetOwner().GetAddress()))
-		fmt.Printf("  Owner Type: %s\n", string(calendar.Owner))
+		sb.WriteString("  Owner: " + util.Deref(calendar.Calendar.GetOwner().GetName()) + " (" + util.Deref(calendar.Calendar.GetOwner().GetAddress()) + ")\n")
+		sb.WriteString("  Owner Type: " + string(calendar.Owner) + "\n")
 	}
 	return sb.String()
 }
