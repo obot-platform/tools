@@ -15,13 +15,13 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func SearchMessages(ctx context.Context, subject, fromAddress, fromName, folderID, start, end, limit string) error {
+func SearchEmails(ctx context.Context, subject, fromAddress, fromName, folderID, start, end, limitStr string) error {
 	var (
 		limitInt = 10
 		err      error
 	)
-	if limit != "" {
-		limitInt, err = strconv.Atoi(limit)
+	if limitStr != "" {
+		limitInt, err = strconv.Atoi(limitStr)
 		if err != nil {
 			return fmt.Errorf("failed to parse limit: %w", err)
 		}

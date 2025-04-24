@@ -31,15 +31,15 @@ func main() {
 			fmt.Printf("failed to list mail folders: %v\n", err)
 			os.Exit(1)
 		}
-	case "listMessages":
-		if err := commands.ListMessages(
+	case "listEmails":
+		if err := commands.ListEmails(
 			context.Background(),
 			os.Getenv("FOLDER_ID"),
 			os.Getenv("START"),
 			os.Getenv("END"),
 			os.Getenv("LIMIT"),
 		); err != nil {
-			fmt.Printf("failed to list mail: %v\n", err)
+			fmt.Printf("failed to list emails: %v\n", err)
 			os.Exit(1)
 		}
 	case "listGroupThreads":
@@ -58,13 +58,13 @@ func main() {
 			fmt.Printf("failed to list groups: %v\n", err)
 			os.Exit(1)
 		}
-	case "getMessageDetails":
-		if err := commands.GetMessageDetails(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
-			fmt.Printf("failed to get message details: %v\n", err)
+	case "getEmailDetails":
+		if err := commands.GetEmailDetails(context.Background(), os.Getenv("EMAIL_ID")); err != nil {
+			fmt.Printf("failed to get email details: %v\n", err)
 			os.Exit(1)
 		}
-	case "searchMessages":
-		if err := commands.SearchMessages(
+	case "searchEmails":
+		if err := commands.SearchEmails(
 			context.Background(),
 			os.Getenv("SUBJECT"),
 			os.Getenv("FROM_ADDRESS"),
@@ -74,7 +74,7 @@ func main() {
 			os.Getenv("END"),
 			os.Getenv("LIMIT"),
 		); err != nil {
-			fmt.Printf("failed to search messages: %v\n", err)
+			fmt.Printf("failed to search emails: %v\n", err)
 			os.Exit(1)
 		}
 	case "createDraft":
@@ -82,9 +82,9 @@ func main() {
 			fmt.Printf("failed to create draft: %v\n", err)
 			os.Exit(1)
 		}
-	case "createGroupThreadMessage":
-		if err := commands.CreateGroupThreadMessage(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), getDraftInfoFromEnv()); err != nil {
-			fmt.Printf("failed to create group thread message: %v\n", err)
+	case "createGroupThreadEmail":
+		if err := commands.CreateGroupThreadEmail(context.Background(), os.Getenv("GROUP_ID"), os.Getenv("REPLY_TO_THREAD_ID"), getDraftInfoFromEnv()); err != nil {
+			fmt.Printf("failed to create group thread email: %v\n", err)
 			os.Exit(1)
 		}
 	case "sendDraft":
@@ -92,9 +92,9 @@ func main() {
 			fmt.Printf("failed to send draft: %v\n", err)
 			os.Exit(1)
 		}
-	case "deleteMessage":
-		if err := commands.DeleteMessage(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
-			fmt.Printf("failed to delete message: %v\n", err)
+	case "deleteEmail":
+		if err := commands.DeleteEmail(context.Background(), os.Getenv("EMAIL_ID")); err != nil {
+			fmt.Printf("failed to delete email: %v\n", err)
 			os.Exit(1)
 		}
 	case "deleteGroupThread":
@@ -102,9 +102,9 @@ func main() {
 			fmt.Printf("failed to delete group thread: %v\n", err)
 			os.Exit(1)
 		}
-	case "moveMessage":
-		if err := commands.MoveMessage(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("DESTINATION_FOLDER_ID")); err != nil {
-			fmt.Printf("failed to move message: %v\n", err)
+	case "moveEmail":
+		if err := commands.MoveEmail(context.Background(), os.Getenv("EMAIL_ID"), os.Getenv("DESTINATION_FOLDER_ID")); err != nil {
+			fmt.Printf("failed to move email: %v\n", err)
 			os.Exit(1)
 		}
 	case "getMyEmailAddress":
@@ -113,7 +113,7 @@ func main() {
 			os.Exit(1)
 		}
 	case "listAttachments":
-		if err := commands.ListAttachments(context.Background(), os.Getenv("MESSAGE_ID")); err != nil {
+		if err := commands.ListAttachments(context.Background(), os.Getenv("EMAIL_ID")); err != nil {
 			fmt.Printf("failed to list attachments: %v\n", err)
 			os.Exit(1)
 		}
@@ -121,41 +121,40 @@ func main() {
 		client := apiclient.NewClientFromEnv()
 
 		if err := commands.DownloadAttachment(context.Background(), os.Getenv("ATTACHMENT_ID"), client, &commands.DownloadAttachmentOpts{
-			MessageID:     os.Getenv("MESSAGE_ID"),
+			EmailID:       os.Getenv("EMAIL_ID"),
 			ThreadID:      threadID,
 			ProjectID:     projectID,
 			AssistantID:   assistantID,
 			GroupID:       os.Getenv("GROUP_ID"),
 			GroupThreadID: os.Getenv("THREAD_ID"),
-			PostID:        os.Getenv("POST_ID"),
 		}); err != nil {
 			fmt.Printf("failed to download attachment: %v\n", err)
 			os.Exit(1)
 		}
-	case "getAttachment":
-		if err := commands.GetAttachment(context.Background(), os.Getenv("MESSAGE_ID"), os.Getenv("ATTACHMENT_ID")); err != nil {
-			fmt.Printf("failed to get attachment: %v\n", err)
+	case "readAttachment":
+		if err := commands.ReadAttachment(context.Background(), os.Getenv("EMAIL_ID"), os.Getenv("ATTACHMENT_ID")); err != nil {
+			fmt.Printf("failed to read attachment: %v\n", err)
 			os.Exit(1)
 		}
-	case "listGroupThreadMessageAttachments":
-		if err := commands.ListGroupThreadMessageAttachments(
+	case "listGroupThreadEmailAttachments":
+		if err := commands.ListGroupThreadEmailAttachments(
 			context.Background(),
 			os.Getenv("GROUP_ID"),
 			os.Getenv("THREAD_ID"),
-			os.Getenv("POST_ID"),
+			os.Getenv("EMAIL_ID"),
 		); err != nil {
-			fmt.Printf("failed to list group thread message attachments: %v\n", err)
+			fmt.Printf("failed to list group thread email attachments: %v\n", err)
 			os.Exit(1)
 		}
-	case "getGroupThreadMessageAttachment":
-		if err := commands.GetGroupThreadMessageAttachment(
+	case "getGroupThreadEmailAttachment":
+		if err := commands.GetGroupThreadEmailAttachment(
 			context.Background(),
 			os.Getenv("GROUP_ID"),
 			os.Getenv("THREAD_ID"),
-			os.Getenv("POST_ID"),
+			os.Getenv("EMAIL_ID"),
 			os.Getenv("ATTACHMENT_ID"),
 		); err != nil {
-			fmt.Printf("failed to get group thread message attachment: %v\n", err)
+			fmt.Printf("failed to get group thread email attachment: %v\n", err)
 			os.Exit(1)
 		}
 	default:
@@ -178,14 +177,14 @@ func getDraftInfoFromEnv() graph.DraftInfo {
 	}
 
 	info := graph.DraftInfo{
-		Subject:          os.Getenv("SUBJECT"),
-		Body:             os.Getenv("BODY"),
-		Recipients:       smartSplit(os.Getenv("RECIPIENTS"), ","),
-		CC:               smartSplit(os.Getenv("CC"), ","),
-		BCC:              smartSplit(os.Getenv("BCC"), ","),
-		Attachments:      attachments,
-		ReplyAll:         os.Getenv("REPLY_ALL") == "true",
-		ReplyToMessageID: os.Getenv("REPLY_MESSAGE_ID"),
+		Subject:        os.Getenv("SUBJECT"),
+		Body:           os.Getenv("BODY"),
+		Recipients:     smartSplit(os.Getenv("RECIPIENTS"), ","),
+		CC:             smartSplit(os.Getenv("CC"), ","),
+		BCC:            smartSplit(os.Getenv("BCC"), ","),
+		Attachments:    attachments,
+		ReplyAll:       os.Getenv("REPLY_ALL") == "true",
+		ReplyToEmailID: os.Getenv("REPLY_EMAIL_ID"),
 	}
 
 	// We need to unset BODY, because if it's still set when we try to write files to the workspace,

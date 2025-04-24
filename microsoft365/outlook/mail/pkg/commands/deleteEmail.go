@@ -10,10 +10,10 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 )
 
-func DeleteMessage(ctx context.Context, messageID string) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
+func DeleteEmail(ctx context.Context, emailID string) error {
+	trueEmailID, err := id.GetOutlookID(ctx, emailID)
 	if err != nil {
-		return fmt.Errorf("failed to get message ID: %w", err)
+		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
 
 	c, err := client.NewClient(global.AllScopes)
@@ -21,10 +21,10 @@ func DeleteMessage(ctx context.Context, messageID string) error {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	if err := graph.DeleteMessage(ctx, c, trueMessageID); err != nil {
-		return fmt.Errorf("failed to delete message: %w", err)
+	if err := graph.DeleteMessage(ctx, c, trueEmailID); err != nil {
+		return fmt.Errorf("failed to delete email: %w", err)
 	}
 
-	fmt.Println("Message deleted successfully")
+	fmt.Println("Email deleted successfully.")
 	return nil
 }

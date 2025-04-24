@@ -43,10 +43,26 @@ func (s *Server) AnthropicProxyRedirect(req *http.Request) {
 	}
 
 	var reqBody openai.ChatCompletionRequest
-	if err := json.Unmarshal(bodyBytes, &reqBody); err == nil && needsModification(reqBody) {
-		if err := modifyRequestBody(req, &reqBody); err != nil {
-			fmt.Println("failed to modify request body for claude, error: ", err.Error())
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	if err := json.Unmarshal(bodyBytes, &reqBody); err == nil {
+		var modified bool
+		if reqBody.Stream && (reqBody.StreamOptions == nil || !reqBody.StreamOptions.IncludeUsage) {
+			reqBody.StreamOptions = &openai.StreamOptions{
+				IncludeUsage: true,
+			}
+			modified = true
+		}
+
+		body, mod := modifyRequestBody(&reqBody)
+		modified = modified || mod
+
+		if modified {
+			modifiedBodyBytes, err := json.Marshal(body)
+			if err != nil {
+				fmt.Println("failed to modify request body: ", err.Error())
+			}
+
+			req.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
+			req.ContentLength = int64(len(modifiedBodyBytes))
 		}
 	} else {
 		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -67,36 +83,19 @@ func isThinkingModel(model string) bool {
 	return strings.HasSuffix(model, "-thinking")
 }
 
-func needsModification(reqBody openai.ChatCompletionRequest) bool {
-	return isThinkingModel(reqBody.Model)
-}
-
-func modifyRequestBody(req *http.Request, reqBody *openai.ChatCompletionRequest) error {
-	var modifiedBodyBytes []byte
-	var err error
+func modifyRequestBody(reqBody *openai.ChatCompletionRequest) (any, bool) {
 	if isThinkingModel(reqBody.Model) {
 		reqBody.Model = strings.TrimSuffix(reqBody.Model, "-thinking") // remove our custom -thinking suffix
 		reqBody.MaxTokens = 64000                                      // set max tokens to 64000, which is the current max for 3.7 Sonnet in extended thinking mode
 		temp := float32(1)
 		reqBody.Temperature = &temp
-		thinkingReqBody := &ThinkingRequestBody{
+		return &ThinkingRequestBody{
 			ChatCompletionRequest: *reqBody,
 			Thinking: ThinkingConfig{
 				Type:         "enabled",
 				BudgetTokens: 64000 / 2, // TODO: is 50% of max tokens a good default?
 			},
-		}
-		modifiedBodyBytes, err = json.Marshal(thinkingReqBody)
-		if err != nil {
-			return err
-		}
-	} else {
-		modifiedBodyBytes, err = json.Marshal(reqBody)
-		if err != nil {
-			return fmt.Errorf("failed to marshal request body after modification: %w", err)
-		}
+		}, true
 	}
-	req.Body = io.NopCloser(bytes.NewBuffer(modifiedBodyBytes))
-	req.ContentLength = int64(len(modifiedBodyBytes))
-	return nil
+	return reqBody, false
 }

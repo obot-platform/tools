@@ -35,6 +35,21 @@ def setup_logger(name):
 logger = setup_logger(__name__)
 
 
+GMAIL_BUILTIN_LABELS = {
+    "INBOX", "SPAM", "TRASH", "DRAFT", "SENT", "IMPORTANT", "STARRED", "UNREAD", "CATEGORY_PERSONAL",
+    "CATEGORY_SOCIAL", "CATEGORY_PROMOTIONS", "CATEGORY_UPDATES", "CATEGORY_FORUMS"
+}
+
+def parse_label_ids(label_ids_input: str) -> list[str]:
+    label_ids = []
+    for label in label_ids_input.split(","):
+        label = label.strip()
+        if label.upper() in GMAIL_BUILTIN_LABELS:
+            label_ids.append(label.upper())
+        else:
+            label_ids.append(label)  # preserve custom labels
+    return label_ids
+
 def get_user_timezone():
     user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
 
@@ -72,6 +87,8 @@ def extract_message_headers(message):
     date = None
 
     if message is not None:
+        label_ids = message.get("labelIds", [])
+
         for header in message["payload"]["headers"]:
             match header["name"].lower():
                 case "subject":
@@ -90,7 +107,7 @@ def extract_message_headers(message):
             .strftime("%Y-%m-%d %H:%M:%S %Z")
         )
 
-    return subject, sender, to, cc, bcc, date
+    return subject, sender, to, cc, bcc, date, label_ids
 
 
 async def prepend_base_path(base_path: str, file_path: str):
@@ -155,3 +172,8 @@ def format_query_timestamp(time_str: str):
 
     except ValueError as e:
         raise ValueError(f"Invalid datetime format: {e}")
+
+
+def str_to_bool(value):
+    """Convert a string to a boolean."""
+    return str(value).lower() in ("true", "1", "yes")

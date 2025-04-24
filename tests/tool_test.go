@@ -29,7 +29,7 @@ func TestGPTScriptLoadTools(t *testing.T) {
 
 	// Add assertions and test cases here
 	if client == nil {
-		t.Error("Expected non-nil client")
+		t.Fatal("Expected non-nil client")
 	}
 
 	idx, err := readRegistry(ctx, registryURL, client)

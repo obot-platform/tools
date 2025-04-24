@@ -12,8 +12,8 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
-func GetMessageDetails(ctx context.Context, messageID string) error {
-	trueMessageID, err := id.GetOutlookID(ctx, messageID)
+func GetEmailDetails(ctx context.Context, emailID string) error {
+	trueEmailID, err := id.GetOutlookID(ctx, emailID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
 	}
@@ -23,12 +23,12 @@ func GetMessageDetails(ctx context.Context, messageID string) error {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	result, err := graph.GetMessageDetails(ctx, c, trueMessageID)
+	result, err := graph.GetMessageDetails(ctx, c, trueEmailID)
 	if err != nil {
-		return fmt.Errorf("failed to get message details: %w", err)
+		return fmt.Errorf("failed to get email details: %w", err)
 	}
 
-	result.SetId(&trueMessageID)
+	result.SetId(&trueEmailID)
 
 	parentFolderID, err := id.GetOutlookID(ctx, util.Deref(result.GetParentFolderId()))
 	if err != nil {

@@ -15,15 +15,15 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func ListMessages(ctx context.Context, folderID, start, end, limit string) error {
+func ListEmails(ctx context.Context, folderID, start, end, limitStr string) error {
 	var (
 		// TODO: Change the default to a value < 1 when we have pagination implemented to trigger
 		// listing all messages.
 		limitInt int = 100
 		err      error
 	)
-	if limit != "" {
-		limitInt, err = strconv.Atoi(limit)
+	if limitStr != "" {
+		limitInt, err = strconv.Atoi(limitStr)
 		if err != nil {
 			return fmt.Errorf("failed to parse limit: %w", err)
 		}

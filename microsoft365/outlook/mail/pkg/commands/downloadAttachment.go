@@ -14,12 +14,8 @@ import (
 )
 
 type DownloadAttachmentOpts struct {
-	// Message fields
-	MessageID string
-
-	// Group message fields
+	EmailID       string
 	GroupID       string
-	PostID        string
 	GroupThreadID string
 
 	// Obot client parameters
@@ -35,28 +31,28 @@ func DownloadAttachment(ctx context.Context, attachmentID string, obotClient *ap
 	}
 
 	var requestInfo *abstractions.RequestInformation
-	if opts.GroupID != "" && opts.GroupThreadID != "" && opts.PostID != "" {
-		// Group thread post attachment
+	if opts.GroupID != "" && opts.GroupThreadID != "" {
+		// Group thread email attachment
 		requestInfo, err = c.Groups().
 			ByGroupId(opts.GroupID).
 			Threads().
 			ByConversationThreadId(opts.GroupThreadID).
 			Posts().
-			ByPostId(opts.PostID).
+			ByPostId(opts.EmailID).
 			Attachments().
 			ByAttachmentId(attachmentID).
 			ToGetRequestInformation(ctx, nil)
 	} else {
-		// Regular message attachment
-		var trueMessageID string
-		trueMessageID, err = id.GetOutlookID(ctx, opts.MessageID)
+		// Regular email attachment
+		var trueEmailID string
+		trueEmailID, err = id.GetOutlookID(ctx, opts.EmailID)
 		if err != nil {
 			return fmt.Errorf("failed to get outlook ID: %w", err)
 		}
 
 		requestInfo, err = c.Me().
 			Messages().
-			ByMessageId(trueMessageID).
+			ByMessageId(trueEmailID).
 			Attachments().
 			ByAttachmentId(attachmentID).
 			ToGetRequestInformation(ctx, nil)

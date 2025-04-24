@@ -5,12 +5,11 @@ from googleapiclient.errors import HttpError
 
 from apis.helpers import client
 from apis.messages import (
-    extract_message_headers,
     fetch_email_or_draft,
     get_email_body,
     has_attachment,
+    format_message_metadata,
 )
-
 
 def main():
     email_id = os.getenv("EMAIL_ID")
@@ -31,12 +30,9 @@ def main():
         body = get_email_body(msg)
         attachment = has_attachment(msg)
 
-        subject, sender, to, cc, bcc, date = extract_message_headers(msg)
-
-        print(
-            f"From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Date: {date}"
-        )
-        print(f"Body:\n{body}")
+        _, metadata_str = format_message_metadata(msg)
+        print(f"Email metadata:\n{metadata_str}")
+        print(f"Email body:\n{body}")
         if attachment:
             print("Email has attachment(s)")
             link = "https://mail.google.com/mail/u/0/#inbox/" + email_id
