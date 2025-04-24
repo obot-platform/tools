@@ -8,7 +8,9 @@ import (
 	"github.com/jaytaylor/html2text"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"os"
 	"strings"
+	"time"
 )
 
 func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, event models.Eventable) string {
@@ -27,9 +29,25 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	var sb strings.Builder
 	sb.WriteString("Subject: " + util.Deref(event.GetSubject()) + "\n")
 	sb.WriteString("  ID: " + util.Deref(event.GetId()) + "\n")
-	startTZ, endTZ := EventDisplayTimeZone(event)
-	sb.WriteString("  Start: " + util.Deref(event.GetStart().GetDateTime()) + startTZ + "\n")
-	sb.WriteString("  End: " + util.Deref(event.GetEnd().GetDateTime()) + endTZ + "\n")
+
+	// Get user timezone from environment variable
+	userTZ := os.Getenv("OBOT_USER_TIMEZONE")
+	if userTZ == "" {
+		userTZ = "UTC"
+	}
+
+	// Convert start time to user timezone
+	startTime := util.Deref(event.GetStart().GetDateTime())
+	startTZSource := util.Deref(event.GetStart().GetTimeZone())
+	startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
+
+	// Convert end time to user timezone
+	endTime := util.Deref(event.GetEnd().GetDateTime())
+	endTZSource := util.Deref(event.GetEnd().GetTimeZone())
+	endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
+
+	sb.WriteString("  Start: " + startTimeConverted + " " + startTZDisplay + "\n")
+	sb.WriteString("  End: " + endTimeConverted + " " + endTZDisplay + "\n")
 	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
 	if calendar.Calendar.GetOwner() != nil {
 		fmt.Printf("  Owner: %s (%s)\n", util.Deref(calendar.Calendar.GetOwner().GetName()), util.Deref(calendar.Calendar.GetOwner().GetAddress()))
@@ -101,4 +119,39 @@ func EventDisplayTimeZone(event models.Eventable) (string, string) {
 		endTZ = " " + util.Deref(event.GetEnd().GetTimeZone())
 	}
 	return startTZ, endTZ
+}
+
+// convertToUserTimezone converts a time string from source timezone to user timezone
+func convertToUserTimezone(timeStr, sourceTZ, userTZ string) (string, string) {
+	// If it's empty or no conversion is needed
+	if timeStr == "" || userTZ == sourceTZ {
+		return timeStr, sourceTZ
+	}
+
+	layout := "2006-01-02T15:04:05.0000000" // a hardcoded layout for parsing the time string
+
+	// Load source location
+	srcLoc, err := time.LoadLocation(sourceTZ)
+	if err != nil {
+		fmt.Printf("Error loading source timezone: %s, error: %s\n", sourceTZ, err)
+		return timeStr, sourceTZ
+	}
+
+	// Parse the time string *in* the source location
+	t, err := time.ParseInLocation(layout, timeStr, srcLoc)
+	if err != nil {
+		fmt.Printf("Error parsing time string: %s\n", err)
+		return timeStr, sourceTZ
+	}
+
+	// Load user location
+	userLoc, err := time.LoadLocation(userTZ)
+	if err != nil {
+		fmt.Printf("Error loading user timezone: %s, error: %s\n", userTZ, err)
+		return timeStr, sourceTZ
+	}
+
+	// Convert to user's timezone
+	t = t.In(userLoc)
+	return t.Format(layout), userTZ
 }
