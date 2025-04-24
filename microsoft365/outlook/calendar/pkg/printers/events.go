@@ -34,22 +34,7 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	if isAllDay {
 		sb.WriteString("  Time: All Day Event\n")
 	} else {
-		// Get user timezone from environment variable
-		userTZ := os.Getenv("OBOT_USER_TIMEZONE")
-		if userTZ == "" {
-			userTZ = "UTC"
-		}
-
-		// Convert start time to user timezone
-		startTime := util.Deref(event.GetStart().GetDateTime())
-		startTZSource := util.Deref(event.GetStart().GetTimeZone())
-		startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
-
-		// Convert end time to user timezone
-		endTime := util.Deref(event.GetEnd().GetDateTime())
-		endTZSource := util.Deref(event.GetEnd().GetTimeZone())
-		endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
-
+		startTimeConverted, startTZDisplay, endTimeConverted, endTZDisplay := convertEventTimesToUserTimezone(event)
 		sb.WriteString("  Start Time: " + startTimeConverted + " " + startTZDisplay + "\n")
 		sb.WriteString("  End Time: " + endTimeConverted + " " + endTZDisplay + "\n")
 	}
@@ -75,33 +60,21 @@ func PrintEvent(event models.Eventable, detailed bool) {
 	isAllDay := util.Deref(event.GetIsAllDay())
 	if isAllDay {
 		fmt.Printf("  Time: All Day Event\n")
-	} else { // display start and end times in user's timezone
-		userTZ := os.Getenv("OBOT_USER_TIMEZONE")
-		if userTZ == "" {
-			userTZ = "UTC"
-		}
-
-		// Convert start time to user timezone
-		startTime := util.Deref(event.GetStart().GetDateTime())
-		startTZSource := util.Deref(event.GetStart().GetTimeZone())
-		startTimeConverted, startTZDisplay := convertToUserTimezone(startTime, startTZSource, userTZ)
-
-		// Convert end time to user timezone
-		endTime := util.Deref(event.GetEnd().GetDateTime())
-		endTZSource := util.Deref(event.GetEnd().GetTimeZone())
-		endTimeConverted, endTZDisplay := convertToUserTimezone(endTime, endTZSource, userTZ)
+	} else {
+		startTimeConverted, startTZDisplay, endTimeConverted, endTZDisplay := convertEventTimesToUserTimezone(event)
 
 		fmt.Printf("  Start Time: %s %s\n", startTimeConverted, startTZDisplay)
 		fmt.Printf("  End Time: %s %s\n", endTimeConverted, endTZDisplay)
 	}
 
+	if event.GetSeriesMasterId() != nil {
+		fmt.Printf("  Recurring: Yes\n")
+	} else {
+		fmt.Printf("  Recurring: No\n")
+	}
+
 	if detailed {
 		fmt.Printf("  Location: %s\n", util.Deref(event.GetLocation().GetDisplayName()))
-		if event.GetSeriesMasterId() != nil {
-			fmt.Printf("  Recurrence: Yes\n")
-		} else {
-			fmt.Printf("  Recurrence: None\n")
-		}
 		fmt.Printf("  Is Cancelled: %t\n", util.Deref(event.GetIsCancelled()))
 		fmt.Printf("  Is Online Meeting: %t\n", util.Deref(event.GetIsOnlineMeeting()))
 		fmt.Printf("  Response Status: %s\n", event.GetResponseStatus().GetResponse().String())
@@ -152,8 +125,8 @@ func EventDisplayTimeZone(event models.Eventable) (string, string) {
 	return startTZ, endTZ
 }
 
-// convertToUserTimezone converts a time string from source timezone to user timezone
-func convertToUserTimezone(timeStr, sourceTZ, userTZ string) (string, string) {
+// convertTimeStringToUserTimezone converts a time string from source timezone to user timezone
+func convertTimeStringToUserTimezone(timeStr, sourceTZ, userTZ string) (string, string) {
 	// If it's empty or no conversion is needed
 	if timeStr == "" || userTZ == sourceTZ {
 		return timeStr, sourceTZ
@@ -185,4 +158,22 @@ func convertToUserTimezone(timeStr, sourceTZ, userTZ string) (string, string) {
 	// Convert to user's timezone
 	t = t.In(userLoc)
 	return t.Format(layout), userTZ
+}
+
+// convertEventTimesToUserTimezone converts both start and end times of an event to the user's timezone
+func convertEventTimesToUserTimezone(event models.Eventable) (start, startTZ, end, endTZ string) {
+	userTZ := os.Getenv("OBOT_USER_TIMEZONE")
+	if userTZ == "" {
+		userTZ = "UTC"
+	}
+
+	startTime := util.Deref(event.GetStart().GetDateTime())
+	startTZSource := util.Deref(event.GetStart().GetTimeZone())
+	start, startTZ = convertTimeStringToUserTimezone(startTime, startTZSource, userTZ)
+
+	endTime := util.Deref(event.GetEnd().GetDateTime())
+	endTZSource := util.Deref(event.GetEnd().GetTimeZone())
+	end, endTZ = convertTimeStringToUserTimezone(endTime, endTZSource, userTZ)
+
+	return start, startTZ, end, endTZ
 }
