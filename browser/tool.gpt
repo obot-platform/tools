@@ -156,7 +156,7 @@ When the `screenshotInfo` field is present in tool response, ALWAYS stop what yo
 
 END TOOL USAGE: The `screenshotInfo` response field
 
-START TOOL USAGE: Download File From URL
+START TOOL USAGE: Get URL
 
 The `Get URL` tool will save the content from a file at an HTTP or HTTPS URL to a file in the workspace, if it is something other than a web page.
 When this happens, the tool returns a JSON object that contains the `url`, `resolvedUrl`, `contentType`, `workspaceFile`, and `downloadedAt` fields.
@@ -164,7 +164,7 @@ It might also contain `fileContents`, if the file was able to be parsed and conv
 The `resolvedUrl` is the final URL after any redirects.
 Do not attempt to link to a `workspaceFile` when displaying the results.
 
-END TOOL USAGE: Download File From URL
+END TOOL USAGE: Get URL
 
 ---
 Name: service
