@@ -7,3 +7,9 @@ test:
 
 package-tools:
 	./scripts/package-tools.sh
+
+package-providers:
+	./scripts/package-providers.sh
+
+docker-build:
+	docker build -t obot-platform/tools:latest --target tools .

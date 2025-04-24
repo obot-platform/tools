@@ -38,7 +38,4 @@ jobs:
           project: bbqjs4tj1g
           context: .
           platforms: linux/amd64,linux/arm64
-          secrets: |
-            GITHUB_TOKEN=${{ secrets.GHCR_TOKEN }}
-          build-args: |
-            TOOL_REGISTRY_REPOS=github.com/${{ github.event.pull_request.head.repo.full_name }}@${{ github.event.pull_request.head.ref }}
+          target: tools

@@ -1,2 +1,0 @@
-linkedin-api-client==0.3.0
-git+https://github.com/gptscript-ai/py-gptscript.git@5c00a24fc28af472202df8763d2e99b10d6db097#egg=gptscript

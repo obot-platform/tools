@@ -1,8 +1,0 @@
-textstat==0.7.5
-# scikit-learn
-pandas==2.2.3
-yake==0.4.8
-openai>=1.70.0
-markdownify==1.1.0
-html2text==2024.2.26
-requests>=2.32.2

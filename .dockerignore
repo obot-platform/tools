@@ -1,9 +1,11 @@
 **/node_modules/
 .local/
-.git/
 **/.venv
 .github/
 .cursor/
 **/bin/
 **/.vscode/
 **/.idea/
+Dockerfile
+LICENSE
+README.md
