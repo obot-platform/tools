@@ -54,6 +54,12 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 		sb.WriteString("  End Time: " + endTimeConverted + " " + endTZDisplay + "\n")
 	}
 
+	isRecurring := "No"
+	if event.GetSeriesMasterId() != nil {
+		isRecurring = "Yes"
+	}
+	sb.WriteString("  Recurring: " + isRecurring + "\n")
+
 	sb.WriteString("  In calendar: " + calendarName + " (ID " + calendar.ID + ")\n")
 	if calendar.Calendar.GetOwner() != nil {
 		sb.WriteString("  Owner: " + util.Deref(calendar.Calendar.GetOwner().GetName()) + " (" + util.Deref(calendar.Calendar.GetOwner().GetAddress()) + ")\n")
@@ -65,13 +71,16 @@ func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 func PrintEvent(event models.Eventable, detailed bool) {
 	fmt.Printf("Subject: %s\n", util.Deref(event.GetSubject()))
 	fmt.Printf("  ID: %s\n", util.Deref(event.GetId()))
+
+	isAllDay := util.Deref(event.GetIsAllDay())
+
 	startTZ, endTZ := EventDisplayTimeZone(event)
 	fmt.Printf("  Start: %s%s\n", util.Deref(event.GetStart().GetDateTime()), startTZ)
 	fmt.Printf("  End: %s%s\n", util.Deref(event.GetEnd().GetDateTime()), endTZ)
 
 	if detailed {
 		fmt.Printf("  Location: %s\n", util.Deref(event.GetLocation().GetDisplayName()))
-		fmt.Printf("  Is All Day: %t\n", util.Deref(event.GetIsAllDay()))
+		// fmt.Printf("  Is All Day: %t\n", util.Deref(event.GetIsAllDay()))
 		isRecurring := false
 		if event.GetSeriesMasterId() != nil {
 			isRecurring = true
