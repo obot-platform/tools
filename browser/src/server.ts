@@ -27,28 +27,6 @@ async function main (): Promise<void> {
   })
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  app.post('/download', async (req: Request, res: Response) => {
-    try {
-      const data = req.body
-      const url = data.url ?? ''
-      if (url === '') {
-        throw new Error('URL is required')
-      }
-
-      const fileName = data.fileName ?? ''
-      if (fileName === '') {
-        throw new Error('File name is required')
-      }
-
-      const downloadInfo = await download(req.headers, url, fileName)
-      res.json(downloadInfo)
-    } catch (e) {
-      // Send a 200 status code GPTScript will pass the error to the LLM
-      res.status(200).send(`Error: ${e}`)
-    }
-  })
-
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   app.post('/*', async (req: Request, res: Response) => {
     const data = req.body
 
@@ -86,7 +64,23 @@ async function main (): Promise<void> {
             break
 
           case '/getPageContents':
-            response.result = await browse(page, website, 'getPageContents', tabID, printTabID)
+            if (website !== '') {
+              // Check response content-type to determine if it's a webpage or a file
+              const pageResponse = await page.goto(website, { waitUntil: 'domcontentloaded' })
+              const contentType = pageResponse?.headers()['content-type'] || ''
+              
+              // If it's HTML, process as a webpage (markdown)
+              if (contentType.includes('text/html') || contentType === '') {
+                response.result = await browse(page, website, 'getPageContents', tabID, printTabID)
+              } else {
+                // It's not HTML, treat as a file download
+                const downloadInfo = await download(req.headers, website)
+                response.result = downloadInfo
+              }
+            } else {
+              // No website specified, just return current page contents
+              response.result = await browse(page, '', 'getPageContents', tabID, printTabID)
+            }
             break
 
           case '/getPageLinks':

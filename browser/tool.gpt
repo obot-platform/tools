@@ -3,14 +3,14 @@ Description: Tools to navigate websites using a browser.
 Metadata: bundle: true
 Metadata: noUserAuth: sys.model.provider.credential
 Credentials: github.com/gptscript-ai/credentials/model-provider
-Share Tools: Browse, Get Page Contents, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot, Download File From URL
+Share Tools: Browse, Get URL, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot
 
 ---
-Name: Get Page Contents
+Name: Get URL
 Share Context: Browser Context
 Tools: service
-Description: Returns the content of a website in Markdown format.
-Params: website: (optional) The HTTPS URL of the website to visit. If unspecified, the current tab will be used.
+Description: Returns the content of a website in Markdown format. If the URL points to a non-HTML resource (like a PDF, image, or document), it will automatically download the file to the workspace and return download information instead.
+Params: website: (optional) The HTTPS URL of the website or file to visit/download. If unspecified, the current tab will be used.
 Params: tabID: (optional) The ID of the tab. If unspecified, a new tab will be created.
 Params: followMode: (optional) If true, the tool will produce a screenshot of the final page state. Defaults to false.
 
@@ -118,31 +118,6 @@ Tools: service
 #!http://service.daemon.gptscript.local/forward
 
 ---
-Name: Download File From URL
-Share Context: Download File From URL Context
-Tools: service
-Description: Downloads a binary file from an HTTP/HTTPS URL and saves it to the workspace.
-Params: url: (required) The URL of the file to download.
-Params: fileName: (required) The name of the workspace file to save the content to.
-
-#!http://service.daemon.gptscript.local/download
-
----
-Name: Download File From URL Context
-Metadata: index: false
-Type: context
-
-#!sys.echo
-
-START TOOL USAGE: Download File From URL
-
-The `Download File From URL` tool saves the content from a file at an HTTP or HTTPS URL to a file in the workspace.
-The tool returns A JSON object that contains the `url`, `resolvedUrl`, `contentType`, `workspaceFile`, and `downloadedAt` fields. The `resolvedUrl` is the final URL after any redirects.
-Do not attempt to link to a `workspaceFile` when displaying the results of a `Download` tool call.
-
-END TOOL USAGE: Download File From URL
-
----
 Name: Browser Context
 Metadata: index: false
 Type: context
@@ -151,7 +126,7 @@ Type: context
 
 START TOOL USAGE: The `tabID` parameter
 
-You can create new tabs with the `Browse` or `Get Page Contents` tools by passing them a `website` and omitting the `tabID`.
+You can create new tabs with the `Browse` or `Get URL` tools by passing them a `website` and omitting the `tabID`.
 You can reuse an existing tab by passing the `tabID` of the tab you want to reuse.
 Each browser tab has mutable state that changes with every tool call that uses its `tabID`.
 Do not make parallel tool calls with the same `tabID`.
@@ -180,6 +155,16 @@ Screenshots can only be displayed to the user by embedding their `imageDownloadU
 When the `screenshotInfo` field is present in tool response, ALWAYS stop what you're doing and display the respective screenshot to the user immediately before continuing.
 
 END TOOL USAGE: The `screenshotInfo` response field
+
+START TOOL USAGE: Download File From URL
+
+The `Get URL` tool will save the content from a file at an HTTP or HTTPS URL to a file in the workspace, if it is something other than a web page.
+When this happens, the tool returns a JSON object that contains the `url`, `resolvedUrl`, `contentType`, `workspaceFile`, and `downloadedAt` fields.
+It might also contain `fileContents`, if the file was able to be parsed and converted to plain text.
+The `resolvedUrl` is the final URL after any redirects.
+Do not attempt to link to a `workspaceFile` when displaying the results.
+
+END TOOL USAGE: Download File From URL
 
 ---
 Name: service

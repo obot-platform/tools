@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@gptscript-ai/gptscript": "https://github.com/gptscript-ai/node-gptscript#306861b8b5aea2ea0481c180067a1687d2726530",
+    "@types/mime-types": "^2.1.4",
     "@types/turndown": "^5.0.4",
     "async-mutex": "^0.5.0",
     "axios": "^1.8.2",
@@ -26,6 +27,7 @@
     "env-paths": "^3.0.0",
     "express": "^4.21.2",
     "global-cache-dir": "^6.0.0",
+    "mime-types": "^3.0.1",
     "playwright": "^1.50.1",
     "sharp": "^0.33.5",
     "ts-node": "^10.9.2",
