@@ -207,10 +207,9 @@ func DeleteEventSeries(ctx context.Context, client *msgraphsdkgo.GraphServiceCli
 	if seriesMasterID == nil {
 		fmt.Println("It appears that this is not a recurring event, so we will delete the single event")
 		return DeleteEvent(ctx, client, eventID, calendarID, owner)
-	} else {
-		// delete the series master event
-		return DeleteEvent(ctx, client, util.Deref(seriesMasterID), calendarID, owner)
 	}
+	// delete the series master event
+	return DeleteEvent(ctx, client, util.Deref(seriesMasterID), calendarID, owner)
 }
 
 func AcceptEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {
