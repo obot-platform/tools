@@ -32,9 +32,8 @@ func DeleteEvent(ctx context.Context, eventID, calendarID string, owner graph.Ow
 	if deleteSeries {
 		if err := graph.DeleteEventSeries(ctx, c, trueEventID, trueCalendarID, owner); err != nil {
 			return fmt.Errorf("failed to delete event series: %w", err)
-		} else {
-			fmt.Println("Event series deleted successfully")
 		}
+		fmt.Println("Event series deleted successfully")
 	} else {
 		if err := graph.DeleteEvent(ctx, c, trueEventID, trueCalendarID, owner); err != nil {
 			return fmt.Errorf("failed to delete event: %w", err)
