@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/recurrence"
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/recurrence"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 )
 
 type CreateEventInfo struct {
@@ -195,6 +195,22 @@ func DeleteEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, e
 	}
 
 	return nil
+}
+
+func DeleteEventSeries(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {
+	event, err := GetEvent(ctx, client, eventID, calendarID, owner)
+	if err != nil {
+		return fmt.Errorf("failed to get the event to delete: %w", err)
+	}
+
+	seriesMasterID := event.GetSeriesMasterId()
+	if seriesMasterID == nil {
+		fmt.Println("It appears that this is not a recurring event, so we will delete the single event")
+		return DeleteEvent(ctx, client, eventID, calendarID, owner)
+	} else {
+		// delete the series master event
+		return DeleteEvent(ctx, client, util.Deref(seriesMasterID), calendarID, owner)
+	}
 }
 
 func AcceptEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {

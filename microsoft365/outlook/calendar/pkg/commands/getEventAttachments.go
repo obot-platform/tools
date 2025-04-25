@@ -6,12 +6,12 @@ import (
 	"log"
 
 	"github.com/gptscript-ai/go-gptscript"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func GetEventAttachments(ctx context.Context, eventID, calendarID string, owner graph.OwnerType) error {

@@ -10,7 +10,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
 )
 
-func DeleteEvent(ctx context.Context, eventID, calendarID string, owner graph.OwnerType) error {
+func DeleteEvent(ctx context.Context, eventID, calendarID string, owner graph.OwnerType, deleteSeries bool) error {
 	trueEventID, err := id.GetOutlookID(ctx, eventID)
 	if err != nil {
 		return fmt.Errorf("failed to get outlook ID: %w", err)
@@ -29,9 +29,18 @@ func DeleteEvent(ctx context.Context, eventID, calendarID string, owner graph.Ow
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	if err := graph.DeleteEvent(ctx, c, trueEventID, trueCalendarID, owner); err != nil {
-		return fmt.Errorf("failed to delete event: %w", err)
+	if deleteSeries {
+		if err := graph.DeleteEventSeries(ctx, c, trueEventID, trueCalendarID, owner); err != nil {
+			return fmt.Errorf("failed to delete event series: %w", err)
+		} else {
+			fmt.Println("Event series deleted successfully")
+		}
+	} else {
+		if err := graph.DeleteEvent(ctx, c, trueEventID, trueCalendarID, owner); err != nil {
+			return fmt.Errorf("failed to delete event: %w", err)
+		} else {
+			fmt.Println("Event deleted successfully")
+		}
 	}
-	fmt.Println("Event deleted successfully")
 	return nil
 }

@@ -107,7 +107,13 @@ func main() {
 			os.Exit(1)
 		}
 	case "deleteEvent":
-		if err := commands.DeleteEvent(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE"))); err != nil {
+		deleteSeries, err := strconv.ParseBool(os.Getenv("DELETE_SERIES"))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		if err := commands.DeleteEvent(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE")), deleteSeries); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
