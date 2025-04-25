@@ -4,7 +4,7 @@
     "tool": "node --no-warnings --loader ts-node/esm src/tools.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.16.11",
+    "@types/node": "^22.15.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "eslint": "^8.56.0",
     "eslint-config-standard-with-typescript": "^43.0.1",

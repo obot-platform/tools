@@ -45,7 +45,7 @@ export async function generateImages(
     });
 
     // Download all images concurrently
-    const imageUrls = response.data.map(image => image.url).filter(url => url != null)
+    const imageUrls = response.data?.map(image => image.url).filter(url => url != null) ?? []
     const client = new gptscript.GPTScript()
     const generatedImages= await Promise.all(
       imageUrls.map(async (url: string) => {
@@ -80,14 +80,21 @@ async function download(client: gptscript.GPTScript, imageUrl: string): Promise<
   const response = await axios.get(imageUrl, {
     responseType: 'arraybuffer'
   })
-  let content = Buffer.from(response.data, 'binary')
+
+  // Process the image data
+  const imageBuffer = Buffer.from(response.data)
+
   // Convert the image to webp format
-  content = Buffer.from(await sharp(content).webp({ quality: 100 }).toBuffer())
+  const webpBuffer = await sharp(imageBuffer).webp({ quality: 100 }).toBuffer()
 
   // Generate a SHA-256 hash of the imageURL to use as the filename
   const filePath = `generated_image_${createHash('sha256').update(imageUrl).digest('hex').substring(0, 8)}.webp`;
 
-  await client.writeFileInWorkspace(`${threadId ? 'files/' : ''}${filePath}`, content.buffer);
+  // Write the file to workspace
+  await client.writeFileInWorkspace(
+    `${threadId ? 'files/' : ''}${filePath}`,
+    new Uint8Array(webpBuffer).buffer
+  );
 
   return filePath
 }
