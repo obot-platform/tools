@@ -34,8 +34,8 @@ func main() {
 		}
 		loc, err := time.LoadLocation(timezone)
 		if err != nil {
-			fmt.Println("Error loading location: %s. Error: %s", timezone, err)
-			os.Exit(1)
+			fmt.Println("Error loading user timezone: %s. Error: %s. Falling back to UTC.", timezone, err)
+			timezone = "UTC"
 		}
 		now := time.Now().In(loc)
 		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
