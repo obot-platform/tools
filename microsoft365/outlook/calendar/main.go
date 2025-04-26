@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/commands"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
