@@ -5,13 +5,14 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	"github.com/microsoft/kiota-abstractions-go/serialization"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 )
 
 // the source for doc.md: https://learn.microsoft.com/en-us/graph/outlook-schedule-recurring-events
@@ -116,7 +117,13 @@ func Generate(ctx context.Context, description string) (Recurrence, error) {
 
 	tool := getTool(description)
 
-	run, err := g.Evaluate(ctx, gptscript.Options{}, tool)
+	run, err := g.Evaluate(ctx, gptscript.Options{
+		GlobalOptions: gptscript.GlobalOptions{
+			OpenAIAPIKey:  os.Getenv("OPENAI_API_KEY"),
+			OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
+			DefaultModel:  os.Getenv("OBOT_DEFAULT_LLM_MINI_MODEL"),
+		},
+	}, tool)
 	if err != nil {
 		return Recurrence{}, err
 	}

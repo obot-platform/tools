@@ -61,6 +61,7 @@ Name: Create Event
 Description: Create a new event.
 Share Context: Outlook Calendar Context, Recurrence Context
 Credential: ../../credential
+Credential: sys.model.provider.credential
 Share Tools: List Calendars
 Param: subject: (Required) The title of the event.
 Param: location: (Required) The location of the event.
