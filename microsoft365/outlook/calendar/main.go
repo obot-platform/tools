@@ -67,6 +67,7 @@ func main() {
 	case "createEvent":
 		info := graph.CreateEventInfo{
 			Attendees:  strings.Split(os.Getenv("ATTENDEES"), ","),
+			OptionalAttendees: strings.Split(os.Getenv("OPTIONAL_ATTENDEES"), ","),
 			Subject:    os.Getenv("SUBJECT"),
 			Location:   os.Getenv("LOCATION"),
 			Body:       os.Getenv("BODY"),

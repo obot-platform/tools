@@ -15,6 +15,7 @@ import (
 
 type CreateEventInfo struct {
 	Attendees                               []string // slice of email addresses
+	OptionalAttendees                       []string // slice of email addresses for optional attendees
 	Subject, Location, Body, ID, Recurrence string
 	Owner                                   OwnerType
 	IsOnline                                bool
@@ -84,11 +85,22 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	}
 
 	var attendees []models.Attendeeable
+	// Add required attendees
 	for _, a := range info.Attendees {
 		attendee := models.NewAttendee()
 		email := models.NewEmailAddress()
 		email.SetAddress(&a)
 		attendee.SetEmailAddress(email)
+		attendee.SetType(util.Ptr(models.REQUIRED_ATTENDEETYPE))
+		attendees = append(attendees, attendee)
+	}
+	// Add optional attendees
+	for _, a := range info.OptionalAttendees {
+		attendee := models.NewAttendee()
+		email := models.NewEmailAddress()
+		email.SetAddress(&a)
+		attendee.SetEmailAddress(email)
+		attendee.SetType(util.Ptr(models.OPTIONAL_ATTENDEETYPE))
 		attendees = append(attendees, attendee)
 	}
 	requestBody.SetAttendees(attendees)
