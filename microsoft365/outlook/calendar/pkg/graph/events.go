@@ -91,7 +91,7 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 		email := models.NewEmailAddress()
 		email.SetAddress(&a)
 		attendee.SetEmailAddress(email)
-		attendee.SetType(util.Ptr(models.REQUIRED_ATTENDEETYPE))
+		attendee.SetTypeEscaped(util.Ptr(models.REQUIRED_ATTENDEETYPE))
 		attendees = append(attendees, attendee)
 	}
 	// Add optional attendees
@@ -100,7 +100,7 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 		email := models.NewEmailAddress()
 		email.SetAddress(&a)
 		attendee.SetEmailAddress(email)
-		attendee.SetType(util.Ptr(models.OPTIONAL_ATTENDEETYPE))
+		attendee.SetTypeEscaped(util.Ptr(models.OPTIONAL_ATTENDEETYPE))
 		attendees = append(attendees, attendee)
 	}
 	requestBody.SetAttendees(attendees)
