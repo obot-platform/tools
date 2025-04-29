@@ -24,6 +24,16 @@ func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceCl
 	return result.GetValue(), nil
 }
 
+func GetThreadMessage(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID, postID string) (models.Postable, error) {
+	// Fetch messages inside a thread
+	result, err := client.Groups().ByGroupId(groupID).Threads().ByConversationThreadId(threadID).Posts().ByPostId(postID).Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get group mailbox message: %w", err)
+	}
+
+	return result, nil
+}
+
 func ListGroupThreads(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID string, limit int) ([]models.ConversationThreadable, error) {
 	queryParams := &groups.ItemThreadsRequestBuilderGetQueryParameters{
 		Orderby: []string{"lastDeliveredDateTime DESC"},

@@ -59,7 +59,7 @@ func main() {
 			os.Exit(1)
 		}
 	case "getEmailDetails":
-		if err := commands.GetEmailDetails(context.Background(), os.Getenv("EMAIL_ID")); err != nil {
+		if err := commands.GetEmailDetails(context.Background(), os.Getenv("EMAIL_ID"), os.Getenv("GROUP_ID"), os.Getenv("THREAD_ID")); err != nil {
 			fmt.Printf("failed to get email details: %v\n", err)
 			os.Exit(1)
 		}
