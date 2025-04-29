@@ -18,7 +18,7 @@ fi
 
 OBOT_SERVER_VERSIONS="$(
     cat <<VERSIONS
-${REPO}=$(cd "tools" && git rev-parse --short HEAD),${OBOT_SERVER_VERSIONS}
+${REPO}=$(cd /obot-tools/tools && git rev-parse --short HEAD),${OBOT_SERVER_VERSIONS}
 VERSIONS
 )"
 OBOT_SERVER_VERSIONS="${OBOT_SERVER_VERSIONS%,}"
