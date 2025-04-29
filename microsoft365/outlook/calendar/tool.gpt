@@ -82,12 +82,12 @@ Description: Adds or removes attendees from an existing event.
 Share Context: Outlook Calendar Context
 Credential: ../../credential
 Share Tools: List Calendars, List Events, Search Events, Get Event Details
-Param: event_id: The unique ID of the event.
-Param: calendar_id: The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
-Param: owner_type: The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
-Param: add_required_attendees: A comma-separated list of the email addresses of additional people required to attend the event.
-Param: add_optional_attendees: A comma-separated list of the email addresses of additional people optionally invited to the event.
-Param: remove_attendees: A comma-separated list of the email addresses of people to remove from the event.
+Param: event_id: (Required) The unique ID of the event.
+Param: calendar_id: (Optional) The unique ID of the calendar or group the event belongs to. If unset, uses the default calendar.
+Param: owner_type: (Optional) The type of the owner of the calendar or group. Possible values are "user" or "group". Required if calendar_id is set.
+Param: add_required_attendees: (Optional) A comma-separated list of the email addresses of additional people required to attend the event.
+Param: add_optional_attendees: (Optional) A comma-separated list of the email addresses of additional people optionally invited to the event.
+Param: remove_attendees: (Optional) A comma-separated list of the email addresses of people to remove from the event.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool modifyEventAttendees
 
