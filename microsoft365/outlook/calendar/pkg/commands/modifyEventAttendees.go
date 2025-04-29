@@ -30,9 +30,16 @@ func ModifyEventAttendees(ctx context.Context, eventID, calendarID string, owner
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	addRequiredAttendeesList := strings.Split(addRequiredAttendees, ",")
-	addOptionalAttendeesList := strings.Split(addOptionalAttendees, ",")
-	removeAttendeesList := strings.Split(removeAttendees, ",")
+	var addRequiredAttendeesList, addOptionalAttendeesList, removeAttendeesList []string
+	if addRequiredAttendees != "" {
+		addRequiredAttendeesList = strings.Split(addRequiredAttendees, ",")
+	}
+	if addOptionalAttendees != "" {
+		addOptionalAttendeesList = strings.Split(addOptionalAttendees, ",")
+	}
+	if removeAttendees != "" {
+		removeAttendeesList = strings.Split(removeAttendees, ",")
+	}
 
 	if err := graph.ModifyEventAttendee(ctx, c, trueEventID, trueCalendarID, owner, addRequiredAttendeesList, addOptionalAttendeesList, removeAttendeesList); err != nil {
 		return fmt.Errorf("failed to invite user to event: %w", err)
