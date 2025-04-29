@@ -17,7 +17,7 @@ func GetEmailDetails(ctx context.Context, emailID, groupID, threadID string) err
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
-	if groupID != "" {
+	if groupID == "" { // Personal mailbox
 		trueEmailID, err := id.GetOutlookID(ctx, emailID)
 		if err != nil {
 			return fmt.Errorf("failed to get outlook ID: %w", err)
@@ -40,10 +40,10 @@ func GetEmailDetails(ctx context.Context, emailID, groupID, threadID string) err
 			return fmt.Errorf("failed to print message: %w", err)
 		}
 		return nil
-	} else {
+	} else { // Group mailbox
 		result, err := graph.GetThreadMessage(ctx, c, groupID, threadID, emailID)
 		if err != nil {
-			return fmt.Errorf("failed to get email details: %w", err)
+			return fmt.Errorf("failed to get group mailbox email details: %w", err)
 		}
 
 		fmt.Printf("Message Details:\n")
