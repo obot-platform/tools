@@ -50,7 +50,7 @@ uv pip install -r /obot-tools/tools/requirements.txt
 cd /obot-tools
 cat <<EOF >.envrc.tools.${REPO_NAME}
 export GPTSCRIPT_SYSTEM_TOOLS_DIR=/obot-tools/
-export GPTSCRIPT_TOOL_REMAP="${REPO}=/${REPO_DIR}"
+export GPTSCRIPT_TOOL_REMAP="${REPO}=${REPO_DIR}"
 export OBOT_SERVER_TOOL_REGISTRIES="github.com/obot-platform/tools"
 export OBOT_SERVER_VERSIONS="${OBOT_SERVER_VERSIONS}"
 export TOOLS_VENV_BIN=/obot-tools/venv/bin
