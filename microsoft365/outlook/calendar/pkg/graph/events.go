@@ -85,23 +85,22 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 	}
 
 	var attendees []models.Attendeeable
-	// Add required attendees
-	for _, a := range info.Attendees {
-		attendee := models.NewAttendee()
-		email := models.NewEmailAddress()
-		email.SetAddress(&a)
-		attendee.SetEmailAddress(email)
-		attendee.SetTypeEscaped(util.Ptr(models.REQUIRED_ATTENDEETYPE))
-		attendees = append(attendees, attendee)
-	}
-	// Add optional attendees
-	for _, a := range info.OptionalAttendees {
-		attendee := models.NewAttendee()
-		email := models.NewEmailAddress()
-		email.SetAddress(&a)
-		attendee.SetEmailAddress(email)
-		attendee.SetTypeEscaped(util.Ptr(models.OPTIONAL_ATTENDEETYPE))
-		attendees = append(attendees, attendee)
+	// Handle both required and optional attendees in a single loop
+	for _, attendeeList := range []struct {
+		emails []string
+		type_  models.AttendeeType
+	}{
+		{info.Attendees, models.REQUIRED_ATTENDEETYPE},
+		{info.OptionalAttendees, models.OPTIONAL_ATTENDEETYPE},
+	} {
+		for _, a := range attendeeList.emails {
+			attendee := models.NewAttendee()
+			email := models.NewEmailAddress()
+			email.SetAddress(&a)
+			attendee.SetEmailAddress(email)
+			attendee.SetTypeEscaped(util.Ptr(attendeeList.type_))
+			attendees = append(attendees, attendee)
+		}
 	}
 	requestBody.SetAttendees(attendees)
 
@@ -153,37 +152,6 @@ func CreateEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, i
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
 	return event, nil
-}
-
-func InviteUserToEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType, userEmail, message string) error {
-	requestBody := users.NewItemEventsItemForwardPostRequestBody()
-	recipient := models.NewRecipient()
-	email := models.NewEmailAddress()
-	email.SetAddress(&userEmail)
-	recipient.SetEmailAddress(email)
-
-	requestBody.SetComment(&message)
-	requestBody.SetToRecipients([]models.Recipientable{recipient})
-
-	if calendarID != "" {
-		switch owner {
-		case OwnerTypeUser:
-			if err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Forward().Post(ctx, requestBody, nil); err != nil {
-				return fmt.Errorf("failed to invite user to event: %w", err)
-			}
-			return nil
-		case OwnerTypeGroup:
-			if err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Forward().Post(ctx, requestBody, nil); err != nil {
-				return fmt.Errorf("failed to invite user to event: %w", err)
-			}
-			return nil
-		}
-	}
-
-	if err := client.Me().Events().ByEventId(eventID).Forward().Post(ctx, requestBody, nil); err != nil {
-		return fmt.Errorf("failed to invite user to event: %w", err)
-	}
-	return nil
 }
 
 func DeleteEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType) error {
@@ -281,5 +249,79 @@ func DeclineEvent(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 	if err := client.Me().Events().ByEventId(eventID).Decline().Post(ctx, requestBody, nil); err != nil {
 		return fmt.Errorf("failed to decline event: %w", err)
 	}
+	return nil
+}
+
+func ModifyEventAttendee(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, eventID, calendarID string, owner OwnerType, addRequiredAttendees, addOptionalAttendees, removeAttendees []string) error {
+	// Get existing event
+	event, err := GetEvent(ctx, client, eventID, calendarID, owner)
+	if err != nil {
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	// Get current attendees and create a map for easier lookup
+	currentAttendees := event.GetAttendees()
+	attendeeMap := make(map[string]models.Attendeeable)
+	for _, a := range currentAttendees {
+		if email := a.GetEmailAddress(); email != nil {
+			if addr := email.GetAddress(); addr != nil {
+				attendeeMap[*addr] = a
+			}
+		}
+	}
+
+	// Remove specified attendees
+	for _, email := range removeAttendees {
+		delete(attendeeMap, email)
+	}
+
+	// Add new attendees
+	for _, attendeeList := range []struct {
+		emails []string
+		type_  models.AttendeeType
+	}{
+		{addRequiredAttendees, models.REQUIRED_ATTENDEETYPE},
+		{addOptionalAttendees, models.OPTIONAL_ATTENDEETYPE},
+	} {
+		for _, a := range attendeeList.emails {
+			if _, exists := attendeeMap[a]; !exists {
+				attendee := models.NewAttendee()
+				email := models.NewEmailAddress()
+				email.SetAddress(&a)
+				attendee.SetEmailAddress(email)
+				attendee.SetTypeEscaped(util.Ptr(attendeeList.type_))
+				attendeeMap[a] = attendee
+			}
+		}
+	}
+
+	// Convert map back to slice
+	var updatedAttendees []models.Attendeeable
+	for _, attendee := range attendeeMap {
+		updatedAttendees = append(updatedAttendees, attendee)
+	}
+
+	// Create update body
+	updateBody := models.NewEvent()
+	updateBody.SetAttendees(updatedAttendees)
+
+	// Update the event
+	if calendarID != "" {
+		switch owner {
+		case OwnerTypeUser:
+			if _, err := client.Me().Calendars().ByCalendarId(calendarID).Events().ByEventId(eventID).Patch(ctx, updateBody, nil); err != nil {
+				return fmt.Errorf("failed to update event attendees: %w", err)
+			}
+		case OwnerTypeGroup:
+			if _, err := client.Groups().ByGroupId(calendarID).Events().ByEventId(eventID).Patch(ctx, updateBody, nil); err != nil {
+				return fmt.Errorf("failed to update event attendees: %w", err)
+			}
+		}
+	} else {
+		if _, err := client.Me().Events().ByEventId(eventID).Patch(ctx, updateBody, nil); err != nil {
+			return fmt.Errorf("failed to update event attendees: %w", err)
+		}
+	}
+
 	return nil
 }
