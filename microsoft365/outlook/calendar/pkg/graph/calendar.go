@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 )
 
 type CalendarInfo struct {

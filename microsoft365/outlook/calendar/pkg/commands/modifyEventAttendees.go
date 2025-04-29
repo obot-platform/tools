@@ -3,11 +3,11 @@ package commands
 import (
 	"context"
 	"fmt"
-	"strings"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
+	"strings"
 )
 
 func ModifyEventAttendees(ctx context.Context, eventID, calendarID string, owner graph.OwnerType, addRequiredAttendees, addOptionalAttendees, removeAttendees string) error {

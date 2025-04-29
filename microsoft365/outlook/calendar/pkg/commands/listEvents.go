@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/go-gptscript"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/printers"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func ListEvents(ctx context.Context, start, end time.Time) error {
