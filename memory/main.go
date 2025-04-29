@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gptscript-ai/go-gptscript"
 	"github.com/obot-platform/obot/apiclient"
 	"github.com/obot-platform/obot/pkg/system"
 )
@@ -29,12 +30,65 @@ func main() {
 	}
 }
 
+const filterMemoryPrompt = `
+Without providing any additional dialog, respond with a single line of text containing a refined version of the information in NEW_MEMORY that is not already provided by MEMORIES. The refined text should be as concise as possible. If all of the information in NEW_MEMORY is already provided by MEMORIES, do not respond.
+<NEW_MEMORY>
+%s
+</NEW_MEMORY>
+<MEMORIES>
+%s
+</MEMORIES>
+`
+
 func create(ctx context.Context, c *apiclient.Client, projectID, content string) error {
 	if content == "" {
 		return fmt.Errorf("missing content to remember")
 	}
+	content = strings.ReplaceAll(content, "\n", " ")
 
-	memory, err := c.CreateMemory(ctx, assistantID, projectID, content)
+	gc, err := gptscript.NewGPTScript()
+	if err != nil {
+		return fmt.Errorf("failed to create gptscript: %v", err)
+	}
+
+	result, err := c.ListMemories(ctx, assistantID, projectID)
+	if err != nil {
+		return fmt.Errorf("failed to list current memories: %v", err)
+	}
+
+	// Add each memory as a CSV row
+	var sb strings.Builder
+	if result != nil && len(result.Items) > 0 {
+		for _, memory := range result.Items {
+			sb.WriteString(fmt.Sprintf("%q\n", strings.ReplaceAll(memory.Content, "\n", " ")))
+		}
+	}
+
+	resp, err := gc.Evaluate(ctx, gptscript.Options{
+		GlobalOptions: gptscript.GlobalOptions{
+			OpenAIAPIKey:  os.Getenv("OPENAI_API_KEY"),
+			OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
+		},
+	}, gptscript.ToolDef{
+		Name:         "filter",
+		ModelName:    os.Getenv("OBOT_DEFAULT_LLM_MINI_MODEL"),
+		Instructions: fmt.Sprintf(filterMemoryPrompt, content, sb.String()),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to filter memory: %v", err)
+	}
+	defer resp.Close()
+
+	filtered, err := resp.Text()
+	if err != nil {
+		return fmt.Errorf("failed to get text from response: %v", err)
+	}
+	if filtered == "" {
+		fmt.Printf("memory already exists")
+		return nil
+	}
+
+	memory, err := c.CreateMemory(ctx, assistantID, projectID, filtered)
 	if err != nil {
 		return fmt.Errorf("failed to create memory: %v", err)
 	}

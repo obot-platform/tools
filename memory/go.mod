@@ -3,6 +3,7 @@ module github.com/obot-platform/tools/memory
 go 1.24.1
 
 require (
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250424204937-af453989e88f
 	github.com/obot-platform/obot v0.7.1
 	github.com/obot-platform/obot/apiclient v0.0.0-20250422181343-7b44bf761ab4
 )
@@ -11,7 +12,6 @@ require (
 	github.com/getkin/kin-openapi v0.129.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250331192455-415de950d72d // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
