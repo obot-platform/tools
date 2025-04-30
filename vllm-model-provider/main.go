@@ -16,14 +16,12 @@ func cleanURL(endpoint string) string {
 func main() {
 	apiKey := os.Getenv("OBOT_VLLM_MODEL_PROVIDER_API_KEY")
 	if apiKey == "" {
-		fmt.Fprintln(os.Stderr, "OBOT_VLLM_MODEL_PROVIDER_API_KEY environment variable not set")
-		os.Exit(1)
+		fmt.Println("OBOT_VLLM_MODEL_PROVIDER_API_KEY environment variable not set, credential must be provided on a per-request basis")
 	}
 
 	endpoint := os.Getenv("OBOT_VLLM_MODEL_PROVIDER_ENDPOINT")
 	if endpoint == "" {
-		fmt.Fprintln(os.Stderr, "OBOT_VLLM_MODEL_PROVIDER_ENDPOINT environment variable not set")
-		os.Exit(1)
+		fmt.Println("OBOT_VLLM_MODEL_PROVIDER_ENDPOINT environment variable not set, credential must be provided on a per-request basis")
 	}
 
 	endpoint = cleanURL(endpoint)
@@ -42,11 +40,13 @@ func main() {
 	}
 
 	cfg := &proxy.Config{
-		APIKey:          apiKey,
-		ListenPort:      os.Getenv("PORT"),
-		BaseURL:         strings.TrimSuffix(u.String(), "/v1") + "/v1", // make sure we have /v1 for vLLM
-		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
-		Name:            "vLLM",
+		APIKey:                apiKey,
+		PersonalAPIKeyHeader:  "X-Obot-OBOT_VLLM_MODEL_PROVIDER_API_KEY",
+		PersonalBaseURLHeader: "X-Obot-OBOT_VLLM_MODEL_PROVIDER_ENDPOINT",
+		ListenPort:            os.Getenv("PORT"),
+		BaseURL:               strings.TrimSuffix(u.String(), "/v1") + "/v1", // make sure we have /v1 for vLLM
+		RewriteModelsFn:       proxy.RewriteAllModelsWithUsage("llm"),
+		Name:                  "vLLM",
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {

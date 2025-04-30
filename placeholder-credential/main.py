@@ -5,10 +5,9 @@ from gptscript import GPTScript, Options
 
 
 if os.getenv("OBOT_RUN_ID") is not None:
-    # This is being run from Obot, and we shouldn't prompt for the credential.
-    # The credential should have been set up outside of this, so just error.
-    print("The credential has not been properly configured")
-    exit(1)
+	# This is being run by Obot. This credential being called means that a "global" credential has not been setup,
+	# but that a user is trying to use it for their own Obot with their own credentials.
+    exit(0)
 
 if os.getenv("ENV_VARS") is None:
     print("No environment variables provided for prompting")

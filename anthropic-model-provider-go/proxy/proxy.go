@@ -28,8 +28,14 @@ func (s *Server) AnthropicProxyRedirect(req *http.Request) {
 	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path
 	req.Host = req.URL.Host
 
+	apiKey := s.cfg.APIKey
+	fmt.Println(req.Header)
+	if requestAPIKey := req.Header.Get("X-Obot-OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY"); requestAPIKey != "" {
+		apiKey = requestAPIKey
+		req.Header.Del("X-Obot-OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY")
+	}
 	req.Header.Del("Authorization")
-	req.Header.Set("x-api-key", s.cfg.APIKey)
+	req.Header.Set("x-api-key", apiKey)
 	req.Header.Set("anthropic-version", "2023-06-01")
 
 	if req.Body == nil || s.cfg.URL.Host != AnthropicBaseHostName || req.URL.Path != proxy.ChatCompletionsPath {

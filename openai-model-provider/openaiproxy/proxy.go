@@ -26,7 +26,12 @@ func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
 	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
-	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
+	apiKey := s.cfg.APIKey
+	if requestAPIKey := req.Header.Get("X-Obot-OBOT_OPENAI_MODEL_PROVIDER_API_KEY"); requestAPIKey != "" {
+		apiKey = requestAPIKey
+		req.Header.Del("X-Obot-OBOT_OPENAI_MODEL_PROVIDER_API_KEY")
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	if req.Body == nil || s.cfg.URL.Host != proxy.OpenaiBaseHostName || req.URL.Path != proxy.ChatCompletionsPath {
 		return

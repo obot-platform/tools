@@ -30,6 +30,13 @@ type Config struct {
 	// APIKey will be used for Bearer Token Auth against the upstream API
 	APIKey string
 
+	// PersonalAPIKeyHeader is used to pull personal API keys that will be used when forwarding the request to the model provider
+	// Should start with `X-Obot-`
+	PersonalAPIKeyHeader string
+
+	// PersonalBaseURLHeader is used to pull a personal base URL from the headers of a request to be used when forwarding the request to the model provider.
+	PersonalBaseURLHeader string
+
 	// ValidateFn is a function that can be used to validate the configuration
 	ValidateFn func(cfg *Config) error
 
@@ -131,12 +138,25 @@ func (s *server) healthz(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *server) proxyDirector(req *http.Request) {
-	req.URL.Scheme = s.cfg.URL.Scheme
-	req.URL.Host = s.cfg.URL.Host
-	req.URL.Path = s.cfg.URL.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
+	u := s.cfg.URL
+	if baseURL := req.Header.Get(s.cfg.PersonalBaseURLHeader); baseURL != "" {
+		baseU, err := url.Parse(baseURL)
+		if err == nil {
+			u = baseU
+		}
+	}
+	req.URL.Scheme = u.Scheme
+	req.URL.Host = u.Host
+	req.URL.Path = u.JoinPath(strings.TrimPrefix(req.URL.Path, "/v1")).Path // join baseURL with request path - /v1 must be part of baseURL if it's needed
 	req.Host = req.URL.Host
 
-	req.Header.Set("Authorization", "Bearer "+s.cfg.APIKey)
+	apiKey := s.cfg.APIKey
+	if requestAPIKey := req.Header.Get(s.cfg.PersonalAPIKeyHeader); requestAPIKey != "" {
+		apiKey = requestAPIKey
+		req.Header.Del(s.cfg.PersonalAPIKeyHeader)
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
 	if s.cfg.RewriteHeaderFn != nil {
 		s.cfg.RewriteHeaderFn(req.Header)
 	}

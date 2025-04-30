@@ -39,11 +39,11 @@ func main() {
 	}
 
 	cfg := &proxy.Config{
-		APIKey:          "",
-		ListenPort:      os.Getenv("PORT"),
-		BaseURL:         u.String(),
-		RewriteModelsFn: proxy.RewriteAllModelsWithUsage("llm"),
-		Name:            "Ollama",
+		PersonalBaseURLHeader: "X-Obot-OLLAMA_MODEL_PROVIDER_HOST",
+		ListenPort:            os.Getenv("PORT"),
+		BaseURL:               u.String(),
+		RewriteModelsFn:       proxy.RewriteAllModelsWithUsage("llm"),
+		Name:                  "Ollama",
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
