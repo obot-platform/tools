@@ -23,3 +23,5 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/obot-platform/obot/apiclient => github.com/njhale/obot/apiclient v0.0.0-20250430035824-1f5b6b7dc8a5

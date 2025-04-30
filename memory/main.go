@@ -19,7 +19,7 @@ var (
 	parentThreadID = os.Getenv("OBOT_PROJECT_ID")
 	assistantID    = os.Getenv("OBOT_AGENT_ID")
 	content        = os.Getenv("CONTENT")
-	memoryID       = os.Getenv("MEMORY_ID")
+	memoryIndex    = os.Getenv("MEMORY_INDEX")
 )
 
 func main() {
@@ -88,45 +88,43 @@ func create(ctx context.Context, c *apiclient.Client, projectID, content string)
 		return nil
 	}
 
-	memory, err := c.CreateMemory(ctx, assistantID, projectID, filtered)
-	if err != nil {
+	if _, err = c.CreateMemory(ctx, assistantID, projectID, filtered); err != nil {
 		return fmt.Errorf("failed to create memory: %v", err)
 	}
 
-	fmt.Printf("memory %q created", memory.ID)
+	fmt.Printf("memory created")
 
 	return nil
 }
 
 func update(ctx context.Context, c *apiclient.Client, projectID, content string) error {
-	if memoryID == "" {
-		return fmt.Errorf("missing memory_id")
+	if memoryIndex == "" {
+		return fmt.Errorf("missing memory_index")
 	}
 
 	if content == "" {
 		return fmt.Errorf("missing content to remember")
 	}
 
-	memory, err := c.UpdateMemory(ctx, assistantID, projectID, memoryID, content)
-	if err != nil {
+	if _, err := c.UpdateMemory(ctx, assistantID, projectID, memoryIndex, content); err != nil {
 		return fmt.Errorf("failed to update memory: %v", err)
 	}
 
-	fmt.Printf("memory %q updated", memory.ID)
+	fmt.Printf("memory updated")
 
 	return nil
 }
 
 func delete(ctx context.Context, c *apiclient.Client, projectID string) error {
-	if memoryID == "" {
-		return fmt.Errorf("missing memory_id")
+	if memoryIndex == "" {
+		return fmt.Errorf("missing memory_index")
 	}
 
-	if err := c.DeleteMemory(ctx, assistantID, projectID, memoryID); err != nil {
+	if _, err := c.DeleteMemory(ctx, assistantID, projectID, memoryIndex); err != nil {
 		return fmt.Errorf("failed to delete memory: %v", err)
 	}
 
-	fmt.Printf("memory %q deleted", memoryID)
+	fmt.Printf("memory deleted")
 
 	return nil
 }
@@ -141,13 +139,12 @@ func list(ctx context.Context, c *apiclient.Client, projectID string) error {
 	sb.WriteString("Below are memories for you to reference when crafting responses to the user:\n")
 	sb.WriteString("<MEMORIES>\n")
 
-	// Add header row
-	sb.WriteString("memory_id, content\n")
-
 	// Add each memory as a CSV row
 	if result != nil && len(result.Items) > 0 {
-		for _, memory := range result.Items {
-			sb.WriteString(fmt.Sprintf("%s, %s\n", memory.ID, memory.Content))
+		// Add header row
+		sb.WriteString("memory_index, content\n")
+		for i, memory := range result.Items {
+			sb.WriteString(fmt.Sprintf("%d, %s\n", i, memory.Content))
 		}
 	}
 
