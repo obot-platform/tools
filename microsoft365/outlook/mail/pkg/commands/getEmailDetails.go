@@ -40,30 +40,30 @@ func GetEmailDetails(ctx context.Context, emailID, groupID, threadID string) err
 			return fmt.Errorf("failed to print message: %w", err)
 		}
 		return nil
-	} else { // Group mailbox
-		result, err := graph.GetThreadMessage(ctx, c, groupID, threadID, emailID)
-		if err != nil {
-			return fmt.Errorf("failed to get group mailbox email details: %w", err)
+	}
+	// Group mailbox
+	result, err := graph.GetThreadMessage(ctx, c, groupID, threadID, emailID)
+	if err != nil {
+		return fmt.Errorf("failed to get group mailbox email details: %w", err)
+	}
+
+	fmt.Printf("Message Details:\n")
+	fmt.Printf("Body Content Type: %s\n", util.Deref(result.GetBody().GetContentType()))
+	fmt.Printf("Body Content: %s\n", util.Deref(result.GetBody().GetContent()))
+	fmt.Printf("Received Date Time: %s\n", result.GetReceivedDateTime().Format("2006-01-02 15:04:05"))
+	fmt.Printf("Has Attachments: %v\n", result.GetHasAttachments())
+
+	if from := result.GetFrom(); from != nil {
+		if email := from.GetEmailAddress(); email != nil {
+			fmt.Printf("From Name: %s\n", util.Deref(email.GetName()))
+			fmt.Printf("From Address: %s\n", util.Deref(email.GetAddress()))
 		}
+	}
 
-		fmt.Printf("Message Details:\n")
-		fmt.Printf("Body Content Type: %s\n", util.Deref(result.GetBody().GetContentType()))
-		fmt.Printf("Body Content: %s\n", util.Deref(result.GetBody().GetContent()))
-		fmt.Printf("Received Date Time: %s\n", result.GetReceivedDateTime().Format("2006-01-02 15:04:05"))
-		fmt.Printf("Has Attachments: %v\n", result.GetHasAttachments())
-
-		if from := result.GetFrom(); from != nil {
-			if email := from.GetEmailAddress(); email != nil {
-				fmt.Printf("From Name: %s\n", util.Deref(email.GetName()))
-				fmt.Printf("From Address: %s\n", util.Deref(email.GetAddress()))
-			}
-		}
-
-		if sender := result.GetSender(); sender != nil {
-			if email := sender.GetEmailAddress(); email != nil {
-				fmt.Printf("Sender Name: %s\n", util.Deref(email.GetName()))
-				fmt.Printf("Sender Address: %s\n", util.Deref(email.GetAddress()))
-			}
+	if sender := result.GetSender(); sender != nil {
+		if email := sender.GetEmailAddress(); email != nil {
+			fmt.Printf("Sender Name: %s\n", util.Deref(email.GetName()))
+			fmt.Printf("Sender Address: %s\n", util.Deref(email.GetAddress()))
 		}
 	}
 
