@@ -29,7 +29,7 @@ async def list_emails_tool():
         sys.exit(1)
 
     label_ids = parse_label_ids(labels)
-    if "ALL" in label_ids:
+    if any(label.upper() == "ALL" for label in label_ids): # check if ALL is in the label_ids
         label_ids = []
     elif "INBOX" in label_ids:
         query = f"{query} category:{category.lower()}"
