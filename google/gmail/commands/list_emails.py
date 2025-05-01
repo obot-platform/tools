@@ -68,7 +68,7 @@ async def list_emails_tool():
         print("No emails found")
         return
 
-    # For primary category, check if the feature is enabled
+    # For primary category, ESTIMATE if the feature is enabled
     estimate_response = list_messages(
         service, "category:primary", ["INBOX"], 10, "", ""
     )
