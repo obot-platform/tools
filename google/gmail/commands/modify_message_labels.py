@@ -3,6 +3,7 @@ import sys
 from apis.messages import modify_message_labels
 from apis.helpers import client, str_to_bool, parse_label_ids
 
+
 def modify_message_labels_tool():
     email_id = os.getenv("EMAIL_ID")
     if not email_id:
@@ -20,7 +21,7 @@ def modify_message_labels_tool():
         "archive": "ARCHIVE",
         "mark_as_read": "MARK_AS_READ",
         "mark_as_starred": "MARK_AS_STARRED",
-        "mark_as_important": "MARK_AS_IMPORTANT"
+        "mark_as_important": "MARK_AS_IMPORTANT",
     }
 
     parsed_flags = {

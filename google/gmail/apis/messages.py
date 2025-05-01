@@ -257,9 +257,9 @@ async def create_message(
     return data
 
 
-async def list_messages(
+def list_messages(
     service, query, labels, max_results=100, after=None, before=None
-):
+) -> list:
     all_messages = []
     next_page_token = None
     if after:
@@ -306,13 +306,16 @@ async def list_messages(
         logger.error(f"Error listing messages: {e}")
         raise Exception(f"Error listing messages: {e}")
 
+    return all_messages
+
+
+async def create_gptscript_dataset(service, all_messages, query, labels) -> str:
     try:
         gptscript_client = gptscript.GPTScript()
 
         elements = []
         if len(all_messages) == 0:
-            print("No messages found")
-            return
+            return ""
 
         for message in all_messages:
             msg_id, msg_str = message_to_string(service, message)
@@ -326,9 +329,9 @@ async def list_messages(
             description=f"list of emails in Gmail for query: [{query}], labels: [{labels}]",
         )
 
-        print(f"Created dataset with ID {dataset_id} with {len(elements)} emails")
+        return f"Created dataset with ID {dataset_id} with {len(elements)} emails"
     except Exception as e:
-        print("An error occurred while creating the dataset:", e)
+        raise Exception(f"An error occurred while creating the dataset: {e}")
 
 
 def message_to_string(service, message) -> tuple[str, str]:
