@@ -104,7 +104,6 @@ def extract_message_headers(message):
 
     if message is not None:
         label_ids = message.get("labelIds", [])
-
         for header in message["payload"]["headers"]:
             match header["name"].lower():
                 case "subject":

@@ -21,12 +21,12 @@ from apis.helpers import (
 
 logger = setup_logger(__name__)
 
-CATEGORY_LABELS = {
-    "CATEGORY_PERSONAL": "primary",
-    "CATEGORY_SOCIAL": "social",
-    "CATEGORY_PROMOTIONS": "promotions",
-    "CATEGORY_UPDATES": "updates",
-    "CATEGORY_FORUMS": "forums",
+CATEGORY_IDS = {
+    "CATEGORY_PERSONAL",
+    "CATEGORY_SOCIAL",
+    "CATEGORY_PROMOTIONS",
+    "CATEGORY_UPDATES",
+    "CATEGORY_FORUMS",
 }
 
 
@@ -350,17 +350,16 @@ def format_message_metadata(msg) -> tuple[str, str]:
     msg_id = msg["id"]
     subject, sender, to, cc, bcc, date, label_ids = extract_message_headers(msg)
     read_status = "Read" if "UNREAD" not in label_ids else "Unread"
-    category = ""
+    category = []
     label_ids_set = set(label_ids)
     if "INBOX" in label_ids_set:  # Category only applies when message is in inbox
-        for category_id, category_name in CATEGORY_LABELS.items():
+        for category_id in CATEGORY_IDS:
             if category_id in label_ids_set:
-                category = category_name
-                break  # Only one category applies
+                category.append(category_id)
 
-    msg_str = f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date},Read_status: {read_status}"
+    msg_str = f"ID: {msg_id} From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Received: {date}, Read_status: {read_status}"
     if category:
-        msg_str += f", Category: {category}"
+        msg_str += f", Built-in Categories: [{', '.join(category)}]"
     return (
         msg_id,
         msg_str,
