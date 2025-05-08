@@ -58,7 +58,7 @@ func ListSharedItems(ctx context.Context) error {
 			},
 			Contents: itemStr,
 		})
-		
+
 	}
 
 	if len(elements) == 0 {

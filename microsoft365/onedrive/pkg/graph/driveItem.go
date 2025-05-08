@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/drives"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func ListDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, driveID string, folderId string) ([]models.DriveItemable, error) {
@@ -98,7 +98,7 @@ func UploadDriveItem(ctx context.Context, client *msgraphsdkgo.GraphServiceClien
 
 	// For files, set the file facet
 	requestBody.SetFile(models.NewFile())
-	
+
 	// Otherwise, create and upload file
 	item, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(folderID).Children().Post(ctx, requestBody, nil)
 	if err != nil {
@@ -153,19 +153,19 @@ func CopyDriveItem(
 }
 
 func UpdateDriveItem(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, driveID string, itemID string, newFolderID string, newName string) (models.DriveItemable, error) {
-	if driveID == "" || itemID == ""{
+	if driveID == "" || itemID == "" {
 		return nil, fmt.Errorf("drive ID and item ID cannot be empty")
 	}
 
 	requestBody := models.NewDriveItem()
 	if newFolderID != "" {
 		parentReference := models.NewItemReference()
-		parentReference.SetId(&newFolderID) 
+		parentReference.SetId(&newFolderID)
 		requestBody.SetParentReference(parentReference)
 	}
 
 	if newName != "" {
-		requestBody.SetName(&newName) 
+		requestBody.SetName(&newName)
 	}
 
 	// To initialize your graphClient, see https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go

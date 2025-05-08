@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/global"
-	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/printer"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
-
+	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/printer"
 )
 
 func GetDrive(ctx context.Context, driveID string) error {
