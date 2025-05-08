@@ -13,7 +13,6 @@ import (
 )
 
 func ListDriveItems(ctx context.Context, driveID string, itemID string) error {
-
 	if driveID == "me" {
 		fmt.Println("Error: drive_id must be the actual drive ID, cannot be 'me'")
 		return nil

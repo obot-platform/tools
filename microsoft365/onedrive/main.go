@@ -16,80 +16,42 @@ func main() {
 
 	command := os.Args[1]
 
+	var mainErr error
 	switch command {
 	case "listAllDrives":
-		if err := commands.ListAllDrives(context.Background()); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.ListAllDrives(context.Background())
 	case "getDrive":
-		if err := commands.GetDrive(context.Background(), os.Getenv("DRIVE_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.GetDrive(context.Background(), os.Getenv("DRIVE_ID"))
 	case "listDriveItems":
-		if err := commands.ListDriveItems(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.ListDriveItems(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"))
 	case "listSharedItems":
-		if err := commands.ListSharedItems(context.Background()); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.ListSharedItems(context.Background())
 	case "getDriveItem":
-		if err := commands.GetDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.GetDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"))
 	case "updateDriveItem":
-		if err := commands.UpdateDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("NEW_FOLDER_ID"), os.Getenv("NEW_NAME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.UpdateDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("NEW_FOLDER_ID"), os.Getenv("NEW_NAME"))
 	case "deleteDriveItem":
-		if err := commands.DeleteDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.DeleteDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"))
 	case "downloadDriveItem":
-		if err := commands.DownloadDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("WORKSPACE_FILE_NAME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.DownloadDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("WORKSPACE_FILE_NAME"))
 	case "uploadDriveItem":
-		if err := commands.UploadDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"), os.Getenv("WORKSPACE_FILE_NAME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.UploadDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"), os.Getenv("WORKSPACE_FILE_NAME"))
 	case "copyDriveItem":
-		if err := commands.CopyDriveItem(context.Background(), os.Getenv("SOURCE_DRIVE_ID"), os.Getenv("SOURCE_ITEM_ID"), 
-			os.Getenv("TARGET_DRIVE_ID"), os.Getenv("TARGET_FOLDER_ID"), os.Getenv("NEW_NAME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.CopyDriveItem(context.Background(), os.Getenv("SOURCE_DRIVE_ID"), os.Getenv("SOURCE_ITEM_ID"), os.Getenv("TARGET_DRIVE_ID"), os.Getenv("TARGET_FOLDER_ID"), os.Getenv("NEW_NAME"))
 	case "createFolder":
-		if err := commands.CreateFolder(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"), os.Getenv("FOLDER_NAME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.CreateFolder(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"), os.Getenv("FOLDER_NAME"))
 	case "addPermission":
-		if err := commands.AddPermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("EMAILS"), os.Getenv("ROLE"), os.Getenv("MESSAGE"), os.Getenv("PASSWORD"), os.Getenv("EXPIRATION_DATE_TIME")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.AddPermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("EMAILS"), os.Getenv("ROLE"), os.Getenv("MESSAGE"), os.Getenv("PASSWORD"), os.Getenv("EXPIRATION_DATE_TIME"))
 	case "deletePermission":
-		if err := commands.DeletePermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("PERMISSION_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.DeletePermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("PERMISSION_ID"))
 	case "listPermissions":
-		if err := commands.ListPermissions(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID")); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		mainErr = commands.ListPermissions(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"))
 	default:
 		fmt.Printf("Unknown command: %q\n", command)
 		os.Exit(1)
 	}
-}
+
+	if mainErr != nil {
+		fmt.Println(mainErr)
+		os.Exit(1)
+	}

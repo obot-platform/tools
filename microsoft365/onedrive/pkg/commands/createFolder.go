@@ -27,10 +27,6 @@ func CreateFolder(ctx context.Context, driveID string, folderID string, folderNa
 	if err != nil {
 		return fmt.Errorf("failed to create folder: %w", err)
 	}
-	// item, err := graph.CreateDriveFolder(ctx, c, driveID, folderID, folderName)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create folder: %w", err)
-	// }
 
 	fmt.Printf("Successfully created folder %s (ID: %s)\n", folderName, *item.GetId())
 	if createdBy := item.GetCreatedBy().GetUser(); createdBy != nil {
