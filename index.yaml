@@ -89,6 +89,8 @@ tools:
     reference: ./search/tavily/obot-search.gpt
   search-combo:
     reference: ./search-combo
+  onedrive:
+    reference: ./microsoft365/onedrive
   aws-s3:
     reference: ./aws/s3
   aws-ec2:
