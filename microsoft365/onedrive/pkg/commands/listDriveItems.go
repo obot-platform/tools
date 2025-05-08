@@ -43,9 +43,9 @@ func ListDriveItems(ctx context.Context, driveID string, itemID string) error {
 		// Print item type indicator and name
 		itemStr := ""
 		if folder := item.GetFolder(); folder != nil {
-			itemStr = "Item Type:📁 folder "
+			itemStr = "Item Type: 📁 folder "
 		} else {
-			itemStr = "Item Type:📄 file "
+			itemStr = "Item Type: 📄 file "
 		}
 		itemStr += fmt.Sprintf("Name: %s\n", util.Deref(item.GetName()))
 
