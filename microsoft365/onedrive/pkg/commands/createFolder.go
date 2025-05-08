@@ -7,6 +7,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
+	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/util"
 )
 
 func CreateFolder(ctx context.Context, driveID string, folderID string, folderName string) error {
@@ -28,16 +29,16 @@ func CreateFolder(ctx context.Context, driveID string, folderID string, folderNa
 		return fmt.Errorf("failed to create folder: %w", err)
 	}
 
-	fmt.Printf("Successfully created folder %s (ID: %s)\n", folderName, *item.GetId())
+	fmt.Printf("Successfully created folder %s (ID: %s)\n", folderName, util.Deref(item.GetId()))
 	if createdBy := item.GetCreatedBy().GetUser(); createdBy != nil {
-		fmt.Printf("Folder Created by: %s\n", *createdBy.GetDisplayName())
+		fmt.Printf("Folder Created by: %s\n", util.Deref(createdBy.GetDisplayName()))
 	}
 	if parentRef := item.GetParentReference(); parentRef != nil {
-		fmt.Printf("Parent ID: %s\n", *parentRef.GetId())
-		fmt.Printf("Parent Path: %s\n", *parentRef.GetPath())
+		fmt.Printf("Parent ID: %s\n", util.Deref(parentRef.GetId()))
+		fmt.Printf("Parent Path: %s\n", util.Deref(parentRef.GetPath()))
 	}
 	if webUrl := item.GetWebUrl(); webUrl != nil {
-		fmt.Printf("Web URL: %s\n", *webUrl)
+		fmt.Printf("Web URL: %s\n", util.Deref(webUrl))
 	}
 	return nil
 }

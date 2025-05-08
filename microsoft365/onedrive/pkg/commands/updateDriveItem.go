@@ -7,6 +7,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
+	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/util"
 )
 
 func UpdateDriveItem(ctx context.Context, driveID string, itemID string, newFolderID string, newName string) error {
@@ -25,7 +26,7 @@ func UpdateDriveItem(ctx context.Context, driveID string, itemID string, newFold
 		return fmt.Errorf("failed to get drive item: %w", err)
 	}
 
-	fmt.Printf("Successfully updated drive item %s (ID: %s)\n", item.GetName(), *item.GetId())
+	fmt.Printf("Successfully updated drive item %s (ID: %s)\n", util.Deref(item.GetName()), util.Deref(item.GetId()))
 
 	return nil
 }

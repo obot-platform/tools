@@ -9,6 +9,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
+	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/util"
 )
 
 func UploadDriveItem(ctx context.Context, driveID string, folderID string, workspaceFileName string) error {
@@ -37,9 +38,9 @@ func UploadDriveItem(ctx context.Context, driveID string, folderID string, works
 		return fmt.Errorf("failed to upload drive item: %w", err)
 	}
 
-	fmt.Printf("Successfully uploaded %s (ID: %s)\n", workspaceFileName, *item.GetId())
+	fmt.Printf("Successfully uploaded %s (ID: %s)\n", workspaceFileName, util.Deref(item.GetId()))
 	if webUrl := item.GetWebUrl(); webUrl != nil {
-		fmt.Printf("Web URL: %s\n", *webUrl)
+		fmt.Printf("Web URL: %s\n", util.Deref(webUrl))
 	}
 	return nil
 }

@@ -31,10 +31,9 @@ func ListSharedItems(ctx context.Context) error {
 	for _, item := range items {
 		itemStr := ""
 		itemStr += fmt.Sprintf("FileName: %s\n", util.Deref(item.GetName()))
-
 		if parentRef := item.GetParentReference(); parentRef != nil {
 			if driveId := parentRef.GetDriveId(); driveId != nil {
-				itemStr += fmt.Sprintf("Drive ID: %s\n", *driveId)
+				itemStr += fmt.Sprintf("Drive ID: %s\n", util.Deref(driveId))
 			}
 		}
 		itemStr += fmt.Sprintf("Item ID: %s\n", util.Deref(item.GetId()))
@@ -49,7 +48,7 @@ func ListSharedItems(ctx context.Context) error {
 		}
 
 		if webUrl := item.GetWebUrl(); webUrl != nil {
-			itemStr += fmt.Sprintf("Web URL: %s\n", *webUrl)
+			itemStr += fmt.Sprintf("Web URL: %s\n", util.Deref(webUrl))
 		}
 		elements = append(elements, gptscript.DatasetElement{
 			DatasetElementMeta: gptscript.DatasetElementMeta{

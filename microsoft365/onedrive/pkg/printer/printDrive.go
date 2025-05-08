@@ -21,13 +21,13 @@ func PrintDrive(drive models.Driveable, details bool) {
 	if details {
 		if quota := drive.GetQuota(); quota != nil {
 			if total := quota.GetTotal(); total != nil {
-				fmt.Printf("Total: %d GB\n", *total/1024/1024/1024)
+				fmt.Printf("Total: %.2f GB\n", float64(*total)/1024/1024/1024)
 			}
 			if used := quota.GetUsed(); used != nil {
-				fmt.Printf("Used: %d GB\n", *used/1024/1024/1024)
+				fmt.Printf("Used: %.2f GB\n", float64(*used)/1024/1024/1024)
 			}
 			if remaining := quota.GetRemaining(); remaining != nil {
-				fmt.Printf("Remaining: %d GB\n", *remaining/1024/1024/1024)
+				fmt.Printf("Remaining: %.2f GB\n", float64(*remaining)/1024/1024/1024)
 			}
 			if state := quota.GetState(); state != nil {
 				fmt.Printf("State: %s\n", *state)

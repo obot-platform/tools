@@ -16,8 +16,7 @@ func CopyDriveItem(ctx context.Context, sourceDriveID, sourceItemID, targetDrive
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	err = graph.CopyDriveItem(ctx, c, sourceDriveID, sourceItemID,
-		targetDriveID, targetFolderID, newName)
+	err = graph.CopyDriveItem(ctx, c, sourceDriveID, sourceItemID, targetDriveID, targetFolderID, newName)
 	if err != nil {
 		return fmt.Errorf("failed to initiate copy operation: %w", err)
 	}

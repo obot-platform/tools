@@ -7,6 +7,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
+	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/util"
 )
 
 func ListPermissions(ctx context.Context, driveID string, itemID string) error {
@@ -26,7 +27,7 @@ func ListPermissions(ctx context.Context, driveID string, itemID string) error {
 
 	for _, permission := range permissions {
 		if id := permission.GetId(); id != nil {
-			fmt.Printf("Permission ID: %s\n", *id)
+			fmt.Printf("Permission ID: %s\n", util.Deref(id))
 		}
 
 		if roles := permission.GetRoles(); roles != nil {
@@ -36,15 +37,15 @@ func ListPermissions(ctx context.Context, driveID string, itemID string) error {
 		if link := permission.GetLink(); link != nil {
 			fmt.Printf("  Link:\n")
 			if url := link.GetWebUrl(); url != nil {
-				fmt.Printf("    Web URL: %s\n", *url)
+				fmt.Printf("    Web URL: %s\n", util.Deref(url))
 			}
 			if app := link.GetApplication(); app != nil {
 				fmt.Printf("    Application:\n")
 				if id := app.GetId(); id != nil {
-					fmt.Printf("      ID: %s\n", *id)
+					fmt.Printf("      ID: %s\n", util.Deref(id))
 				}
 				if name := app.GetDisplayName(); name != nil {
-					fmt.Printf("      Display Name: %s\n", *name)
+					fmt.Printf("      Display Name: %s\n", util.Deref(name))
 				}
 			}
 		}
@@ -53,19 +54,19 @@ func ListPermissions(ctx context.Context, driveID string, itemID string) error {
 			fmt.Printf("  Granted To:\n")
 			if user := grantedToV2.GetUser(); user != nil {
 				if id := user.GetId(); id != nil {
-					fmt.Printf("    User ID: %s\n", *id)
+					fmt.Printf("    User ID: %s\n", util.Deref(id))
 				}
 				if name := user.GetDisplayName(); name != nil {
-					fmt.Printf("    Display Name: %s\n", *name)
+					fmt.Printf("    Display Name: %s\n", util.Deref(name))
 				}
 			}
 			if siteUser := grantedToV2.GetSiteUser(); siteUser != nil {
 				fmt.Printf("    Site User:\n")
 				if id := siteUser.GetId(); id != nil {
-					fmt.Printf("      ID: %s\n", *id)
+					fmt.Printf("      ID: %s\n", util.Deref(id))
 				}
 				if name := siteUser.GetDisplayName(); name != nil {
-					fmt.Printf("      Display Name: %s\n", *name)
+					fmt.Printf("      Display Name: %s\n", util.Deref(name))
 				}
 			}
 		}
@@ -73,13 +74,13 @@ func ListPermissions(ctx context.Context, driveID string, itemID string) error {
 		if inheritedFrom := permission.GetInheritedFrom(); inheritedFrom != nil {
 			fmt.Printf("  Inherited From:\n")
 			if driveId := inheritedFrom.GetDriveId(); driveId != nil {
-				fmt.Printf("    Drive ID: %s\n", *driveId)
+				fmt.Printf("    Drive ID: %s\n", util.Deref(driveId))
 			}
 			if id := inheritedFrom.GetId(); id != nil {
-				fmt.Printf("    Item ID: %s\n", *id)
+				fmt.Printf("    Item ID: %s\n", util.Deref(id))
 			}
 			if path := inheritedFrom.GetPath(); path != nil {
-				fmt.Printf("    Path: %s\n", *path)
+				fmt.Printf("    Path: %s\n", util.Deref(path))
 			}
 		}
 

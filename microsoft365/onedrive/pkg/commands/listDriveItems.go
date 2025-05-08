@@ -52,7 +52,7 @@ func ListDriveItems(ctx context.Context, driveID string, itemID string) error {
 		// Print detailed information indented
 		itemStr += fmt.Sprintf("ID: %s\n", util.Deref(item.GetId()))
 		if size := item.GetSize(); size != nil {
-			itemStr += fmt.Sprintf("Size: %d bytes\n", *size)
+			itemStr += fmt.Sprintf("Size: %d bytes\n", util.Deref(size))
 		}
 		if created := item.GetCreatedDateTime(); created != nil {
 			itemStr += fmt.Sprintf("Created: %s\n", created.Format(time.RFC3339))
@@ -61,18 +61,18 @@ func ListDriveItems(ctx context.Context, driveID string, itemID string) error {
 			itemStr += fmt.Sprintf("Modified: %s\n", modified.Format(time.RFC3339))
 		}
 		if webUrl := item.GetWebUrl(); webUrl != nil {
-			itemStr += fmt.Sprintf("Web URL: %s\n", *webUrl)
+			itemStr += fmt.Sprintf("Web URL: %s\n", util.Deref(webUrl))
 		}
 
 		// If it's a folder, show child count
 		if folder := item.GetFolder(); folder != nil {
-			itemStr += fmt.Sprintf("Child Count: %d\n", *folder.GetChildCount())
+			itemStr += fmt.Sprintf("Child Count: %d\n", util.Deref(folder.GetChildCount()))
 		}
 
 		// If it's a file, show additional file properties
 		if file := item.GetFile(); file != nil {
 			if mimeType := file.GetMimeType(); mimeType != nil {
-				itemStr += fmt.Sprintf("MIME Type: %s\n", *mimeType)
+				itemStr += fmt.Sprintf("MIME Type: %s\n", util.Deref(mimeType))
 			}
 		}
 		elements = append(elements, gptscript.DatasetElement{
