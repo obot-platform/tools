@@ -2,7 +2,7 @@
 Name: Google Drive
 Description: Tools for interacting with a user's Google Drive account
 Metadata: bundle: true
-Share Tools: List Files, Download File, Copy File, Get File, Create File, Update File, Create Folder, Delete File, Transfer Ownership, List Permissions, Get Permission, Create Permission, Update Permission, Delete Permission
+Share Tools: List Files, Download File, Copy File, Get File, Create File, Update File, Create Folder, Delete File, Transfer Ownership, List Permissions, Get Permission, Create Permission, Update Permission, Delete Permission, Create Shared Drive, Delete Shared Drive, List Shared Drives, Rename Shared Drive
 
 ---
 Name: List Files
@@ -10,8 +10,8 @@ Description: List or search for files in the user's Google Drive.
 Credential: ../credential
 Share Context: Google Drive Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: drive_id: (Optional) ID of the shared Google Drive to list files from. If not provided, default to the user's personal drive.
-Param: parent_id: (Optional) ID of the parent folder to list files from. If not provided, default to the root folder.
+Param: drive_id: (Optional) ID of the Google Drive to list files from. If not provided, default to the user's personal drive.
+Param: parent_id: (Optional) ID of the parent folder to list files from. If not provided, default to the root folder of user's personal drive.
 Param: query: (Optional) A query for filtering the file results using Google Drive's query syntax. Example: name contains 'report'(Search by name); mimeType = 'application/pdf'(Search by file mimeType); modifiedTime > '2025-01-01'(Search by modified time)
 Param: max_results: (Optional) Maximum integer number of files to return. If not provided, default to 50.
 
@@ -154,6 +154,42 @@ Param: permission_id: (Required) ID of the permission to delete
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py delete_permission
 
 ---
+Name: Create Shared Drive
+Description: Create a new shared Google Drive for the user
+Credential: ../credential
+Share Context: Google Drive Context
+Param: drive_name: (Required) Name of the new shared drive
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py create_shared_drive
+
+---
+Name: Delete Shared Drive
+Description: Delete an existing shared Google Drive
+Credential: ../credential
+Share Context: Google Drive Context
+Param: drive_id: (Required) ID of the shared drive to delete
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py delete_shared_drive
+
+---
+Name: List Shared Drives
+Description: List all shared Google Drives for the user
+Credential: ../credential
+Share Context: Google Drive Context
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_shared_drives
+
+---
+Name: Rename Shared Drive
+Description: Rename an existing shared Google Drive
+Credential: ../credential
+Share Context: Google Drive Context
+Param: drive_id: (Required) ID of the shared drive to rename
+Param: drive_name: (Required) New name for the shared drive
+
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py update_shared_drive
+
+---
 Name: Google Drive Context
 Type: context
 Share Context: ../../time
@@ -167,6 +203,12 @@ You can use these tools to operate files/folders/drives/permissions on behalf of
 
 When the user requested to operate on a file or permission without specifying the drive, you should assume using the user's personal drive.
 
+ALWAYS ask for user's confirmation before deleting a file/folder/shared_drive/permission.
+
+the drive id of a shared drive is the same as the drive id of the root folder of the shared drive.
+
+Show links to files/folders/shared_drives/permissions in markdown format: [link text](link url)
+
 ## End of instructions for Using Google Drive Tools
 
 ---
@@ -175,3 +217,4 @@ When the user requested to operate on a file or permission without specifying th
 
 ---
 !metadata:*:oauth
+google
