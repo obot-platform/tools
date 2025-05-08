@@ -61,7 +61,7 @@ func AddDriveItemPermission(ctx context.Context, client *msgraphsdkgo.GraphServi
 		requestBody.SetExpirationDateTime(&expirationDateTime)
 	}
 
-	invite, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(itemID).Invite().PostAsInvitePostResponse(context.Background(), requestBody, nil)
+	invite, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(itemID).Invite().PostAsInvitePostResponse(ctx, requestBody, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add permission for item %s in drive %s: %w", itemID, driveID, err)
 	}
