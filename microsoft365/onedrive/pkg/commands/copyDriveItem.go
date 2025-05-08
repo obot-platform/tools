@@ -9,8 +9,7 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/graph"
 )
 
-func CopyDriveItem(ctx context.Context, sourceDriveID string, sourceItemID string,
-	targetDriveID string, targetFolderID string, newName string) error {
+func CopyDriveItem(ctx context.Context, sourceDriveID, sourceItemID, targetDriveID, targetFolderID, newName string) error {
 
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {
