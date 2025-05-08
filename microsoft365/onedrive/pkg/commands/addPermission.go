@@ -18,7 +18,11 @@ func AddPermission(ctx context.Context, driveID string, itemID string, emails st
 
 	var emailList []string
 	if emails != "" {
-		emailList = strings.Split(emails, ",")
+		for _, email := range strings.Split(strings.ReplaceAll(strings.TrimSpace(emails), " ", ""), ",") {
+			if email != "" {
+				emailList = append(emailList, email)
+			}
+		}
 	}
 
 	validRoles := []string{"read", "write", "review", "owner"}

@@ -127,7 +127,7 @@ Share Context: OneDrive Context
 Credential: ../credential
 Param: drive_id: (Required) The ID of the drive to add the permission to.
 Param: item_id: (Required) The ID of the item to add the permission to.
-Param: emails: (Required) comma separated emails of the users to add the permission to.
+Param: emails: (Required) Comma-separated list of email addresses to grant permission to (e.g., "user1@example.com,user2@example.com")
 Param: role: (Required) The role to grant to the users. Must be one of: "read" (view only), "write" (view and edit), "review" (view and approve), or "owner" (full control including sharing).
 Param: message: (Optional) The message to send to the users.
 Param: password: (Optional) The password to use for the permission. if unset, the permission will be added without a password.
