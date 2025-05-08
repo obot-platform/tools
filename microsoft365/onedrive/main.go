@@ -73,6 +73,21 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	case "addPermission":
+		if err := commands.AddPermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("EMAILS"), os.Getenv("ROLE"), os.Getenv("MESSAGE"), os.Getenv("PASSWORD"), os.Getenv("EXPIRATION_DATE_TIME")); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	case "deletePermission":
+		if err := commands.DeletePermission(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"), os.Getenv("PERMISSION_ID")); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	case "listPermissions":
+		if err := commands.ListPermissions(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID")); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %q\n", command)
 		os.Exit(1)
