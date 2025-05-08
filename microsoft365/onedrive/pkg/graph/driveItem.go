@@ -30,7 +30,7 @@ func ListDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 }
 
 func ListSharedDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.DriveItemable, error) {
-	sharedWithMe, err := client.Drives().ByDriveId("me").SharedWithMe().GetAsSharedWithMeGetResponse(context.Background(), nil)
+	sharedWithMe, err := client.Drives().ByDriveId("me").SharedWithMe().GetAsSharedWithMeGetResponse(ctx, nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to list shared items: %w", err)
