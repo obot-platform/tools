@@ -9,7 +9,7 @@ import (
 )
 
 func ListOrgDrives(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.Driveable, error) {
-	drives, err := client.Drives().Get(context.Background(), nil)
+	drives, err := client.Drives().Get(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list drives: %w", err)
 	}
