@@ -18,7 +18,7 @@ func ListOrgDrives(ctx context.Context, client *msgraphsdkgo.GraphServiceClient)
 }
 
 func GetMyDrive(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) (models.Driveable, error) {
-	drive, err := client.Me().Drive().Get(context.Background(), nil)
+	drive, err := client.Me().Drive().Get(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get my drive: %w", err)
 	}
