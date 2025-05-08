@@ -168,7 +168,6 @@ func UpdateDriveItem(ctx context.Context, client *msgraphsdkgo.GraphServiceClien
 		requestBody.SetName(&newName)
 	}
 
-	// To initialize your graphClient, see https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go
 	items, err := client.Drives().ByDriveId(driveID).Items().ByDriveItemId(itemID).Patch(context.Background(), requestBody, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update item %s in drive %s: %w", itemID, driveID, err)
