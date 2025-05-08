@@ -35,6 +35,11 @@ func main() {
 	}
 
 	if cfg.APIKey != "" {
+		cfg.RewriteHeaderFn = func(header http.Header) {
+			header.Del("Authorization")
+			header.Set("x-api-key", cfg.APIKey)
+			header.Set("anthropic-version", "2023-06-01")
+		}
 		if err := cfg.Validate("/tools/anthropic-model-provider/validate"); err != nil {
 			os.Exit(1)
 		}

@@ -15,8 +15,6 @@ tools:
     reference: ./wordpress
   wordpress-seo:
     reference: ./wordpress-seo
-  excel:
-    reference: ./microsoft365/excel
   browser:
     reference: ./browser
   bluesky:
@@ -45,10 +43,16 @@ tools:
     reference: ./gitlab
   images:
     reference: ./images
+  excel:
+    reference: ./microsoft365/excel
   outlook-mail:
     reference: ./microsoft365/outlook/mail
   outlook-calender:
     reference: ./microsoft365/outlook/calendar
+  word:
+    reference: ./microsoft365/word
+  onedrive:
+    reference: ./microsoft365/onedrive
   github:
     reference: ./github
   time:
@@ -63,8 +67,6 @@ tools:
     reference: ./knowledge
   shell:
     reference: ./shell
-  word:
-    reference: ./microsoft365/word
   tavily:
     reference: ./search/tavily
   googlecustomsearch:
