@@ -125,8 +125,8 @@ Description: Create a new permission for a Google Drive file
 Credential: ../credential
 Share Context: Google Drive Context
 Param: file_id: (Required) ID of the file to create permission for
-Param: role: (Required) Role for the new permission, must be one of (owner, organizer, fileOrganizer, writer, commenter, reader)
-Param: type: (Required) Type of the new permission, must be one of (user, group, domain, anyone)
+Param: role: (Required) Role for the new permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]
+Param: type: (Required) Type of the new permission, must be one of [user, group, domain, anyone]
 Param: email_address: (Optional) Email address for user/group permission, required if type is user or group
 Param: domain: (Optional) Domain for domain permission, required if type is domain
 
@@ -139,7 +139,7 @@ Credential: ../credential
 Share Context: Google Drive Context
 Param: file_id: (Required) ID of the file to update permission for
 Param: permission_id: (Required) ID of the permission to update
-Param: role: (Optional) New role for the permission, must be one of (owner, organizer, fileOrganizer, writer, commenter, reader)
+Param: role: (Optional) New role for the permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py update_permission
 
@@ -208,6 +208,8 @@ ALWAYS ask for user's confirmation before deleting a file/folder/shared_drive/pe
 the drive id of a shared drive is the same as the drive id of the root folder of the shared drive.
 
 Show links to files/folders/shared_drives/permissions in markdown format: [link text](link url)
+
+Don't show IDs in your response to the user unless the user asks for it.
 
 ## End of instructions for Using Google Drive Tools
 

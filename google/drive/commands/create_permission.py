@@ -30,7 +30,11 @@ def create_permission_tool() -> None:
         "reader",
     ]
     if role not in valid_roles:
-        print(f"Error: ROLE must be one of {valid_roles}, but got {role}")
+        print(f"Error: Invalid role '{role}'")
+        print(f"Valid roles are: {', '.join(valid_roles)}")
+        print("Note:")
+        print("- 'owner' can only be used for My Drive files")
+        print("- 'organizer' and 'fileOrganizer' can only be used for shared drives")
         return
 
     valid_types = ["user", "group", "domain", "anyone"]
