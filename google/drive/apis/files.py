@@ -15,6 +15,7 @@ def list_files(
     parent_id: Optional[str] = None,
     query: Optional[str] = None,  # TODO: better search file query support
     max_results: Optional[int] = None,
+    trashed: Optional[bool] = False,
 ) -> List[dict]:
     """
     List files accessible to the user, optionally filtered by drive_id and query.
@@ -51,12 +52,17 @@ def list_files(
                 }
             )
 
+        # Build query conditions list
+        query_conditions = ["trashed = true" if trashed else "trashed = false"]
+
         if parent_id:
-            parent_condition = f"'{parent_id}' in parents"
-            query = f"{parent_condition} and {query}" if query else parent_condition
+            query_conditions.append(f"'{parent_id}' in parents")
 
         if query:
-            params["q"] = query
+            query_conditions.append(f"({query})")
+        # Combine all conditions with AND
+        if query_conditions:
+            params["q"] = " and ".join(query_conditions)
 
         while True:
             response = service.files().list(**params).execute()

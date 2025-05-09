@@ -48,5 +48,6 @@ def list_files_tool() -> None:
         parent_id=parent_id,
         query=query,
         max_results=max_results,
+        trashed=False,
     )
     add_files_to_dataset_elements(files)  # this will print out the result

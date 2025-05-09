@@ -10,8 +10,8 @@ Description: List or search for files in the user's Google Drive.
 Credential: ../credential
 Share Context: Google Drive Context
 Tools: github.com/gptscript-ai/datasets/filter
-Param: drive_id: (Optional) ID of the Google Drive to list files from. If not provided, default to the user's personal drive.
-Param: parent_id: (Optional) ID of the parent folder to list files from. If not provided, default to the root folder of user's personal drive.
+Param: drive_id: (Optional) ID of the Google Drive to list files from. If unset, default to the user's personal drive.
+Param: parent_id: (Optional) ID of the parent folder to list files from. If unset, default to the root folder of user's personal drive.
 Param: query: (Optional) A query for filtering the file results using Google Drive's query syntax. Example: name contains 'report'(Search by name); mimeType = 'application/pdf'(Search by file mimeType); modifiedTime > '2025-01-01'(Search by modified time)
 Param: max_results: (Optional) Maximum integer number of files to return. If not provided, default to 50.
 
