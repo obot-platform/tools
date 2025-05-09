@@ -1,0 +1,55 @@
+---
+Name: Microsoft 365 Contact
+Description: Tools for interacting with Microsoft 365 Contact.
+Metadata: bundle: true
+Share Tools: List Contacts, Create Contact, Update Contact, Delete Contact, Get Contact
+
+---
+Name: List Contacts
+Description: List all contacts available to the user.
+Tools: github.com/gptscript-ai/datasets/filter
+Credential: ../../credential
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listContacts
+
+---
+Name: Create Contact
+Description: Create a new contact in the user's Microsoft contact list.
+Credential: ../../credential
+Param: givenName: The given name of the contact.
+Param: surname: The surname of the contact.
+Param: emailAddress: The email address of the contact.
+Param: businessPhone: The business phone number of the contact.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createContact
+
+--- 
+Name: Update Contact
+Description: Update an existing contact in the user's Microsoft contact list.
+Credential: ../../credential
+Param: contactID: (required) The ID of the contact to update.
+Param: givenName: (optional) The given name of the contact.
+Param: surname: (optional) The surname of the contact.
+Param: emailAddress: (optional) The email address of the contact.
+Param: businessPhone: (optional) The business phone number of the contact.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool updateContact
+
+---
+Name: Delete Contact
+Description: Delete an existing contact from the user's Microsoft contact list.
+Credential: ../../credential
+Param: contactID: (required) The ID of the contact to delete.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool deleteContact
+
+---
+Name: Get Contact
+Description: Get the details of an existing contact from the user's Microsoft contact list.
+Credential: ../../credential
+Param: contactID: (required) The ID of the contact to get.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getContact
+
+---
+!metadata:*:oauth
