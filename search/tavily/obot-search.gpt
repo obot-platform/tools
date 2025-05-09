@@ -1,10 +1,26 @@
 ---
 Name: Obot Search
 Description: Search the web with Obot. This returns a list of search results scored by relevance to the query and summarized.
+Share Context: Obot Search Context
 Credential: ./credential
 Param: query: The search query
+Param: time_range: (Optional) the time range to search in. Value must be exactly "day", "week", "month", or "year".
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py search
+
+---
+Name: Obot Search Context
+Type: context
+
+#!sys.echo
+
+# Instructions for using Obot Search
+
+The `time_range` parameter should only be used when you know that you will get better or more accurate search results by using it.
+Examples of when using it might be appropriate include getting some statistic that fluctuates by the day, such as a stock price or currency conversion rate.
+Do not use it for information that remains relatively constant over time.
+
+# End of instructions for using Obot Search
 
 ---
 !metadata:*:icon

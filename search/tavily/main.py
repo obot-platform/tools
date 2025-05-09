@@ -48,15 +48,32 @@ def main():
             if os.getenv("MAX_RESULTS", "").strip():
                 max_results = int(os.getenv("MAX_RESULTS"))  # override with env var
 
-            response = client.search(
-                query=query,
-                include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
-                == "true",  # no LLM-generated answer needed by default - we'll do that
-                include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
-                != "false",  # include raw content by default
-                max_results=max_results,
-                include_domains=include_domains,
-            )
+            time_range = os.getenv("TIME_RANGE", "").lower().strip()
+            if time_range not in ["", "day", "week", "month", "year"]:
+                print("Invalid time range: must be day, week, month, or year")
+                sys.exit(1)
+
+            if time_range:
+                response = client.search(
+                    query=query,
+                    include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
+                    == "true",  # no LLM-generated answer needed by default - we'll do that
+                    include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
+                    != "false",  # include raw content by default
+                    max_results=max_results,
+                    include_domains=include_domains,
+                    time_range=time_range,
+                )
+            else:
+                response = client.search(
+                    query=query,
+                    include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
+                    == "true",  # no LLM-generated answer needed by default - we'll do that
+                    include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
+                    != "false",  # include raw content by default
+                    max_results=max_results,
+                    include_domains=include_domains,
+                )
         case "extract":
             client = TavilyClient()  # env TAVILY_API_KEY required
             url = parse_url(os.getenv("URL").strip())

@@ -11,6 +11,7 @@ Credential: ./credential
 Share Context: Tavily Context
 Param: query: The search query
 Param: includeDomains: A comma-separated list of domains to specifically include in the search
+Param: time_range: (Optional) the time range to search in. Value must be exactly "day", "week", "month", or "year".
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py search
 
