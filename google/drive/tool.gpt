@@ -102,29 +102,29 @@ Param: new_owner_email: (Required) Email address of the new owner
 
 ---
 Name: List Permissions
-Description: List all permissions for a Google Drive file
+Description: List all permissions for a Google Drive file, folder, or shared drive.
 Credential: ../credential
 Share Context: Google Drive Context
-Param: file_id: (Required) ID of the file to list permissions for
+Param: file_id: (Required) ID of the file, folder, or shared drive to list permissions for
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_permissions
 
 ---
 Name: Get Permission
-Description: Get a specific permission for a Google Drive file
+Description: Get a specific permission for a Google Drive file, folder, or shared drive.
 Credential: ../credential
 Share Context: Google Drive Context
-Param: file_id: (Required) ID of the file to get permission for
+Param: file_id: (Required) ID of the file, folder, or shared drive to get permission for
 Param: permission_id: (Required) ID of the permission to get
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py get_permission
 
 ---
 Name: Create Permission
-Description: Create a new permission for a Google Drive file
+Description: Create a new permission for a Google Drive file, folder, or shared drive.
 Credential: ../credential
 Share Context: Google Drive Context
-Param: file_id: (Required) ID of the file to create permission for
+Param: file_id: (Required) ID of the file, folder, or shared drive to create permission for
 Param: role: (Required) Role for the new permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]
 Param: type: (Required) Type of the new permission, must be one of [user, group, domain, anyone]
 Param: email_address: (Optional) Email address for user/group permission, required if type is user or group
@@ -134,10 +134,10 @@ Param: domain: (Optional) Domain for domain permission, required if type is doma
 
 ---
 Name: Update Permission
-Description: Update an existing permission for a Google Drive file
+Description: Update an existing permission for a Google Drive file, folder, or shared drive.
 Credential: ../credential
 Share Context: Google Drive Context
-Param: file_id: (Required) ID of the file to update permission for
+Param: file_id: (Required) ID of the file, folder, or shared drive to update permission for
 Param: permission_id: (Required) ID of the permission to update
 Param: role: (Optional) New role for the permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]
 
@@ -145,10 +145,10 @@ Param: role: (Optional) New role for the permission, must be one of [owner(for M
 
 ---
 Name: Delete Permission
-Description: Delete an existing permission for a Google Drive file
+Description: Delete an existing permission for a Google Drive file, folder, or shared drive.
 Credential: ../credential
 Share Context: Google Drive Context
-Param: file_id: (Required) ID of the file to delete permission from
+Param: file_id: (Required) ID of the file, folder, or shared drive to delete permission from
 Param: permission_id: (Required) ID of the permission to delete
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py delete_permission
