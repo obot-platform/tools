@@ -53,27 +53,18 @@ def main():
                 print("Invalid time range: must be day, week, month, or year")
                 sys.exit(1)
 
+            search_params = {
+                "query": query,
+                "include_answer": os.getenv("INCLUDE_ANSWER", "").lower() == "true",  # no LLM-generated answer needed by default - we'll do that
+                "include_raw_content": os.getenv("INCLUDE_RAW_CONTENT", "").lower() != "false",  # include raw content by default
+                "max_results": max_results,
+                "include_domains": include_domains,
+            }
+
             if time_range:
-                response = client.search(
-                    query=query,
-                    include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
-                    == "true",  # no LLM-generated answer needed by default - we'll do that
-                    include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
-                    != "false",  # include raw content by default
-                    max_results=max_results,
-                    include_domains=include_domains,
-                    time_range=time_range,
-                )
-            else:
-                response = client.search(
-                    query=query,
-                    include_answer=os.getenv("INCLUDE_ANSWER", "").lower()
-                    == "true",  # no LLM-generated answer needed by default - we'll do that
-                    include_raw_content=os.getenv("INCLUDE_RAW_CONTENT", "").lower()
-                    != "false",  # include raw content by default
-                    max_results=max_results,
-                    include_domains=include_domains,
-                )
+                search_params["time_range"] = time_range
+
+            response = client.search(**search_params)
         case "extract":
             client = TavilyClient()  # env TAVILY_API_KEY required
             url = parse_url(os.getenv("URL").strip())
