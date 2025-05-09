@@ -82,7 +82,7 @@ def create_permission(
                 body=permission,
                 fields="id, type, role, emailAddress, domain",
                 supportsAllDrives=True,
-                sendNotificationEmail=True
+                sendNotificationEmail=True,
             )
             .execute()
         )

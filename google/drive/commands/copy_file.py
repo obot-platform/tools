@@ -13,5 +13,7 @@ def copy_file_tool() -> None:
         print("Error: FILE_ID environment variable is required but not set")
         return
 
-    file = copy_file(client, file_id=file_id, new_name=new_name, parent_id=new_parent_id)
+    file = copy_file(
+        client, file_id=file_id, new_name=new_name, parent_id=new_parent_id
+    )
     print(file)
