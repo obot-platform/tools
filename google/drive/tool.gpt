@@ -6,14 +6,16 @@ Share Tools: List Files, Download File, Copy File, Get File, Create File, Update
 
 ---
 Name: List Files
-Description: List or search for files in the user's Google Drive.
+Description: List or search for files in the user's Google Drive. Returns up to 50 files by default, sorted by last modified date.
 Credential: ../credential
 Share Context: Google Drive Context
 Tools: github.com/gptscript-ai/datasets/filter
 Param: drive_id: (Optional) ID of the Google Drive to list files from. If unset, default to the user's personal drive.
 Param: parent_id: (Optional) ID of the parent folder to list files from. If unset, default to the root folder of user's personal drive.
-Param: query: (Optional) A query for filtering the file results using Google Drive's query syntax. Example: name contains 'report'(Search by name); mimeType = 'application/pdf'(Search by file mimeType); modifiedTime > '2025-01-01'(Search by modified time)
-Param: max_results: (Optional) Maximum integer number of files to return. If not provided, default to 50.
+Param: mime_type: (Optional) Filter files by MIME type (e.g., 'application/pdf' for PDFs, 'image/jpeg' for JPEG images, 'application/vnd.google-apps.folder' for folders). If unset, returns all file types.
+Param: file_name_contains: (Optional) Case-insensitive search string to filter files by name. Returns files containing this string in their name.
+Param: modified_time_after: (Optional) Return only files modified after this timestamp (RFC 3339 format: YYYY-MM-DDTHH:MM:SSZ, e.g., '2024-03-20T10:00:00Z').
+Param: max_results: (Optional) Maximum number of files to return (default: 50, must be a positive integer).
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_files
 

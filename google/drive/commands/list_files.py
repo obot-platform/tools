@@ -30,7 +30,9 @@ def list_files_tool() -> None:
     client = get_client("drive", "v3")
     drive_id = os.getenv("DRIVE_ID")  # Optional
     parent_id = os.getenv("PARENT_ID")  # Optional
-    query = os.getenv("QUERY")  # Optional
+    mime_type = os.getenv("MIME_TYPE")  # Optional
+    file_name_contains = os.getenv("FILE_NAME_CONTAINS")  # Optional
+    modified_time_after = os.getenv("MODIFIED_TIME_AFTER")  # Optional
     max_results = os.getenv("MAX_RESULTS")
 
     if max_results:
@@ -46,7 +48,9 @@ def list_files_tool() -> None:
         client,
         drive_id=drive_id,
         parent_id=parent_id,
-        query=query,
+        mime_type=mime_type,
+        file_name_contains=file_name_contains,
+        modified_time_after=modified_time_after,
         max_results=max_results,
         trashed=False,
     )
