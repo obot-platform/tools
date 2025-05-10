@@ -12,6 +12,9 @@ func PrintDrive(drive models.Driveable, details bool) {
 	if driveType := drive.GetDriveType(); driveType != nil {
 		fmt.Printf("Drive Type: %s\n", *driveType)
 	}
+	if webUrl := drive.GetWebUrl(); webUrl != nil {
+		fmt.Printf("Web URL: %s\n", *webUrl)
+	}
 	if owner := drive.GetOwner(); owner != nil {
 		user := owner.GetUser()
 		if user != nil && user.GetDisplayName() != nil {

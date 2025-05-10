@@ -24,8 +24,8 @@ func main() {
 		mainErr = commands.GetDrive(context.Background(), os.Getenv("DRIVE_ID"))
 	case "listDriveItems":
 		mainErr = commands.ListDriveItems(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("FOLDER_ID"))
-	case "listSharedItems":
-		mainErr = commands.ListSharedItems(context.Background())
+	case "listSharedWithMeItems":
+		mainErr = commands.ListSharedWithMeItems(context.Background())
 	case "getDriveItem":
 		mainErr = commands.GetDriveItem(context.Background(), os.Getenv("DRIVE_ID"), os.Getenv("ITEM_ID"))
 	case "updateDriveItem":

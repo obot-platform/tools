@@ -25,7 +25,7 @@ func AddPermission(ctx context.Context, driveID string, itemID string, emails st
 		}
 	}
 
-	validRoles := []string{"read", "write", "review", "owner"}
+	validRoles := []string{"read", "write", "member", "owner"}
 	if !slices.Contains(validRoles, role) {
 		return fmt.Errorf("invalid role: %s, valid roles are: %s", role, strings.Join(validRoles, ", "))
 	}
