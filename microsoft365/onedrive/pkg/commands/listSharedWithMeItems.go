@@ -11,13 +11,13 @@ import (
 	"github.com/obot-platform/tools/microsoft365/onedrive/pkg/util"
 )
 
-func ListSharedItems(ctx context.Context) error {
+func ListSharedWithMeItems(ctx context.Context) error {
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	items, err := graph.ListSharedDriveItems(ctx, c)
+	items, err := graph.ListSharedWithMeDriveItems(ctx, c)
 	if err != nil {
 		return fmt.Errorf("failed to list shared items: %w", err)
 	}
@@ -31,20 +31,15 @@ func ListSharedItems(ctx context.Context) error {
 	for _, item := range items {
 		itemStr := ""
 		itemStr += fmt.Sprintf("FileName: %s\n", util.Deref(item.GetName()))
-		if parentRef := item.GetParentReference(); parentRef != nil {
-			if driveId := parentRef.GetDriveId(); driveId != nil {
-				itemStr += fmt.Sprintf("Drive ID: %s\n", util.Deref(driveId))
-			}
-		}
+
 		itemStr += fmt.Sprintf("Item ID: %s\n", util.Deref(item.GetId()))
 
-		if shared := item.GetShared(); shared != nil {
-			if owner := shared.GetOwner(); owner != nil {
-				if user := owner.GetUser(); user != nil {
-					itemStr += fmt.Sprintf("Shared by: %s\n", util.Deref(user.GetDisplayName()))
+		if remoteItem := item.GetRemoteItem(); remoteItem != nil {
+			if parentRef := remoteItem.GetParentReference(); parentRef != nil {
+				if parentDriveID := parentRef.GetDriveId(); parentDriveID != nil {
+					itemStr += fmt.Sprintf("Drive ID: %s\n", util.Deref(parentDriveID))
 				}
 			}
-			itemStr += fmt.Sprintf("Sharing Scope: %s\n", util.Deref(shared.GetScope()))
 		}
 
 		if webUrl := item.GetWebUrl(); webUrl != nil {

@@ -29,9 +29,14 @@ func ListDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient
 	return resp.GetValue(), nil
 }
 
-func ListSharedDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.DriveItemable, error) {
-	sharedWithMe, err := client.Drives().ByDriveId("me").SharedWithMe().GetAsSharedWithMeGetResponse(ctx, nil)
+func ListSharedWithMeDriveItems(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.DriveItemable, error) {
+	drive, err := client.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user drive: %w", err)
+	}
 
+	driveID := *drive.GetId()
+	sharedWithMe, err := client.Drives().ByDriveId(driveID).SharedWithMe().GetAsSharedWithMeGetResponse(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list shared items: %w", err)
 	}
