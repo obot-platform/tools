@@ -49,7 +49,7 @@ export async function analyzeImages(
 
   for await (const part of response) {
     const { choices } = part;
-    const text = choices[0]?.delta?.content;
+    const text = choices?.[0]?.delta?.content;
     if (text) {
       process.stdout.write(text);
     }
