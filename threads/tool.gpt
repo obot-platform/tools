@@ -1,4 +1,4 @@
 Name: Threads
-Description: Users can create multiple threads
+Description: Enables users to create multiple threads on an agent
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/scroll-duotone.svg
 Metadata: category: Capability

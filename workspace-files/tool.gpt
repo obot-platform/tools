@@ -1,5 +1,5 @@
 Name: Workspace Files
-Description: Adds the capability for users to read and write workspace files
+Description: Manage files in the Obot workspace
 Type: context
 Metadata: category: Capability
 Context: workspace_list

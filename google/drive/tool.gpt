@@ -1,6 +1,6 @@
 ---
 Name: Google Drive
-Description: Tools for interacting with a user's Google Drive account
+Description: Manage files in Google Drive
 Metadata: bundle: true
 Share Tools: List Files, Download File, Copy File, Get File, Create File, Update File, Create Folder, Delete File, Transfer Ownership, List Permissions, Get Permission, Create Permission, Update Permission, Delete Permission, Create Shared Drive, Delete Shared Drive, List Shared Drives, Rename Shared Drive
 

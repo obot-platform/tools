@@ -1,6 +1,6 @@
 ---
 Name: Outlook Mail
-Description: Tools for interacting with Microsoft Outlook Mail.
+Description: Create, read, send, and manage emails in Outlook Mail in Microsoft 365
 Metadata: bundle: true
 Share Tools: List Mail Folders, List Emails, Get Email Details, Search Emails, Create Draft, Create Group Thread Email, Send Draft, Delete Email, Move Email, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Email Attachments, Get Group Thread Email Attachment, Download Group Thread Email Attachment
 

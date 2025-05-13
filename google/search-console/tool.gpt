@@ -1,6 +1,6 @@
 ---
 Name: Google Search Console
-Description: Tools for working with Google Search Console
+Description: Get search results from Google Search Console
 Metadata: bundle: true
 Share Tools: Get GSC Properties, Inspect URL, Get Top Keywords, Get URLs for Property
 

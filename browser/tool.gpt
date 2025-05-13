@@ -1,5 +1,5 @@
 Name: Browser
-Description: Tools to navigate websites using a browser.
+Description: Drive a web browser using AI
 Metadata: bundle: true
 Metadata: noUserAuth: sys.model.provider.credential
 Credentials: github.com/gptscript-ai/credentials/model-provider

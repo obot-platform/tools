@@ -1,6 +1,6 @@
 ---
 Name: Word
-Description: Tools for interacting with Microsoft Word documents in OneDrive
+Description: Create, write, and read documents in Word in Microsoft 365
 Metadata: bundle: true
 Share Tools: List Docs, Read Doc, Write Doc
 

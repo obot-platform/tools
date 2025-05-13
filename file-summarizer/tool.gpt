@@ -1,5 +1,5 @@
 Name: File Summarizer
-Description: This tool summarizes the input file in the workspace, returns a text summary of the file content, either write to a file in the workspace or print to the console.
+Description: Summarize large files
 Credential: sys.model.provider.credential
 Params: input_file: (Required) Name of the file in the workspace to summarize.
 Params: output_file: (Optional) Name of the file to save the summary, default to empty string. If not provided, a summary file will be created in the same directory as the input file. To print to the console, set this to "NONE".

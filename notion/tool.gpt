@@ -1,6 +1,6 @@
 ---
 Name: Notion
-Description: Tools for interacting with Notion
+Description: Create, update, and read pages and databases in Notion
 Metadata: bundle: true
 Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Database Properties, Add Database Row, Update Database Row, Update Page
 

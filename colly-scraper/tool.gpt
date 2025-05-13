@@ -1,6 +1,6 @@
 ---
 Name: Colly Website Scraper
-Description: Scrape a URL to get its content
+Description: Scrape a web page using Colly
 Param: url: the URL to scrape
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool

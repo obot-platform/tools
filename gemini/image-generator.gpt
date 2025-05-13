@@ -1,5 +1,5 @@
 Name: Gemini Image Generator
-Description: Generate images based on a given prompt using Google's Gemini Developer API.
+Description: Generate images using Google's Gemini Developer API
 Credential: ./credential
 Param: prompt: (required) Text describing the image to generate
 Param: title: (required) Title for the generated image (will be converted to a safe filename)

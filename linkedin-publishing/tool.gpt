@@ -1,6 +1,6 @@
 ---
 Name: LinkedIn Publishing
-Description: Tools for publishing content to LinkedIn with the LinkedIn APIs
+Description: Create posts on LinkedIn
 Metadata: bundle: true
 Share Tools: Get Current LinkedIn User, Create LinkedIn Post
 

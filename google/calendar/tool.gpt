@@ -1,6 +1,6 @@
 ---
 Name: Google Calendar
-Description: Tools for interacting with a user's Google Calendar account
+Description: Manage events and calendars in Google Calendar
 Metadata: bundle: true
 Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, Update Event, Respond To Event, Delete Event, List Recurring Event Instances, List Calendars, Get Calendar, Create Calendar, Update Calendar, Delete Calendar
 

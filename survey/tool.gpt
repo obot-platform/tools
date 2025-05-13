@@ -1,5 +1,5 @@
 Name: Survey
-Description: Presents a survey form for the user to fill out, and prints their responses.
+Description: Present a survey form for the user to fill out
 Metadata: icon: https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/clipboard-text-duotone.svg
 Param: survey: A JSON string containing information for the survey to give to the user. Must match this JSONSchema: {
         "$schema": "http://json-schema.org/draft-07/schema#",

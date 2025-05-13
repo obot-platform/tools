@@ -1,6 +1,6 @@
 ---
 Name: Weather
-Description: Tools for getting the weather forecast
+Description: Get the weather forecast for a set of coordinates
 Metadata: bundle: true
 Share Tools: Get Weekly Forecast, Get Hourly Forecast
 

@@ -1,6 +1,6 @@
 ---
 Name: Gmail
-Description: Tools for interacting with a user's Gmail account
+Description: Create, read, and send emails in Gmail
 Metadata: bundle: true
 Share Tools: Current Email, List Emails, Read Email, Send Email, Delete Email, Modify Email Labels, List Drafts, Create Draft, Update Draft, Delete Draft, Send Draft, List Attachments, Download Attachment, Read Attachment, List Labels, Create Label, Update Label, Delete Label
 

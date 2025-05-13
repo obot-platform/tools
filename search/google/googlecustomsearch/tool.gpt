@@ -1,6 +1,6 @@
 ---
 Name: Google Custom Search
-Description: Search the Web using a Google Custom Search Engine.
+Description: Search the Internet using a Google Custom Search Engine
 Credential: ./credential
 Param: query: The search query
 

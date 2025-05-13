@@ -1,6 +1,6 @@
 ---
 Name: Time
-Description: Context tools that expose information about the current time, date, and timezone for the user.
+Description: Get information about the current date, time, and time zone
 Share Contexts: Current Date and Time, User Timezone
 
 ---

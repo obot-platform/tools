@@ -1,6 +1,6 @@
 ---
 Name: Outlook Calendar
-Description: Tools for interacting with Microsoft Outlook Calendar.
+Description: Manage events in Outlook Calendar in Microsoft 365
 Metadata: bundle: true
 Share Tools: List Calendars, List Events Today, List Events, Get Event Details, Create Event, Modify Event Attendees, Delete Event, Search Events, Respond To Event
 
