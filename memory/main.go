@@ -79,7 +79,7 @@ func delete(ctx context.Context, c *apiclient.Client, projectID string) error {
 
 func list(ctx context.Context, c *apiclient.Client, projectID string) error {
 	result, err := c.ListMemories(ctx, assistantID, projectID)
-	if err != nil && !strings.Contains(err.Error(), "404") {
+	if err != nil && !strings.Contains(err.Error(), "404") && !strings.Contains(err.Error(), "403") {
 		return fmt.Errorf("failed to list memories: %v", err)
 	}
 
