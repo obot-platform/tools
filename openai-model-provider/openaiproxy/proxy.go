@@ -81,6 +81,5 @@ func modifyRequestBodyForReasoningModel(reqBody *openai.ChatCompletionRequest) {
 }
 
 func isReasoningModel(model string) bool {
-	model = strings.TrimSpace(model)
 	return (strings.HasPrefix(model, "o1") && !strings.HasPrefix(model, "o1-mini") && !strings.HasPrefix(model, "o1-preview")) || strings.HasPrefix(model, "o3") || strings.HasPrefix(model, "o4")
 }
