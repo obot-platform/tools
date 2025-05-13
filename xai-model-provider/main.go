@@ -11,8 +11,13 @@ import (
 
 // RewriteGrokModels marks only Grok models as LLMs
 func RewriteGrokModels(resp *http.Response) error {
-	rewriteFn := proxy.RewriteAllModelsWithUsage("llm", func(modelID string) bool {
-		return strings.HasPrefix(modelID, "grok-")
+	rewriteFn := proxy.RewriteAllModelsWithUsageMap(map[string][]func(string) bool{
+		"llm": {func(modelID string) bool {
+			return strings.HasPrefix(modelID, "grok-") && !strings.Contains(modelID, "image")
+		}},
+		"image-generation": {func(modelID string) bool {
+			return strings.HasPrefix(modelID, "image")
+		}},
 	})
 	return rewriteFn(resp)
 }
