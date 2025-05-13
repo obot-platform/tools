@@ -75,10 +75,6 @@ tools:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-  survey:
-    reference: ./survey
-  weather:
-    reference: ./weather
   die-roller:
     reference: ./die-roller
   smartthings:
@@ -87,12 +83,8 @@ tools:
     reference: ./gemini/image-generator.gpt
   firecrawl:
     reference: ./firecrawl
-  colly-scraper:
-    reference: ./colly-scraper
   obot-search:
     reference: ./search/tavily/obot-search.gpt
-  search-combo:
-    reference: ./search-combo
   aws-s3:
     reference: ./aws/s3
   aws-ec2:
