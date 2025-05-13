@@ -71,8 +71,8 @@ func (s *Server) Openaiv1ProxyRedirect(req *http.Request) {
 }
 
 func modifyRequestBodyForReasoningModel(reqBody *openai.ChatCompletionRequest) {
-	temp := float32(1.0) // temperature is not supported for reasoning models. It must be 1.0
-	reqBody.Temperature = &temp
+	// temperature is not supported for reasoning models. It must be 1.0
+	reqBody.Temperature = &[]float32{1.0}[0]
 	for i, msg := range reqBody.Messages {
 		if msg.Role == "system" {
 			reqBody.Messages[i].Role = "developer"
