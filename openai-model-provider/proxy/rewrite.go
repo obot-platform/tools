@@ -42,8 +42,7 @@ func DefaultRewriteModelsResponse(resp *http.Response) error {
 		switch {
 		case strings.HasPrefix(model.ID, "gpt-"),
 			strings.HasPrefix(model.ID, "ft:gpt-"),
-			strings.TrimSpace(model.ID) == "o1",
-			(strings.HasPrefix(model.ID, "o1-") && !strings.HasPrefix(model.ID, "o1-mini") && !strings.HasPrefix(model.ID, "o1-preview") && !strings.HasPrefix(model.ID, "o1-pro")),
+			strings.HasPrefix(model.ID, "o1") && !strings.HasPrefix(model.ID, "o1-mini") && !strings.HasPrefix(model.ID, "o1-preview") && !strings.HasPrefix(model.ID, "o1-pro"),
 			strings.HasPrefix(model.ID, "o3"),
 			strings.HasPrefix(model.ID, "o4"),
 			strings.HasPrefix(model.ID, "ft:o1-"):
