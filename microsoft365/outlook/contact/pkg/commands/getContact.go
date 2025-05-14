@@ -38,14 +38,12 @@ func GetContact(ctx context.Context, contactID string) error {
 		fmt.Printf("Display Name: %s\n", util.Deref(contact.GetDisplayName()))
 	}
 
-	emails := []string{}
 	if emailAddresses := contact.GetEmailAddresses(); emailAddresses != nil && len(emailAddresses) > 0 {
 		fmt.Println("Email Addresses:")
 		for i, email := range emailAddresses {
 			if email.GetAddress() != nil {
 				emailAddress := util.Deref(email.GetAddress())
 				fmt.Printf("  %d. %s\n", i+1, emailAddress)
-				emails = append(emails, emailAddress)
 			}
 		}
 	}
