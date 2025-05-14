@@ -27,14 +27,11 @@ func CreateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 		emailAddress := models.NewEmailAddress()
 		address := email
 		emailAddress.SetAddress(&address)
-		// name := givenName + " " + surname
-		// emailAddress.SetName(&name)
 		emailAddresses = append(emailAddresses, emailAddress)
 	}
 	requestBody.SetEmailAddresses(emailAddresses)
-	
-	requestBody.SetBusinessPhones(businessPhones)
 
+	requestBody.SetBusinessPhones(businessPhones)
 
 	contacts, err := client.Me().Contacts().Post(ctx, requestBody, nil)
 	if err != nil {
@@ -69,17 +66,17 @@ func UpdateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 		requestBody.SetSurname(&surname)
 	}
 
-	emailAddresses := []models.EmailAddressable{}
-	for _, email := range emails {
-		emailAddress := models.NewEmailAddress()
-		address := email
-		emailAddress.SetAddress(&address)
-		// name := givenName + " " + surname
-		// emailAddress.SetName(&name)
-		emailAddresses = append(emailAddresses, emailAddress)
+	if len(emails) > 0 {
+		emailAddresses := []models.EmailAddressable{}
+		for _, email := range emails {
+			emailAddress := models.NewEmailAddress()
+			address := email
+			emailAddress.SetAddress(&address)
+			emailAddresses = append(emailAddresses, emailAddress)
+		}
+		requestBody.SetEmailAddresses(emailAddresses)
 	}
-	requestBody.SetEmailAddresses(emailAddresses)
-	
+
 	if len(businessPhones) > 0 {
 		requestBody.SetBusinessPhones(businessPhones)
 	}

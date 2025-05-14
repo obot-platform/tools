@@ -21,28 +21,31 @@ func GetContact(ctx context.Context, contactID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get contact: %w", err)
 	}
-	
+
 	// Print contact information
 	fmt.Println("Contact Details:")
 	fmt.Printf("ID: %s\n", util.Deref(contact.GetId()))
-	
+
 	if contact.GetGivenName() != nil {
 		fmt.Printf("First Name: %s\n", util.Deref(contact.GetGivenName()))
 	}
-	
+
 	if contact.GetSurname() != nil {
 		fmt.Printf("Last Name: %s\n", util.Deref(contact.GetSurname()))
 	}
-	
+
 	if contact.GetDisplayName() != nil {
 		fmt.Printf("Display Name: %s\n", util.Deref(contact.GetDisplayName()))
 	}
-	
-	if emails := contact.GetEmailAddresses(); emails != nil && len(emails) > 0 {
+
+	emails := []string{}
+	if emailAddresses := contact.GetEmailAddresses(); emailAddresses != nil && len(emailAddresses) > 0 {
 		fmt.Println("Email Addresses:")
-		for i, email := range emails {
+		for i, email := range emailAddresses {
 			if email.GetAddress() != nil {
-				fmt.Printf("  %d. %s\n", i+1, util.Deref(email.GetAddress()))
+				emailAddress := util.Deref(email.GetAddress())
+				fmt.Printf("  %d. %s\n", i+1, emailAddress)
+				emails = append(emails, emailAddress)
 			}
 		}
 	}
@@ -52,10 +55,6 @@ func GetContact(ctx context.Context, contactID string) error {
 		for i, phone := range phones {
 			fmt.Printf("  %d. %s\n", i+1, phone)
 		}
-	}
-	
-	if phones := contact.GetMobilePhone(); phones != nil {
-		fmt.Printf("Mobile Phone: %s\n", util.Deref(phones))
 	}
 
 	return nil
