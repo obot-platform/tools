@@ -3,7 +3,12 @@ module github.com/obot-platform/tools/microsoft365/outlook/contact
 go 1.24.2
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
+	github.com/microsoftgraph/msgraph-sdk-go v1.70.0
+)
+
+require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/getkin/kin-openapi v0.124.0 // indirect
@@ -12,7 +17,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -23,7 +27,6 @@ require (
 	github.com/microsoft/kiota-serialization-json-go v1.1.2 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.1.2 // indirect
 	github.com/microsoft/kiota-serialization-text-go v1.1.2 // indirect
-	github.com/microsoftgraph/msgraph-sdk-go v1.70.0 // indirect
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.3.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect

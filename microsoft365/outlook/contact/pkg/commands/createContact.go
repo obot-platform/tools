@@ -11,6 +11,10 @@ import (
 )
 
 func CreateContact(ctx context.Context, givenName, surname, emails, businessPhones string) error {
+	if givenName == "" && surname == "" && emails == "" && businessPhones == "" {
+		fmt.Println("No parameters provided. Please provide at least one of the following parameters: given_name, surname, emails, business_phones")
+		return nil
+	}
 
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {

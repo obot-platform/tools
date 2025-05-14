@@ -1,6 +1,6 @@
 ---
 Name: Outlook Contact
-Description: A toolset for managing Microsoft Outlook contacts. It supports contact operations within Microsoft 365 and can be used independently or alongside Outlook Mail and Calendar tools.
+Description: Manage contacts in Outlook in Microsoft 365. It supports contact operations within Microsoft 365 and can be used independently or alongside Outlook Mail and Calendar tools.
 Metadata: bundle: true
 Share Tools: List Contacts, Create Contact, Update Contact, Delete Contact, Get Contact
 
@@ -16,9 +16,9 @@ Credential: ../../credential
 Name: Create Contact
 Description: Create a new Outlook contact.
 Credential: ../../credential
-Param: given_name: (required) The given name of the contact.
-Param: surname: (required) The surname of the contact.
-Param: emails: (required) a comma separated list of email addresses of the contact. Example: "john.doe@example.com,jane.doe@example.com"
+Param: given_name: (optional) The given name of the contact.
+Param: surname: (optional) The surname of the contact.
+Param: emails: (optional) a comma separated list of email addresses of the contact. Example: "john.doe@example.com,jane.doe@example.com"
 Param: business_phones: (optional) a comma separated list of business phone numbers of the contact. Example: "+1234567890,+1234567891"
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool createContact
@@ -28,8 +28,8 @@ Name: Update Contact
 Description: Update an existing Outlook contact.
 Credential: ../../credential
 Param: contact_id: (required) The ID of the contact to update.
-Param: given_name: (optional) The given name of the contact.
-Param: surname: (optional) The surname of the contact.
+Param: given_name: (optional) Replace the given name of the contact.
+Param: surname: (optional) Replace the surname of the contact.
 Param: emails: (optional) a comma separated list of email addresses of the contact. Example: "john.doe@example.com,jane.doe@example.com". This will replace the existing email addresses.
 Param: business_phones: (optional) a comma separated list of business phone numbers of the contact. Example: "+1234567890,+1234567891". This will replace the existing business phone numbers.
 

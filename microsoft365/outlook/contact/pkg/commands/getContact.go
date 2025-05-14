@@ -11,7 +11,6 @@ import (
 )
 
 func GetContact(ctx context.Context, contactID string) error {
-
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
