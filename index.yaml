@@ -31,8 +31,6 @@ tools:
     reference: ./google/docs
   google-gmail:
     reference: ./google/gmail
-  google-search:
-    reference: ./google/search
   google-search-console:
     reference: ./google/search-console
   google-sheets:
@@ -69,8 +67,6 @@ tools:
     reference: ./shell
   tavily:
     reference: ./search/tavily
-  googlecustomsearch:
-    reference: ./search/google/googlecustomsearch
   pagerduty:
     reference: ./pagerduty
   postgres:
