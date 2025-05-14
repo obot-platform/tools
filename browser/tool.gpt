@@ -18,7 +18,6 @@ Params: followMode: (optional) If true, the tool will produce a screenshot of th
 
 ---
 Name: Browse
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: Navigates to a website, but does not return the content.
@@ -30,7 +29,6 @@ Params: followMode: (optional) If true, the tool will produce a screenshot of th
 
 ---
 Name: Filter
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: filter the page to get elements based on specific id, html tag, or class.
@@ -42,7 +40,6 @@ Tools: service
 
 ---
 Name: Fill
-Metadata: index: false
 Metadata: noUserAuth: sys.model.provider.credential
 Credentials: github.com/gptscript-ai/credentials/model-provider
 Share Context: Browser Context
@@ -60,7 +57,6 @@ Tools: service
 
 ---
 Name: Enter
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: Presses the enter key. Useful after filling out a form or other input.
@@ -72,7 +68,6 @@ Tools: service
 
 ---
 Name: Scroll
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: Scrolls to the bottom of the page, possibly loading more content. Useful for sites like Reddit which support infinite scroll.
@@ -84,7 +79,6 @@ Tools: service
 
 ---
 Name: Screenshot
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: Take a screenshot of the given tabID
@@ -95,7 +89,6 @@ Params: fullPage: (optional) Take a full page screenshot. Defaults to false, whi
 
 ---
 Name: Back
-Metadata: index: false
 Share Context: Browser Context
 Tools: service
 Description: Navigates to back to the previous site in history.
@@ -108,7 +101,6 @@ Tools: service
 ---
 Name: Forward
 Share Context: Browser Context
-Metadata: index: false
 Tools: service
 Description: Navigates to forward to the next site in history.
 Params: tabID: (required) The ID of the tab.
@@ -119,7 +111,6 @@ Tools: service
 
 ---
 Name: Browser Context
-Metadata: index: false
 Type: context
 
 #!sys.echo
@@ -169,7 +160,6 @@ END TOOL USAGE: Get URL
 ---
 Name: service
 Metadata: requestedEnvVars: OPENAI_API_KEY,OPENAI_BASE_URL
-Metadata: index: false
 
 #!sys.daemon /usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} run server
 
