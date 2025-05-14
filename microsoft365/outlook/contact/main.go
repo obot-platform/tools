@@ -21,9 +21,9 @@ func main() {
 	case "listContacts":
 		mainErr = commands.ListContacts(context.Background())
 	case "createContact":
-		mainErr = commands.CreateContact(context.Background(), os.Getenv("GIVEN_NAME"), os.Getenv("SURNAME"), os.Getenv("EMAIL_ADDRESS"), os.Getenv("BUSINESS_PHONE"))
+		mainErr = commands.CreateContact(context.Background(), os.Getenv("GIVEN_NAME"), os.Getenv("SURNAME"), os.Getenv("EMAILS"), os.Getenv("BUSINESS_PHONES"))
 	case "updateContact":
-		mainErr = commands.UpdateContact(context.Background(), os.Getenv("CONTACT_ID"), os.Getenv("GIVEN_NAME"), os.Getenv("SURNAME"), os.Getenv("EMAIL_ADDRESS"), os.Getenv("BUSINESS_PHONE"))
+		mainErr = commands.UpdateContact(context.Background(), os.Getenv("CONTACT_ID"), os.Getenv("GIVEN_NAME"), os.Getenv("SURNAME"), os.Getenv("EMAILS"), os.Getenv("BUSINESS_PHONES"))
 	case "deleteContact":
 		mainErr = commands.DeleteContact(context.Background(), os.Getenv("CONTACT_ID"))
 	case "getContact":

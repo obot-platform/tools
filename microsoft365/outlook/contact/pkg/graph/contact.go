@@ -17,27 +17,25 @@ func ListAllContacts(ctx context.Context, client *msgraphsdkgo.GraphServiceClien
 	return contacts.GetValue(), nil
 }
 
-func CreateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, givenName, surname, email, businessPhone string) (models.Contactable, error) {
+func CreateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, givenName, surname string, emails []string, businessPhones []string) (models.Contactable, error) {
 	requestBody := models.NewContact()
-	requestBody.SetGivenName(&givenName) 
-	requestBody.SetSurname(&surname) 
+	requestBody.SetGivenName(&givenName)
+	requestBody.SetSurname(&surname)
 
-	emailAddress := models.NewEmailAddress()
-	address := email
-	emailAddress.SetAddress(&address) 
-	name := givenName + " " + surname
-	emailAddress.SetName(&name) 
-
-	emailAddresses := []models.EmailAddressable {
-		emailAddress,
+	emailAddresses := []models.EmailAddressable{}
+	for _, email := range emails {
+		emailAddress := models.NewEmailAddress()
+		address := email
+		emailAddress.SetAddress(&address)
+		// name := givenName + " " + surname
+		// emailAddress.SetName(&name)
+		emailAddresses = append(emailAddresses, emailAddress)
 	}
 	requestBody.SetEmailAddresses(emailAddresses)
-	businessPhones := []string {
-		businessPhone,
-	}
+	
 	requestBody.SetBusinessPhones(businessPhones)
 
-	// To initialize your graphClient, see https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go
+
 	contacts, err := client.Me().Contacts().Post(ctx, requestBody, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create contact %s %s: %w", givenName, surname, err)
@@ -62,24 +60,29 @@ func DeleteContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient,
 	return nil
 }
 
-func UpdateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, contactId string, givenName, surname, email, businessPhone string) (models.Contactable, error) {
+func UpdateContact(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, contactId string, givenName, surname string, emails []string, businessPhones []string) (models.Contactable, error) {
 	requestBody := models.NewContact()
-	requestBody.SetGivenName(&givenName) 
-	requestBody.SetSurname(&surname) 
-	emailAddress := models.NewEmailAddress()
-	address := email
-	emailAddress.SetAddress(&address) 
-	name := givenName + " " + surname
-	emailAddress.SetName(&name) 
+	if givenName != "" {
+		requestBody.SetGivenName(&givenName)
+	}
+	if surname != "" {
+		requestBody.SetSurname(&surname)
+	}
 
-	emailAddresses := []models.EmailAddressable {
-		emailAddress,
+	emailAddresses := []models.EmailAddressable{}
+	for _, email := range emails {
+		emailAddress := models.NewEmailAddress()
+		address := email
+		emailAddress.SetAddress(&address)
+		// name := givenName + " " + surname
+		// emailAddress.SetName(&name)
+		emailAddresses = append(emailAddresses, emailAddress)
 	}
 	requestBody.SetEmailAddresses(emailAddresses)
-	businessPhones := []string {
-		businessPhone,
+	
+	if len(businessPhones) > 0 {
+		requestBody.SetBusinessPhones(businessPhones)
 	}
-	requestBody.SetBusinessPhones(businessPhones)
 
 	contacts, err := client.Me().Contacts().ByContactId(contactId).Patch(ctx, requestBody, nil)
 	if err != nil {

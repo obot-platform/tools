@@ -49,6 +49,8 @@ tools:
     reference: ./microsoft365/outlook/mail
   outlook-calender:
     reference: ./microsoft365/outlook/calendar
+  outlook-contact:
+    reference: ./microsoft365/outlook/contact
   word:
     reference: ./microsoft365/word
   onedrive:

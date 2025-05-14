@@ -10,14 +10,16 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/contact/pkg/util"
 )
 
-func UpdateContact(ctx context.Context, contactID, givenName, surname, emailAddress, businessPhone string) error {
+func UpdateContact(ctx context.Context, contactID, givenName, surname, emails, businessPhones string) error {
 
 	c, err := client.NewClient(global.AllScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	contact, err := graph.UpdateContact(ctx, c, contactID, givenName, surname, emailAddress, businessPhone)
+	emailAddresses := util.SplitString(emails)
+	businessPhoneList := util.SplitString(businessPhones)
+	contact, err := graph.UpdateContact(ctx, c, contactID, givenName, surname, emailAddresses, businessPhoneList)
 	if err != nil {
 		return fmt.Errorf("failed to update contact: %w", err)
 	}
