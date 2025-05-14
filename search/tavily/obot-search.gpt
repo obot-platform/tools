@@ -1,5 +1,11 @@
 ---
 Name: Obot Search
+Description: Obot's built-in search provider
+Metadata: bundle: true
+Share Tools: Search
+
+---
+Name: Search
 Description: Search the web to get a list of results scored by relevance to the query, and a summary
 Share Context: Obot Search Context
 Credential: ./credential
