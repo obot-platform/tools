@@ -91,11 +91,9 @@ func isThinkingModel(model string) bool {
 
 func modifyRequestBody(reqBody *openai.ChatCompletionRequest) (any, bool) {
 	for i := range reqBody.Messages {
-		if reqBody.Messages[i].ToolCalls != nil {
-			for j := range reqBody.Messages[i].ToolCalls {
-				if reqBody.Messages[i].ToolCalls[j].Function.Arguments == "" {
-					reqBody.Messages[i].ToolCalls[j].Function.Arguments = "{}" // anthropic requires a valid json object
-				}
+		for j := range reqBody.Messages[i].ToolCalls {
+			if reqBody.Messages[i].ToolCalls[j].Function.Arguments == "" {
+				reqBody.Messages[i].ToolCalls[j].Function.Arguments = "{}" // anthropic requires a valid json object
 			}
 		}
 	}
