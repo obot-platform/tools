@@ -128,7 +128,7 @@ Credential: ../credential
 Param: drive_id: (Required) The ID of the drive to add the permission to.
 Param: item_id: (Required) The ID of the item to add the permission to.
 Param: emails: (Required) Comma-separated list of email addresses to grant permission to (e.g., "user1@example.com,user2@example.com")
-Param: role: (Required) The role to grant to the users. Must be one of: "read" (view only), "write" (view and edit), "member" (the member role for SharePoint and OneDrive for Business), or "owner" (the owner role for SharePoint and OneDrive for Business).
+Param: role: (Required) The role to grant to the users. Must be one of: "read" (can view), "write" (can view and edit).
 Param: message: (Optional) The message to send to the users.
 Param: password: (Optional) The password to use for the permission. if unset, the permission will be added without a password.
 Param: expiration_date_time: (Optional) The expiration date and time of the permission. if unset, the permission will be added without an expiration date. Format: YYYY-MM-DDTHH:MM:SSZ, like 2018-07-15T14:00:00.000Z
