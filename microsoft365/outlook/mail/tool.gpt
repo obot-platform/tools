@@ -3,7 +3,7 @@ Name: Outlook Mail
 Description: Create, read, send, and manage emails in Outlook Mail in Microsoft 365
 Metadata: bundle: true
 Metadata: mcp: true
-Share Tools: List Mail Folders, List Emails, Get Email Details, Search Emails, Create Draft, Create Group Thread Email, Send Draft, Delete Email, Move Email, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Email Attachments, Get Group Thread Email Attachment, Download Group Thread Email Attachment
+Share Tools: List Mail Folders, List Emails, Get Email Details, Search Emails, Create Draft, Create Group Thread Email, Send Draft, Delete Email, Move Email, List Groups, List Group Threads, Delete Group Thread, Current Email, List Attachments, Download Attachment, Read Attachment, List Group Thread Email Attachments, Get Group Thread Email Attachment, Download Group Thread Email Attachment, Download OneDrive Share Link
 
 ---
 Name: List Mail Folders
@@ -235,6 +235,15 @@ Param: email_id: The ID of the email containing the attachment.
 Param: attachment_id: The ID of the attachment to download.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadAttachment
+
+---
+Name: Download OneDrive Share Link
+Description: Download the file from a OneDrive share link to the workspace
+Share Context: Outlook Mail Context
+Credential: ../../credential
+Param: share_link: The OneDrive share link
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool downloadOneDriveShareLink
 
 ---
 Name: Outlook Mail Context

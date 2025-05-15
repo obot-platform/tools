@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/obot-platform/obot/apiclient"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/commands"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
-	"github.com/obot-platform/obot/apiclient"
 )
 
 var (
@@ -155,6 +155,11 @@ func main() {
 			os.Getenv("ATTACHMENT_ID"),
 		); err != nil {
 			fmt.Printf("failed to get group thread email attachment: %v\n", err)
+			os.Exit(1)
+		}
+	case "downloadOneDriveShareLink":
+		if err := commands.DownloadOneDriveShareLink(context.Background(), os.Getenv("SHARE_LINK")); err != nil {
+			fmt.Printf("failed to download OneDrive share link: %v\n", err)
 			os.Exit(1)
 		}
 	default:
