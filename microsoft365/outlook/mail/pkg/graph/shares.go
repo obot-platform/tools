@@ -20,12 +20,14 @@ func convertShareLinkToID(shareLink string) string {
 }
 
 func GetOneDriveShareLink(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, shareLink string) (string, []byte, error) {
-	item, err := client.Shares().BySharedDriveItemId(convertShareLinkToID(shareLink)).DriveItem().Get(ctx, nil)
+	id := convertShareLinkToID(shareLink)
+
+	item, err := client.Shares().BySharedDriveItemId(id).DriveItem().Get(ctx, nil)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to get shared drive item: %w", err)
 	}
 
-	content, err := client.Shares().BySharedDriveItemId(convertShareLinkToID(shareLink)).DriveItem().Content().Get(ctx, nil)
+	content, err := client.Shares().BySharedDriveItemId(id).DriveItem().Content().Get(ctx, nil)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to get content of shared drive item: %w", err)
 	}
