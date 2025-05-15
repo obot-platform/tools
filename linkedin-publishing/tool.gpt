@@ -2,6 +2,7 @@
 Name: LinkedIn Publishing
 Description: Create posts on LinkedIn
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Get Current LinkedIn User, Create LinkedIn Post
 
 ---

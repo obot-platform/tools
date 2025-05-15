@@ -2,6 +2,7 @@
 Name: Wordpress
 Description: Manage posts, media, categories, and more on self-hosted and hosted Wordpress sites that support basic auth. Wordpress.com sites are not supported.
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Users, Get Me, List Posts, Retrieve Post, Create Post, Update Post, Delete Post, List Media, Upload Media, Update Media, Delete Media, List Categories, Create Category, Update Category, Delete Category, List Tags, Create Tag, Update Tag, Delete Tag, Get Site Settings
 
 ---

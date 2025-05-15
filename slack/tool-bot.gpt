@@ -2,6 +2,7 @@
 Name: Slack Bot
 Description: Send messages in Slack as a bot
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Send Direct Message As Bot, List Channels As Bot, Search Channels As Bot, Get Channel History As Bot, Get Channel History By Time As Bot, Get Thread History From Link As Bot, Get Thread History As Bot, Send Message As Bot, Send Message in Thread As Bot, List Users As Bot, Search Users As Bot, Send DM in Thread As Bot, Send Direct Message As Bot, Get Message Link As Bot, Get DM History As Bot, Get DM Thread History As Bot, Send Typing Event As Bot
 
 ---

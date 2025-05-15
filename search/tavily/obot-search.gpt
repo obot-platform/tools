@@ -2,6 +2,7 @@
 Name: Obot Search
 Description: Obot's built-in search provider
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Search
 
 ---

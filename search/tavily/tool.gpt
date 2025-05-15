@@ -2,6 +2,7 @@
 Name: Tavily Web Search
 Description: Search the Internet with Tavily
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Search, Read Site
 
 ---

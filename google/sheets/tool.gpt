@@ -2,6 +2,7 @@
 Name: Google Sheets
 Description: Create, read, and write to spreadsheets in Google Sheets
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Read Spreadsheet, Query Spreadsheet, Read Tables From Spreadsheet, Create Spreadsheet, Append Cells To Spreadsheet, Update Cells In Spreadsheet
 
 ---

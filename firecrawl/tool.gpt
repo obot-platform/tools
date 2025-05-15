@@ -2,6 +2,7 @@
 Name: Firecrawl
 Description: Scrape websites with Firecrawl
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Scrape URL
 
 ---

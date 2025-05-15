@@ -2,6 +2,7 @@
 Name: GitLab
 Description: Manage issues, MRs, and more on GitLab
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Search Issues, List Project Issues, List My Assigned Issues, List My Created Issues, Get Issue Details, Create Issue, Update Issue, Delete Issue, Add Issue Comment, Search Merge Requests, List Project Merge Requests, List My Assigned Merge Requests, List My Opened Merge Requests, Get Merge Request Details, Create Merge Request, Update Merge Request, Delete Merge Request, Add Merge Request Comment, Approve Merge Request, Lookup User ID, List User Projects
 
 ---

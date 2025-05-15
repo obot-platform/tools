@@ -2,6 +2,7 @@
 Name: Google Search
 Description: Get search results from Google
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Search
 
 ---

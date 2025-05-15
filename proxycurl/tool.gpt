@@ -2,6 +2,7 @@
 Name: LinkedIn Search
 Description: Search for companies, users, and jobs on LinkedIn
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Get Company Profile, Get School Profile, Get Person Profile, Company Search, Person Search, Job Search, Search by Role
 
 ---

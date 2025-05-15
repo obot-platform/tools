@@ -2,6 +2,7 @@
 Name: AWS S3
 Description: Interact with AWS S3 buckets
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Buckets, Get Bucket Info, List Objects, Get Object, Put Object, Delete Object
 
 ---

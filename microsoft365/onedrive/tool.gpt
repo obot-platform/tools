@@ -2,6 +2,7 @@
 Name: Microsoft 365 OneDrive
 Description: Manage files in OneDrive in Microsoft 365
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Drive Files, Create Folder, List All Drives, Get Drive, List SharedWithMe Files, Get File, Delete File, Copy File, Download File, Upload File, Move and Rename File, List Permissions, Add Permission, Delete Permission
 
 ---

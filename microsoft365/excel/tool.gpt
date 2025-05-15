@@ -2,6 +2,7 @@
 Name: Excel
 Description: Create, read, and update spreadsheets in Excel in Microsoft 365
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Workbooks, List Worksheets, Get Worksheet Column Headers, Get Worksheet Data, Get Worksheet Tables, Query Worksheet Data, Add Worksheet Row, Add Worksheet Column, Create Worksheet, Get Dates From Serials
 
 ---

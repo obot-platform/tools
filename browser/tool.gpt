@@ -1,6 +1,7 @@
 Name: Browser
 Description: Drive a web browser using AI
 Metadata: bundle: true
+Metadata: mcp: true
 Metadata: noUserAuth: sys.model.provider.credential
 Credentials: github.com/gptscript-ai/credentials/model-provider
 Share Tools: Browse, Get URL, Filter, Fill, Enter, Scroll, Back, Forward, Screenshot

@@ -3,6 +3,7 @@ Name: PagerDuty
 Description: Manage incidents and alerts in PagerDuty
 Share Context: PagerDuty Context
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Incidents, Get Incident, Acknowledge Incident, Resolve Incident, Add Note To Incident, List Incident Notes, List Incident Alerts, Get Me
 
 ---

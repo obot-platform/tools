@@ -2,6 +2,7 @@
 Name: Outlook Contact
 Description: Manage contacts in Outlook in Microsoft 365. It supports contact operations within Microsoft 365 and can be used independently or alongside Outlook Mail and Calendar tools.
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Contacts, Create Contact, Update Contact, Delete Contact, Get Contact
 
 ---

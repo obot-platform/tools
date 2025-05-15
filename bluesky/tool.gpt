@@ -2,6 +2,7 @@
 Name: Bluesky
 Description: Create and search for posts on Bluesky
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Create Post, Delete Post, Search Posts, Search Users
 
 ---

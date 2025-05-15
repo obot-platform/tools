@@ -2,6 +2,7 @@
 Name: Images
 Description: Analyze and generate images
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: Analyze Images, Generate Images
 
 ---

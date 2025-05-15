@@ -2,6 +2,7 @@
 Name: SmartThings
 Description: Manage smart home devices with SmartThings
 Metadata: bundle: true
+Metadata: mcp: true
 Share Tools: List Devices, Toggle Device, Get Device Info, List Locations, List Rooms, List Rules, Get Rule, Delete Rule, Create Rule
 
 ---
