@@ -108,6 +108,7 @@ func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 				EndDateTime:   util.Ptr(util.Deref(end).Format(time.RFC3339)),
 				StartDateTime: util.Ptr(util.Deref(start).Format(time.RFC3339)),
 				Top:           util.Ptr(int32(100)),
+				Orderby:       []string{"start/dateTime"},
 			},
 		})
 
@@ -125,6 +126,7 @@ func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 			EndDateTime:   util.Ptr(util.Deref(end).Format(time.RFC3339)),
 			StartDateTime: util.Ptr(util.Deref(start).Format(time.RFC3339)),
 			Top:           util.Ptr(int32(100)),
+			Orderby:       []string{"start/dateTime"},
 		},
 	})
 
