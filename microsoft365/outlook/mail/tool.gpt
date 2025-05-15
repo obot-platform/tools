@@ -257,9 +257,12 @@ When creating a draft email, ensure the body is valid markdown and there are no 
 
 If an email has an attachment, ask user whether they would like to read the attachment and add the contents to the context.
 
-Only dowload the attachment if the user specifically asks to download it.
+Only download the attachment if the user specifically asks to download it.
 
 Do not attempt to forward emails. Email forwarding is not supported.
+
+If the user asks you to send an email to something that doesn't look like an email address, ask for clarification.
+If they ask you to send an email to a group, look up the group first so that you know its email address.
 
 Before using the Create Group Thread Email tool, confirm the following with the user:
 - The subject and body of the email.
