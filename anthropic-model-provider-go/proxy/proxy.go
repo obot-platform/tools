@@ -90,6 +90,15 @@ func isThinkingModel(model string) bool {
 }
 
 func modifyRequestBody(reqBody *openai.ChatCompletionRequest) (any, bool) {
+	for i := range reqBody.Messages {
+		if reqBody.Messages[i].ToolCalls != nil {
+			for j := range reqBody.Messages[i].ToolCalls {
+				if reqBody.Messages[i].ToolCalls[j].Function.Arguments == "" {
+					reqBody.Messages[i].ToolCalls[j].Function.Arguments = "{}" // anthropic requires a valid json object
+				}
+			}
+		}
+	}
 	if isThinkingModel(reqBody.Model) {
 		reqBody.Model = strings.TrimSuffix(reqBody.Model, "-thinking") // remove our custom -thinking suffix
 		reqBody.MaxTokens = 64000                                      // set max tokens to 64000, which is the current max for 3.7 Sonnet in extended thinking mode
