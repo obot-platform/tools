@@ -37,8 +37,8 @@ Share Context: Outlook Mail Context
 Credential: ../../credential
 Share Tools: List Emails, Search Emails
 Param: email_id: (Required) The ID of the email to get details for.
-Param: group_id: (Optional) If the email is in a group mailbox, the ID of the group mailbox is also required.
-Param: thread_id: (Optional) If the email is in a group mailbox, the ID of the thread is also required.
+Param: group_id: (Required for group emails only) If the email is in a group mailbox, the ID of the group mailbox is also required.
+Param: thread_id: (Required for group emails only) If the email is in a group mailbox, the ID of the thread is also required.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool getEmailDetails
 
