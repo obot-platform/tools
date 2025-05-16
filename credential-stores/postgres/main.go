@@ -28,46 +28,27 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
-		if err := authenticate(r.Header); err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
+	mux.HandleFunc("/store", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(p, credentials.ActionStore, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-	})
-	mux.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
-		if err := authenticate(r.Header); err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
+	}))
+	mux.HandleFunc("/get", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(p, credentials.ActionGet, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-	})
-	mux.HandleFunc("/erase", func(w http.ResponseWriter, r *http.Request) {
-		if err := authenticate(r.Header); err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
+	}))
+	mux.HandleFunc("/erase", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(p, credentials.ActionErase, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-	})
-	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
-		if err := authenticate(r.Header); err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
+	}))
+	mux.HandleFunc("/list", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(p, credentials.ActionList, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
-	})
+	}))
+	// Leave this one unauthenticated so that the health check works.
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -94,6 +75,16 @@ func NewPostgres(ctx context.Context) (common.Database, error) {
 	}
 
 	return common.NewDatabase(ctx, db)
+}
+
+func authenticatedHandler(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := authenticate(r.Header); err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		next(w, r)
+	}
 }
 
 func authenticate(headers http.Header) error {
