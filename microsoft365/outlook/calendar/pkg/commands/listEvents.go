@@ -48,33 +48,30 @@ func ListEvents(ctx context.Context, calendarIDstring string, start, end time.Ti
 		return fmt.Errorf("failed to set calendar IDs: %w", err)
 	}
 
-	// Parse requested calendar IDs if provided
-	var requestedCalendarIDs []string
+	// Parse requested calendar IDs and see if match any of the actual calendar IDs
 	if calendarIDstring != "" {
-		requestedCalendarIDs = strings.Split(calendarIDstring, ",")
-		for i := range requestedCalendarIDs {
-			requestedCalendarIDs[i] = strings.TrimSpace(requestedCalendarIDs[i])
+		ids := strings.Split(calendarIDstring, ",")
+		for i := range ids {
+			ids[i] = strings.TrimSpace(ids[i])
 		}
-		// Get the map of IDs and convert to a slice of the mapped values
-		idMap, err := id.GetOutlookIDs(ctx, requestedCalendarIDs)
+
+		idMap, err := id.GetOutlookIDs(ctx, ids)
 		if err != nil {
 			return fmt.Errorf("failed to get Outlook IDs: %w", err)
 		}
 
-		// Create a map for O(1) lookups directly from the idMap
-		requestedIDsMap := make(map[string]struct{}, len(idMap))
-		for _, mappedID := range idMap {
-			requestedIDsMap[mappedID] = struct{}{}
+		requestedIDsSet := make(map[string]struct{}, len(idMap))
+		for _, v := range idMap {
+			requestedIDsSet[v] = struct{}{}
 		}
 
-		// Filter calendars in a single pass
-		filteredCalendars := make([]graph.CalendarInfo, 0, len(calendars))
+		filtered := calendars[:0] // reuse underlying array
 		for _, cal := range calendars {
-			if _, exists := requestedIDsMap[cal.ID]; exists {
-				filteredCalendars = append(filteredCalendars, cal)
+			if _, ok := requestedIDsSet[cal.ID]; ok {
+				filtered = append(filtered, cal)
 			}
 		}
-		calendars = filteredCalendars
+		calendars = filtered
 	}
 
 	calendarEvents := map[graph.CalendarInfo][]models.Eventable{}
