@@ -29,28 +29,48 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
 	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
+		if err := authenticate(r.Header); err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
 		if err := credentials.HandleCommand(s, credentials.ActionStore, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
 	mux.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
+		if err := authenticate(r.Header); err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
 		if err := credentials.HandleCommand(s, credentials.ActionGet, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
 	mux.HandleFunc("/erase", func(w http.ResponseWriter, r *http.Request) {
+		if err := authenticate(r.Header); err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
 		if err := credentials.HandleCommand(s, credentials.ActionErase, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
 	mux.HandleFunc("/list", func(w http.ResponseWriter, r *http.Request) {
+		if err := authenticate(r.Header); err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
 		if err := credentials.HandleCommand(s, credentials.ActionList, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
+	})
+	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
 	})
 
 	if err := http.ListenAndServe("127.0.0.1:"+port, mux); !errors.Is(err, http.ErrServerClosed) {
@@ -89,4 +109,13 @@ func NewSqlite(ctx context.Context) (common.Database, error) {
 	}
 
 	return common.NewDatabase(ctx, db)
+}
+
+func authenticate(headers http.Header) error {
+	token := headers.Get("X-GPTScript-Daemon-Token")
+	if token != os.Getenv("GPTSCRIPT_DAEMON_TOKEN") {
+		return fmt.Errorf("unauthorized")
+	}
+
+	return nil
 }
