@@ -27,8 +27,10 @@ Description: List all events in the given time frame in all calendars available 
 Share Context: Outlook Calendar Context
 Tools: github.com/gptscript-ai/datasets/filter
 Credential: ../../credential
-Param: start: The start date and time of the time frame, in RFC 3339 format.
-Param: end: The end date and time of the time frame, in RFC 3339 format.
+Param: start: (Required) The start date and time of the time frame, in RFC 3339 format.
+Param: end: (Required) The end date and time of the time frame, in RFC 3339 format.
+Param: calendar_ids: (Optional) A comma-separated list of the unique IDs of the calendars to list events from. If unset, lists events from all calendars.
+Param: limit: (Optional) The maximum number of events to return for each calendar. If unset, returns up to 50 events for each calendar.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEvents
 

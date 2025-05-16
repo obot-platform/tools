@@ -6,8 +6,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/global"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
+	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/global"
 )
 
 // StaticTokenCredential is taken from https://github.com/gptscript-ai/mail-assistant/blob/10944805801bbb6f71eccefd1bea5f114fded164/pkg/mstoken/auth.go

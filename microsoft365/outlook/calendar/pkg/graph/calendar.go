@@ -101,13 +101,13 @@ func ListCalendars(ctx context.Context, client *msgraphsdkgo.GraphServiceClient)
 	return calendars, nil
 }
 
-func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, id string, owner OwnerType, start, end *time.Time) ([]models.Eventable, error) {
+func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, CalendarId string, owner OwnerType, start, end *time.Time, limit int32) ([]models.Eventable, error) {
 	if owner == OwnerTypeUser {
-		resp, err := client.Me().Calendars().ByCalendarId(id).CalendarView().Get(ctx, &users.ItemCalendarsItemCalendarViewRequestBuilderGetRequestConfiguration{
+		resp, err := client.Me().Calendars().ByCalendarId(CalendarId).CalendarView().Get(ctx, &users.ItemCalendarsItemCalendarViewRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemCalendarsItemCalendarViewRequestBuilderGetQueryParameters{
 				EndDateTime:   util.Ptr(util.Deref(end).Format(time.RFC3339)),
 				StartDateTime: util.Ptr(util.Deref(start).Format(time.RFC3339)),
-				Top:           util.Ptr(int32(100)),
+				Top:           util.Ptr(limit),
 				Orderby:       []string{"start/dateTime"},
 			},
 		})
@@ -121,11 +121,11 @@ func ListCalendarView(ctx context.Context, client *msgraphsdkgo.GraphServiceClie
 		return resp.GetValue(), nil
 	}
 
-	resp, err := client.Groups().ByGroupId(id).CalendarView().Get(ctx, &groups.ItemCalendarViewRequestBuilderGetRequestConfiguration{
+	resp, err := client.Groups().ByGroupId(CalendarId).CalendarView().Get(ctx, &groups.ItemCalendarViewRequestBuilderGetRequestConfiguration{
 		QueryParameters: &groups.ItemCalendarViewRequestBuilderGetQueryParameters{
 			EndDateTime:   util.Ptr(util.Deref(end).Format(time.RFC3339)),
 			StartDateTime: util.Ptr(util.Deref(start).Format(time.RFC3339)),
-			Top:           util.Ptr(int32(100)),
+			Top:           util.Ptr(limit),
 			Orderby:       []string{"start/dateTime"},
 		},
 	})

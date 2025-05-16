@@ -35,10 +35,11 @@ func SearchEvents(ctx context.Context, query string, start, end time.Time) error
 		return fmt.Errorf("failed to translate calendar IDs: %w", err)
 	}
 
+	limit := int32(100) // default limit for search
 	calendarEventsInSubject := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
 	calendarEventsInPreview := make(map[graph.CalendarInfo][]models.Eventable, len(calendars))
 	for _, cal := range calendars {
-		result, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end)
+		result, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end, limit)
 		if err != nil {
 			return fmt.Errorf("failed to search events: %w", err)
 		}

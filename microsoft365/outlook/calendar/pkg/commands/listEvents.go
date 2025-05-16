@@ -3,6 +3,8 @@ package commands
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gptscript-ai/go-gptscript"
@@ -15,7 +17,19 @@ import (
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
 )
 
-func ListEvents(ctx context.Context, start, end time.Time) error {
+func ListEvents(ctx context.Context, calendarIDstring string, start, end time.Time, limit string) error {
+	var limitInt int32
+	if limit == "" {
+		limitInt = 50 // default limit
+	} else {
+		var err error
+		limitInt64, err := strconv.ParseInt(limit, 10, 32)
+		if err != nil {
+			return fmt.Errorf("invalid limit value provided: (%s) %w. must be a positive integer", limit, err)
+		}
+		limitInt = int32(limitInt64)
+	}
+
 	c, err := client.NewClient(global.ReadOnlyScopes)
 	if err != nil {
 		return fmt.Errorf("failed to create client: %w", err)
@@ -34,13 +48,42 @@ func ListEvents(ctx context.Context, start, end time.Time) error {
 		return fmt.Errorf("failed to set calendar IDs: %w", err)
 	}
 
+	// Parse requested calendar IDs if provided
+	var requestedCalendarIDs []string
+	if calendarIDstring != "" {
+		requestedCalendarIDs = strings.Split(calendarIDstring, ",")
+		for i := range requestedCalendarIDs {
+			requestedCalendarIDs[i] = strings.TrimSpace(requestedCalendarIDs[i])
+		}
+		// Get the map of IDs and convert to a slice of the mapped values
+		idMap, err := id.GetOutlookIDs(ctx, requestedCalendarIDs)
+		if err != nil {
+			return fmt.Errorf("failed to get Outlook IDs: %w", err)
+		}
+
+		// Create a map for O(1) lookups directly from the idMap
+		requestedIDsMap := make(map[string]struct{}, len(idMap))
+		for _, mappedID := range idMap {
+			requestedIDsMap[mappedID] = struct{}{}
+		}
+
+		// Filter calendars in a single pass
+		filteredCalendars := make([]graph.CalendarInfo, 0, len(calendars))
+		for _, cal := range calendars {
+			if _, exists := requestedIDsMap[cal.ID]; exists {
+				filteredCalendars = append(filteredCalendars, cal)
+			}
+		}
+		calendars = filteredCalendars
+	}
+
 	calendarEvents := map[graph.CalendarInfo][]models.Eventable{}
 	for _, cal := range calendars {
 		if cal.ID == "" {
 			continue
 		}
 
-		events, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end)
+		events, err := graph.ListCalendarView(ctx, c, cal.ID, cal.Owner, &start, &end, limitInt)
 		if err != nil {
 			return fmt.Errorf("failed to list events for calendar %s: %w", util.Deref(cal.Calendar.GetName()), err)
 		}

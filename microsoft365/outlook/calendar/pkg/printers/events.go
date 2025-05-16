@@ -3,15 +3,16 @@ package printers
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+	_ "time/tzdata"
+
 	"github.com/jaytaylor/html2text"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/calendar/pkg/util"
-	"os"
-	"strings"
-	"time"
-	_ "time/tzdata"
 )
 
 func EventToString(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, calendar graph.CalendarInfo, event models.Eventable) string {

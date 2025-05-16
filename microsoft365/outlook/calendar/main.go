@@ -41,7 +41,7 @@ func main() {
 		now := time.Now().In(loc)
 		start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
 		end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, loc)
-		if err := commands.ListEvents(context.Background(), start, end); err != nil {
+		if err := commands.ListEvents(context.Background(), "", start, end, ""); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -52,7 +52,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		if err := commands.ListEvents(context.Background(), start, end); err != nil {
+		if err := commands.ListEvents(context.Background(), os.Getenv("CALENDAR_IDS"), start, end, os.Getenv("LIMIT")); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
