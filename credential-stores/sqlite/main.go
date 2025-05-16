@@ -16,6 +16,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var tokenFromEnv = os.Getenv("GPTSCRIPT_DAEMON_TOKEN")
+
 func main() {
 	s, err := NewSqlite(context.Background())
 	if err != nil {
@@ -29,28 +31,28 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/store", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /store", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(s, credentials.ActionStore, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}))
-	mux.HandleFunc("/get", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /get", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(s, credentials.ActionGet, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}))
-	mux.HandleFunc("/erase", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /erase", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(s, credentials.ActionErase, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}))
-	mux.HandleFunc("/list", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /list", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		if err := credentials.HandleCommand(s, credentials.ActionList, r.Body, w); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}))
 	// Leave this one unauthenticated so that the health check works.
-	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -94,19 +96,14 @@ func NewSqlite(ctx context.Context) (common.Database, error) {
 
 func authenticatedHandler(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := authenticate(r.Header); err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+		if !authenticate(r.Header) {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 		next(w, r)
 	}
 }
 
-func authenticate(headers http.Header) error {
-	token := headers.Get("X-GPTScript-Daemon-Token")
-	if token != os.Getenv("GPTSCRIPT_DAEMON_TOKEN") {
-		return fmt.Errorf("unauthorized")
-	}
-
-	return nil
+func authenticate(headers http.Header) bool {
+	return headers.Get("X-GPTScript-Daemon-Token") == tokenFromEnv
 }
