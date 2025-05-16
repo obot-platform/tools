@@ -16,11 +16,15 @@ import (
 )
 
 type DocInfo struct {
-	ID, Name string
+	ID, Name         string
+	ParentFolderPath string
 }
 
 func (d DocInfo) String() string {
-	return fmt.Sprintf("Name: %s\nID: %s", d.Name, d.ID)
+	if d.ParentFolderPath == "" {
+		return fmt.Sprintf("Name: %s\nID: %s", d.Name, d.ID)
+	}
+	return fmt.Sprintf("Name: %s\nParent Folder: %s\nID: %s", d.Name, d.ParentFolderPath, d.ID)
 }
 
 // getItemByPath retrieves a drive item (file or folder) by its path relative to the drive root.
@@ -239,7 +243,7 @@ func ListDocs(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]DocInf
 	}
 
 	var infos []DocInfo
-	err = listDocsInFolder(ctx, c, deref(drive.GetId()), deref(root.GetId()), &infos)
+	err = listDocsInFolder(ctx, c, deref(drive.GetId()), deref(root.GetId()), &infos, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to list docs: %w", err)
 	}
@@ -248,7 +252,7 @@ func ListDocs(ctx context.Context, c *msgraphsdkgo.GraphServiceClient) ([]DocInf
 }
 
 // listDocsInFolder recursively lists all documents in a folder and its subfolders.
-func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, driveID, folderID string, infos *[]DocInfo) error {
+func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, driveID, folderID string, infos *[]DocInfo, currentPath string) error {
 	items, err := c.Drives().
 		ByDriveId(driveID).
 		Items().
@@ -261,9 +265,12 @@ func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, d
 
 	// Process this page of items
 	for _, item := range items.GetValue() {
+		itemName := deref(item.GetName())
+		itemPath := filepath.Join(currentPath, itemName)
+
 		// Skip folders, but process their contents
 		if item.GetFolder() != nil {
-			err = listDocsInFolder(ctx, c, driveID, deref(item.GetId()), infos)
+			err = listDocsInFolder(ctx, c, driveID, deref(item.GetId()), infos, itemPath)
 			if err != nil {
 				return err
 			}
@@ -272,14 +279,15 @@ func listDocsInFolder(ctx context.Context, c *msgraphsdkgo.GraphServiceClient, d
 
 		// Only include Word documents
 		file := item.GetFile()
-		if file == nil || !isWordDocument(deref(item.GetName())) {
+		if file == nil || !isWordDocument(itemName) {
 			continue
 		}
 
 		// Add Word documents to our list
 		*infos = append(*infos, DocInfo{
-			ID:   deref(item.GetId()),
-			Name: deref(item.GetName()),
+			ID:               deref(item.GetId()),
+			Name:             itemName,
+			ParentFolderPath: currentPath,
 		})
 	}
 
