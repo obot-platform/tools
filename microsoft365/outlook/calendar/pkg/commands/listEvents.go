@@ -22,7 +22,6 @@ func ListEvents(ctx context.Context, calendarIDstring string, start, end time.Ti
 	if limit == "" {
 		limitInt = 50 // default limit
 	} else {
-		var err error
 		limitInt64, err := strconv.ParseInt(limit, 10, 32)
 		if err != nil {
 			return fmt.Errorf("invalid limit value provided: (%s) %w. must be a positive integer", limit, err)
