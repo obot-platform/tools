@@ -61,7 +61,7 @@ Param: owner_type: The type of the owner of the calendar or group. Possible valu
 
 ---
 Name: Create Event
-Description: Create a new event.
+Description: Create a new event on the user's Outlook calendar.
 Share Context: Outlook Calendar Context, Recurrence Context
 Credential: ../../credential
 Credential: sys.model.provider.credential
@@ -69,8 +69,8 @@ Share Tools: List Calendars
 Param: subject: (Required) The title of the event.
 Param: location: (Required) The location of the event.
 Param: body: (Required) The details of the event.
-Param: attendees: (Required) A comma-separated list of the email addresses of people required to attend the event.
-Param: optional_attendees: (Optional) A comma-separated list of the email addresses of people optionally invited to the event.
+Param: attendees: (Required) A comma-separated list of the email addresses of people required to attend the event. Example: "john@example.com,jane@example.com"
+Param: optional_attendees: (Optional) A comma-separated list of the email addresses of people optionally invited to the event. Example: "john@example.com,jane@example.com"
 Param: is_online: (Required) (boolean) Whether the event is online (true) or in person (false).
 Param: start: (Required) The start time of the event, in RFC 3339 format.
 Param: end: (Required) The end time of the event, in RFC 3339 format. When scheduling a recurring event, this should be the end time of the first event in the series.
