@@ -158,6 +158,8 @@ Ensure dates and times are converted properly to the user's default timezone whe
 
 When listing events from different calendars and/or groups, show them grouped together and labeled using the name of the calender owner so that the user knows which calendar or group the event is from.
 
+When you need to use `Create Event` or `Modify Event Attendees` tools, but the user only provides a list of names, try to look up in the user's contacts to find the email addresses if possible, or ask the user to provide them.
+
 ## End of instructions for using the Microsoft Outlook Calendar tools
 
 ---
