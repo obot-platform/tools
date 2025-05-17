@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"net/mail"
 	"strconv"
 	"strings"
 	"time"
@@ -68,13 +69,19 @@ func main() {
 		}
 	case "createEvent":
 		info := graph.CreateEventInfo{
-			Attendees:  strings.Split(os.Getenv("ATTENDEES"), ","),
-			OptionalAttendees: strings.Split(os.Getenv("OPTIONAL_ATTENDEES"), ","),
 			Subject:    os.Getenv("SUBJECT"),
 			Location:   os.Getenv("LOCATION"),
 			Body:       os.Getenv("BODY"),
 			Recurrence: os.Getenv("RECURRENCE"),
 		}
+
+		attendees := readEmailsFromEnv("ATTENDEES")
+		validateEmails("attendee", attendees)
+		info.Attendees = attendees
+
+		optionalAttendees := readEmailsFromEnv("OPTIONAL_ATTENDEES")
+		validateEmails("optional attendee", optionalAttendees)
+		info.OptionalAttendees = optionalAttendees
 
 		// Unset the BODY variable so that it does not mess up writing files to the workspace later on.
 		if err := os.Unsetenv("BODY"); err != nil {
@@ -114,7 +121,15 @@ func main() {
 			os.Exit(1)
 		}
 	case "modifyEventAttendees":
-		if err := commands.ModifyEventAttendees(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE")), os.Getenv("ADD_REQUIRED_ATTENDEES"), os.Getenv("ADD_OPTIONAL_ATTENDEES"), os.Getenv("REMOVE_ATTENDEES")); err != nil {
+		addRequiredAttendees := readEmailsFromEnv("ADD_REQUIRED_ATTENDEES")
+		addOptionalAttendees := readEmailsFromEnv("ADD_OPTIONAL_ATTENDEES")
+		removeAttendees := readEmailsFromEnv("REMOVE_ATTENDEES")
+
+		validateEmails("required attendee", addRequiredAttendees)
+		validateEmails("optional attendee", addOptionalAttendees)
+		validateEmails("attendee to remove", removeAttendees)
+
+		if err := commands.ModifyEventAttendees(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE")), addRequiredAttendees, addOptionalAttendees, removeAttendees); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -171,4 +186,25 @@ func parseStartEnd(start, end string, optional bool) (time.Time, time.Time, erro
 	}
 
 	return startTime, endTime, nil
+}
+
+func readEmailsFromEnv(envKey string) []string {
+	raw := strings.Split(os.Getenv(envKey), ",")
+	var emails []string
+	for _, e := range raw {
+		email := strings.TrimSpace(e)
+		if email != "" {
+			emails = append(emails, email)
+		}
+	}
+	return emails
+}
+
+func validateEmails(label string, emails []string) {
+	for _, email := range emails {
+		if _, err := mail.ParseAddress(email); err != nil {
+			fmt.Printf("Invalid email address for %s: %s\n", label, email)
+			os.Exit(1)
+		}
+	}
 }
