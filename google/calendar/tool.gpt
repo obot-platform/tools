@@ -182,8 +182,7 @@ Share Context: ../../time
 
 #!sys.echo
 
-## Instructions for Using Google Calendar Tools
-
+<google_calendar_tools_instructions>
 You have access to tools for interacting with the Google Calendar API. 
 
 KEY guidelines to follow when handling dates and times:
@@ -195,8 +194,7 @@ KEY guidelines to follow when handling dates and times:
 Many of the tools require the use of RFC3339 formatted date/time strings -- for example, 2025-03-12T10:00:00-07:00, 2024-01-27T10:00:00Z. 
 
 If displaying recurring events, kindly remind the user that recurring events are included and will continue to appear in future listings, as they are scheduled to repeat over time.
-
-## End of instructions for Using Google Calendar Tools
+</google_calendar_tools_instructions>
 
 ---
 !metadata:*:icon

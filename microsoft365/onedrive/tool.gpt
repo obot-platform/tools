@@ -164,15 +164,13 @@ Share Context: ../../time
 
 #!sys.echo
 
-## Instructions for using the Microsoft 365 OneDrive tools
-
+<onedrive_tools_instructions>
 You have access to tools for the Microsoft 365 OneDrive API.
 
 Show the URL of drives or files in markdown format: [description](URL)
 
 Don't display any IDs in your response to the user, unless explicitly asked for.
-
-## End of instructions for using the Microsoft 365 OneDrive tools
+</onedrive_tools_instructions>
 
 ---
 !metadata:*:icon

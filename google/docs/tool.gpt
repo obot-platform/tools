@@ -43,8 +43,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using Google Docs tools
-
+<google_docs_tools_instructions>
 Do not output Google Docs IDs because they are not helpful for the user.
 Document names are not considered Doc IDs.
 Google Docs share links match the following regex: (?:https?://(?:drive|docs)\.google\.com/(?:file/d/|document/d/|open\?id=|uc\?id=))([a-zA-Z0-9_-]{33,})
@@ -53,8 +52,7 @@ For the doc_drive_dir parameter, you can optionally specify folder paths directl
 When calling the `Create Google Doc` tool, you may optionally provide the entire document as a markdown formatted string using the `doc_content` parameter.
 When calling the `Update Google Doc` tool, you must provide the entire modified document as a markdown formatted string using the `doc_content` parameter. The entire document is replaced by the content of the `doc_content` argument.
 For the `drive_dir` parameter, you can optionally specify folder paths directly, such as `Haikus` or `Haikus/New`, to move the document to a specific folder in Google Drive. If you do not provide a `drive_dir`, the new documents will be created in the root Google Drive folder, and updated documents will remain in their current folder.
-
-## End of instructions for using Google Docs tools
+</google_docs_tools_instructions>
 
 ---
 !metadata:*:icon

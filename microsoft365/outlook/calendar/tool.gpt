@@ -140,8 +140,7 @@ Share Context: ../../../time
 
 #!sys.echo
 
-## Instructions for using the Microsoft Outlook Calendar tools
-
+<outlook_calendar_tools_instructions>
 You have access to tools for the Microsoft Outlook Calendar API.
 
 Do not output calendar IDs or event IDs because they are not helpful for the user.
@@ -157,8 +156,7 @@ When the user asks you to create or modify events, assume that any dates or time
 Ensure dates and times are converted properly to the user's default timezone when displaying them to the user.
 
 When listing events from different calendars and/or groups, show them grouped together and labeled using the name of the calender owner so that the user knows which calendar or group the event is from.
-
-## End of instructions for using the Microsoft Outlook Calendar tools
+</outlook_calendar_tools_instructions>
 
 ---
 Name: Recurrence Context
@@ -166,8 +164,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for scheduling recurring meetings in Outlook Calendar
-
+<outlook_calendar_recurrence_instructions>
 When scheduling a recurring meeting in Outlook Calendar, include as much information as you can about when it should occur.
 Always include the date of the first occurrence of the event. Here are some examples of how to describe recurrence well:
 
@@ -200,8 +197,7 @@ Yearly:
 When setting the `end` parameter, it should be the date and time of the end of the very first event in the series.
 In most circumstances, this event will not span multiple days. Ask for confirmation from the user before creating a single
 event that spans multiple days.
-
-## End of instructions for scheduling recurring meetings in Outlook Calendar
+</outlook_calendar_recurrence_instructions>
 
 ---
 !metadata:*:icon

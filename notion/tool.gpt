@@ -103,13 +103,11 @@ Type: Context
 
 #!sys.echo
 
-## Instructions for using Notion tools
-
+<notion_tools_instructions>
 You have access to a set of tools to interact with Notion.
 You cannot use the Create Page tool to update the contents of a page. It is only for creating new pages.
 Every time you are about to create a new page and the user isn't explicitly asking for one, ask them to confirm before proceeding.
-
-## End of instructions for using Notion tools
+</notion_tools_instructions>
 
 ---
 !metadata:*:icon

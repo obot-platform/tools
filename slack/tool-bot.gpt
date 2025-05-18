@@ -199,8 +199,7 @@ Share Tools: User Context
 
 #!sys.echo
 
-## Instructions for using Slack tools
-
+<slack_tools_instructions>
 You have access to a set of tools to interact with a Slack workspace as a bot.
 
 Wait to call the User Context tool until the user asks you something about Slack. Always call this tool before calling any other Slack tools.
@@ -230,8 +229,7 @@ The following search modifiers can be used in search-messages `query` arguments:
 - `from:<user>`: Matches messages sent by the specified user. Example: `from:@alice`
 - `in:<channel>`: Matches messages from the specified channel. Example: `in:#general`
 - `is:<type>`: Matches messages of the specified type. Valid types are `dm`, `thread`. Example: `is:thread`
-
-## End of instructions for using Slack tools
+</slack_tools_instructions>
 
 ---
 !metadata:*:icon

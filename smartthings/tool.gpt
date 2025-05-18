@@ -101,6 +101,7 @@ Type: Context
 
 #!sys.echo
 
+<smartthings_instructions>
 `List` tools can be used to find the GUID of an object using the friendly human-readable name.
 Do not return IDs or GUIDs to the user unless they specifically ask for it.
 
@@ -109,6 +110,7 @@ Capabilities are generally whatever the current state of the device is and the o
 * For a lock, that's "lock" or "unlock".
 * For devices with a 'level' capability, it is a value between 0-100.
 The `Get Device Info` tool should be used to discover the current state of a Device.
+</smartthings_instructions>
 
 ---
 Name: SmartThings Create Rule Context
@@ -116,6 +118,7 @@ Type: Context
 
 #!sys.echo
 
+<smartthings_create_rule_instructions>
 Sequence must be set to 'Serial' or 'Parallel'.
 
 A single Rule can be used to contain multiple actions within it. These actions represent a tree that is evaluated when the Rule is triggered.
@@ -277,6 +280,7 @@ In the example Rule below:
 ```
 {"name":"Sample for precondition","actions":[{"if":{"equals":{"left":{"string":"pushed"},"right":{"device":{"devices":["button-device-id"],"component":"main","capability":"button","attribute":"button","trigger":"Always"}}},"then":[{"if":{"equals":{"left":{"device":{"devices":["switch1-device-id"],"component":"main","capability":"switch","attribute":"switch","trigger":"Never"}},"right":{"string":"on"}},"then":[{"command":{"devices":["switch2-device-id"],"commands":[{"component":"main","capability":"switch","command":"on","arguments":[]}]}}],"else":[{"command":{"devices":["switch2-device-id"],"commands":[{"component":"main","capability":"switch","command":"off","arguments":[]}]}}]}}]}}]}
 ```
+</smartthings_create_rule_instructions>
 
 ---
 !metadata:*:oauth

@@ -199,8 +199,7 @@ Share Context: ../../time
 
 #!sys.echo
 
-## Instructions for Using Google Drive Tools
-
+<google_drive_tools_instructions>
 You have access to tools for interacting with the Google Drive API.
 You can use these tools to operate files/folders/drives/permissions on behalf of the user.
 
@@ -213,8 +212,7 @@ the drive id of a shared drive is the same as the drive id of the root folder of
 ALWAYS show links to files/folders/shared_drives/permissions in your response in markdown format: [link text](link url)
 
 Don't show IDs in your response to the user unless the user asks for it.
-
-## End of instructions for Using Google Drive Tools
+</google_drive_tools_instructions>
 
 ---
 !metadata:*:icon

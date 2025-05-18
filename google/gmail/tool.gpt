@@ -219,17 +219,14 @@ Type: context
 
 #!sys.echo
 
-## Instructions for Creating, Updating, Deleting, or Sending a Draft Email
-
+<gmail_draft_instructions>
 If more information about a draft email is required before updating, deleting, or sending it,
 retrieve the contents of the current draft using the Read Email tool.
 
 Forwarding emails is not a supported operation.
 Drafts should not be used to provide indirect support for these operations.
 Do not assist the user with drafting an email to forward an email in any way.
-
-
-## End of instructions for Updating, Deleting, or Sending a Draft Email
+</gmail_draft_instructions>
 
 
 ---
@@ -238,11 +235,9 @@ Type: context
 
 #!sys.echo
 
-## Instructions for modifying labels of an email
-
+<gmail_label_instructions>
 If the user asks to move an email to a custom label, you should add the specified label and archive the email by removing it from the inbox.
-
-## End of instructions for modifying labels of an email
+</gmail_label_instructions>
 
 
 ---
@@ -252,13 +247,11 @@ Share Context: ../../time
 
 #!sys.echo
 
-## Instructions for getting emails from a dataset
-
+<gmail_dataset_instructions>
 When you list the element in a dataset that contains emails, the element names will be the email IDs.
 These email IDs are not useful to the user, so don't show them to the user.
 Instead, get the contents of the elements and display that to the user.
-
-## End of instructions for getting emails from a dataset
+</gmail_dataset_instructions>
 
 ---
 !metadata:*:icon
