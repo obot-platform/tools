@@ -35,12 +35,10 @@ Type: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: Generate Images tool
-
+<generate_image_tool_instructions>
 The Generate Images tool returns a JSON object with each image’s `workspaceFilePath` and `downloadUrl`.
 Unless otherwise specified, to display images in the UI, use the `downloadUrl` in markdown format. Do NOT use `workspaceFilePath`, as it cannot be rendered by the UI.
-
-# END INSTRUCTIONS: Generate Images tool
+</generate_image_tool_instructions>
 
 ---
 Name: Analyze Images Context
@@ -48,8 +46,7 @@ Type: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: Analyze Images tool
-
+<analyze_image_tool_instructions>
 Use the Analyze Images tool to whenever you need to inspect, compare, or answer questions about the contents of images.
 
 You can pass multiple images to the Analyze Images tool at once using a single call.
@@ -57,8 +54,7 @@ You can pass multiple images to the Analyze Images tool at once using a single c
 When calling the Analyze Images tool, always provide a JSON array containing one or more URLs or workspace file paths for the `images` argument, even if you are only analyzing a single image.
 e.g. Analyzing a single image: ["https://example.com/image2.png"]
 e.g. Analyzing multiple images: ["https://example.com/image1.webp", "cool.jpg", "cow.webp", "generated_image_defg1234.png", "https://example.com/image2.png"]
-
-# END INSTRUCTIONS: Analyze Images tool
+</analyze_image_tool_instructions>
 
 ---
 !metadata:*:icon

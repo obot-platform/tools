@@ -101,7 +101,7 @@ Type: Context
 
 #!sys.echo
 
-<smartthings_instructions>
+<smartthings_tools_instructions>
 `List` tools can be used to find the GUID of an object using the friendly human-readable name.
 Do not return IDs or GUIDs to the user unless they specifically ask for it.
 
@@ -110,7 +110,7 @@ Capabilities are generally whatever the current state of the device is and the o
 * For a lock, that's "lock" or "unlock".
 * For devices with a 'level' capability, it is a value between 0-100.
 The `Get Device Info` tool should be used to discover the current state of a Device.
-</smartthings_instructions>
+</smartthings_tools_instructions>
 
 ---
 Name: SmartThings Create Rule Context

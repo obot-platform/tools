@@ -168,8 +168,7 @@ Share Tools: List Jira Sites, Get Current User
 
 #!sys.echo
 
-# START INSTRUCTIONS: Jira Tools
-
+<jira_tools_instructions>
 You have access to tools for interacting with Jira.
 If you don't know what Jira Sites are available for the current user, call the List Jira Sites tool
 to get the list of sites that the user has access to.
@@ -180,8 +179,7 @@ When information about the current user is needed to fulfill a request, call the
 Always call Get Project to gather more information about a Project when prompted to interact with the issues in a project.
 Issue descriptions are always in ADF (Atlassian Document Format) and must be passed as a JSON string when calling the Create Issue tool.
 The List Issues tool can be used to search for issues in a Jira instance. The jql_query argument provided to this tool must be valid JQL (Jira Query Language) query.
-
-# END INSTRUCTIONS: Jira Tools
+</jira_tools_instructions>
 
 ---
 !metadata:*:icon
