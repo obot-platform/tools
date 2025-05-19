@@ -13,14 +13,12 @@ func DatabaseContext(ctx context.Context, dbFile *os.File) (string, error) {
 	var builder strings.Builder
 
 	// Add usage instructions
-	builder.WriteString(`# START INSTRUCTIONS: Run Database SQL tool
-
+	builder.WriteString(`<sqlite_database_tools_instructions>
 You have access to tools for interacting with a SQLite database.
 The "Run Database SQL" tool lets you run SQL against the SQLite3 database.
 Display all results from these tools and their schemas in markdown format.
 If the user refers to creating or modifying tables, assume they mean a SQLite3 table and not writing a table in a markdown file.
-
-# END INSTRUCTIONS: Run Database SQL tool
+</sqlite_database_tools_instructions>
 `)
 
 	// Add the schemas section
@@ -29,9 +27,9 @@ If the user refers to creating or modifying tables, assume they mean a SQLite3 t
 		return "", fmt.Errorf("failed to retrieve schemas: %w", err)
 	}
 	if schemas != "" {
-		builder.WriteString("# START CURRENT DATABASE SCHEMAS\n")
+		builder.WriteString("<current_database_schema>\n")
 		builder.WriteString(schemas)
-		builder.WriteString("\n# END CURRENT DATABASE SCHEMAS\n")
+		builder.WriteString("\n</current_database_schema>\n")
 	} else {
 		builder.WriteString("# DATABASE HAS NO TABLES\n")
 	}

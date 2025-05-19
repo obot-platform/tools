@@ -340,12 +340,10 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using GitHub tools
-
+<github_tools_instructions>
 If you are unable to access resources because of a permissions issue, inform the user that they need to either adjust the repository/organization settings, or request access in their Authorized OAuth Apps configuration for this app in GitHub (https://github.com/settings/applications).
 Refer them to this link for more information on how the OAuth permissions work in GitHub - https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions.
-
-## End of instructions for using GitHub tools
+</github_tools_instructions>
 
 ---
 !metadata:*:icon

@@ -86,8 +86,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using PagerDuty tools
-
+<pagerduty_tools_instructions>
 If you encounter permission issues while accessing PagerDuty resources:
 
 For OAuth applications:
@@ -95,8 +94,7 @@ For OAuth applications:
 
 For Personal Access Tokens (PAT):
 - Follow the documentation at https://support.pagerduty.com/docs/api-access-keys to create a token with the required scopes
-
-## End of instructions for using PagerDuty tools
+</pagerduty_tools_instructions>
 
 ---
 !metadata:*:icon

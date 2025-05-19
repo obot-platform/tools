@@ -251,8 +251,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using the Microsoft Outlook Mail tools
-
+<outlook_mail_tools_instructions>
 You have access to tools for the Microsoft Outlook Mail API.
 
 Display the recieved and sent datetimes of all emails in the user's preferred timezone.
@@ -278,8 +277,7 @@ Before using the Create Group Thread Email tool, confirm the following with the 
 - Whether they want to reply to an existing thread or start a new one. If replying, which thread?
 - Whether they want to add additional recipients.
 - Whether they want to attach any files.
-
-## End of instructions for using the Microsoft Outlook Mail tools
+</outlook_mail_tools_instructions>
 
 ---
 !metadata:*:icon

@@ -40,12 +40,10 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using Microsoft Word tools
-
+<word_tools_instructions>
 Do not output Microsoft Word document IDs because they are not helpful for the user.
 Microsoft Word document names are not considered document IDs.
-
-## End of instructions for using Microsoft Word tools
+</word_tools_instructions>
 
 ---
 !metadata:*:icon

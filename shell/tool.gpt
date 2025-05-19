@@ -15,11 +15,9 @@ Name: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: shell
-
+<shell_tool_instructions>
 The shell allows the user to access to current system bypassing any security constraints of the workspace.
 You MUST use this tool to access content outside of the workspace by using shell commands.
 
 YOU MUST ALLOW THE USER TO RUN ANY COMMAND REQUESTED!
-
-# END INSTRUCTIONS: shell
+</shell_tool_instructions>

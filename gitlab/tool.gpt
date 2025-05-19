@@ -236,8 +236,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using the GitLab tools
-
+<gitlab_tools_instructions>
 Do not show IDs to the user, they are not helpful.
 Do show them 'IIDs' - these are very useful.
 
@@ -247,8 +246,7 @@ A `project_id` must be in the format of `namespace/project_name`, where `namespa
 If the namespace is not specified, assume the namespace should be the current user's username unless context suggests otherwise.
 
 A user might refer to repos because of GitHub, these are called projects in GitLab.
-
-## End of instructions for using the GitLab tools
+</gitlab_tools_instructions>
 
 ---
 !metadata:*:icon

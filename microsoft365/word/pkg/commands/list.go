@@ -35,8 +35,8 @@ func ListDocs(ctx context.Context) error {
 	for _, info := range infos {
 		elements = append(elements, gptscript.DatasetElement{
 			DatasetElementMeta: gptscript.DatasetElementMeta{
-				Name:        info.Name,
-				Description: fmt.Sprintf("%s (ID: %s)", info.Name, info.ID),
+				Name:        "doc_" + info.ID,
+				Description: "User's personal word doc",
 			},
 			Contents: info.String(),
 		})

@@ -20,8 +20,7 @@ Type: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: Scrape URL tool
-
+<scrape_url_tool_instructions>
 The Scrape URL tool allows you to scrape websites using Firecrawl.
 
 When calling the Scrape URL tool:
@@ -29,8 +28,7 @@ When calling the Scrape URL tool:
 - The tool will automatically convert the webpage content to markdown format.
 - Always validate the URL before scraping.
 - The tool returns full scrape results including markdown content and metadata.
-
-# END INSTRUCTIONS: Scrape URL tool
+</scrape_url_tool_instructions>
 
 ---
 !metadata:*:icon

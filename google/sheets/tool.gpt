@@ -76,8 +76,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using Google Sheets tools
-
+<google_sheets_tools_instructions>
 You have access to a set of tools to access, create, and modify Google Sheets.
 Do not output sheet IDs because they are not helpful for the user.
 If the user does not provide a URL for the Google Sheet they want to work with, ask them to provide it.
@@ -87,8 +86,7 @@ If the user asks to filter or list only specific information from the spreadshee
 Write the query such that it returns the minimum number of columns and rows necessary to answer the user request.
 
 Do your best to always return the complete data that the user asked for, even if it is a large dataset.
-
-## End of instructions for using Google Sheets tools
+</google_sheets_tools_instructions>
 
 ---
 !metadata:*:icon

@@ -51,8 +51,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using WordPress SEO tools
-
+<wordpress_seo_tools_instructions>
 Help the user optimize a post for SEO by following these steps:
 
 1. Use the `Keywords Suggestions` tool to recommend relevant keywords based on the content.
@@ -68,8 +67,7 @@ Provide actionable suggestions to improve keyword usage based on the analysis.
 Explain the result metrics to the user, also remind the user that readability formulas aren't always a good match for well-written professional/technical content.
 
 Finally, generate an updated version of the content reflecting the SEO and readability enhancements.
-
-## End of instructions for using WordPress SEO tools
+</wordpress_seo_tools_instructions>
 
 ---
 !metadata:*:icon

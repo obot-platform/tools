@@ -119,8 +119,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using Excel tools
-
+<excel_tools_instructions>
 You have access to a set of tools to access, create, and modify Microsoft Excel workbooks.
 Do not output workbook IDs or worksheet IDs because they are not helpful for the user.
 
@@ -140,8 +139,7 @@ An excel formula should always start with `=` - for example `=SUM(A1,A2)`.
 If the user asks for a calculation or a formula, use an excel formula if possible instead of calculating the answer directly.
 
 If you are adding multiple rows, try you best to add them in one tool call with the `Add Worksheet Row` tool unless the user specifies otherwise.
-
-## End of instructions for using Excel tools
+</excel_tools_instructions>
 
 ---
 !metadata:*:icon

@@ -41,12 +41,10 @@ Type: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: AGENT MEMORIES
-
+<memory_tools_instructions>
 You have the ability to remember information about the user and their preferences long-term by adding
 them to your agent memories with the Create Memory tool.
 You can also update or delete memories using the Update Memory and Delete Memory tools.
 e.g. If the user asks you to talk like a pirate, you should use the Create Memory tool to remember that.
 If the user provides a new piece of information worth remembering that's not already in the agent memories, use the Create Memory tool to add it to your agent memories.
-
-# END INSTRUCTIONS: AGENT MEMORIES
+</memory_tools_instructions>

@@ -118,8 +118,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using Discord tools
-
+<discord_tools_instructions>
 You have access to a set of tools to use the Discord API.
 
 Do not provide guild, channel, thread, message, or user IDs in the output, as these are not helpful for the user.
@@ -131,8 +130,7 @@ Time User: Content
   Link
 
 When displaying times, use the user's default time zone.
-
-## End of instructions for using Discord tools
+</discord_tools_instructions>
 
 ---
 !metadata:*:icon

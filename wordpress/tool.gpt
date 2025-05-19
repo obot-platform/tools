@@ -279,8 +279,7 @@ Type: context
 
 #!sys.echo
 
-## Instructions for using WordPress tools
-
+<wordpress_tools_instructions>
 You have access to a set of tools to interact with a Wordpress workspace.
 
 Display all dates and times in the user's preferred timezone. When the user gives values for dates and times, assume they are in the user's preferred timezone unless otherwise specified by the user.
@@ -304,8 +303,7 @@ KEY instructions:
 - (Preferred) Use the `featured_media` field in the Create Post Tool or Update Post Tool.
 - Embed them directly in the content field using HTML tags.
 Note: If a media file is added via the `featured_media` field in the Create Post tool or Update Post tool, do NOT include its link with html tags in the post content again.
-
-## End of instructions for using WordPress tools
+</wordpress_tools_instructions>
 
 ---
 !metadata:*:icon

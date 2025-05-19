@@ -10,9 +10,8 @@ from move_doc import move_doc
 
 
 def update_doc(file_id, doc_content, drive_dir):
+    drive_service = client('drive', 'v3')
     if doc_content:
-        drive_service = client('drive', 'v3')
-
         # Convert Markdown content into an in-memory file
         markdown_file = io.BytesIO(doc_content.encode("utf-8"))
 

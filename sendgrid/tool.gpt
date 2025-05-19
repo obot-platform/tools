@@ -24,8 +24,7 @@ Type: context
 
 #!sys.echo
 
-# START INSTRUCTIONS: Send Email tool
-
+<send_email_tool_instructions>
 The Send Email tool allows you to send emails using SendGrid.
 
 When calling the Send Email tool:
@@ -33,8 +32,7 @@ When calling the Send Email tool:
 - If both `html_body` and `text_body` are provided, both will be included in the email
 - An email can be sent to multiple recipients by providing a comma-delimited list of email addresses for the `to` parameter
 - Before sending every email, check the body for placeholder or template text and, when found, prompt the user to resolve them. Afterwards, send the email using the resolved values in the body
-
-# END INSTRUCTIONS: Send Email tool
+</send_email_tool_instructions>
 
 ---
 !metadata:*:icon
