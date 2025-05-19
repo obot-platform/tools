@@ -38,6 +38,7 @@ func main() {
 			os.Getenv("START"),
 			os.Getenv("END"),
 			os.Getenv("LIMIT"),
+			os.Getenv("READ_STATUS"),
 		); err != nil {
 			fmt.Printf("failed to list emails: %v\n", err)
 			os.Exit(1)

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	graph "github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/global"
+	graph "github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 )
 
 func DeleteGroupThread(ctx context.Context, groupID, threadID string) error {

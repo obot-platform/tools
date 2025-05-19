@@ -7,11 +7,11 @@ import (
 	"slices"
 
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	users "github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
 func ListThreadMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, groupID, threadID string) ([]models.Postable, error) {

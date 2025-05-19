@@ -4,24 +4,27 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gptscript-ai/go-gptscript"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/printers"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
-func ListEmails(ctx context.Context, folderID, start, end, limitStr string) error {
+func ListEmails(ctx context.Context, folderID, start, end, limitStr, readStatus string) error {
 	var (
 		// TODO: Change the default to a value < 1 when we have pagination implemented to trigger
 		// listing all messages.
 		limitInt int = 100
 		err      error
+		isRead   *bool
 	)
+
 	if limitStr != "" {
 		limitInt, err = strconv.Atoi(limitStr)
 		if err != nil {
@@ -29,6 +32,18 @@ func ListEmails(ctx context.Context, folderID, start, end, limitStr string) erro
 		}
 		if limitInt < 1 {
 			return fmt.Errorf("limit must be a positive integer")
+		}
+	}
+
+	// Parse read status parameter
+	if readStatus != "" {
+		switch strings.ToLower(readStatus) {
+		case "read":
+			isRead = util.Ptr(true)
+		case "unread":
+			isRead = util.Ptr(false)
+		default:
+			return fmt.Errorf("read_status must be 'read', 'unread', or empty")
 		}
 	}
 
@@ -45,7 +60,7 @@ func ListEmails(ctx context.Context, folderID, start, end, limitStr string) erro
 		return fmt.Errorf("failed to create client: %w", err)
 	}
 
-	messages, err := graph.ListMessages(ctx, c, trueFolderID, start, end, limitInt)
+	messages, err := graph.ListMessages(ctx, c, trueFolderID, start, end, limitInt, isRead)
 	if err != nil {
 		return fmt.Errorf("failed to list mail: %w", err)
 	}

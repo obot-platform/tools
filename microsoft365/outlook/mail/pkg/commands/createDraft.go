@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func CreateDraft(ctx context.Context, info graph.DraftInfo) error {

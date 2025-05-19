@@ -27,6 +27,7 @@ Param: folder_id: (Optional) The ID of the folder to list emails in. If unset, l
 Param: start: (Optional) The RFC3339 formatted start date and time of the time frame to list emails within.
 Param: end: (Optional) The RFC3339 formatted end date and time of the time frame to list emails within.
 Param: limit: (Optional) The maximum number of emails to return. If unset, returns up to 100 emails.
+Param: read_status: (Optional) The read status of the emails to list, valid values are "read" or "unread". If unset, lists all emails.
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listEmails
 

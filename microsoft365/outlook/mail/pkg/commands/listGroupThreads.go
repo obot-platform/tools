@@ -9,11 +9,11 @@ import (
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/gptscript-ai/go-gptscript"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/client"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/global"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/graph"
 	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
 
 func ListGroupThreads(ctx context.Context, groupID, start, end, limit string) error {

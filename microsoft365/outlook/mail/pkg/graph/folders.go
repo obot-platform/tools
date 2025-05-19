@@ -3,10 +3,10 @@ package graph
 import (
 	"context"
 
-	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
 func ListMailFolders(ctx context.Context, client *msgraphsdkgo.GraphServiceClient) ([]models.MailFolderable, error) {

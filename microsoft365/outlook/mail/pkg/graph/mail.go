@@ -12,16 +12,16 @@ import (
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 	"github.com/gptscript-ai/go-gptscript"
-	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
-	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 	abstractions "github.com/microsoft/kiota-abstractions-go"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
+	"github.com/obot-platform/tools/microsoft365/outlook/common/id"
+	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
-func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID, start, end string, limit int) ([]models.Messageable, error) {
+func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, folderID, start, end string, limit int, isRead *bool) ([]models.Messageable, error) {
 
 	var filters []string
 	if start != "" {
@@ -29,6 +29,9 @@ func ListMessages(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, 
 	}
 	if end != "" {
 		filters = append(filters, fmt.Sprintf("receivedDateTime le %s", end))
+	}
+	if isRead != nil {
+		filters = append(filters, fmt.Sprintf("isRead eq %t", *isRead))
 	}
 
 	if folderID != "" { // if folderID is provided, we only want to get messages from that folder

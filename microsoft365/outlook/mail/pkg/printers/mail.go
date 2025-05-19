@@ -6,8 +6,8 @@ import (
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
-	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/obot-platform/tools/microsoft365/outlook/mail/pkg/util"
 )
 
 func MailFolderToString(folder models.MailFolderable) (string, error) {
