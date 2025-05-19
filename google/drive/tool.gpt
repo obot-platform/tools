@@ -80,7 +80,6 @@ Description: Download a Google Drive file to the user's GPTScript workspace
 Credential: ../credential
 Share Context: Google Drive Context
 Param: file_id: (Required) ID of the file to download
-Param: workspace_file_path: (Required) Path to save the downloaded file in the user's GPTScript workspace
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py download_file
 

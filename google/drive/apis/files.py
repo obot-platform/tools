@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
@@ -284,7 +284,7 @@ def update_file(
         return None
 
 
-def download_file(service: Resource, file_id: str) -> Optional[bytes]:
+def download_file(service: Resource, file_id: str) -> Tuple[Optional[bytes], str]:
     """
     Download a file's content from Google Drive.
     Files larger than 100MB will not be downloaded.
@@ -294,13 +294,15 @@ def download_file(service: Resource, file_id: str) -> Optional[bytes]:
         file_id: ID of the file to download
 
     Returns:
-        File content as bytes if successful, None otherwise
+        Tuple containing file content as bytes and the file name if successful, None otherwise
     """
     try:
         # Get the file metadata including size
         file = get_file(service, file_id, "mimeType, size, name")
         if not file:
-            return None
+            return None, None
+
+        file_name = file["name"]
 
         # Check file size. exclude Google Workspace files, those are typically not too large.
         if not file["mimeType"].startswith("application/vnd.google-apps"):
@@ -309,7 +311,7 @@ def download_file(service: Resource, file_id: str) -> Optional[bytes]:
                 print(
                     f"File '{file['name']}' is too large ({file_size / (1024 * 1024):.2f}MB). Maximum size is {MAX_DOWNLOAD_SIZE / (1024 * 1024):.0f}MB."
                 )
-                return None
+                return None, file_name
 
         # Handle Google Workspace files (Docs, Sheets, Slides, etc.)
         if file["mimeType"].startswith("application/vnd.google-apps"):
@@ -319,6 +321,19 @@ def download_file(service: Resource, file_id: str) -> Optional[bytes]:
                 "application/vnd.google-apps.presentation": "application/pdf",
             }
             export_mime_type = export_formats.get(file["mimeType"], "application/pdf")
+
+            # Add appropriate file extension based on export format
+            extension_map = {
+                "application/pdf": ".pdf",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+            }
+
+            # Add extension if the file doesn't already have it
+            extension = extension_map.get(export_mime_type, ".pdf")
+            if not file_name.lower().endswith(extension):
+                file_name = f"{file_name}{extension}"
 
             request = service.files().export_media(
                 fileId=file_id, mimeType=export_mime_type
@@ -334,14 +349,14 @@ def download_file(service: Resource, file_id: str) -> Optional[bytes]:
         while not done:
             _, done = downloader.next_chunk()
 
-        return file_content.getvalue()
+        return file_content.getvalue(), file_name
 
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
         print(
             f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
         )
-        return None
+        return None, None
 
 
 def copy_file(
