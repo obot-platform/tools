@@ -127,7 +127,7 @@ func main() {
 
 		validateEmails("required attendee", addRequiredAttendees)
 		validateEmails("optional attendee", addOptionalAttendees)
-		validateEmails("attendee to remove", removeAttendees)
+		validateEmails("attendees to remove", removeAttendees)
 
 		if err := commands.ModifyEventAttendees(context.Background(), os.Getenv("EVENT_ID"), os.Getenv("CALENDAR_ID"), graph.OwnerType(os.Getenv("OWNER_TYPE")), addRequiredAttendees, addOptionalAttendees, removeAttendees); err != nil {
 			fmt.Println(err)
