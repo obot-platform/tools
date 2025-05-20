@@ -3,7 +3,7 @@ Name: SendGrid
 Description: Send emails with SendGrid
 Metadata: bundle: true
 Metadata: mcp: true
-Metadata: categories: Official,SaaS & API Integrations,Communication & Messaging
+Metadata: categories: Official,Communication & Messaging
 Share Tools: Send Email
 
 ---

@@ -3,7 +3,7 @@ Name: Tavily Web Search
 Description: Search the Internet with Tavily
 Metadata: bundle: true
 Metadata: mcp: true
-Metadata: categories: Official,Retrieval & Search,SaaS & API Integrations
+Metadata: categories: Official,Retrieval & Search
 Share Tools: Search, Read Site
 
 ---

@@ -3,7 +3,7 @@ Name: LinkedIn Publishing
 Description: Create posts on LinkedIn
 Metadata: bundle: true
 Metadata: mcp: true
-Metadata: categories: Official,SaaS & API Integrations,Communication & Messaging
+Metadata: categories: Official,Communication & Messaging
 Share Tools: Get Current LinkedIn User, Create LinkedIn Post
 
 ---

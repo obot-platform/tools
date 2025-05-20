@@ -3,7 +3,7 @@ Name: GitHub
 Description: Manage issues, pull requests, and more on GitHub
 Metadata: bundle: true
 Metadata: mcp: true
-Metadata: categories: Official,Developer Tools,Saas & API Integrations
+Metadata: categories: Official,Developer Tools
 Share Tools: Search Issues and PRs, Get Issue, Create Issue, Modify Issue, Close Issue, List Issue Comments, Add Comment to Issue, Get PR, Create PR, Modify PR, Close PR, List PR Comments, Add Comment to PR, List Repos, Get Star Count, List Assigned Issues, List PRs for Review, Add Issue Labels, Remove Issue Labels, Get Job Logs, List User Organizations, Create Branch, Get File Content, Create or Update File, Delete File, List Repo Contents, List Branches
 
 ---
