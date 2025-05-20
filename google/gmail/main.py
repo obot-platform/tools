@@ -7,8 +7,8 @@ from commands import (
     update_label_tool,
     delete_label_tool,
     modify_message_labels_tool,
+    list_drafts_tool,
 )
-
 
 async def main():
 
@@ -33,6 +33,8 @@ async def main():
                 delete_label_tool()
             case "modify_message_labels":
                 modify_message_labels_tool()
+            case "list_drafts":
+                await list_drafts_tool()
             case _:
                 print(f"Command {command} not found")
     except Exception as e:

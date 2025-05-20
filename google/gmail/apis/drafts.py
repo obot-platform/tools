@@ -50,7 +50,7 @@ async def list_drafts(service, max_results=None):
                 )
 
             dataset_id = await gptscript_client.add_dataset_elements(
-                elements, name=f"gmail_drafts"
+                elements, name=f"gmail_drafts", description=f"list of drafts in Gmail"
             )
 
             print(f"Created dataset with ID {dataset_id} with {len(elements)} drafts")
@@ -65,7 +65,7 @@ def draft_to_string(service, draft):
     draft_id = draft["id"]
     draft_msg = service.users().drafts().get(userId="me", id=draft_id).execute()
     msg = draft_msg["message"]
-    subject, sender, to, cc, bcc, date = extract_message_headers(msg)
+    subject, sender, to, cc, bcc, date, _ = extract_message_headers(msg)
     return (
         draft_id,
         f"Draft ID: {draft_id}, From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Saved: {date}",

@@ -87,7 +87,7 @@ Tools: github.com/gptscript-ai/datasets/filter
 Param: max_results: Maximum number of drafts to list (Optional: Default will list 100 drafts)
 Param: attachments: A comma separated list of workspace file paths to attach to the email (Optional)
 
-#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/listDrafts.py
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py list_drafts
 
 ---
 Name: Create Draft
