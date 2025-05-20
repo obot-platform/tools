@@ -3,6 +3,7 @@ Name: Jira
 Description: Create, update, and manage issues and projects in Jira
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations,Developer Tools
 Share Tools: List Jira Sites, List Projects, Get Project, List Users, Get User, Get Current User, Search Issues, List Issues, Get Issue, Create Issue, Edit Issue, Add Comment, List Comments
 
 ---

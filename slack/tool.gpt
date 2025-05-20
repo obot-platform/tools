@@ -3,6 +3,7 @@ Name: Slack
 Description: Send and search for messages in Slack
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,Communication & Messaging,SaaS & API Integrations
 Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History From Link, Get Thread History, Search Messages, Send Message, Send Message in Thread, List Users, Search Users, Send DM, Send DM in Thread, Get Message Link, Get DM History, Get DM Thread History, Send Typing Event
 
 ---

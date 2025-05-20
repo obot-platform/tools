@@ -3,6 +3,7 @@ Name: Google Docs
 Description: Create, read, and update Google Docs
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations
 Share Tools: Read Google Doc, Create Google Doc, Update Google Doc
 
 ---

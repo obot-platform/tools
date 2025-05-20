@@ -3,6 +3,7 @@ Name: Notion
 Description: Create, update, and read pages and databases in Notion
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations,File & Storage Systems,Databases
 Share Tools: Get Page, Get Database, Search, Create Page, List Users, Get Database Properties, Add Database Row, Update Database Row, Update Page
 
 ---

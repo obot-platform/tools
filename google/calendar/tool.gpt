@@ -3,6 +3,7 @@ Name: Google Calendar
 Description: Manage events and calendars in Google Calendar
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations,Time & Scheduling
 Share Tools: List Events, Get Event, Move Event, Quick Add Event, Create Event, Update Event, Respond To Event, Delete Event, List Recurring Event Instances, List Calendars, Get Calendar, Create Calendar, Update Calendar, Delete Calendar
 
 ---

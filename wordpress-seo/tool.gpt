@@ -3,6 +3,7 @@ Name: Wordpress SEO
 Description: Analyze your Wordpress posts and receive SEO recommendations
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations,Media & Design
 Share Tools: Keywords Suggestions, Keyword Density Metrics, Long Tail Keywords, Readability Metrics
 ---
 Name: Keywords Suggestions

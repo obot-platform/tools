@@ -3,6 +3,7 @@ Name: Discord Bot
 Description: Send messages in Discord as a Bot
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,Communication & Messaging,SaaS & API Integrations
 Share Tools: List Channels, Search Channels, Get Channel History, Get Channel History by Time, Get Thread History, List Users, Search Users, Send Message, Send Message in Thread
 
 ---

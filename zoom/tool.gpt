@@ -3,6 +3,7 @@ Name: Zoom
 Description: Manage meetings on Zoom
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,Time & Scheduling,Communication & Messaging,SaaS & API Integrations
 Share Tools: Get Zoom User, Create Meeting, Update Meeting, List Meeting Templates, Get Hosted Meeting, Delete Meeting, List Hosted Meetings, List Upcoming Meetings, List Past Meeting Instances, Get Past Meeting Details, Get Meeting Invitation, Get Meeting Cloud Recordings, List User Cloud Recordings, Get AI Meeting Summary, List Available Timezones
 
 ---

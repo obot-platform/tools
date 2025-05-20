@@ -3,6 +3,7 @@ Name: Google Search Console
 Description: Get search results from Google Search Console
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,SaaS & API Integrations,Retrieval & Search
 Share Tools: Get GSC Properties, Inspect URL, Get Top Keywords, Get URLs for Property
 
 ---

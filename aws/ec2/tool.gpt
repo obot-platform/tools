@@ -3,6 +3,7 @@ Name: AWS EC2
 Description: Launch and manage AWS EC2 instances
 Metadata: bundle: true
 Metadata: mcp: true
+Metadata: categories: Official,Developer Tools,SaaS & API Integrations,Infrastructure & DevOps
 Share Tools: List Instances, Search Instances By Name, Search Instances By Tag, Get Instance Info, Start Instance, Stop Instance, Reboot Instance, Terminate Instance, Launch New Instance, List VPCs, List Subnets, List Security Groups
 
 ---
