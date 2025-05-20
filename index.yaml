@@ -9,8 +9,6 @@ tools:
     reference: ./database
   zoom:
     reference: ./zoom
-  atlassian-jira:
-    reference: ./atlassian/jira
   wordpress:
     reference: ./wordpress
   wordpress-seo:
@@ -25,8 +23,6 @@ tools:
     reference: ./slack/tool-bot.gpt
   linkedin-publishing:
     reference: ./linkedin-publishing
-  notion:
-    reference: ./notion
   google-docs:
     reference: ./google/docs
   google-gmail:
@@ -37,8 +33,6 @@ tools:
     reference: ./google/sheets
   google-drive:
     reference: ./google/drive
-  gitlab:
-    reference: ./gitlab
   images:
     reference: ./images
   excel:
@@ -53,8 +47,6 @@ tools:
     reference: ./microsoft365/word
   onedrive:
     reference: ./microsoft365/onedrive
-  github:
-    reference: ./github
   time:
     reference: ./time
   workspace-files:
@@ -67,8 +59,6 @@ tools:
     reference: ./knowledge
   shell:
     reference: ./shell
-  tavily:
-    reference: ./search/tavily
   pagerduty:
     reference: ./pagerduty
   postgres:
