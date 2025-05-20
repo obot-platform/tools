@@ -1,6 +1,6 @@
 ---
 Name: Slack
-Description: Send and search for messages in Slack
+Description: Interact with your Slack workspace. This server will have you use OAuth to authenticate as yourself. All actions will be performed as you.
 Metadata: bundle: true
 Metadata: mcp: true
 Metadata: categories: Official,Communication & Messaging
