@@ -10,8 +10,8 @@ github.com/go-openapi/swag v0.23.0 h1:vsEVJDUo2hPJ2tu0/Xc+4noaxyEffXNIs3cOULZ+Gr
 github.com/go-openapi/swag v0.23.0/go.mod h1:esZ8ITTYEsH1V2trKHjAN8Ai7xHb8RV+YSZ577vPjgQ=
 github.com/go-test/deep v1.0.8 h1:TDsG77qcSprGbC6vTN8OuXp5g+J+b5Pcguhf7Zt61VM=
 github.com/go-test/deep v1.0.8/go.mod h1:5C2ZWiW0ErCdrYzpqxLbTX7MG14M9iiw8DgHncVwcsE=
-github.com/gptscript-ai/go-gptscript v0.9.6-0.20250331192455-415de950d72d h1:S9gfdnk0VK3dSFOHn/rhPWBbbOoC64uy38rRKIPLLcQ=
-github.com/gptscript-ai/go-gptscript v0.9.6-0.20250331192455-415de950d72d/go.mod h1:QvGPZoRuAiA8P5EzPI05kTrs+LZ0ipHywUGsKruSknw=
+github.com/gptscript-ai/go-gptscript v0.9.6-0.20250424204937-af453989e88f h1:JG/uszEGS99hQeajV+h87M2vfQtIONhbdVCC8dpL50E=
+github.com/gptscript-ai/go-gptscript v0.9.6-0.20250424204937-af453989e88f/go.mod h1:QvGPZoRuAiA8P5EzPI05kTrs+LZ0ipHywUGsKruSknw=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
@@ -22,14 +22,14 @@ github.com/mailru/easyjson v0.9.0 h1:PrnmzHw7262yW8sTBwxi1PdJA3Iw/EKBa8psRf7d9a4
 github.com/mailru/easyjson v0.9.0/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
+github.com/njhale/obot/apiclient v0.0.0-20250430070646-13d08e96a3d4 h1:7QjOlKSG8MssqAcbQhqNmrTfODteTLJOwDzrYY4VvpM=
+github.com/njhale/obot/apiclient v0.0.0-20250430070646-13d08e96a3d4/go.mod h1:6xuT2XK3SdzTxEk8PSpE9KI6Kf/RDf/jw6wRaHNs6m0=
 github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80 h1:nZspmSkneBbtxU9TopEAE0CY+SBJLxO8LPUlw2vG4pU=
 github.com/oasdiff/yaml v0.0.0-20241210131133-6b86fb107d80/go.mod h1:7tFDb+Y51LcDpn26GccuUgQXUk6t0CXZsivKjyimYX8=
 github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349 h1:t05Ww3DxZutOqbMN+7OIuqDwXbhl32HiZGpLy26BAPc=
 github.com/oasdiff/yaml3 v0.0.0-20241210130736-a94c01f36349/go.mod h1:y5+oSEHCPT/DGrS++Wc/479ERge0zTFxaF8PbGKcg2o=
 github.com/obot-platform/obot v0.7.1 h1:sxE0Se8Vw2+IQW418yumFGCN7ayAyRPeXZbMSIamDz8=
 github.com/obot-platform/obot v0.7.1/go.mod h1:qr3POCZBYQ6Xm8ZuRdzkIQuuO+FHqHfJkHTKP2C0VCI=
-github.com/obot-platform/obot/apiclient v0.0.0-20250422181343-7b44bf761ab4 h1:WScX8iJZAX9yQ7oFZbISjgt1x/q/HI1frpnKVBIYkzc=
-github.com/obot-platform/obot/apiclient v0.0.0-20250422181343-7b44bf761ab4/go.mod h1:6xuT2XK3SdzTxEk8PSpE9KI6Kf/RDf/jw6wRaHNs6m0=
 github.com/obot-platform/obot/logger v0.0.0-20241217130503-4004a5c69f32 h1:PooNaWBm+SVJ5nif7t9eAy/bBgN5r6x2tWW9Za51gKk=
 github.com/obot-platform/obot/logger v0.0.0-20241217130503-4004a5c69f32/go.mod h1:mstAp0dK+o0h8AGcfFjyMOwTc0DgIFnKldBARfYYQzI=
 github.com/perimeterx/marshmallow v1.1.5 h1:a2LALqQ1BlHM8PZblsDdidgv1mWi1DgC2UmX50IvK2s=
