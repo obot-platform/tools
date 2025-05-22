@@ -1,10 +1,30 @@
 Name: Gemini Image Generator
 Description: Generate images using Google's Gemini Developer API
+Metadata: bundle: true
+Metadata: mcp: true
+Metadata: categories: Official,Media & Design
+Share Tool: Gemini Generate Image
+
+---
+Name: Gemini Generate Image
+Description: Generate an image using Google's Gemini Developer API
 Credential: ./credential
+Share Context: Gemini Generate Image Context
 Param: prompt: (required) Text describing the image to generate
 Param: title: (required) Title for the generated image (will be converted to a safe filename)
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py generate-image
+
+---
+Name: Gemini Generate Image Context
+Type: context
+
+#!sys.echo
+
+<gemini_generate_image_tool_context>
+The Gemini Generate Image tool returns a JSON object with the generated image’s `workspaceFile` and `imageUrl`.
+Unless otherwise specified, to display images to the user, reference the `imageUrl` in markdown format (e.g. `![Image](imageUrl)`). Do NOT use `workspaceFile`, as it cannot be rendered by the UI.
+</gemini_generate_image_tool_context>
 
 ---
 !metadata:*:icon
