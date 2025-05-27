@@ -13,10 +13,25 @@ import (
 	"github.com/obot-platform/tools/microsoft365/word/pkg/graph"
 )
 
-func WriteDoc(ctx context.Context, name string, content string) error {
+func WriteDoc(ctx context.Context, name string, content string, overwriteIfExists bool) error {
 	c, err := client.NewClient(global.ReadWriteScopes)
 	if err != nil {
 		return err
+	}
+
+	// Ensure name has .docx extension
+	name = strings.TrimSuffix(name, filepath.Ext(name)) + ".docx"
+
+	// Check if file already exists
+	if !overwriteIfExists {
+		exists, err := graph.DocExists(ctx, c, name)
+		if err != nil {
+			return fmt.Errorf("failed to check if document exists: %w", err)
+		}
+
+		if exists {
+			return fmt.Errorf("document with name %q already exists, aborting to prevent overwrite", name)
+		}
 	}
 
 	slog.Info("Creating new Word Document in OneDrive", "name", name)
@@ -26,7 +41,6 @@ func WriteDoc(ctx context.Context, name string, content string) error {
 		return fmt.Errorf("failed to convert markdown to docx: %w", err)
 	}
 
-	name = strings.TrimSuffix(name, filepath.Ext(name)) + ".docx"
 	name, id, err := graph.CreateDoc(ctx, c, name, contentBytes)
 	if err != nil {
 		return err
