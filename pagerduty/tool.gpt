@@ -60,7 +60,7 @@ Name: List Incident Notes
 Description: List all notes (comments) from a PagerDuty incident
 Share Context: PagerDuty Context
 Credential: ./credential
-params: incident_id: ID of the incident to add note to
+params: incident_id: ID of the incident to list notes from. Can also be the incident number.
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIncidentNotes
 
@@ -69,7 +69,7 @@ Name: List Incident Alerts
 Description: List all alerts from a PagerDuty incident
 Share Context: PagerDuty Context
 Credential: ./credential
-params: incident_id: ID of the incident to add note to
+params: incident_id: ID of the incident to list note from. Can also be the incident number.
 
 #!/usr/bin/env node --no-warnings ${GPTSCRIPT_TOOL_DIR}/index.js listIncidentAlerts
 

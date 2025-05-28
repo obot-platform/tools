@@ -32,7 +32,7 @@ async function updateIncidentStatus(client, id, status) {
 
 async function listIncidentNotes(client, id) {
     const resp = await client.get(`/incidents/${id}/notes`);
-    return resp.resource;
+    return JSON.stringify(resp.data.notes);
 }
 
 async function addIncidentNote(client, id, contents) {
