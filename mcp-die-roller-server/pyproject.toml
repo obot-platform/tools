@@ -1,0 +1,13 @@
+[project]
+name = "mcp-die-roller-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "fastmcp",
+  "pydiceroll"
+]
+
+[project.scripts]
+mcp-die-roller-server = "mcp_die_roller_server:main"
