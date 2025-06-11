@@ -40,6 +40,7 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 		if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
 			return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
 		}
+		fmt.Println("migrating context")
 		if err := migrateContext(db); err != nil {
 			return Database{}, fmt.Errorf("failed to migrate context: %w", err)
 		}
@@ -67,7 +68,7 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 // migrateContext populates the Context field of all credentials.
 func migrateContext(db *gorm.DB) error {
 	var creds []GptscriptCredential
-	if err := db.Find(&creds).Where("context = ?", "").Error; err != nil {
+	if err := db.Where("context = ?", "").Find(&creds).Error; err != nil {
 		return fmt.Errorf("failed to find credentials with empty context: %w", err)
 	}
 
@@ -78,6 +79,7 @@ func migrateContext(db *gorm.DB) error {
 			continue
 		}
 
+		fmt.Printf("migrating context for %s\n", cred.ServerURL)
 		cred.Context = parts[1]
 		if err := db.Save(&cred).Error; err != nil {
 			return fmt.Errorf("failed to save credential: %w", err)
