@@ -200,6 +200,10 @@ func (d Database) ListWithContexts(contexts []string) (map[string]string, error)
 	)
 
 	for _, context := range contexts {
+		if strings.Contains(context, "///") {
+			return nil, fmt.Errorf("invalid context: %s", context)
+		}
+
 		var creds []GptscriptCredential
 		if err = d.db.Where("context = ?", context).Find(&creds).Error; err != nil {
 			return nil, fmt.Errorf("failed to list credentials: %w", err)
