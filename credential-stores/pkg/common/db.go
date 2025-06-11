@@ -68,7 +68,7 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 // migrateContext populates the Context field of all credentials.
 func migrateContext(db *gorm.DB) error {
 	var creds []GptscriptCredential
-	if err := db.Where("context = ?", "").Find(&creds).Error; err != nil {
+	if err := db.Where("context IS NULL OR context = ?", "").Find(&creds).Error; err != nil {
 		return fmt.Errorf("failed to find credentials with empty context: %w", err)
 	}
 
