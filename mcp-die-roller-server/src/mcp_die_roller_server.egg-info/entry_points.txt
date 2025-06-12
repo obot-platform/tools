@@ -1,0 +1,2 @@
+[console_scripts]
+mcp-die-roller-server = mcp_die_roller_server:main

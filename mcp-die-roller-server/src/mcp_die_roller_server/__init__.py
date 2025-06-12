@@ -1,9 +1,11 @@
-import click
-from pathlib import Path
+import asyncio
 import logging
 import sys
-from .main import serve
-import asyncio
+from pathlib import Path
+
+import click
+
+from .main import roll_die, serve
 
 
 @click.command()
@@ -23,3 +25,5 @@ def main(verbose: bool) -> None:
 
 if __name__ == "__main__":
     main()
+
+__all__ = ["roll_die"]

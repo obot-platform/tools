@@ -1,6 +1,7 @@
-from fastmcp import FastMCP
 from typing import Annotated
+
 from dice_roller import Dice
+from fastmcp import FastMCP
 
 mcp = FastMCP(name="die-roller")
 
