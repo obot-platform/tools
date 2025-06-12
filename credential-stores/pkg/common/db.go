@@ -40,7 +40,6 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 		if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
 			return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
 		}
-		fmt.Println("migrating context")
 		if err := migrateContext(db); err != nil {
 			return Database{}, fmt.Errorf("failed to migrate context: %w", err)
 		}
@@ -79,7 +78,6 @@ func migrateContext(db *gorm.DB) error {
 			continue
 		}
 
-		fmt.Printf("migrating context for %s\n", cred.ServerURL)
 		cred.Context = parts[1]
 		if err := db.Save(&cred).Error; err != nil {
 			return fmt.Errorf("failed to save credential: %w", err)
@@ -208,7 +206,6 @@ func (d Database) ListWithContexts(contexts []string) (map[string]string, error)
 		if err = d.db.Where("context = ?", context).Find(&creds).Error; err != nil {
 			return nil, fmt.Errorf("failed to list credentials: %w", err)
 		}
-		fmt.Printf("found %d credentials for context %s\n", len(creds), context)
 		allCreds = append(allCreds, creds...)
 	}
 
