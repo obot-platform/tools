@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/docker/docker-credential-helpers/credentials"
@@ -39,6 +40,9 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 		if err := db.AutoMigrate(&GptscriptCredential{}); err != nil {
 			return Database{}, fmt.Errorf("failed to auto migrate GptscriptCredential: %w", err)
 		}
+		if err := migrateContext(db); err != nil {
+			return Database{}, fmt.Errorf("failed to migrate context: %w", err)
+		}
 	}
 
 	encryptionConf, err := readEncryptionConfig(ctx)
@@ -60,19 +64,52 @@ func NewDatabase(ctx context.Context, db *gorm.DB) (Database, error) {
 	}, nil
 }
 
+// migrateContext populates the Context field of all credentials.
+func migrateContext(db *gorm.DB) error {
+	var creds []GptscriptCredential
+	if err := db.Where("context IS NULL OR context = ?", "").Find(&creds).Error; err != nil {
+		return fmt.Errorf("failed to find credentials with empty context: %w", err)
+	}
+
+	for _, cred := range creds {
+		parts := strings.Split(cred.ServerURL, "///")
+		if len(parts) != 2 {
+			// Shouldn't happen, but just ignore it.
+			continue
+		}
+
+		cred.Context = parts[1]
+		if err := db.Save(&cred).Error; err != nil {
+			return fmt.Errorf("failed to save credential: %w", err)
+		}
+	}
+
+	return nil
+}
+
 type GptscriptCredential struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	ServerURL string `gorm:"unique"`
 	Username  string
 	Secret    string
+
+	// Context is used to separately store the context of the credential.
+	// The ServerURL field already contains the context, but we need to be able to query by it separately for performance reasons.
+	Context string `gorm:"index"`
 }
 
 func (d Database) Add(creds *credentials.Credentials) error {
+	parts := strings.Split(creds.ServerURL, "///")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid server URL: %s", creds.ServerURL)
+	}
+
 	cred := GptscriptCredential{
 		ServerURL: creds.ServerURL,
 		Username:  creds.Username,
 		Secret:    creds.Secret,
+		Context:   parts[1],
 	}
 
 	cred, err := d.encryptCred(context.Background(), cred)
@@ -147,6 +184,33 @@ func (d Database) List() (map[string]string, error) {
 
 	credMap := make(map[string]string)
 	for _, cred := range creds {
+		// No need to decrypt anything, since we don't need to access the secret.
+		credMap[cred.ServerURL] = cred.Username
+	}
+
+	return credMap, nil
+}
+
+func (d Database) ListWithContexts(contexts []string) (map[string]string, error) {
+	var (
+		allCreds []GptscriptCredential
+		err      error
+	)
+
+	for _, context := range contexts {
+		if strings.Contains(context, "///") {
+			return nil, fmt.Errorf("invalid context: %s", context)
+		}
+
+		var creds []GptscriptCredential
+		if err = d.db.Where("context = ?", context).Find(&creds).Error; err != nil {
+			return nil, fmt.Errorf("failed to list credentials: %w", err)
+		}
+		allCreds = append(allCreds, creds...)
+	}
+
+	credMap := make(map[string]string)
+	for _, cred := range allCreds {
 		// No need to decrypt anything, since we don't need to access the secret.
 		credMap[cred.ServerURL] = cred.Username
 	}
