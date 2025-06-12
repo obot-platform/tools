@@ -61,8 +61,6 @@ tools:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-  die-roller:
-    reference: ./die-roller
   smartthings:
     reference: ./smartthings
   gemini-image-generator:
