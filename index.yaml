@@ -13,8 +13,6 @@ tools:
     reference: ./wordpress
   wordpress-seo:
     reference: ./wordpress-seo
-  browser:
-    reference: ./browser
   bluesky:
     reference: ./bluesky
   slack:
@@ -69,10 +67,6 @@ tools:
     reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-  firecrawl:
-    reference: ./firecrawl
-  obot-search:
-    reference: ./search/tavily/obot-search.gpt
   aws-s3:
     reference: ./aws/s3
   aws-ec2:
