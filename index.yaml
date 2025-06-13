@@ -67,8 +67,6 @@ tools:
     reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-  aws-s3:
-    reference: ./aws/s3
   aws-ec2:
     reference: ./aws/ec2
   discord:
@@ -77,7 +75,6 @@ tools:
     reference: ./proxycurl
   memory:
     reference: ./memory
-
 
 knowledgeDataSources:
   notion-data-source:
