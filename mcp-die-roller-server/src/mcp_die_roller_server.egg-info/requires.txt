@@ -1,6 +1,0 @@
-fastmcp
-pydiceroll
-
-[dev]
-pytest>=8.4.0
-pytest-asyncio>=1.0.0
