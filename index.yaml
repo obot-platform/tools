@@ -65,8 +65,6 @@ tools:
     reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-  aws-ec2:
-    reference: ./aws/ec2
   discord:
     reference: ./discord
   proxycurl:
