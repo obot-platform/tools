@@ -105,10 +105,6 @@ system:
     reference: ./existing-credential
   database-ui:
     reference: ./database/ui.gpt
-  docker-shell-id:
-    reference: ./docker-shell-id
-  docker:
-    reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
   task-invoke:
