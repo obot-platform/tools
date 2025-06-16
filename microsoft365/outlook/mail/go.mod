@@ -3,10 +3,10 @@ module github.com/obot-platform/tools/microsoft365/outlook/mail
 go 1.23.1
 
 replace (
-	github.com/obot-platform/tools/microsoft365/outlook/common => ../common
 	github.com/hupe1980/golc => github.com/iwilltry42/golc v0.0.113-0.20240802113826-d065a3c5b0c7 // nbformat extension
 	github.com/ledongthuc/pdf => github.com/iwilltry42/pdf v0.0.0-20240517145113-99fbaebc5dd3
 	github.com/obot-platform/tools/knowledge => ../../../knowledge
+	github.com/obot-platform/tools/microsoft365/outlook/common => ../common
 	github.com/philippgille/chromem-go => github.com/iwilltry42/chromem-go v0.0.0-20250218054308-81ac4c30d459
 	github.com/tmc/langchaingo => github.com/StrongMonkey/langchaingo v0.0.0-20240617180437-9af4bee04c8b
 )
@@ -16,17 +16,17 @@ require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/gomarkdown/markdown v0.0.0-20240930133441-72d49d9543d8
 	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250331192455-415de950d72d
-	github.com/obot-platform/tools/microsoft365/outlook/common v0.0.0-20241008222508-3c6174b443e7
 	github.com/microsoft/kiota-abstractions-go v1.7.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.51.0
 	github.com/obot-platform/obot/apiclient v0.0.0-20250417212002-eed4977ade6b
 	github.com/obot-platform/tools/knowledge v0.6.9
+	github.com/obot-platform/tools/microsoft365/outlook/common v0.0.0-20241008222508-3c6174b443e7
 	github.com/pkoukk/tiktoken-go v0.1.7
 )
 
 require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 )
 
 require (
@@ -69,7 +69,7 @@ require (
 	github.com/fatih/set v0.2.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gen2brain/go-fitz v1.24.14 // indirect
-	github.com/getkin/kin-openapi v0.131.0 // indirect
+	github.com/getkin/kin-openapi v0.132.0 // indirect
 	github.com/gigawattio/window v0.0.0-20180317192513-0f5467e35573 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
@@ -154,11 +154,11 @@ require (
 	go.opentelemetry.io/otel v1.26.0 // indirect
 	go.opentelemetry.io/otel/metric v1.26.0 // indirect
 	go.opentelemetry.io/otel/trace v1.26.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/net v0.37.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	google.golang.org/api v0.184.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240610135401-a8a62080eff3 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240610135401-a8a62080eff3 // indirect
