@@ -8,8 +8,11 @@ mcp = FastMCP(name="aws-ec2")
 
 @mcp.tool()
 async def list_instances(
-    aws_region: Annotated[str, "The AWS region to list instances in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to list instances in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """List all instances in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
 
     try:
@@ -42,8 +45,11 @@ async def list_instances(
 @mcp.tool()
 async def start_instance(
     instance_id: Annotated[str, "The ID of the instance to start"],
-    aws_region: Annotated[str, "The AWS region to start the instance in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to start the instance in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """Start the specified ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     try:
         ec2_client.start_instances(InstanceIds=[instance_id])
@@ -55,8 +61,11 @@ async def start_instance(
 @mcp.tool()
 async def stop_instance(
     instance_id: Annotated[str, "The ID of the instance to stop"],
-    aws_region: Annotated[str, "The AWS region to stop the instance in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to stop the instance in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """Stop the specified ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     try:
         ec2_client.stop_instances(InstanceIds=[instance_id])
@@ -69,9 +78,10 @@ async def stop_instance(
 async def terminate_instance(
     instance_id: Annotated[str, "The ID of the instance to terminate"],
     aws_region: Annotated[
-        str, "The AWS region to terminate the instance in"
+        str, "The AWS region to terminate the instance in, defaults to us-east-1"
     ] = "us-east-1",
 ):
+    """Terminate the specified ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     ec2_client.terminate_instances(InstanceIds=[instance_id])
     return {"message": f"Instance {instance_id} terminated"}
@@ -81,9 +91,10 @@ async def terminate_instance(
 async def reboot_instance(
     instance_id: Annotated[str, "The ID of the instance to reboot"],
     aws_region: Annotated[
-        str, "The AWS region to reboot the instance in"
+        str, "The AWS region to reboot the instance in, defaults to us-east-1"
     ] = "us-east-1",
 ):
+    """Reboot the specified ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     try:
         ec2_client.reboot_instances(InstanceIds=[instance_id])
@@ -105,9 +116,10 @@ async def create_instance(
         list[str], "The IDs of the security groups to use"
     ] = [],
     aws_region: Annotated[
-        str, "The AWS region to create the instance in"
+        str, "The AWS region to create the instance in, defaults to us-east-1"
     ] = "us-east-1",
 ):
+    """Create a new ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     try:
         instance = ec2_client.run_instances(
@@ -150,8 +162,11 @@ async def create_instance(
 
 @mcp.tool()
 async def list_vpcs(
-    aws_region: Annotated[str, "The AWS region to list VPCs in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to list VPCs in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """List all VPCs in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_vpcs()
     try:
@@ -162,8 +177,11 @@ async def list_vpcs(
 
 @mcp.tool()
 async def list_subnets(
-    aws_region: Annotated[str, "The AWS region to list subnets in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to list subnets in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """List all subnets in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_subnets()
     try:
@@ -176,9 +194,10 @@ async def list_subnets(
 async def list_security_groups(
     vpc_id: Annotated[str, "The ID of the VPC to list security groups in"],
     aws_region: Annotated[
-        str, "The AWS region to list security groups in"
+        str, "The AWS region to list security groups in, defaults to us-east-1"
     ] = "us-east-1",
 ):
+    """List all security groups in the specified AWS region and VPC."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_security_groups()
     try:
@@ -191,9 +210,10 @@ async def list_security_groups(
 async def get_instance_details(
     instance_id: Annotated[str, "The ID of the instance to get details for"],
     aws_region: Annotated[
-        str, "The AWS region to get instance details in"
+        str, "The AWS region to get instance details in, defaults to us-east-1"
     ] = "us-east-1",
 ):
+    """Get the details of the specified ec2 instance in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_instances(InstanceIds=[instance_id])
     try:
@@ -205,8 +225,11 @@ async def get_instance_details(
 @mcp.tool()
 async def search_instances_by_name(
     instance_name: Annotated[str, "The name of the instance to search for"],
-    aws_region: Annotated[str, "The AWS region to search instances in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to search instances in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """Search for instances by name in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_instances(
         Filters=[{"Name": "tag:Name", "Values": [instance_name]}]
@@ -221,8 +244,11 @@ async def search_instances_by_name(
 async def search_instances_by_tag(
     tag_key: Annotated[str, "The key of the tag to search for"],
     tag_value: Annotated[str, "The value of the tag to search for"],
-    aws_region: Annotated[str, "The AWS region to search instances in"] = "us-east-1",
+    aws_region: Annotated[
+        str, "The AWS region to search instances in, defaults to us-east-1"
+    ] = "us-east-1",
 ):
+    """Search for instances by tag in the specified AWS region."""
     ec2_client = boto3.client("ec2", region_name=aws_region)
     response = ec2_client.describe_instances(
         Filters=[{"Name": f"tag:{tag_key}", "Values": [tag_value]}]
