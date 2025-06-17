@@ -19,8 +19,8 @@ type googleProfile struct {
 	HD            string `json:"hd"`
 }
 
-func FetchGoogleProfile(ctx context.Context, accessToken string) (*googleProfile, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://openidconnect.googleapis.com/v1/userinfo", nil)
+func FetchGoogleProfile(ctx context.Context, accessToken, url string) (*googleProfile, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

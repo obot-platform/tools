@@ -43,8 +43,8 @@ type githubResponse struct {
 	UpdatedAt         string `json:"updated_at"`
 }
 
-func FetchGitHubProfile(ctx context.Context, accessToken string) (*githubResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user", nil)
+func FetchGitHubProfile(ctx context.Context, accessToken, url string) (*githubResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -133,7 +133,7 @@ func main() {
 	})
 	mux.HandleFunc("/obot-get-state", getState(oauthProxy))
 	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
-		userInfo, err := profile.FetchGitHubProfile(r.Context(), r.Header.Get("Authorization"))
+		userInfo, err := profile.FetchGitHubProfile(r.Context(), r.Header.Get("Authorization"), "https://api.github.com/user")
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to fetch user info: %v", err), http.StatusBadRequest)
 			return

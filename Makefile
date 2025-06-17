@@ -4,6 +4,8 @@ build:
 
 test:
 	cd tests && GPTSCRIPT_TOOL_REMAP="github.com/obot-platform/tools=.." go test -v tool_test.go
+	cd github-auth-provider && go test ./... && cd ..
+	cd google-auth-provider && go test ./... && cd ..
 
 package-tools:
 	./scripts/package-tools.sh

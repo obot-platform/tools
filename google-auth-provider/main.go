@@ -112,7 +112,7 @@ func main() {
 	})
 	mux.HandleFunc("/obot-get-state", state.ObotGetState(oauthProxy))
 	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
-		userInfo, err := profile.FetchGoogleProfile(r.Context(), r.Header.Get("Authorization"))
+		userInfo, err := profile.FetchGoogleProfile(r.Context(), r.Header.Get("Authorization"), "https://openidconnect.googleapis.com/v1/userinfo")
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to fetch user info: %v", err), http.StatusBadRequest)
 			return

@@ -55,8 +55,6 @@ tools:
     reference: ./threads
   knowledge:
     reference: ./knowledge
-  shell:
-    reference: ./shell
   pagerduty:
     reference: ./pagerduty
   postgres:
