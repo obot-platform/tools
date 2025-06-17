@@ -5,8 +5,6 @@ tools:
     reference: ./file-summarizer
   google-calendar:
     reference: ./google/calendar
-  database:
-    reference: ./database
   zoom:
     reference: ./zoom
   wordpress:
@@ -103,8 +101,6 @@ system:
     reference: ./obot-model-provider
   existing-credential:
     reference: ./existing-credential
-  database-ui:
-    reference: ./database/ui.gpt
   tasks-workflow:
     reference: ./tasks-workflow
   task-invoke:
