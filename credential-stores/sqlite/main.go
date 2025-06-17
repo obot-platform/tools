@@ -51,7 +51,7 @@ func main() {
 	mux.HandleFunc("POST /list", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
 		// Check for context in the body.
 		body, err := io.ReadAll(r.Body)
-		if err == nil && len(body) > 0 {
+		if err == nil && len(body) > 0 && string(body) != "unused" {
 			var contexts []string
 			if err := json.Unmarshal(body, &contexts); err != nil {
 				http.Error(w, "invalid request body: body must be a JSON array of credential context strings", http.StatusBadRequest)
