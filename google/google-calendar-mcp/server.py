@@ -7,8 +7,6 @@ from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
 from rfc3339_validator import validate_rfc3339
 from tools.event import (
-    DEFAULT_MAX_RESULTS,
-    GOOGLE_EVENT_TYPE_OPTIONS,
     MOVABLE_EVENT_TYPES,
     get_current_time_rfc3339,
     validate_recurrence_list,
@@ -37,7 +35,7 @@ mcp = FastMCP(
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def list_calendars(cred_token: str = None) -> list:
     """Lists all calendars for the authenticated user."""
@@ -54,7 +52,7 @@ def list_calendars(cred_token: str = None) -> list:
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def get_calendar(calendar_id: Annotated[str, Field(description="calendar id to get")],
                  cred_token: str = None) -> dict:
@@ -72,7 +70,7 @@ def get_calendar(calendar_id: Annotated[str, Field(description="calendar id to g
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def create_calendar(summary: Annotated[str, Field(description="calendar title to create")],
                     time_zone: Annotated[str | None, Field(description="calendar timezone to create")] = None,
@@ -100,7 +98,7 @@ def create_calendar(summary: Annotated[str, Field(description="calendar title to
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def update_calendar(calendar_id: Annotated[str, Field(description="calendar id to update")],
                     summary: Annotated[str | None, Field(description="calendar title to update")] = None,
@@ -134,7 +132,7 @@ def update_calendar(calendar_id: Annotated[str, Field(description="calendar id t
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def delete_calendar(calendar_id: Annotated[str, Field(description="calendar id to delete")],
                     cred_token: str = None) -> str:
@@ -156,7 +154,7 @@ def delete_calendar(calendar_id: Annotated[str, Field(description="calendar id t
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
                 event_type: Annotated[Literal["birthday", "default", "focusTime", "fromGmail", "outOfOffice", "workingLocation"], Field(description="The type of event to list. Defaults to 'default'")] = "default",
@@ -239,7 +237,7 @@ def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def get_event(calendar_id: Annotated[str, Field(description="calendar id to get event from")],
               event_id: Annotated[str, Field(description="event id to get")],
@@ -261,7 +259,7 @@ def get_event(calendar_id: Annotated[str, Field(description="calendar id to get 
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def move_event(calendar_id: Annotated[str, Field(description="calendar id to move event from")],
               event_id: Annotated[str, Field(description="event id to move")],
@@ -300,7 +298,7 @@ def move_event(calendar_id: Annotated[str, Field(description="calendar id to mov
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def quick_add_event(text: Annotated[str, Field(description="The text of the event to add")],
                     calendar_id: Annotated[str, Field(description="The ID of the calendar to add event for")] = "primary",
@@ -320,7 +318,7 @@ def quick_add_event(text: Annotated[str, Field(description="The text of the even
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def create_event(calendar_id: Annotated[str, Field(description="Calendar id to create event in. Set to `primary` to create event in the primary calendar")],
                  summary: Annotated[str, Field(description="Event title")] = "My Event",
@@ -408,7 +406,7 @@ def create_event(calendar_id: Annotated[str, Field(description="Calendar id to c
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def update_event(calendar_id: Annotated[str, Field(description="Calendar id to update event in.")],
                  event_id: Annotated[str, Field(description="Event id to update")],
@@ -571,7 +569,7 @@ def update_event(calendar_id: Annotated[str, Field(description="Calendar id to u
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def respond_to_event(calendar_id: Annotated[str, Field(description="Calendar id to respond to event in.")],
                      event_id: Annotated[str, Field(description="Event id to respond to")],
@@ -622,7 +620,7 @@ def respond_to_event(calendar_id: Annotated[str, Field(description="Calendar id 
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def delete_event(calendar_id: Annotated[str, Field(description="Calendar id to delete event from.")],
                  event_id: Annotated[str, Field(description="Event id to delete")],
@@ -644,7 +642,7 @@ def delete_event(calendar_id: Annotated[str, Field(description="Calendar id to d
 
 
 @mcp.tool(
-    exclude_args=["cred_token"], # the access token, is excluded to LLM
+    exclude_args=["cred_token"],
 )
 def list_recurring_event_instances(calendar_id: Annotated[str, Field(description="Calendar id to list recurring event instances from.")],
                                    event_id: Annotated[str, Field(description="Event id to list recurring event instances for")],
