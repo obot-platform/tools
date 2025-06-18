@@ -27,7 +27,7 @@ mcp = FastMCP(
     on_duplicate_tools="error",                  # Handle duplicate registrations
     on_duplicate_resources="warn",
     on_duplicate_prompts="replace",
-    mask_error_details=True, # only include details for ToolError and convert other errors to generic error\
+    mask_error_details=False, # only include details for ToolError and convert other errors to generic error\
 )
 
 @mcp.tool(

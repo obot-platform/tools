@@ -5,6 +5,7 @@
 
 ## Run the Server
 ```
+cd src
 uv run server.py
 ```
 

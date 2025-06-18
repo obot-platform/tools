@@ -10,3 +10,11 @@ dependencies = [
     "google-api-python-client>=2.172.0",
     "rfc3339-validator>=0.1.4",
 ]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.9.1",
+    "pytest>=8.4.0",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
+]
