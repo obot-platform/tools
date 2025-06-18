@@ -18,11 +18,14 @@ import (
 const FilesDir = "files"
 
 var (
-	FileEnv     = os.Getenv("FILENAME")
-	DirEnv      = os.Getenv("DIR")
-	MaxFileSize = 250_000
-	ThreadID    = os.Getenv("OBOT_THREAD_ID")
-	ServerURL   = os.Getenv("OBOT_SERVER_URL")
+	FileEnv            = os.Getenv("FILENAME")
+	DirEnv             = os.Getenv("DIR")
+	MaxFileSize        = 250_000
+	ThreadID           = os.Getenv("OBOT_THREAD_ID")
+	ProjectID          = os.Getenv("OBOT_PROJECT_ID")
+	ServerURL          = os.Getenv("OBOT_SERVER_URL")
+	ProjectWorkspaceID = os.Getenv("PROJECT_WORKSPACE_ID")
+	ProjectScoped      = os.Getenv("PROJECT_SCOPED") == "true"
 )
 
 var unsupportedWriteFileTypes = []string{".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".jpg", ".png", ".gif", ".mp3", ".mp4", ".zip", ".rar"}
@@ -151,6 +154,7 @@ func list(ctx context.Context, filename string) error {
 		return err
 	}
 
+	// List files in the thread-scoped workspace
 	files, err := client.ListFilesInWorkspace(ctx, gptscript.ListFilesInWorkspaceOptions{
 		Prefix: path.Join(FilesDir, filename),
 	})
@@ -158,47 +162,100 @@ func list(ctx context.Context, filename string) error {
 		return err
 	}
 
-	toPrint := map[string]struct{}{}
+	toPrint := make(map[string]struct{}, len(files))
 	for _, file := range files {
 		p := strings.TrimPrefix(file, FilesDir+"/")
-		if p != "" {
-			parts := strings.Split(p, "/")
-			if len(parts) > 1 {
-				toPrint[parts[0]+"/"] = struct{}{}
-			} else {
-				toPrint[parts[0]] = struct{}{}
-			}
+		if p == "" {
+			continue
+		}
+
+		parts := strings.Split(p, "/")
+		if len(parts) > 1 {
+			toPrint[parts[0]+"/"] = struct{}{}
+			continue
+		}
+
+		toPrint[parts[0]] = struct{}{}
+	}
+
+	// List files in the project workspace if ProjectWorkspaceID is available
+	var projectFiles []string
+	if ProjectWorkspaceID != "" {
+		projectFiles, err = client.ListFilesInWorkspace(ctx, gptscript.ListFilesInWorkspaceOptions{
+			Prefix:      path.Join(FilesDir, filename),
+			WorkspaceID: ProjectWorkspaceID,
+		})
+		if err != nil {
+			return err
 		}
 	}
 
-	if len(toPrint) > 0 {
-		fmt.Println(strings.Join(slices.Sorted(maps.Keys(toPrint)), "\n"))
+	projectToPrint := make(map[string]struct{}, len(projectFiles))
+	for _, file := range projectFiles {
+		p := strings.TrimPrefix(file, FilesDir+"/")
+		if p == "" {
+			continue
+		}
+
+		parts := strings.Split(p, "/")
+		if len(parts) > 1 {
+			projectToPrint[parts[0]+"/"] = struct{}{}
+			continue
+		}
+
+		projectToPrint[parts[0]] = struct{}{}
 	}
+
+	// Output with XML-like tags using string builder
+	var output strings.Builder
+	output.WriteString("<files_in_workspace>\n")
+	if len(toPrint) > 0 {
+		output.WriteString("List of files currently in workspace:\n")
+		output.WriteString(strings.Join(slices.Sorted(maps.Keys(toPrint)), "\n"))
+		output.WriteString("\n")
+	} else {
+		output.WriteString("No files found in workspace\n")
+	}
+	output.WriteString("</files_in_workspace>\n\n")
+
+	output.WriteString("<files_in_project_workspace>\n")
+	if len(projectToPrint) > 0 {
+		output.WriteString("List of files currently in project workspace:\n")
+		output.WriteString(strings.Join(slices.Sorted(maps.Keys(projectToPrint)), "\n"))
+		output.WriteString("\n")
+	} else {
+		output.WriteString("No files found in project workspace\n")
+	}
+	output.WriteString("</files_in_project_workspace>\n")
+
+	fmt.Print(output.String())
 
 	return nil
 }
 
-func readNonPlainOrLargeFile(ctx context.Context, filename string) (string, error) {
+func readNonPlainOrLargeFile(ctx context.Context, filename, workspaceID string) (string, error) {
 	// forward to a tool to handle non-plain text files or large files
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return "", err
 	}
 
-	var workspaceID = os.Getenv("GPTSCRIPT_WORKSPACE_ID")
 	newData := map[string]string{"input_file": filename}
-
 	jsonData, err := json.Marshal(newData)
 	if err != nil {
 		return "", err
 	}
 
+	var text string
 	run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/tool.gpt", gptscript.Options{
 		Input:     string(jsonData),
 		Workspace: workspaceID,
 	})
+	if err != nil {
+		return "", err
+	}
 
-	text, err := run.Text()
+	text, err = run.Text()
 	if err != nil {
 		return "", err
 	}
@@ -207,11 +264,21 @@ func readNonPlainOrLargeFile(ctx context.Context, filename string) (string, erro
 }
 
 func read(ctx context.Context, filename string) error {
-	triedNonPlain := false
+	// Attempt to get the workspace ID.
+	var workspaceID string
+	if ProjectScoped {
+		if ProjectWorkspaceID == "" {
+			return fmt.Errorf("PROJECT_WORKSPACE_ID is not set")
+		}
+
+		workspaceID = ProjectWorkspaceID
+	}
+
 	// Check if the file extension is not plain text. If it is, forward it the a separate tool to handle it.
+	var triedNonPlain bool
 	for _, ext := range nonPlainTextFileTypes {
 		if strings.HasSuffix(strings.ToLower(filename), ext) {
-			text, err := readNonPlainOrLargeFile(ctx, filename) // hand it to the tool to ingest it and potentially summarize it
+			text, err := readNonPlainOrLargeFile(ctx, filename, workspaceID) // hand it to the tool to ingest it and potentially summarize it
 			triedNonPlain = true
 			if err == nil {
 				fmt.Println(string(text))
@@ -227,7 +294,9 @@ func read(ctx context.Context, filename string) error {
 		return err
 	}
 
-	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename), gptscript.ReadFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 	if err != nil {
 		return err
 	}
@@ -237,7 +306,7 @@ func read(ctx context.Context, filename string) error {
 			return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
 		}
 
-		text, err := readNonPlainOrLargeFile(ctx, filename) // hand it to the tool to summarize it
+		text, err := readNonPlainOrLargeFile(ctx, filename, workspaceID) // hand it to the tool to summarize it
 		if err != nil {
 			return fmt.Errorf("file size exceeds %d bytes and failed to summarize it as plain text: %w", MaxFileSize, err)
 		}
@@ -255,6 +324,16 @@ func read(ctx context.Context, filename string) error {
 }
 
 func write(ctx context.Context, filename, content string) error {
+	// Attempt to get the workspace ID
+	var workspaceID string
+	if ProjectScoped {
+		if ProjectWorkspaceID == "" {
+			return fmt.Errorf("PROJECT_WORKSPACE_ID is not set")
+		}
+
+		workspaceID = ProjectWorkspaceID
+	}
+
 	// Check if the file extension is not plain text. We don't support writing to non-plain text files yet.
 	for _, ext := range unsupportedWriteFileTypes {
 		if strings.HasSuffix(strings.ToLower(filename), ext) {
@@ -267,26 +346,63 @@ func write(ctx context.Context, filename, content string) error {
 		return err
 	}
 
-	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, filename), []byte(content))
+	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, filename), []byte(content), gptscript.WriteFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 }
 
 func copy(ctx context.Context, filename, toFilename string) error {
+	// Attempt to get the workspace ID
+	var workspaceID string
+	if ProjectScoped {
+		if ProjectWorkspaceID == "" {
+			return fmt.Errorf("PROJECT_WORKSPACE_ID is not set")
+		}
+
+		workspaceID = ProjectWorkspaceID
+	}
+
 	client, err := gptscript.NewGPTScript()
 	if err != nil {
 		return err
 	}
 
-	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	data, err := client.ReadFileInWorkspace(ctx, path.Join(FilesDir, filename), gptscript.ReadFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 	if err != nil {
 		return err
 	}
 
-	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, toFilename), data)
+	return client.WriteFileInWorkspace(ctx, path.Join(FilesDir, toFilename), data, gptscript.WriteFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 }
 
 func downloadURL(ctx context.Context, filename string) error {
-	if ThreadID == "" || ServerURL == "" {
-		return fmt.Errorf("OBOT_THREAD_ID and OBOT_SERVER_URL environment variables are required")
+	// Attempt to get the workspace ID and thread ID for the requested workspace scope
+	var (
+		workspaceID string
+		threadID    string
+	)
+	if ProjectScoped {
+		if ProjectWorkspaceID == "" || ProjectID == "" {
+			return fmt.Errorf("PROJECT_WORKSPACE_ID and OBOT_PROJECT_ID environment variables are required")
+
+		}
+
+		workspaceID = ProjectWorkspaceID
+		threadID = ProjectID
+	} else {
+		if ThreadID == "" {
+			return fmt.Errorf("OBOT_THREAD_ID environment variable is required")
+		}
+
+		threadID = ThreadID
+	}
+
+	if ServerURL == "" {
+		return fmt.Errorf("OBOT_SERVER_URL environment variable is required")
 	}
 
 	client, err := gptscript.NewGPTScript()
@@ -295,12 +411,14 @@ func downloadURL(ctx context.Context, filename string) error {
 	}
 
 	// Check if file exists
-	_, err = client.StatFileInWorkspace(ctx, path.Join(FilesDir, filename))
+	_, err = client.StatFileInWorkspace(ctx, path.Join(FilesDir, filename), gptscript.StatFileInWorkspaceOptions{
+		WorkspaceID: workspaceID,
+	})
 	if err != nil {
 		return err
 	}
 
-	downloadURL := fmt.Sprintf("%s/api/threads/%s/file/%s", ServerURL, ThreadID, filename)
-	fmt.Println(downloadURL)
+	fmt.Printf("%s/api/threads/%s/file/%s\n", ServerURL, threadID, filename)
+
 	return nil
 }
