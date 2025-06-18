@@ -23,7 +23,7 @@ PORT = os.getenv("PORT", 9000)
 MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-drive")
 
 mcp = FastMCP(
-    name="GoogleDriveMCPServer",
+    name="GoogleCalendarMCPServer",
     on_duplicate_tools="error",                  # Handle duplicate registrations
     on_duplicate_resources="warn",
     on_duplicate_prompts="replace",
