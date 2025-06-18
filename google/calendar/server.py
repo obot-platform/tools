@@ -20,7 +20,7 @@ logger = setup_logger(__name__)
 
 # Configure server-specific settings
 PORT = os.getenv("PORT", 9000)
-MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-drive")
+MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-calendar")
 
 mcp = FastMCP(
     name="GoogleCalendarMCPServer",

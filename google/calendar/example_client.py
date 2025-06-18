@@ -5,9 +5,10 @@ import json
 
 GOOGLE_OAUTH_TOKEN = os.getenv("GOOGLE_OAUTH_TOKEN")
 PORT = os.getenv("PORT", "9000")
+MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-calendar")
 
 async def example_list_calendars():
-    async with Client(f"http://127.0.0.1:{PORT}/mcp/google-drive") as client:
+    async with Client(f"http://127.0.0.1:{PORT}{MCP_PATH}") as client:
         res = await client.call_tool(
             name="list_calendars",
             arguments={"cred_token": GOOGLE_OAUTH_TOKEN},
@@ -17,7 +18,7 @@ async def example_list_calendars():
 
 async def example_get_calendar():
     calendar_id = "primary"  # Replace with a real calendar ID
-    async with Client(f"http://127.0.0.1:{PORT}/mcp/google-drive") as client:
+    async with Client(f"http://127.0.0.1:{PORT}{MCP_PATH}") as client:
         res = await client.call_tool(
             name="get_calendar",
             arguments={
@@ -30,7 +31,7 @@ async def example_get_calendar():
 
 async def example_list_events():
     calendar_id = "primary"  # Replace with a real calendar ID
-    async with Client(f"http://127.0.0.1:{PORT}/mcp/google-drive") as client:
+    async with Client(f"http://127.0.0.1:{PORT}{MCP_PATH}") as client:
         res = await client.call_tool(
             name="list_events",
             arguments={
@@ -48,7 +49,7 @@ async def example_list_events():
 
 async def example_get_event(event_id):
     calendar_id = "primary"  # Replace with a real calendar ID
-    async with Client(f"http://127.0.0.1:{PORT}/mcp/google-drive") as client:
+    async with Client(f"http://127.0.0.1:{PORT}{MCP_PATH}") as client:
         res = await client.call_tool(
             name="get_event",
             arguments={
@@ -62,7 +63,7 @@ async def example_get_event(event_id):
 
 async def example_quick_add_event():
     calendar_id = "primary"  # Replace with a real calendar ID
-    async with Client(f"http://127.0.0.1:{PORT}/mcp/google-drive") as client:
+    async with Client(f"http://127.0.0.1:{PORT}{MCP_PATH}") as client:
         res = await client.call_tool(
             name="quick_add_event",
             arguments={
