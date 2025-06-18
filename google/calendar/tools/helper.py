@@ -4,9 +4,10 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import os
 import logging
+from fastmcp.exceptions import ToolError
 
 
-def setup_logger(name, tool_name: str = "Google Calendar Tool"):
+def setup_logger(name, tool_name: str = "Google Calendar MCP server"):
     """Setup a logger that writes to sys.stderr. This will eventually show up in GPTScript's debugging logs.
 
     Args:
@@ -42,18 +43,13 @@ def str_to_bool(value):
     return str(value).lower() in ("true", "1", "yes")
 
 
-def get_client(service_name: str = "calendar", version: str = "v3"):
-    token = os.getenv("GOOGLE_OAUTH_TOKEN")
-    if token is None:
-        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
-
-    creds = Credentials(token=token)
+def get_client(cred_token: str, service_name: str = "calendar", version: str = "v3"):
+    creds = Credentials(token=cred_token)
     try:
         service = build(serviceName=service_name, version=version, credentials=creds)
         return service
     except HttpError as err:
-        print(err)
-        exit(1)
+        raise ToolError(f"Failed to build {service_name} client. HttpError: {err}")
 
 
 def get_obot_user_timezone():
