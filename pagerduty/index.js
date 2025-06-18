@@ -70,6 +70,7 @@ async function main() {
                 incidentId = getIncidentId();
                 const noteList = await listIncidentNotes(pd, incidentId);
                 console.log("NOTES: ", noteList);
+                break
             case "listIncidentAlerts":
                 incidentId = getIncidentId();
                 const alerts = await listIncidentAlerts(pd, incidentId);

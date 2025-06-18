@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -46,8 +48,26 @@ func main() {
 		}
 	}))
 	mux.HandleFunc("POST /list", authenticatedHandler(func(w http.ResponseWriter, r *http.Request) {
-		if err := credentials.HandleCommand(p, credentials.ActionList, r.Body, w); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		// Check for context in the body.
+		body, err := io.ReadAll(r.Body)
+		if err == nil && len(body) > 0 && string(body) != "unused" {
+			var contexts []string
+			if err := json.Unmarshal(body, &contexts); err != nil {
+				http.Error(w, "invalid request body: body must be a JSON array of credential context strings", http.StatusBadRequest)
+				return
+			}
+
+			// Use our custom ListWithContexts handler rather than relying on Docker's libraries.
+			creds, err := p.ListWithContexts(contexts)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(creds)
+		} else {
+			if err := credentials.HandleCommand(p, credentials.ActionList, r.Body, w); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
 		}
 	}))
 	// Leave this one unauthenticated so that the health check works.

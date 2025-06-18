@@ -1,0 +1,30 @@
+[project]
+name = "mcp-aws-ec2-server"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+  "fastmcp",
+  "boto3"
+]
+
+[tool.uv]
+package = true
+dev-dependencies = [
+    "pytest>=8.4.0",
+    "pytest-asyncio>=1.0.0"
+]
+
+[project.scripts]
+mcp-aws-ec2-server = "mcp_aws_ec2_server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

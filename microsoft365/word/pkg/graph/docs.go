@@ -359,3 +359,27 @@ func deref[T any](v *T) (r T) {
 	}
 	return
 }
+
+// DocExists checks if a document with the given path exists in the user's OneDrive.
+func DocExists(ctx context.Context, client *msgraphsdkgo.GraphServiceClient, path string) (bool, error) {
+	// Get the user's drive.
+	drive, err := client.Me().Drive().Get(ctx, nil)
+	if err != nil {
+		return false, fmt.Errorf("failed to get drive: %w", err)
+	}
+	driveID := deref(drive.GetId())
+
+	// Try to get the item by path
+	_, err = getItemByPath(ctx, client, driveID, path)
+	if err != nil {
+		if strings.Contains(err.Error(), "item not found") {
+			// Item doesn't exist
+			return false, nil
+		}
+		// Some other error occurred
+		return false, err
+	}
+
+	// Item exists
+	return true, nil
+}

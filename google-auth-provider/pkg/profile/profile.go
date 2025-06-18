@@ -19,27 +19,27 @@ type googleProfile struct {
 	HD            string `json:"hd"`
 }
 
-func FetchGoogleProfileIconURL(ctx context.Context, accessToken string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://openidconnect.googleapis.com/v1/userinfo", nil)
+func FetchGoogleProfile(ctx context.Context, accessToken, url string) (*googleProfile, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	req.Header.Set("Authorization", accessToken)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		result, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("unexpected status code: %d: %s", resp.StatusCode, result)
+		return nil, fmt.Errorf("unexpected status code: %d: %s", resp.StatusCode, result)
 	}
 
 	var profile googleProfile
 	if err = json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return profile.Picture, nil
+	return &profile, nil
 }

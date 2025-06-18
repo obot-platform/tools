@@ -3,16 +3,12 @@ tools:
     reference: ./sendgrid
   file-summarizer:
     reference: ./file-summarizer
-  database:
-    reference: ./database
   zoom:
     reference: ./zoom
   wordpress:
     reference: ./wordpress
   wordpress-seo:
     reference: ./wordpress-seo
-  browser:
-    reference: ./browser
   bluesky:
     reference: ./bluesky
   slack:
@@ -55,33 +51,20 @@ tools:
     reference: ./threads
   knowledge:
     reference: ./knowledge
-  shell:
-    reference: ./shell
   pagerduty:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-  die-roller:
-    reference: ./die-roller
   smartthings:
     reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-  firecrawl:
-    reference: ./firecrawl
-  obot-search:
-    reference: ./search/tavily/obot-search.gpt
-  aws-s3:
-    reference: ./aws/s3
-  aws-ec2:
-    reference: ./aws/ec2
   discord:
     reference: ./discord
   proxycurl:
     reference: ./proxycurl
   memory:
     reference: ./memory
-
 
 knowledgeDataSources:
   notion-data-source:
@@ -112,12 +95,6 @@ system:
     reference: ./obot-model-provider
   existing-credential:
     reference: ./existing-credential
-  database-ui:
-    reference: ./database/ui.gpt
-  docker-shell-id:
-    reference: ./docker-shell-id
-  docker:
-    reference: ./docker
   tasks-workflow:
     reference: ./tasks-workflow
   task-invoke:

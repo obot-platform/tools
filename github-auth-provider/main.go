@@ -14,7 +14,6 @@ import (
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
-	"github.com/obot-platform/tools/auth-providers-common/pkg/icon"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/github-auth-provider/pkg/profile"
 )
@@ -133,7 +132,14 @@ func main() {
 		w.Write([]byte(fmt.Sprintf("http://127.0.0.1:%s", port)))
 	})
 	mux.HandleFunc("/obot-get-state", getState(oauthProxy))
-	mux.HandleFunc("/obot-get-icon-url", icon.ObotGetIconURL(profile.FetchGitHubProfileIconURL))
+	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
+		userInfo, err := profile.FetchGitHubProfile(r.Context(), r.Header.Get("Authorization"), "https://api.github.com/user")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to fetch user info: %v", err), http.StatusBadRequest)
+			return
+		}
+		json.NewEncoder(w).Encode(userInfo)
+	})
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)

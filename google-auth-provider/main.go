@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
-	"github.com/obot-platform/tools/auth-providers-common/pkg/icon"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/google-auth-provider/pkg/profile"
 )
@@ -111,7 +111,15 @@ func main() {
 		w.Write([]byte(fmt.Sprintf("http://127.0.0.1:%s", port)))
 	})
 	mux.HandleFunc("/obot-get-state", state.ObotGetState(oauthProxy))
-	mux.HandleFunc("/obot-get-icon-url", icon.ObotGetIconURL(profile.FetchGoogleProfileIconURL))
+	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
+		userInfo, err := profile.FetchGoogleProfile(r.Context(), r.Header.Get("Authorization"), "https://openidconnect.googleapis.com/v1/userinfo")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to fetch user info: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		json.NewEncoder(w).Encode(userInfo)
+	})
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
