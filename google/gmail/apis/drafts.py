@@ -1,9 +1,7 @@
-import gptscript
 from googleapiclient.errors import HttpError
-from gptscript.datasets import DatasetElement
 
 from apis.helpers import extract_message_headers
-from apis.messages import create_message
+from apis.messages import create_message_data
 
 
 async def list_drafts(service, max_results=None):
@@ -35,37 +33,17 @@ async def list_drafts(service, max_results=None):
             if not next_page_token:
                 break
 
-        try:
-            gptscript_client = gptscript.GPTScript()
-
-            elements = []
-            if len(all_drafts) == 0:
-                print("No drafts found")
-                return
-
-            for draft in all_drafts:
-                draft_id, draft_str = draft_to_string(service, draft)
-                elements.append(
-                    DatasetElement(name=draft_id, description="", contents=draft_str)
-                )
-
-            dataset_id = await gptscript_client.add_dataset_elements(
-                elements, name=f"gmail_drafts", description=f"list of drafts in Gmail"
-            )
-
-            print(f"Created dataset with ID {dataset_id} with {len(elements)} drafts")
-        except Exception as e:
-            print("An error occurred while creating the dataset:", e)
+        return all_drafts
 
     except HttpError as err:
-        print(f"An error occurred: {err}")
+        raise HttpError(f"An error occurred: {err}")
 
 
-def draft_to_string(service, draft):
+def draft_to_string(service, draft, user_tz: str = "UTC"):
     draft_id = draft["id"]
     draft_msg = service.users().drafts().get(userId="me", id=draft_id).execute()
     msg = draft_msg["message"]
-    subject, sender, to, cc, bcc, date, _ = extract_message_headers(msg)
+    subject, sender, to, cc, bcc, date, _ = extract_message_headers(msg, user_tz)
     return (
         draft_id,
         f"Draft ID: {draft_id}, From: {sender}, Subject: {subject}, To: {to}, CC: {cc}, Bcc: {bcc}, Saved: {date}",
@@ -92,7 +70,7 @@ async def update_draft(
     reply_all=False,
 ):
     try:
-        message = await create_message(
+        message = await create_message_data(
             service=service,
             to=to,
             cc=cc,
@@ -114,6 +92,6 @@ async def update_draft(
             .update(userId="me", id=draft_id, body=updated_draft)
             .execute()
         )
-        print(f"Draft Id: {draft_response['id']} - Draft updated successfully!")
-    except HttpError as error:
-        print(f"An error occurred: {error}")
+        return draft_response
+    except Exception as e:
+        raise Exception(f"Error: An error occurred: {e}")

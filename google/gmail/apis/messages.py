@@ -6,11 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Optional
 
-import gptscript
 from bs4 import BeautifulSoup
 from filetype import guess_mime
 from googleapiclient.errors import HttpError
-from gptscript.datasets import DatasetElement
 
 from apis.helpers import (
     format_query_timestamp,
@@ -33,8 +31,8 @@ CATEGORY_IDS = {
 def modify_message_labels(
     service,
     message_id,
-    add_labels=None,
-    remove_labels=None,
+    add_labels: list[str] = None,
+    remove_labels: list[str] = None,
     apply_action_to_thread: bool = False,
     archive: Optional[
         bool
@@ -172,7 +170,7 @@ def get_thread_with_message_id(service, message_id: str):
         raise ValueError(f"No thread found for message {message_id}")
 
 
-async def create_message(
+async def create_message_data(
     service,
     to,
     cc,
@@ -183,7 +181,6 @@ async def create_message(
     reply_to_email_id=None,
     reply_all=False,
 ):
-    gptscript_client = gptscript.GPTScript()
     message = MIMEMultipart()
     message_text_html = message_text.replace("\n", "<br>")
     message.attach(MIMEText(message_text_html, "html"))
@@ -224,30 +221,31 @@ async def create_message(
         message["bcc"] = bcc
 
     # Read and attach any workspace files if provided
-    for filepath in attachments:
-        try:
-            # Get the file bytes from the workspace
-            wksp_file_path = await prepend_base_path("files", filepath)
-            file_content = await gptscript_client.read_file_in_workspace(wksp_file_path)
+    # TODO: Commented out for now, will get this back in once we have a workspace solution
+    # for filepath in attachments:
+    #     try:
+    #         # Get the file bytes from the workspace
+    #         wksp_file_path = await prepend_base_path("files", filepath)
+    #         file_content = await gptscript_client.read_file_in_workspace(wksp_file_path)
 
-            # Determine the MIME type and subtype
-            mime = guess_mime(file_content) or "application/octet-stream"
-            main_type, sub_type = mime.split("/", 1)
+    #         # Determine the MIME type and subtype
+    #         mime = guess_mime(file_content) or "application/octet-stream"
+    #         main_type, sub_type = mime.split("/", 1)
 
-            # Create the appropriate MIMEBase object for the attachment
-            mime_base = MIMEBase(main_type, sub_type)
-            mime_base.set_payload(file_content)
-            encoders.encode_base64(mime_base)
+    #         # Create the appropriate MIMEBase object for the attachment
+    #         mime_base = MIMEBase(main_type, sub_type)
+    #         mime_base.set_payload(file_content)
+    #         encoders.encode_base64(mime_base)
 
-            # Add header with the file name
-            mime_base.add_header(
-                "Content-Disposition",
-                f'attachment; filename="{filepath.split("/")[-1]}"',
-            )
-            message.attach(mime_base)
-        except Exception as e:
-            # Raise a new exception with the problematic file path included
-            raise Exception(f"Error attaching {filepath}: {e}")
+    #         # Add header with the file name
+    #         mime_base.add_header(
+    #             "Content-Disposition",
+    #             f'attachment; filename="{filepath.split("/")[-1]}"',
+    #         )
+    #         message.attach(mime_base)
+    #     except Exception as e:
+    #         # Raise a new exception with the problematic file path included
+    #         raise Exception(f"Error attaching {filepath}: {e}")
 
     # Encode the message as a base64 string
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
@@ -309,32 +307,7 @@ def list_messages(
     return all_messages
 
 
-async def create_gptscript_dataset(service, all_messages, query, labels) -> str:
-    try:
-        gptscript_client = gptscript.GPTScript()
-
-        elements = []
-        if len(all_messages) == 0:
-            return ""
-
-        for message in all_messages:
-            msg_id, msg_str = message_to_string(service, message)
-            elements.append(
-                DatasetElement(name=msg_id, description="", contents=msg_str)
-            )
-
-        dataset_id = await gptscript_client.add_dataset_elements(
-            elements,
-            name=f"gmail_{query}",
-            description=f"list of emails in Gmail for query: [{query}], labels: [{labels}]",
-        )
-
-        return f"Created dataset with ID {dataset_id} with {len(elements)} emails"
-    except Exception as e:
-        raise Exception(f"An error occurred while creating the dataset: {e}")
-
-
-def message_to_string(service, message) -> tuple[str, str]:
+def message_to_string(service, message, user_tz: str) -> tuple[str, str]:
     msg = (
         service.users()
         .messages()
@@ -346,12 +319,14 @@ def message_to_string(service, message) -> tuple[str, str]:
         )
         .execute()
     )
-    return format_message_metadata(msg)
+    return format_message_metadata(msg, user_tz)
 
 
-def format_message_metadata(msg) -> tuple[str, str]:
+def format_message_metadata(msg, user_tz: str) -> tuple[str, str]:
     msg_id = msg["id"]
-    subject, sender, to, cc, bcc, date, label_ids = extract_message_headers(msg)
+    subject, sender, to, cc, bcc, date, label_ids = extract_message_headers(
+        msg, user_tz
+    )
     read_status = "Read" if "UNREAD" not in label_ids else "Unread"
     category = []
     label_ids_set = set(label_ids)
@@ -477,5 +452,4 @@ def get_email_body(message):
             decoded_body = base64.urlsafe_b64decode(body_data).decode("utf-8")
             return decoded_body
     except Exception as e:
-        print(f"Error while decoding the email body: {e}")
-        return None
+        raise Exception(f"Error while decoding the email body: {e}")

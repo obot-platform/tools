@@ -2,11 +2,37 @@ import logging
 import os
 import sys
 from datetime import datetime, timezone
+from typing import Union
 from zoneinfo import ZoneInfo
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from fastmcp.exceptions import ToolError
+import pytz
+
+NON_PRIMARY_CATEGORIES_MAP = {
+    "social": "CATEGORY_SOCIAL",
+    "promotions": "CATEGORY_PROMOTIONS",
+    "updates": "CATEGORY_UPDATES",
+    "forums": "CATEGORY_FORUMS",
+}
+
+GMAIL_BUILTIN_LABELS = {
+    "INBOX",
+    "SPAM",
+    "TRASH",
+    "DRAFT",
+    "SENT",
+    "IMPORTANT",
+    "STARRED",
+    "UNREAD",
+    "CATEGORY_PERSONAL",
+    "CATEGORY_SOCIAL",
+    "CATEGORY_PROMOTIONS",
+    "CATEGORY_UPDATES",
+    "CATEGORY_FORUMS",
+}
 
 
 def setup_logger(name):
@@ -35,39 +61,22 @@ def setup_logger(name):
 logger = setup_logger(__name__)
 
 
-GMAIL_BUILTIN_LABELS = {
-    "INBOX",
-    "SPAM",
-    "TRASH",
-    "DRAFT",
-    "SENT",
-    "IMPORTANT",
-    "STARRED",
-    "UNREAD",
-    "CATEGORY_PERSONAL",
-    "CATEGORY_SOCIAL",
-    "CATEGORY_PROMOTIONS",
-    "CATEGORY_UPDATES",
-    "CATEGORY_FORUMS",
-}
-
-
-def parse_label_ids(label_ids_input: str) -> list[str]:
-    if not isinstance(label_ids_input, str):
-        raise TypeError("label_ids_input must be a string")
-
-    if not label_ids_input.strip():
-        return []
+def parse_label_ids(label_ids_input: Union[str, list[str]]) -> list[str]:
+    if isinstance(label_ids_input, str):
+        if not label_ids_input.strip():
+            return []
+        label_ids_list = label_ids_input.split(",")
+    else:
+        label_ids_list = label_ids_input
 
     return [
         label.upper() if label.upper() in GMAIL_BUILTIN_LABELS else label
-        for label in (l.strip() for l in label_ids_input.split(","))
+        for label in (l.strip() for l in label_ids_list)
         if label
     ]
 
 
-def get_user_timezone():
-    user_tz = os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+def get_timezone(user_tz: str) -> ZoneInfo:
 
     try:
         tz = ZoneInfo(user_tz)
@@ -77,24 +86,16 @@ def get_user_timezone():
     return tz
 
 
-obot_user_tz = get_user_timezone()
-
-
-def client(service_name: str = "gmail", version: str = "v1"):
-    token = os.getenv("GOOGLE_OAUTH_TOKEN")
-    if token is None:
-        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
-
-    creds = Credentials(token=token)
+def get_client(cred_token: str, service_name: str = "gmail", version: str = "v1"):
+    creds = Credentials(token=cred_token)
     try:
         service = build(serviceName=service_name, version=version, credentials=creds)
         return service
     except HttpError as err:
-        print(err)
-        exit(1)
+        raise HttpError(f"Error creating client, HTTP Error: {err}")
 
 
-def extract_message_headers(message):
+def extract_message_headers(message, user_tz: str):
     subject = None
     sender = None
     to = None
@@ -118,7 +119,7 @@ def extract_message_headers(message):
                     bcc = header["value"]
         date = (
             datetime.fromtimestamp(int(message["internalDate"]) / 1000, timezone.utc)
-            .astimezone(obot_user_tz)
+            .astimezone(get_timezone(user_tz))
             .strftime("%Y-%m-%d %H:%M:%S %Z")
         )
 
@@ -161,11 +162,6 @@ async def prepend_base_path(base_path: str, file_path: str):
 
     # Prepend the base path
     return os.path.join(base_path, file_path)
-
-
-from datetime import datetime
-
-import pytz
 
 
 def format_query_timestamp(time_str: str):
