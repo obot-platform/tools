@@ -699,10 +699,15 @@ def list_recurring_event_instances(calendar_id: Annotated[str, Field(description
         raise ToolError(f"Failed to list recurring event instances for event {event_id} in calendar {calendar_id}. Exception: {e}")
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for uvx execution."""
     mcp.run(
         transport="streamable-http", # fixed to streamable-http
         host="0.0.0.0",
         port=PORT,
         path=MCP_PATH,
     )
+
+
+if __name__ == "__main__":
+    main()

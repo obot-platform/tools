@@ -3,14 +3,22 @@
 - supports streamable HTTP
 - tools of this mcp server expect `cred_token`(access_token of google oauth) as part of the tool input.
 
-## uv install
+## Installation & Running
+
+### Option 1: Using uvx (Recommended)
+install from local directory:
+```bash
+uvx --from . google-calendar-mcp
 ```
+
+### Option 2: Using uv (Development)
+Install dependencies:
+```bash
 uv pip install
 ```
 
-## Run the Server
-```
-cd src
+Run the server:
+```bash
 uv run server.py
 ```
 

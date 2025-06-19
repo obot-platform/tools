@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "google-calendar-mcp"
 version = "0.1.0"
@@ -9,6 +13,26 @@ dependencies = [
     "google>=3.0.0",
     "google-api-python-client>=2.172.0",
     "rfc3339-validator>=0.1.4",
+]
+
+[project.scripts]
+google-calendar-mcp = "server:main"
+
+[project.urls]
+Homepage = "https://github.com/obot-platform/otto8-tools"
+Repository = "https://github.com/obot-platform/otto8-tools"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+exclude = [
+    "tests/",
+    ".pytest_cache/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
 ]
 
 [dependency-groups]
