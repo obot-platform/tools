@@ -1,0 +1,39 @@
+---
+Name: AWS Spot Instance Fleet
+Description: Manage AWS Spot Instance Fleets
+Metadata: bundle: true
+Metadata: mcp: true
+Metadata: categories: Official,Developer Tools,Infrastructure & DevOps
+Share Tools: List Spot Fleet Instances, List Spot Fleet Requests, Set Spot Fleet Target
+
+---
+Name: List Spot Fleet Instances
+Description: List instances in a specified Spot Fleet
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: fleet_id: The ID of the Spot Fleet to list instances for.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listSpotFleetInstances
+
+---
+Name: List Spot Fleet Requests
+Description: List all Spot Fleet requests
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool listSpotFleetRequests
+
+---
+Name: Set Spot Fleet Target
+Description: Set the target capacity for a Spot Fleet and optionally terminate instances
+Credential: ../credential
+Param: aws_region: The Region of the resources to query. If blank, defaults to us-east-1.
+Param: fleet_id: The ID of the Spot Fleet to modify.
+Param: target_capacity: The desired target capacity.
+Param: terminate_instances: Whether to terminate instances with expiration. Defaults to false.
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool setSpotFleetTarget
+
+---
+!metadata:*:icon
+https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/amazonec2.svg
