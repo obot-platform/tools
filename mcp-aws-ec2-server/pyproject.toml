@@ -1,7 +1,7 @@
 [project]
 name = "mcp-aws-ec2-server"
 version = "0.1.0"
-description = "MCP AWS EC2 Server"
+description = "AWS EC2 MCP Server"
 requires-python = ">=3.12"
 dependencies = [
   "fastmcp>=2.8.1",
