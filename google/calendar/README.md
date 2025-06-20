@@ -10,6 +10,10 @@ install from local directory:
 ```bash
 uvx --from . google-calendar-mcp
 ```
+or stdio server:
+```bash
+uvx --from . google-calendar-mcp-stdio
+```
 
 ### Option 2: Using uv (Development)
 Install dependencies:

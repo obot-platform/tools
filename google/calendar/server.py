@@ -699,8 +699,8 @@ def list_recurring_event_instances(calendar_id: Annotated[str, Field(description
         raise ToolError(f"Failed to list recurring event instances for event {event_id} in calendar {calendar_id}. Exception: {e}")
 
 
-def main():
-    """Main entry point for uvx execution."""
+def streamable_http_server():
+    """Main entry point for the Gmail MCP server."""
     mcp.run(
         transport="streamable-http", # fixed to streamable-http
         host="0.0.0.0",
@@ -708,6 +708,10 @@ def main():
         path=MCP_PATH,
     )
 
+def stdio_server():
+    """Main entry point for the Gmail MCP server."""
+    mcp.run()
+
 
 if __name__ == "__main__":
-    main()
+    streamable_http_server()

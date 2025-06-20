@@ -16,7 +16,8 @@ dependencies = [
 ]
 
 [project.scripts]
-google-calendar-mcp = "server:main"
+google-calendar-mcp = "server:streamable_http_server"
+google-calendar-mcp-stdio = "server:stdio_server"
 
 [project.urls]
 Homepage = "https://github.com/obot-platform/otto8-tools"
