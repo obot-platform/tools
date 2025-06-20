@@ -1,0 +1,12 @@
+[project]
+name = "google-calendar-mcp"
+version = "0.1.0"
+description = "Obot's google calendar mcp server"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=2.8.0",
+    "google>=3.0.0",
+    "google-api-python-client>=2.172.0",
+    "rfc3339-validator>=0.1.4",
+]

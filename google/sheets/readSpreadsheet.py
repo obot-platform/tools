@@ -5,22 +5,23 @@ from auth import gspread_client
 
 
 async def main():
-    spreadsheet_id = os.getenv('SPREADSHEET_ID')
+    spreadsheet_id = os.getenv("SPREADSHEET_ID")
     if spreadsheet_id is None:
         raise ValueError("spreadsheet_id parameter must be set")
-    range = os.getenv('RANGE')
-    sheet_name = os.getenv('SHEET_NAME')
+    range = os.getenv("RANGE")
+    sheet_name = os.getenv("SHEET_NAME")
 
     service = gspread_client()
     try:
-        spreadsheet = service.open_by_key(
-            spreadsheet_id)
+        spreadsheet = service.open_by_key(spreadsheet_id)
         if sheet_name is None:
             sheet = spreadsheet.sheet1
         else:
             sheet = spreadsheet.worksheet(sheet_name)
+
+        all_values = sheet.get_all_values()
         if range is None:
-            values = sheet.get_all_values()
+            values = all_values
         else:
             values = sheet.get(range)
 
@@ -28,6 +29,13 @@ async def main():
             print("No data found.")
             return
         else:
+            print(
+                f"Overview of the sheet: {len(all_values)} rows and {len(all_values[0])} columns"
+            )
+            if range is None:
+                print("Sheet data:")
+            else:
+                print(f"Data in range {range}:")
             for row in values:
                 print(row)
 
