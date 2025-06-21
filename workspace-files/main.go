@@ -83,6 +83,28 @@ Usage: go run main.go <path>\n`)
 	}
 }
 
+type fileID struct {
+	Filename      string `json:"filename,omitempty"`
+	ProjectScoped bool   `json:"projectScoped,omitempty"`
+}
+
+func (id fileID) String() string {
+	scope := "workspace"
+	if id.ProjectScoped {
+		scope = "project workspace"
+	}
+
+	return fmt.Sprintf("%q %s file", id.Filename, scope)
+}
+
+func parseFileID(unparsed string) fileID {
+	parsed := strings.TrimPrefix(unparsed, "project://")
+	return fileID{
+		Filename:      parsed,
+		ProjectScoped: len(parsed) != len(unparsed),
+	}
+}
+
 type data struct {
 	Prompt       string            `json:"prompt,omitempty"`
 	Explain      *explain          `json:"explain,omitempty"`
@@ -91,7 +113,7 @@ type data struct {
 }
 
 type explain struct {
-	Filename  string `json:"filename,omitempty"`
+	fileID    `json:",inline"`
 	Selection string `json:"selection,omitempty"`
 }
 
@@ -110,42 +132,75 @@ func input(ctx context.Context) {
 		return
 	}
 
+	var output strings.Builder
 	if data.Explain != nil {
-		fmt.Printf(`Explain the following selection from the "%s" workspace file: %s`,
-			data.Explain.Filename, inBackTicks(data.Explain.Selection))
+		fmt.Fprintf(&output, `Explain the following selection from the %s: %s\n`,
+			data.Explain.fileID, inBackTicks(data.Explain.Selection))
 	}
 
 	if data.Improve != nil {
 		if data.Improve.Selection == "" {
-			fmt.Printf(`Refering to the workspace file "%s", %s
-Write any suggested changes back to the file`, data.Improve.Filename, data.Prompt)
+			fmt.Fprintf(&output, `Refering to the %s, %s
+Write any suggested changes back to the file.`, data.Improve.fileID, data.Prompt)
 		} else {
-			fmt.Printf(`Refering to the below selection from the workspace file "%s", %s: %s
+			fmt.Fprintf(&output, `Refering to the below selection from the %s, %s: %s
 Write any suggested changes back to the file.`,
-				data.Improve.Filename, data.Prompt, inBackTicks(data.Improve.Selection))
+				data.Improve.fileID, data.Prompt, inBackTicks(data.Improve.Selection))
 		}
 	}
 
 	if len(data.ChangedFiles) > 0 {
-		var printed bool
+		var (
+			files, projectFiles []string
+			headerTemplate      = "The following files have been externally changed in the %s, re-read them if the up to date content needs to be known:"
+			entryTemplate       = "%s: %s\n%s"
+		)
+
 		c, err := gptscript.NewGPTScript()
-		for filename, content := range data.ChangedFiles {
-			if err == nil {
-				if err := c.WriteFileInWorkspace(ctx, path.Join(FilesDir, filename), []byte(content)); err == nil {
-					if !printed {
-						printed = true
-						fmt.Println("The following files have been externally changed in the workspace, re-read them if the up to date content needs to be known:")
+		if err == nil {
+			for filename, content := range data.ChangedFiles {
+				id := parseFileID(filename)
+
+				var workspaceID string
+				if id.ProjectScoped {
+					if ProjectWorkspaceID == "" {
+						// Project workspace isn't set up, so don't attempt to write changes to it
+						continue
 					}
-					fmt.Printf("File: %s\n%s\n", filename, inBackTicks(content))
+
+					workspaceID = ProjectWorkspaceID
 				}
+
+				if err := c.WriteFileInWorkspace(ctx, path.Join(FilesDir, id.Filename), []byte(content), gptscript.WriteFileInWorkspaceOptions{
+					WorkspaceID: workspaceID,
+				}); err == nil {
+					if id.ProjectScoped {
+						projectFiles = append(projectFiles, fmt.Sprintf(entryTemplate, id.Filename, inBackTicks(content), "Project File"))
+						continue
+					}
+
+					files = append(files, fmt.Sprintf(entryTemplate, id.Filename, inBackTicks(content), "File"))
+				}
+
+			}
+
+			if len(projectFiles) > 0 {
+				fmt.Fprintf(&output, headerTemplate, "project workspace")
+				fmt.Fprint(&output, strings.Join(projectFiles, "\n"))
+			}
+
+			if len(files) > 0 {
+				fmt.Fprintf(&output, headerTemplate, "workspace")
+				fmt.Fprint(&output, strings.Join(files, "\n"))
 			}
 		}
-		fmt.Println("")
 	}
 
 	if data.Prompt != "" {
-		fmt.Print(data.Prompt)
+		fmt.Fprintln(&output, data.Prompt)
 	}
+
+	fmt.Print(output.String())
 }
 
 func list(ctx context.Context, filename string) error {
