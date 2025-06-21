@@ -21,7 +21,7 @@ google-calendar-mcp-stdio = "server:stdio_server"
 
 [project.urls]
 Homepage = "https://github.com/obot-platform/otto8-tools"
-Repository = "https://github.com/obot-platform/otto8-tools"
+Repository = "https://github.com/obot-platform/otto8-tools/google/calendar"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
