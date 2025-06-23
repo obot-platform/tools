@@ -1,86 +1,115 @@
-import { AtpAgent } from '@atproto/api'
-import { createPost, deletePost, searchPosts } from './posts.ts'
-import { searchUsers } from './users.ts'
+import { z } from 'zod'
+import { createPost, deletePost, searchPosts } from './posts.js'
+import { searchUsers } from './users.js'
+import { UserError } from 'fastmcp'
+import type { AtpAgent } from '@atproto/api'
 
-if (process.argv.length !== 3) {
-  console.error('Usage: node tool.ts <command>')
-  process.exit(1)
+// Add type declaration for global.agent
+// eslint-disable-next-line no-var
+declare global {
+  // eslint-disable-next-line no-var
+  var agent: { agent: AtpAgent, [key: string]: unknown } | undefined;
 }
 
-const BLUESKY_HANDLE = process.env.BLUESKY_HANDLE
-const BLUESKY_APP_PASSWORD = process.env.BLUESKY_APP_PASSWORD
-
-const command = process.argv[2]
-
-try {
-  if (!BLUESKY_HANDLE) {
-    throw new Error('bluesky username not set')
-  }
-
-  if (!BLUESKY_APP_PASSWORD) {
-    throw new Error('bluesky app password not set')
-  }
-
-  const agent = new AtpAgent({
-    service: 'https://bsky.social'
-  })
-
-  try {
-    await agent.login({
-      identifier: BLUESKY_HANDLE,
-      password: BLUESKY_APP_PASSWORD
-    })
-  } catch (error: any) {
-    if (command === 'getProfile') {
-      if (error instanceof Error) {
-        console.log(JSON.stringify({ error: error.message }))
-      } else {
-        console.log(JSON.stringify({ error: String(error) }))
+// Define tools
+export const tools = [
+  {
+    name: 'getProfile',
+    description: 'Get the profile of the authenticated user',
+    parameters: z.object({}),
+    execute: async (args: any) => {
+      if (!global.agent) {
+        throw new UserError('No authenticated session found!')
       }
-      process.exit(0)
+      try {
+        if (!global.agent.agent.session!.handle) {
+          throw new UserError('No authenticated handle found')
+        }
+        const response = await global.agent.agent.getProfile({ actor: global.agent.agent.session!.handle })
+        return JSON.stringify(response.data)
+      } catch (error: any) {
+        if (error instanceof UserError) {
+          throw error
+        }
+        throw new UserError(`Failed to get profile: ${error.message}`)
+      }
     }
-    throw error
+  },
+  {
+    name: 'createPost',
+    description: 'Create a new post',
+    parameters: z.object({
+      text: z.string().describe('The text content of the post')
+    }),
+    execute: async (args: any) => {
+      if (!global.agent?.agent.session) {
+        throw new UserError('No authenticated session found')
+      }
+      try {
+        const response = await createPost(global.agent.agent, args.text)
+        return JSON.stringify(response)
+      } catch (error: any) {
+        throw new UserError(`Failed to get profile: ${error.message}`)
+      }
+    }
+  },
+  {
+    name: 'deletePost',
+    description: 'Delete a post',
+    parameters: z.object({
+      postUri: z.string().describe('The URI of the post to delete')
+    }),
+    execute: async (args: any) => {
+      if (!global.agent?.agent.session) {
+        throw new UserError('No authenticated session found')
+      }
+      try {
+        await deletePost(global.agent.agent, args.postUri)
+        return 'Post deleted'
+      } catch (error: any) {
+        throw new UserError(`Failed to get profile: ${error.message}`)
+      }
+    }
+  },
+  {
+    name: 'searchPosts',
+    description: 'Search for posts',
+    parameters: z.object({
+      query: z.string().describe('The search query'),
+      since: z.string().optional().describe('Filter posts since this date (ISO 8601)'),
+      until: z.string().optional().describe('Filter posts until this date (ISO 8601)'),
+      limit: z.string().optional().describe('The maximum number of results to return'),
+      tags: z.string().optional().describe('A comma-separated list of tags to search for')
+    }),
+    execute: async (args: any) => {
+      if (!global.agent?.agent.session) {
+        throw new UserError('No authenticated session found')
+      }
+      try {
+        const response = await searchPosts(global.agent.agent, args.query, args.since, args.until, args.limit, args.tags)
+        return JSON.stringify(response)
+      } catch (error: any) {
+        throw new UserError(`Failed to get profile: ${error.message}`)
+      }
+    }
+  },
+  {
+    name: 'searchUsers',
+    description: 'Search for users',
+    parameters: z.object({
+      query: z.string().describe('The search query'),
+      limit: z.string().optional().describe('The maximum number of results to return')
+    }),
+    execute: async (args: any) => {
+      if (!global.agent?.agent.session) {
+        throw new UserError('No authenticated session found')
+      }
+      try {
+        const response = await searchUsers(global.agent.agent, args.query, args.limit)
+        return JSON.stringify(response)
+      } catch (error: any) {
+        throw new UserError(`Failed to get profile: ${error.message}`)
+      }
+    }
   }
-
-  switch (command) {
-      case 'getProfile':
-          await agent.getProfile({ actor: BLUESKY_HANDLE })
-          break
-      case 'createPost':
-          await createPost(
-              agent,
-              process.env.TEXT,
-          )
-          break
-      case 'deletePost':
-          await deletePost(
-              agent,
-              process.env.POST_URI,
-          )
-          break
-      case 'searchPosts':
-          await searchPosts(
-              agent,
-              process.env.QUERY,
-              process.env.SINCE,
-              process.env.UNTIL,
-              process.env.LIMIT,
-              process.env.TAGS,
-          )
-          break
-      case 'searchUsers':
-          await searchUsers(
-              agent,
-              process.env.QUERY,
-              process.env.LIMIT,
-          )
-          break
-      default:
-          console.log(`Unknown command: ${command}`)
-          process.exit(1)
-  }
-} catch (error: unknown) {
-  // Print the error to stdout so that it can be captured by the GPTScript
-  console.log(String(error))
-  process.exit(1)
-}
+] 
