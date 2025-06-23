@@ -1,6 +1,7 @@
 from typing import Optional, List
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
+from fastmcp.exceptions import ToolError
 
 
 def _generate_ids(service: Resource, count: int = 1, space: str = "drive") -> List[str]:
@@ -54,10 +55,7 @@ def list_drives(service: Resource) -> List[dict]:
         return drives
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return []
+        raise ToolError(f"Error listing drives: {error_details}")
 
 
 def get_drive(service: Resource, drive_id: str) -> Optional[dict]:
