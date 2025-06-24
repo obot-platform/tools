@@ -2,7 +2,7 @@ from apis.shared_drives import list_drives
 from apis.files import list_files
 from fastmcp import FastMCP
 from pydantic import Field
-from typing import Annotated, Literal, Union, Optional
+from typing import Annotated, Literal
 import os
 from apis.helper import get_client
 from googleapiclient.errors import HttpError
@@ -12,12 +12,10 @@ from fastmcp.exceptions import ToolError
 from apis.files import download_file, copy_file, get_file, create_file, update_file, delete_file, create_folder
 from apis.permissions import list_permissions, get_permission, create_permission, update_permission, delete_permission, transfer_ownership
 from apis.shared_drives import create_drive, update_drive, delete_drive
-from apis.workspace_file import save_to_gptscript_workspace, load_from_gptscript_workspace
-import mimetypes
 
 # Configure server-specific settings
 PORT = os.getenv("PORT", 9000)
-MCP_PATH = os.getenv("MCP_PATH", "/mcp/drive")
+MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-drive")
 
 mcp = FastMCP(
     name="GoogleDriveMCPServer",
@@ -476,4 +474,4 @@ def stdio_server():
 
 
 if __name__ == "__main__":
-    stdio_server()
+    streamable_http_server()
