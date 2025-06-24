@@ -240,6 +240,7 @@ def delete_file_tool(
     cred_token: str = None,) -> str:
     """
     Delete an existing file or folder from user's Google Drive
+    ALWAYS ask for user's confirmation before proceeding this tool.
     """
     try:
         client = get_client(cred_token)
@@ -372,6 +373,7 @@ def delete_permission_tool(
     cred_token: str = None,) -> dict:
     """
     Delete an existing permission for a Google Drive file, folder, or shared drive.
+    ALWAYS ask for user's confirmation before proceeding this tool.
     """
     try:
         client = get_client(cred_token)
@@ -427,7 +429,8 @@ def delete_shared_drive_tool(
     drive_id: Annotated[str, Field(description="ID of the shared drive to delete")],
     cred_token: str = None,) -> dict:
     """
-    Delete an existing shared Google Drive
+    Delete an existing shared Google Drive.
+    ALWAYS ask for user's confirmation before proceeding this tool.
     """
     try:
         client = get_client(cred_token)
