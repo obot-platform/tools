@@ -16,6 +16,7 @@ from apis.shared_drives import create_drive, update_drive, delete_drive
 # Configure server-specific settings
 PORT = os.getenv("PORT", 9000)
 MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-drive")
+GOOGLE_OAUTH_TOKEN = os.getenv("GOOGLE_OAUTH_TOKEN")
 
 mcp = FastMCP(
     name="GoogleDriveMCPServer",
@@ -36,7 +37,7 @@ def list_files_tool(
     file_name_contains: Annotated[str, Field(description="Case-insensitive search string to filter files by name. Returns files containing this string in their name.")] = None,
     modified_time_after: Annotated[str, Field(description="Return only files modified after this timestamp (RFC 3339 format: YYYY-MM-DDTHH:MM:SSZ, e.g., '2024-03-20T10:00:00Z').")] = None,
     max_results: Annotated[int, Field(description="Maximum number of files to return", ge=1, le=1000, default=50)] = 50,
-    cred_token: str = None,) -> list[dict]:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> list[dict]:
     """
     List or search for files in the user's Google Drive. Returns up to 50 files by default, sorted by last modified date.
     """
@@ -95,7 +96,7 @@ def copy_file_tool(
     file_id: Annotated[str, Field(description="ID of the file to copy")],
     new_name: Annotated[str, Field(description="New name for the copied file. If not provided, the copied file will be named \"Copy of [original name]\".")] = None,
     new_parent_id: Annotated[str, Field(description="New parent folder ID for the copied file. Provide this if you want to have the copied file in a different folder.")] = None,
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Create a copy of a Google Drive file.
     """
@@ -114,7 +115,7 @@ def copy_file_tool(
 )
 def get_file_tool(
     file_id: Annotated[str, Field(description="ID of the file to get")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Get a Google Drive file from user's Google Drive
     """
@@ -178,7 +179,7 @@ def update_file_tool(
     new_name: Annotated[str, Field(description="New name for the file or folder")] = None,
     new_parent_id: Annotated[str, Field(description="New parent folder ID. Provide this if you want to move the item to a different folder, use `root` to move to the root folder.")] = None,
     # new_workspace_file_path: Annotated[str, Field(description="Path to the new content of the file (not applicable for folders)")] = None,
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Update an existing file or folder in user's Google Drive. Can rename and/or move to a different location.
     """
@@ -218,7 +219,7 @@ def update_file_tool(
 def create_folder_tool(
     folder_name: Annotated[str, Field(description="Name of the new folder")],
     parent_id: Annotated[str, Field(description="ID of the parent folder for the new folder. If not provided, the folder will be created in the root folder.")] = None,
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Create a new folder in user's Google Drive.
     """
@@ -237,7 +238,7 @@ def create_folder_tool(
 )
 def delete_file_tool(
     file_id: Annotated[str, Field(description="ID of the file or folder to delete")],
-    cred_token: str = None,) -> str:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> str:
     """
     Delete an existing file or folder from user's Google Drive
     ALWAYS ask for user's confirmation before proceeding this tool.
@@ -261,7 +262,7 @@ def delete_file_tool(
 def transfer_ownership_tool(
     file_id: Annotated[str, Field(description="ID of the file to transfer ownership of")],
     new_owner_email: Annotated[str, Field(description="Email address of the new owner")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Transfer ownership of a Google Drive file to another user. Can only transfer ownership to a user in the same domain.
     """
@@ -280,7 +281,7 @@ def transfer_ownership_tool(
 )
 def list_permissions_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to list permissions for")],
-    cred_token: str = None,) -> list[dict]:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> list[dict]:
     """
     List all permissions for a Google Drive file, folder, or shared drive.
     """
@@ -300,7 +301,7 @@ def list_permissions_tool(
 def get_permission_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to get permission for")],
     permission_id: Annotated[str, Field(description="ID of the permission to get")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Get a specific permission for a Google Drive file, folder, or shared drive.
     """
@@ -323,7 +324,7 @@ def create_permission_tool(
     type: Annotated[Literal["user", "group", "domain", "anyone"], Field(description="Type of the new permission, must be one of [user, group, domain, anyone]")],
     email_address: Annotated[str, Field(description="Email address for user/group permission, required if type is user or group")] = None,
     domain: Annotated[str, Field(description="Domain for domain permission, required if type is domain")] = None,
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Create a new permission for a Google Drive file, folder, or shared drive.
     """
@@ -350,7 +351,7 @@ def update_permission_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to update permission for")],
     permission_id: Annotated[str, Field(description="ID of the permission to update")],
     role: Annotated[str, Field(description="New role for the permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Update an existing permission for a Google Drive file, folder, or shared drive.
     """
@@ -370,7 +371,7 @@ def update_permission_tool(
 def delete_permission_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to delete permission from")],
     permission_id: Annotated[str, Field(description="ID of the permission to delete")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Delete an existing permission for a Google Drive file, folder, or shared drive.
     ALWAYS ask for user's confirmation before proceeding this tool.
@@ -393,7 +394,7 @@ def delete_permission_tool(
     exclude_args=["cred_token"],
 )
 def list_shared_drives(
-    cred_token: str = None) -> list[dict]:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> list[dict]:
     """
     List all shared Google Drives for the user.
     """
@@ -408,7 +409,7 @@ def list_shared_drives(
 )
 def create_shared_drive_tool(
     drive_name: Annotated[str, Field(description="Name of the new shared drive")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Create a new shared Google Drive for the user
     """
@@ -427,7 +428,7 @@ def create_shared_drive_tool(
 )
 def delete_shared_drive_tool(
     drive_id: Annotated[str, Field(description="ID of the shared drive to delete")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Delete an existing shared Google Drive.
     ALWAYS ask for user's confirmation before proceeding this tool.
@@ -448,7 +449,7 @@ def delete_shared_drive_tool(
 def update_shared_drive_tool(
     drive_id: Annotated[str, Field(description="ID of the shared drive to rename")],
     drive_name: Annotated[str, Field(description="New name for the shared drive")],
-    cred_token: str = None,) -> dict:
+    cred_token: str = GOOGLE_OAUTH_TOKEN,) -> dict:
     """
     Rename an existing shared Google Drive
     """

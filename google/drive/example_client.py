@@ -26,4 +26,5 @@ async def example_list_files():
         print(res[0].text)
 
 if __name__ == "__main__":
+    asyncio.run(example_list_shared_drives())
     asyncio.run(example_list_files())
