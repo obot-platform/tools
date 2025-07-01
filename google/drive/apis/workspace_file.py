@@ -1,8 +1,8 @@
 import os
-import gptscript
+# import gptscript
 from pathlib import Path
 from apis.helper import setup_logger
-from gptscript.datasets import DatasetElement
+# from gptscript.datasets import DatasetElement
 import asyncio
 
 logger = setup_logger(__name__)
