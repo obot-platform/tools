@@ -16,6 +16,7 @@ import (
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/github-auth-provider/pkg/profile"
+	"github.com/sahilm/fuzzy"
 )
 
 type Options struct {
@@ -60,6 +61,7 @@ func main() {
 	legacyOpts := options.NewLegacyOptions()
 	legacyOpts.LegacyProvider.ProviderType = "github"
 	legacyOpts.LegacyProvider.ProviderName = "github"
+	legacyOpts.LegacyProvider.Scope = "user:email read:org"
 	legacyOpts.LegacyProvider.ClientID = opts.ClientID
 	legacyOpts.LegacyProvider.ClientSecret = opts.ClientSecret
 
@@ -133,13 +135,14 @@ func main() {
 	})
 	mux.HandleFunc("/obot-get-state", getState(oauthProxy))
 	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
-		userInfo, err := profile.FetchGitHubProfile(r.Context(), r.Header.Get("Authorization"), "https://api.github.com/user")
+		userInfo, err := profile.FetchUserProfile(r.Context(), r.Header.Get("Authorization"))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to fetch user info: %v", err), http.StatusBadRequest)
 			return
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
+	mux.HandleFunc("/obot-list-auth-groups", listGroups(legacyOpts.LegacyProvider.GitHubToken))
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
@@ -174,46 +177,79 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 
 		// The User on the state, for GitHub, is the GitHub username.
 		// This is bad, because we want the user ID instead.
-		// Make an API request to get more info about the authenticated user.
-
+		// Make API requests to get more info about the authenticated user.
 		ss.PreferredUsername = ss.User
 
-		var userID struct {
-			ID int64 `json:"id"`
-		}
-
-		req, err := http.NewRequest("GET", "https://api.github.com/user", nil) // This gets the info for the authenticated user
+		// Get user info
+		userProfile, err := profile.FetchUserProfile(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to create request: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to create request: %v\n", err)
+			http.Error(w, fmt.Sprintf("failed to get user info: %v", err), http.StatusInternalServerError)
+			fmt.Printf("ERROR: github-auth-provider: failed to get user info: %v\n", err)
 			return
 		}
-		req.Header.Set("Authorization", fmt.Sprintf("token %s", ss.AccessToken))
+		ss.User = fmt.Sprintf("%d", userProfile.ID)
 
-		resp, err := http.DefaultClient.Do(req)
+		// Add user teams and organizations to auth groups
+		groups, err := profile.FetchUserGroupInfos(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to make request: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to make request: %v\n", err)
-			return
+			// Note: Not a fatal error
+			fmt.Printf("WARNING: github-auth-provider: failed to get user auth groups: %v\n", err)
 		}
-
-		if resp.StatusCode != http.StatusOK {
-			http.Error(w, fmt.Sprintf("failed to get user: %v", resp.StatusCode), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to get user: %v\n", resp.StatusCode)
-			return
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&userID); err != nil {
-			http.Error(w, fmt.Sprintf("failed to decode user: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to decode user: %v\n", err)
-			return
-		}
-
-		ss.User = fmt.Sprintf("%d", userID.ID)
+		ss.Groups = groups.IDs()
+		ss.GroupInfos = groups
 
 		if err := json.NewEncoder(w).Encode(ss); err != nil {
 			http.Error(w, fmt.Sprintf("failed to encode state: %v", err), http.StatusInternalServerError)
 			fmt.Printf("ERROR: github-auth-provider: failed to encode state: %v\n", err)
+			return
+		}
+	}
+}
+
+func listGroups(providerToken string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := providerToken
+		if token == "" {
+			token = r.Header.Get("Authorization")
+		}
+		if token == "" {
+			http.Error(w, "no github token provided", http.StatusUnauthorized)
+			return
+		}
+
+		groups, err := profile.FetchUserGroupInfos(r.Context(), token)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		// Handle nil groups slice
+		if groups == nil {
+			groups = state.GroupInfoList{}
+		}
+
+		// Get the name query parameter for filtering
+		nameFilter := r.URL.Query().Get("name")
+		if nameFilter != "" && len(groups) > 0 {
+			// Create a slice of group names for fuzzy matching
+			groupNames := make([]string, len(groups))
+			for i, group := range groups {
+				groupNames[i] = group.Name
+			}
+
+			// Perform fuzzy search - results are automatically ranked by relevance
+			matches := fuzzy.Find(nameFilter, groupNames)
+
+			// Filter groups based on fuzzy matches, preserving the relevance order
+			var filteredGroups state.GroupInfoList
+			for _, match := range matches {
+				filteredGroups = append(filteredGroups, groups[match.Index])
+			}
+			groups = filteredGroups
+		}
+
+		if err := json.NewEncoder(w).Encode(groups); err != nil {
+			http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
 			return
 		}
 	}

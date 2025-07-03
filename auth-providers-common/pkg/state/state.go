@@ -9,6 +9,22 @@ import (
 	oauth2proxy "github.com/oauth2-proxy/oauth2-proxy/v7"
 )
 
+type GroupInfo struct {
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	IconURL *string `json:"iconURL,omitempty"`
+}
+
+type GroupInfoList []GroupInfo
+
+func (a GroupInfoList) IDs() []string {
+	ids := make([]string, len(a))
+	for i, group := range a {
+		ids[i] = group.ID
+	}
+	return ids
+}
+
 type SerializableRequest struct {
 	Method string              `json:"method"`
 	URL    string              `json:"url"`
@@ -16,12 +32,14 @@ type SerializableRequest struct {
 }
 
 type SerializableState struct {
-	ExpiresOn         *time.Time `json:"expiresOn"`
-	AccessToken       string     `json:"accessToken"`
-	PreferredUsername string     `json:"preferredUsername"`
-	User              string     `json:"user"`
-	Email             string     `json:"email"`
-	SetCookies        []string   `json:"setCookies"`
+	ExpiresOn         *time.Time    `json:"expiresOn"`
+	AccessToken       string        `json:"accessToken"`
+	PreferredUsername string        `json:"preferredUsername"`
+	User              string        `json:"user"`
+	Email             string        `json:"email"`
+	Groups            []string      `json:"groups"`
+	GroupInfos        GroupInfoList `json:"groupInfos"`
+	SetCookies        []string      `json:"setCookies"`
 }
 
 func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
@@ -77,6 +95,8 @@ func GetSerializableState(p *oauth2proxy.OAuthProxy, r *http.Request) (Serializa
 		PreferredUsername: state.PreferredUsername,
 		User:              state.User,
 		Email:             state.Email,
+		Groups:            state.Groups,
+		GroupInfos:        GroupInfoList{},
 		SetCookies:        setCookies,
 	}, nil
 }
