@@ -1,0 +1,30 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  db:
+    image: ankane/pgvector:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    environment:
+      PORT: 9000
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/postgres
+      OPENAI_API_KEY: ${OPENAI_API_KEY} 
+
+volumes:
+  pgdata:
