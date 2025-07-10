@@ -21,8 +21,6 @@ tools:
     reference: ./linkedin-publishing
   google-docs:
     reference: ./google/docs
-  google-gmail:
-    reference: ./google/gmail
   google-search-console:
     reference: ./google/search-console
   google-sheets:
