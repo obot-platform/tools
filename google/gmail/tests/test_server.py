@@ -5,7 +5,8 @@ from fastmcp.exceptions import ToolError
 from googleapiclient.errors import HttpError
 import json
 
-from server import mcp
+from obot_gmail_mcp.server import mcp
+import obot_gmail_mcp.server as server
 
 # Configure pytest for async support
 pytestmark = pytest.mark.asyncio

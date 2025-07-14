@@ -2,8 +2,8 @@ from fastmcp import FastMCP
 from pydantic import Field
 from typing import Annotated, Literal, Union, Optional
 import os
-from apis.helpers import get_client, parse_label_ids, NON_PRIMARY_CATEGORIES_MAP
-from apis.messages import (
+from .apis.helpers import get_client, parse_label_ids, NON_PRIMARY_CATEGORIES_MAP
+from .apis.messages import (
     list_messages,
     message_to_string,
     modify_message_labels,
@@ -15,8 +15,8 @@ from apis.messages import (
 )
 from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
-from apis.drafts import list_drafts, update_draft
-from apis.labels import list_labels, get_label, create_label, update_label, delete_label
+from .apis.drafts import list_drafts, update_draft
+from .apis.labels import list_labels, get_label, create_label, update_label, delete_label
 from fastmcp.server.dependencies import get_http_headers
 
 # Configure server-specific settings

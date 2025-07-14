@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from filetype import guess_mime
 from googleapiclient.errors import HttpError
 
-from apis.helpers import (
+from .helpers import (
     format_query_timestamp,
     extract_message_headers,
     prepend_base_path,
