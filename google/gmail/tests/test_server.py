@@ -131,10 +131,10 @@ class TestMCPServer:
 class TestEmailFunctions:
     """Test individual email-related functions"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_messages')
-    @patch('server.message_to_string')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_messages')
+    @patch('obot_gmail_mcp.server.message_to_string')
     async def test_list_emails_success(self, mock_message_to_string, mock_list_messages, mock_get_client, mock_get_access_token, mock_service, mock_email_data):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -152,9 +152,9 @@ class TestEmailFunctions:
             res_json = result[0].text
             assert res_json == "Formatted Email"
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_messages')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_messages')
     async def test_list_emails_no_results(self, mock_list_messages, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -171,9 +171,9 @@ class TestEmailFunctions:
             res_json = result[0].text
             assert res_json == "No emails found"
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_messages')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_messages')
     async def test_list_emails_with_query_containing_date_filters(self, mock_list_messages, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -188,12 +188,12 @@ class TestEmailFunctions:
                     arguments={'query': 'after:2024-01-01'}
                 )
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.fetch_email_or_draft')
-    @patch('server.get_email_body')
-    @patch('server.has_attachment')
-    @patch('server.format_message_metadata')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.fetch_email_or_draft')
+    @patch('obot_gmail_mcp.server.get_email_body')
+    @patch('obot_gmail_mcp.server.has_attachment')
+    @patch('obot_gmail_mcp.server.format_message_metadata')
     async def test_read_email_success(self, mock_format_metadata, mock_has_attachment, 
                                      mock_get_body, mock_fetch_email, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
@@ -216,8 +216,8 @@ class TestEmailFunctions:
             assert res_json['metadata'] == 'Test metadata'
             assert res_json['has_attachment'] == False
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_read_email_missing_params(self, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -232,8 +232,8 @@ class TestEmailFunctions:
                     arguments={}
                 )
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_delete_email_success(self, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -251,9 +251,9 @@ class TestEmailFunctions:
 
         mock_service.users().messages().trash.assert_called_with(userId="me", id="test_id")
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.create_message_data')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.create_message_data')
     async def test_send_email_success(self, mock_create_message, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -274,8 +274,8 @@ class TestEmailFunctions:
             res_json = result[0].text
             assert "Message sent successfully" in res_json
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_get_current_email_address_success(self, mock_get_client, mock_get_access_token, mock_service, mock_profile_data):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -293,9 +293,9 @@ class TestEmailFunctions:
 
         mock_service.users().getProfile.assert_called_with(userId="me")
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.modify_message_labels')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.modify_message_labels')
     async def test_modify_message_labels_success(self, mock_modify_labels, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -312,9 +312,9 @@ class TestEmailFunctions:
             res_json = json.loads(result[0].text)
             assert res_json['id'] == 'test_id'
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.fetch_email_or_draft')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.fetch_email_or_draft')
     async def test_list_attachments_success(self, mock_fetch_email, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -337,9 +337,9 @@ class TestEmailFunctions:
             assert res_json['filename'] == 'test.pdf'
             assert res_json['id'] == 'attachment_id'
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.fetch_email_or_draft')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.fetch_email_or_draft')
     async def test_list_attachments_no_attachments(self, mock_fetch_email, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -357,9 +357,9 @@ class TestEmailFunctions:
 class TestDraftFunctions:
     """Test individual draft-related functions"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_drafts')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_drafts')
     async def test_list_drafts_success(self, mock_list_drafts_func, mock_get_client, mock_get_access_token, mock_service, mock_draft_data):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -373,9 +373,9 @@ class TestDraftFunctions:
             res_json = json.loads(result[0].text)
             assert res_json == mock_draft_data[0]
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.create_message_data')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.create_message_data')
     async def test_create_draft_success(self, mock_create_message, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -393,8 +393,8 @@ class TestDraftFunctions:
             res_json = result[0].text
             assert "Draft created successfully" in res_json
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_delete_draft_success(self, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -410,8 +410,8 @@ class TestDraftFunctions:
 
         mock_service.users().drafts().delete.assert_called_with(userId="me", id="test_id")
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_send_draft_success(self, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -427,9 +427,9 @@ class TestDraftFunctions:
 
         mock_service.users().drafts().send.assert_called_with(userId="me", body={"id": "test_id"})
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.update_draft')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.update_draft')
     async def test_update_draft_success(self, mock_update_draft_func, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -452,9 +452,9 @@ class TestDraftFunctions:
 class TestLabelFunctions:
     """Test individual label-related functions"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_labels')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_labels')
     async def test_list_labels_success(self, mock_list_labels_func, mock_get_client, mock_get_access_token, mock_service, mock_label_data):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -468,9 +468,9 @@ class TestLabelFunctions:
             res_json = json.loads(result[0].text)
             assert res_json == mock_label_data[0]
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.get_label')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.get_label')
     async def test_list_labels_with_id(self, mock_get_label_func, mock_get_client, mock_get_access_token, mock_service, mock_label_data):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -484,9 +484,9 @@ class TestLabelFunctions:
             res_json = json.loads(result[0].text)
             assert res_json == mock_label_data[0]
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.create_label')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.create_label')
     async def test_create_label_success(self, mock_create_label_func, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -500,9 +500,9 @@ class TestLabelFunctions:
             res_json = json.loads(result[0].text)
             assert res_json['name'] == 'New Label'
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.update_label')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.update_label')
     async def test_update_label_success(self, mock_update_label_func, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -519,9 +519,9 @@ class TestLabelFunctions:
             res_json = json.loads(result[0].text)
             assert res_json['name'] == 'Updated Label'
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.delete_label')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.delete_label')
     async def test_delete_label_success(self, mock_delete_label_func, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
@@ -539,8 +539,8 @@ class TestLabelFunctions:
 class TestErrorHandling:
     """Test error handling across different scenarios"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_http_error_handling(self, mock_get_client, mock_get_access_token, mock_service):
         """Test that HttpErrors are properly converted to ToolErrors"""
         mock_get_access_token.return_value = 'fake_token'
@@ -556,8 +556,8 @@ class TestErrorHandling:
                     arguments={}
                 )
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_general_exception_handling(self, mock_get_client, mock_get_access_token, mock_service):
         """Test that general exceptions are properly converted to ToolErrors"""
         mock_get_access_token.return_value = 'fake_token'
@@ -571,8 +571,8 @@ class TestErrorHandling:
                     arguments={}
                 )
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_send_email_http_error(self, mock_get_client, mock_get_access_token, mock_service):
         """Test HttpError handling in send_email"""
         mock_get_access_token.return_value = 'fake_token'
@@ -592,8 +592,8 @@ class TestErrorHandling:
                     }
                 )
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_delete_draft_http_error(self, mock_get_client, mock_get_access_token, mock_service):
         """Test HttpError handling in delete_draft"""
         mock_get_access_token.return_value = 'fake_token'
@@ -613,10 +613,10 @@ class TestErrorHandling:
 class TestComplexScenarios:
     """Test complex business logic scenarios"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_messages')
-    @patch('server.message_to_string')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_messages')
+    @patch('obot_gmail_mcp.server.message_to_string')
     async def test_list_emails_with_category_fallback(self, mock_message_to_string, mock_list_messages, mock_get_client, mock_get_access_token, mock_service):
         """Test the complex category fallback logic in list_emails"""
         mock_get_access_token.return_value = 'fake_token'
@@ -642,12 +642,12 @@ class TestComplexScenarios:
         # Should have made 3 calls to list_messages due to fallback logic
         assert mock_list_messages.call_count == 3
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.fetch_email_or_draft')
-    @patch('server.get_email_body')
-    @patch('server.has_attachment')
-    @patch('server.format_message_metadata')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.fetch_email_or_draft')
+    @patch('obot_gmail_mcp.server.get_email_body')
+    @patch('obot_gmail_mcp.server.has_attachment')
+    @patch('obot_gmail_mcp.server.format_message_metadata')
     async def test_read_email_with_attachment(self, mock_format_metadata, mock_has_attachment,
                                              mock_get_body, mock_fetch_email, mock_get_client, mock_get_access_token, mock_service):
         """Test reading email with attachment includes link"""
@@ -668,8 +668,8 @@ class TestComplexScenarios:
             assert 'link' in res_json
             assert 'mail.google.com' in res_json['link']
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
     async def test_read_email_by_subject(self, mock_get_client, mock_get_access_token, mock_service):
         """Test reading email by subject instead of ID"""
         mock_get_access_token.return_value = 'fake_token'
@@ -681,10 +681,10 @@ class TestComplexScenarios:
         }
         
         # Mock the rest of the email reading process
-        with patch('server.fetch_email_or_draft') as mock_fetch, \
-             patch('server.get_email_body') as mock_get_body, \
-             patch('server.has_attachment') as mock_has_attachment, \
-             patch('server.format_message_metadata') as mock_format_metadata:
+        with patch('obot_gmail_mcp.server.fetch_email_or_draft') as mock_fetch, \
+             patch('obot_gmail_mcp.server.get_email_body') as mock_get_body, \
+             patch('obot_gmail_mcp.server.has_attachment') as mock_has_attachment, \
+             patch('obot_gmail_mcp.server.format_message_metadata') as mock_format_metadata:
             
             mock_fetch.return_value = {'id': 'found_email_id'}
             mock_get_body.return_value = 'Email body'
@@ -709,10 +709,10 @@ class TestComplexScenarios:
 class TestPerformance:
     """Test performance characteristics"""
 
-    @patch('server._get_access_token')
-    @patch('server.get_client')
-    @patch('server.list_messages')
-    @patch('server.message_to_string')
+    @patch('obot_gmail_mcp.server._get_access_token')
+    @patch('obot_gmail_mcp.server.get_client')
+    @patch('obot_gmail_mcp.server.list_messages')
+    @patch('obot_gmail_mcp.server.message_to_string')
     async def test_large_email_list(self, mock_message_to_string, mock_list_messages, mock_get_client, mock_get_access_token, mock_service):
         """Test handling of large email lists"""
         mock_get_access_token.return_value = 'fake_token'
