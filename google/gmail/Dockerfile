@@ -12,15 +12,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy uv project files first for better Docker layer caching
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies using uv sync (faster and more reliable)
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-editable
 
 # Copy your application code
 COPY . .
 
-ENV PORT=9000
 EXPOSE 9000
 
 # Start the server using uv run (ensures proper virtual environment)
