@@ -9,8 +9,6 @@ WORKDIR /app
 # Install system deps (if any needed) - using apt for Debian
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libpq-dev \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy uv project files first for better Docker layer caching
@@ -22,9 +20,8 @@ RUN uv sync --frozen --no-dev
 # Copy your application code
 COPY . .
 
-# Expose the port using the PORT environment variable
 ENV PORT=9000
-EXPOSE $PORT
+EXPOSE 9000
 
 # Start the server using uv run (ensures proper virtual environment)
 CMD ["uv", "run", "python", "-m", "server"]
