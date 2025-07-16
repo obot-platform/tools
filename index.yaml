@@ -3,8 +3,6 @@ tools:
     reference: ./sendgrid
   file-summarizer:
     reference: ./file-summarizer
-  google-calendar:
-    reference: ./google/calendar
   zoom:
     reference: ./zoom
   wordpress:
