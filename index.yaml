@@ -55,14 +55,10 @@ tools:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-  smartthings:
-    reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
   discord:
     reference: ./discord
-  proxycurl:
-    reference: ./proxycurl
   memory:
     reference: ./memory
 
