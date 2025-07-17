@@ -16,7 +16,13 @@ from .apis.messages import (
 from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
 from .apis.drafts import list_drafts, update_draft
-from .apis.labels import list_labels, get_label, create_label, update_label, delete_label
+from .apis.labels import (
+    list_labels,
+    get_label,
+    create_label,
+    update_label,
+    delete_label,
+)
 from fastmcp.server.dependencies import get_http_headers
 
 # Configure server-specific settings
@@ -136,11 +142,11 @@ async def list_emails_tool(
 )
 def list_drafts_tool(
     max_results: Annotated[
-        int, Field(description="Maximum number of drafts to return.", ge=1, le=1000)
-    ] = 100,
+        int, Field(description="Maximum number of drafts to return.", ge=1, le=20)
+    ] = 10,
 ) -> list:
     """
-    List drafts in the user's gmail account.
+    List drafts in the user's gmail account. at most 20 drafts are returned.
     """
     access_token = _get_access_token()
     service = get_client(access_token)

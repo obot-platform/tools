@@ -13,19 +13,20 @@ async def list_drafts(service, max_results=None):
                 results = (
                     service.users()
                     .drafts()
-                    .list(userId="me", pageToken=next_page_token, maxResults=10)
+                    .list(userId="me", pageToken=next_page_token, maxResults=max_results)
                     .execute()
                 )
             else:
                 results = (
-                    service.users().drafts().list(userId="me", maxResults=10).execute()
+                    service.users().drafts().list(userId="me", maxResults=max_results).execute()
                 )
 
             drafts = results.get("drafts", [])
             if not drafts:
                 break
-
-            all_drafts.extend(drafts)
+            for draft in drafts:
+                draft_id, draft_str = draft_to_string(service, draft)
+                all_drafts.append(draft_str)
             if max_results is not None and len(all_drafts) >= max_results:
                 break
 
