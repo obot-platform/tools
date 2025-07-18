@@ -31,8 +31,6 @@ tools:
     reference: ./images
   excel:
     reference: ./microsoft365/excel
-  outlook-mail:
-    reference: ./microsoft365/outlook/mail
   outlook-calender:
     reference: ./microsoft365/outlook/calendar
   outlook-contact:
