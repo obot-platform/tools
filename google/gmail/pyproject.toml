@@ -5,7 +5,7 @@ description = "Obot gmail mcp server"
 requires-python = ">=3.13"
 dependencies = [
     "bs4>=0.0.2",
-    "fastmcp>=2.8.1",
+    "fastmcp @ git+https://github.com/tybalex/fastmcp.git@fix-get-http-request",
     "filetype>=1.2.0",
     "google-api-python-client>=2.172.0",
     "pytz>=2025.2",
@@ -41,3 +41,6 @@ source-exclude = [
     "*.pyd",
     ".DS_Store",
 ]
+
+[tool.uv.sources]
+fastmcp = { git = "https://github.com/tybalex/fastmcp.git", rev = "fix-get-http-request" }

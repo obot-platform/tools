@@ -9,6 +9,7 @@ WORKDIR /app
 # Install system deps (if any needed) - using apt for Debian
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy uv project files first for better Docker layer caching
