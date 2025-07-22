@@ -2,6 +2,7 @@ import sys
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from fastmcp.exceptions import ToolError
 import os
 import logging
 
@@ -32,27 +33,14 @@ def setup_logger(name, tool_name: str = "Google Drive Tool"):
 logger = setup_logger(__name__)
 
 
-def str_to_bool(value):
-    """Convert a string to a boolean."""
-    return str(value).lower() in ("true", "1", "yes")
+def get_client(cred_token: str, service_name: str = "drive", version: str = "v3"):
 
-
-def get_client(service_name: str = "drive", version: str = "v3"):
-    token = os.getenv("GOOGLE_OAUTH_TOKEN")
-    if token is None:
-        raise ValueError("GOOGLE_OAUTH_TOKEN environment variable is not set")
-
-    creds = Credentials(token=token)
+    creds = Credentials(token=cred_token)
     try:
         service = build(serviceName=service_name, version=version, credentials=creds)
         return service
     except HttpError as err:
-        print(err)
-        exit(1)
-
-
-def get_obot_user_timezone():
-    return os.getenv("OBOT_USER_TIMEZONE", "UTC").strip()
+        raise ToolError(f"HttpError retrieving google {service_name} client: {err}")
 
 
 def get_user_timezone(service):
@@ -60,11 +48,11 @@ def get_user_timezone(service):
     try:
         settings = service.settings().get(setting="timezone").execute()
         return settings.get(
-            "value", get_obot_user_timezone()
-        )  # Default to Obot's user timezone if not found
+            "value", "UTC"
+        )  # Default to UTC if not found
     except HttpError as err:
         if err.status_code == 403:
-            raise Exception(f"HttpError retrieving user timezone: {err}")
+            raise ToolError(f"HttpError retrieving user timezone: {err}")
         logger.error(f"HttpError retrieving user timezone: {err}")
         return "UTC"
     except Exception as e:
