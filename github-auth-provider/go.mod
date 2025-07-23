@@ -5,13 +5,14 @@ go 1.23.7
 toolchain go1.24.1
 
 replace (
-	github.com/oauth2-proxy/oauth2-proxy/v7 => github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20250402151943-8bfeb682f4c4
+	github.com/oauth2-proxy/oauth2-proxy/v7 => github.com/njhale/oauth2-proxy/v7 v7.0.0-20250723153722-76f81f01882a
 	github.com/obot-platform/tools/auth-providers-common => ../auth-providers-common
 )
 
 require (
 	github.com/oauth2-proxy/oauth2-proxy/v7 v7.8.1
 	github.com/obot-platform/tools/auth-providers-common v0.0.0-20241008222508-3c6174b443e7
+	github.com/sahilm/fuzzy v0.1.1
 )
 
 require (
@@ -62,7 +63,6 @@ require (
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
