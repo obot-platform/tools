@@ -71,15 +71,16 @@ func FetchUserProfile(ctx context.Context, accessToken string) (*githubUserProfi
 }
 
 func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupInfoList, error) {
-	var infos state.GroupInfoList
-
-	var orgs []githubOrganization
+	var (
+		groupsInfos state.GroupInfoList
+		orgs        []githubOrganization
+	)
 	err := makeGitHubRequest(ctx, accessToken, "user/orgs", &orgs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch user organizations: %w", err)
 	}
 	for _, org := range orgs {
-		infos = append(infos, state.GroupInfo{
+		groupsInfos = append(groupsInfos, state.GroupInfo{
 			ID:      fmt.Sprintf("github/org/%d", org.ID),
 			Name:    org.Login,
 			IconURL: &org.AvatarURL,
@@ -92,7 +93,7 @@ func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupIn
 		return nil, fmt.Errorf("failed to fetch user teams: %w", err)
 	}
 	for _, team := range teams {
-		infos = append(infos, state.GroupInfo{
+		groupsInfos = append(groupsInfos, state.GroupInfo{
 			ID:      fmt.Sprintf("github/org/%d/team/%d", team.Organization.ID, team.ID),
 			Name:    team.Name,
 			IconURL: &team.Organization.AvatarURL,
@@ -100,11 +101,11 @@ func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupIn
 	}
 
 	// Sort groups by ID lexicographically
-	slices.SortFunc(infos, func(a, b state.GroupInfo) int {
+	slices.SortFunc(groupsInfos, func(a, b state.GroupInfo) int {
 		return strings.Compare(a.ID, b.ID)
 	})
 
-	return infos, nil
+	return groupsInfos, nil
 }
 
 func makeGitHubRequest(ctx context.Context, accessToken, path string, result any) error {

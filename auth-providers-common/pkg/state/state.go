@@ -25,6 +25,32 @@ func (a GroupInfoList) IDs() []string {
 	return ids
 }
 
+// ToJSONStrings returns a slice of JSON strings, where each string is a serialized GroupInfo
+func (a GroupInfoList) ToJSONStrings() ([]string, error) {
+	jsonStrings := make([]string, len(a))
+	for i, group := range a {
+		jsonBytes, err := json.Marshal(group)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal GroupInfo at index %d: %w", i, err)
+		}
+		jsonStrings[i] = string(jsonBytes)
+	}
+	return jsonStrings, nil
+}
+
+// GroupInfoListFromJSONStrings converts a slice of JSON strings back to a GroupInfoList
+func toGroupInfos(groups []string) (GroupInfoList, error) {
+	groupInfos := make(GroupInfoList, len(groups))
+	for i, group := range groups {
+		var groupInfo GroupInfo
+		if err := json.Unmarshal([]byte(group), &groupInfo); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal JSON string at index %d: %w", i, err)
+		}
+		groupInfos[i] = groupInfo
+	}
+	return groupInfos, nil
+}
+
 type SerializableRequest struct {
 	Method string              `json:"method"`
 	URL    string              `json:"url"`
@@ -49,6 +75,7 @@ func ObotGetState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("failed to decode request body: %v", err), http.StatusBadRequest)
 			return
 		}
+		fmt.Printf("\nObotGetState: %s\n%s\n%v\n", sr.Method, sr.URL, sr.Header)
 
 		reqObj, err := http.NewRequest(sr.Method, sr.URL, nil)
 		if err != nil {
@@ -89,6 +116,14 @@ func GetSerializableState(p *oauth2proxy.OAuthProxy, r *http.Request) (Serializa
 		}
 	}
 
+	// Attempt to decode the groups as GroupInfoList
+	groupInfos, err := toGroupInfos(state.Groups)
+	if err == nil {
+		// This means that the groups were enriched by an oauth provider
+		// Convert the groups into plain IDs
+		state.Groups = groupInfos.IDs()
+	}
+
 	return SerializableState{
 		ExpiresOn:         state.ExpiresOn,
 		AccessToken:       state.AccessToken,
@@ -96,7 +131,7 @@ func GetSerializableState(p *oauth2proxy.OAuthProxy, r *http.Request) (Serializa
 		User:              state.User,
 		Email:             state.Email,
 		Groups:            state.Groups,
-		GroupInfos:        GroupInfoList{},
+		GroupInfos:        groupInfos,
 		SetCookies:        setCookies,
 	}, nil
 }
