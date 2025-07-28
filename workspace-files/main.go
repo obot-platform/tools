@@ -208,26 +208,19 @@ func list(ctx context.Context, filename string) error {
 
 	// Output with XML-like tags using string builder
 	var output strings.Builder
-	output.WriteString("<files_in_workspace>\n")
 	if len(toPrint) > 0 {
-		output.WriteString("List of files currently in workspace:\n")
+		output.WriteString("<files_in_workspace>\n")
+		output.WriteString("List of files currently in thread workspace:\n")
 		output.WriteString(strings.Join(slices.Sorted(maps.Keys(toPrint)), "\n"))
-		output.WriteString("\n")
-	} else {
-		output.WriteString("No files found in workspace\n")
+		output.WriteString("\n</files_in_workspace>\n")
 	}
-	output.WriteString("</files_in_workspace>\n\n")
 
-	output.WriteString("<files_in_project_workspace>\n")
 	if len(projectToPrint) > 0 {
+		output.WriteString("<files_in_project_workspace>\n")
 		output.WriteString("List of files currently in project workspace:\n")
 		output.WriteString(strings.Join(slices.Sorted(maps.Keys(projectToPrint)), "\n"))
-		output.WriteString("\n")
-	} else {
-		output.WriteString("No files found in project workspace\n")
+		output.WriteString("\n</files_in_project_workspace>\n")
 	}
-	output.WriteString("</files_in_project_workspace>\n")
-
 	fmt.Print(output.String())
 
 	return nil

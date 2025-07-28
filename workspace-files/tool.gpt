@@ -60,7 +60,6 @@ Params: dir: The directory to list files from
 Name: workspace_read
 Description: Read the contents of a file in the workspace. For non-plain text files, it will parse the text. If the text is too long, it will summarize the text.
 Credential: sys.model.provider.credential
-Params: project_scoped: Whether to read the file from the project workspace (default is false)
 Params: filename: The filename to read
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool read
@@ -68,7 +67,6 @@ Params: filename: The filename to read
 ---
 Name: workspace_file_download_url
 Description: Get a URL that the current user can use to download a given workspace file. This URL is authenticated and authorized to the current user and is not appropriate for public sharing.
-Params: project_scoped: Whether the file is in the project workspace (default is false)
 Params: filename: The filename to get a download URL for
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool download-url
@@ -76,7 +74,6 @@ Params: filename: The filename to get a download URL for
 ---
 Name: workspace_write
 Description: Writes content to a file, replacing any existing content if the file already exists. Supports only plain text formats (e.g., .txt, .md).
-Params: project_scoped: Whether to write the file in the project workspace (default is false)
 Params: filename: The filename to write to
 Params: content: The contents to write to the file
 
@@ -85,7 +82,6 @@ Params: content: The contents to write to the file
 ---
 Name: workspace_copy
 Description: Copy the contents of a file to a new filename
-Params: project_scoped: Whether the file is in the project workspace (default is false)
 Params: filename: The filename to copy from
 Params: to_filename: The new filename to copy to
 
