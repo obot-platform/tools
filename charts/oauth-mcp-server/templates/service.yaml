@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mcpServer.fullname" . }}
+  labels:
+    {{- include "mcpServer.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{ .Values.service.annotations | toYaml | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: proxy-http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "mcpServer.selectorLabels" . | nindent 4 }}
+  {{- if .Values.service.spec }}
+  {{ .Values.service.spec | toYaml | indent 2 }}
+  {{- end }}
