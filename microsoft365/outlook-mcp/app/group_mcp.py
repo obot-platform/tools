@@ -26,6 +26,7 @@ group_mcp = FastMCP(
     on_duplicate_prompts="replace",
 )
 
+
 @group_mcp.tool(name="list_groups")
 async def list_groups_tool() -> dict:
     """Lists all Microsoft 365 groups the user is a member of."""

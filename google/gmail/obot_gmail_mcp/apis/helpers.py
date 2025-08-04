@@ -77,7 +77,6 @@ def parse_label_ids(label_ids_input: Union[str, list[str]]) -> list[str]:
 
 
 def get_timezone(user_tz: str) -> ZoneInfo:
-
     try:
         tz = ZoneInfo(user_tz)
     except:

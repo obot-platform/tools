@@ -410,9 +410,11 @@ async def delete_group_thread(
     client: GraphServiceClient, group_id: str, thread_id: str
 ) -> None:
     """Delete a group thread."""
-    await client.groups.by_group_id(group_id).threads.by_conversation_thread_id(
-        thread_id
-    ).delete()
+    await (
+        client.groups.by_group_id(group_id)
+        .threads.by_conversation_thread_id(thread_id)
+        .delete()
+    )
 
 
 async def list_group_thread_email_attachments(
@@ -462,10 +464,10 @@ async def create_group_thread_email(
         request_body = ReplyPostRequestBody()
         request_body.post = post
 
-        await client.groups.by_group_id(
-            info.group_id
-        ).threads.by_conversation_thread_id(info.reply_to_thread_id).reply.post(
-            request_body
+        await (
+            client.groups.by_group_id(info.group_id)
+            .threads.by_conversation_thread_id(info.reply_to_thread_id)
+            .reply.post(request_body)
         )
 
         # Return the existing thread info (we can't get the new post ID from reply API)

@@ -1,30 +1,32 @@
 import asyncio
-from typing import Optional, Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from fastmcp import FastMCP
-from pydantic import Field
 from fastmcp.exceptions import ToolError
+from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from .client import create_client, get_access_token
 from .global_config import SCOPES
 from .graph import (
     DraftInfo,
-    list_messages,
-    get_message_details,
-    search_messages,
     create_draft,
     create_draft_reply,
-    send_draft,
     delete_message,
-    move_message,
-    get_me,
-    list_attachments,
     get_attachment_content,
-    list_mail_folders,
     get_group_thread_post,
+    get_me,
+    get_message_details,
+    list_attachments,
+    list_mail_folders,
+    list_messages,
+    move_message,
+    search_messages,
+    send_draft,
 )
-from .utils import message_to_string, message_to_dict, post_to_string
 from .group_mcp import group_mcp
+from .utils import message_to_dict, message_to_string, post_to_string
 
 mcp = FastMCP(
     name="OutlookMailMCP",
@@ -33,10 +35,17 @@ mcp = FastMCP(
     on_duplicate_prompts="replace",
 )
 
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request):
+    return JSONResponse({"status": "healthy"})
+
+
 # Server composition - import group tools
 async def setup_server():
     """Setup server composition by importing group tools."""
     await mcp.import_server(group_mcp)
+
 
 @mcp.tool(name="list_mail_folders")
 async def list_mail_folders_tool() -> dict:

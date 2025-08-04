@@ -13,12 +13,17 @@ async def list_drafts(service, max_results=None):
                 results = (
                     service.users()
                     .drafts()
-                    .list(userId="me", pageToken=next_page_token, maxResults=max_results)
+                    .list(
+                        userId="me", pageToken=next_page_token, maxResults=max_results
+                    )
                     .execute()
                 )
             else:
                 results = (
-                    service.users().drafts().list(userId="me", maxResults=max_results).execute()
+                    service.users()
+                    .drafts()
+                    .list(userId="me", maxResults=max_results)
+                    .execute()
                 )
 
             drafts = results.get("drafts", [])

@@ -1,29 +1,33 @@
-from fastmcp import FastMCP
-from pydantic import Field
-from typing import Annotated, Literal, Union, Optional
 import os
-from .apis.helpers import get_client, parse_label_ids, NON_PRIMARY_CATEGORIES_MAP
+from typing import Annotated, Literal, Optional, Union
+
+from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
+from fastmcp.server.dependencies import get_http_headers
+from googleapiclient.errors import HttpError
+from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+from .apis.drafts import list_drafts, update_draft
+from .apis.helpers import NON_PRIMARY_CATEGORIES_MAP, get_client, parse_label_ids
+from .apis.labels import (
+    create_label,
+    delete_label,
+    get_label,
+    list_labels,
+    update_label,
+)
 from .apis.messages import (
+    create_message_data,
+    fetch_email_or_draft,
+    format_message_metadata,
+    get_email_body,
+    has_attachment,
     list_messages,
     message_to_string,
     modify_message_labels,
-    create_message_data,
-    fetch_email_or_draft,
-    get_email_body,
-    has_attachment,
-    format_message_metadata,
 )
-from googleapiclient.errors import HttpError
-from fastmcp.exceptions import ToolError
-from .apis.drafts import list_drafts, update_draft
-from .apis.labels import (
-    list_labels,
-    get_label,
-    create_label,
-    update_label,
-    delete_label,
-)
-from fastmcp.server.dependencies import get_http_headers
 
 # Configure server-specific settings
 PORT = int(os.getenv("PORT", 9000))
@@ -36,6 +40,11 @@ mcp = FastMCP(
     on_duplicate_resources="warn",
     on_duplicate_prompts="replace",
 )
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request):
+    return JSONResponse({"status": "healthy"})
 
 
 def _get_access_token() -> str:
