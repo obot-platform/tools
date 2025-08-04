@@ -7,7 +7,7 @@ dependencies = [
     "aiohttp>=3.12.14",
     "azure-core>=1.35.0",
     "azure-identity>=1.23.0",
-    "fastmcp @ git+https://github.com/tybalex/fastmcp.git@fix-get-http-request",
+    "fastmcp>=2.11.1",
     "markdown>=3.8.2",
     "markitdown[all]>=0.1.2",
     "msgraph-sdk>=1.37.0",
