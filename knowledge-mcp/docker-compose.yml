@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.0-pg15
+    container_name: app_db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    environment:
+      PORT: 9000
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/postgres
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+  postgres_oauth:
+    image: postgres:15
+    container_name: oauth_db
+    environment:
+      POSTGRES_DB: oauth_proxy
+      POSTGRES_USER: oauth_user
+      POSTGRES_PASSWORD: oauth_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  oauth-proxy:
+    image: ghcr.io/obot-platform/mcp-oauth-proxy:master
+    environment:
+      DATABASE_DSN: "postgres://oauth_user:oauth_password@postgres_oauth:5432/oauth_proxy?sslmode=disable"
+      SCOPES_SUPPORTED: "openid,profile,email"
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      OAUTH_AUTHORIZE_URL: "https://accounts.google.com"
+      MCP_SERVER_URL: "http://app:9000/mcp/knowledge/"
+    depends_on:
+      - postgres_oauth
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
+  postgres_data:

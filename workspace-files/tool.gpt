@@ -47,11 +47,7 @@ cat << EOF
 
 </workspace_instructions>
 
-<files_in_workspace>
-List of files currently in workspace:
 $FILES
-</files_in_workspace>
-EOF
 
 ---
 Name: workspace_list

@@ -1,18 +1,19 @@
 [project]
 name = "mcp-aws-ec2-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "AWS EC2 MCP Server"
 requires-python = ">=3.12"
 dependencies = [
-  "fastmcp",
-  "boto3"
+  "fastmcp>=2.8.1",
+  "boto3>=1.38.40"
 ]
 
 [tool.uv]
 package = true
 dev-dependencies = [
     "pytest>=8.4.0",
-    "pytest-asyncio>=1.0.0"
+    "pytest-asyncio>=1.0.0",
+    "moto[ec2]>=5.1.6"
 ]
 
 [project.scripts]

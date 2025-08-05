@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mcpServer.fullname" . }}
+  labels:
+    {{- include "mcpServer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.updateStrategy }}
+  selector:
+    matchLabels:
+      {{- include "mcpServer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- if not .Values.proxy.config.existingSecret }}
+        checksum/proxy-config-secret: {{ include (print $.Template.BasePath "/proxy-secret.yaml") . | sha256sum }}
+      {{- end }}
+      {{- if not .Values.mcpServer.config.existingSecret }}
+        checksum/mcpServer-config-secret: {{ include (print $.Template.BasePath "/mcpServer-secret.yaml") . | sha256sum }}
+      {{- end }}
+      labels:
+        {{- include "mcpServer.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "mcpServer.serviceAccountName" . }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: mcp-oauth-proxy
+          image: "{{ .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}"
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
+          ports:
+            - name: proxy-http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          {{- if .Values.proxy.extraEnv }}
+          env:
+            {{- range $key, $value := .Values.proxy.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ if .Values.proxy.config.existingSecret }}{{ .Values.proxy.config.existingSecret }}{{ else }}{{ include "proxy.config.secretName" . }}{{- end }}
+          {{- with .Values.proxy.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.proxy.resources | nindent 12 }}
+
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.mcpServer.image.repository }}:{{ .Values.mcpServer.image.tag }}"
+          imagePullPolicy: {{ .Values.mcpServer.image.pullPolicy }}
+          ports:
+            - name: mcp-server-http
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          {{- if .Values.mcpServer.extraEnv }}
+          env:
+            {{- range $key, $value := .Values.mcpServer.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ if .Values.mcpServer.config.existingSecret }}{{ .Values.mcpServer.config.existingSecret }}{{ else }}{{ include "mcpServer.config.secretName" . }}{{- end }}
+          {{- with .Values.mcpServer.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.mcpServer.resources | nindent 12 }}
