@@ -2,11 +2,12 @@ from fastmcp import FastMCP
 from pydantic import Field
 from typing import Annotated, Literal
 import os
-from tools.helper import setup_logger, get_client, get_user_timezone
+from .tools.helper import setup_logger, get_client, get_user_timezone
 from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
 from rfc3339_validator import validate_rfc3339
-from tools.event import (
+from fastmcp.server.dependencies import get_http_headers
+from .tools.event import (
     MOVABLE_EVENT_TYPES,
     get_current_time_rfc3339,
     validate_recurrence_list,
@@ -16,31 +17,44 @@ from tools.event import (
     can_update_property,
     has_calendar_write_access,
 )
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 logger = setup_logger(__name__)
 
 # Configure server-specific settings
-PORT = os.getenv("PORT", 9000)
+PORT = int(os.getenv("PORT", 9000))
 MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-calendar")
 
 mcp = FastMCP(
     name="GoogleCalendarMCPServer",
-    on_duplicate_tools="error",                  # Handle duplicate registrations
+    on_duplicate_tools="error",
     on_duplicate_resources="warn",
-    on_duplicate_prompts="replace",
-    mask_error_details=False, # only include details for ToolError and convert other errors to generic error\
+    on_duplicate_prompts="replace"
 )
+
+def _get_access_token() -> str:
+    headers = get_http_headers()
+    access_token = headers.get("x-forwarded-access-token", None)
+    if not access_token:
+        raise ToolError(
+            "No access token found in headers, available headers: " + str(headers)
+        )
+    return access_token
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request):
+    return JSONResponse({"status": "healthy"})
 
 @mcp.tool(
     annotations={
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"],
 )
-def list_calendars(cred_token: str = None) -> list:
+def list_calendars() -> list:
     """Lists all calendars for the authenticated user."""
     try:
-        service = get_client(cred_token)
+        service = get_client(_get_access_token())
         calendars = service.calendarList().list().execute()
         return calendars.get("items", [])
     except HttpError as err:
@@ -52,14 +66,12 @@ def list_calendars(cred_token: str = None) -> list:
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"],
 )
-def get_calendar(calendar_id: Annotated[str, Field(description="calendar id to get")],
-                 cred_token: str = None) -> dict:
+def get_calendar(calendar_id: Annotated[str, Field(description="calendar id to get")]) -> dict:
     """Get details of a specific google calendar"""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
     try:
         calendar = service.calendars().get(calendarId=calendar_id).execute()
         return calendar
@@ -70,15 +82,14 @@ def get_calendar(calendar_id: Annotated[str, Field(description="calendar id to g
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def create_calendar(summary: Annotated[str, Field(description="calendar title to create")],
                     time_zone: Annotated[str | None, Field(description="calendar timezone to create")] = None,
-                    cred_token: str = None) -> dict:
+                    ) -> dict:
     """Creates a new google calendar."""
     if summary == "":
-        raise ValueError(f"argument `summary` can't be empty")
-    service = get_client(cred_token)
+        raise ValueError("argument `summary` can't be empty")
+    service = get_client(_get_access_token())
     if time_zone is None:
         time_zone = get_user_timezone(service)
     elif not is_valid_iana_timezone(time_zone):
@@ -98,18 +109,17 @@ def create_calendar(summary: Annotated[str, Field(description="calendar title to
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def update_calendar(calendar_id: Annotated[str, Field(description="calendar id to update")],
                     summary: Annotated[str | None, Field(description="calendar title to update")] = None,
                     time_zone: Annotated[str | None, Field(description="calendar timezone to update")] = None,
                     description: Annotated[str | None, Field(description="calendar description to update")] = None,
                     location: Annotated[str | None, Field(description="Geographic location of the calendar as free-form text to update")] = None,
-                    cred_token: str = None) -> dict:
+                    ) -> dict:
     """Updates an existing google calendar"""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
     try:
         calendar = service.calendars().get(calendarId=calendar_id).execute()
         if summary:
@@ -132,14 +142,12 @@ def update_calendar(calendar_id: Annotated[str, Field(description="calendar id t
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
-def delete_calendar(calendar_id: Annotated[str, Field(description="calendar id to delete")],
-                    cred_token: str = None) -> str:
+def delete_calendar(calendar_id: Annotated[str, Field(description="calendar id to delete")]) -> str:
     """Deletes a google calendar"""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
     try:
         service.calendars().delete(calendarId=calendar_id).execute()
         return f"Google calendar {calendar_id} deleted successfully."
@@ -154,7 +162,6 @@ def delete_calendar(calendar_id: Annotated[str, Field(description="calendar id t
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"],
 )
 def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
                 event_type: Annotated[Literal["birthday", "default", "focusTime", "fromGmail", "outOfOffice", "workingLocation"], Field(description="The type of event to list. Defaults to 'default'")] = "default",
@@ -164,11 +171,11 @@ def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
                 order_by: Annotated[Literal["updated"] | None, Field(description="Order by which to sort events. Valid options are: updated. If set, results will be returned in ascending order.")] = None,
                 q: Annotated[str | None, Field(description="Free text search terms to find events by")] = None,
                 max_results: Annotated[int, Field(description="Maximum number of events to return.", ge=1, le=500)] = 250,
-                cred_token: str = None) -> list:
+                    ) -> list:
     """Lists events for a specific google calendar."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     # optional parameters
     params = {}
@@ -237,17 +244,16 @@ def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
         "readOnlyHint": True,
         "destructiveHint": False,
     },
-    exclude_args=["cred_token"],
 )
 def get_event(calendar_id: Annotated[str, Field(description="calendar id to get event from")],
               event_id: Annotated[str, Field(description="event id to get")],
-              cred_token: str = None) -> dict:
+              ) -> dict:
     """Gets details of a specific google event."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
     if event_id == "":
         raise ValueError("argument `event_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
@@ -259,12 +265,11 @@ def get_event(calendar_id: Annotated[str, Field(description="calendar id to get 
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def move_event(calendar_id: Annotated[str, Field(description="calendar id to move event from")],
               event_id: Annotated[str, Field(description="event id to move")],
               new_calendar_id: Annotated[str, Field(description="calendar id to move the event to")],
-              cred_token: str = None) -> dict:
+              ) -> dict:
     """Moves an event to a different google calendar."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
@@ -272,7 +277,7 @@ def move_event(calendar_id: Annotated[str, Field(description="calendar id to mov
         raise ValueError("argument `event_id` can't be empty")
     if new_calendar_id == "":
         raise ValueError("argument `new_calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         existing_event = (
@@ -298,15 +303,14 @@ def move_event(calendar_id: Annotated[str, Field(description="calendar id to mov
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def quick_add_event(text: Annotated[str, Field(description="The text of the event to add")],
                     calendar_id: Annotated[str, Field(description="The ID of the calendar to add event for")] = "primary",
-                    cred_token: str = None) -> dict:
+                    ) -> dict:
     """Quickly adds an event to the calendar based on a simple text string."""
     if text == "":
         raise ValueError("argument `text` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         event = service.events().quickAdd(calendarId=calendar_id, text=text).execute()
@@ -318,7 +322,6 @@ def quick_add_event(text: Annotated[str, Field(description="The text of the even
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def create_event(calendar_id: Annotated[str, Field(description="Calendar id to create event in. Set to `primary` to create event in the primary calendar")],
                  summary: Annotated[str, Field(description="Event title")] = "My Event",
@@ -331,11 +334,11 @@ def create_event(calendar_id: Annotated[str, Field(description="Calendar id to c
                  end_datetime: Annotated[str | None, Field(description="Event end date and time to create. Must be a valid RFC 3339 formatted date/time string. A time zone offset is required unless a time zone is explicitly specified in timeZone")] = None,
                  recurrence: Annotated[list[str] | None, Field(description='To create a recurring event, provide a list of strings, where each string is an RRULE, EXRULE, RDATE, or EXDATE line as defined by the RFC5545. For example, ["RRULE:FREQ=YEARLY", "EXDATE:20250403T100000Z"]. Note that DTSTART and DTEND are not allowed in this field, because they are already specified in the start_datetime and end_datetime fields.')] = None,
                  attendees: Annotated[list[str] | None, Field(description="A list of email addresses of the attendees")] = None,
-                 cred_token: str = None) -> dict:
+                    ) -> dict:
     """Creates an event in a given google calendar."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
     if time_zone is None:
         time_zone = get_user_timezone(service)
     elif not is_valid_iana_timezone(time_zone):
@@ -406,7 +409,6 @@ def create_event(calendar_id: Annotated[str, Field(description="Calendar id to c
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def update_event(calendar_id: Annotated[str, Field(description="Calendar id to update event in.")],
                  event_id: Annotated[str, Field(description="Event id to update")],
@@ -421,13 +423,13 @@ def update_event(calendar_id: Annotated[str, Field(description="Calendar id to u
                  recurrence: Annotated[list[str] | None, Field(description='For a recurring event, provide a list of strings, where each string is an RRULE, EXRULE, RDATE, or EXDATE line as defined by the RFC5545. For example, ["RRULE:FREQ=YEARLY", "EXDATE:20250403T100000Z"]. Note that DTSTART and DTEND are not allowed in this field, because they are already specified in the start_datetime and end_datetime fields.')] = None,
                  add_attendees: Annotated[list[str] | None, Field(description="A list of email addresses of the attendees to add. This will add the new attendees to the existing attendees list")] = None,
                  replace_attendees: Annotated[list[str] | None, Field(description="A list of email addresses of the attendees to replace. This is only valid when add_attendees is empty. This will replace the existing attendees list with the new list")] = None,
-                 cred_token: str = None) -> dict:
+                    ) -> dict:
     """Updates an existing google calendar event."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
     if event_id == "":
         raise ValueError("argument `event_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         existing_event = (
@@ -569,18 +571,17 @@ def update_event(calendar_id: Annotated[str, Field(description="Calendar id to u
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def respond_to_event(calendar_id: Annotated[str, Field(description="Calendar id to respond to event in.")],
                      event_id: Annotated[str, Field(description="Event id to respond to")],
                      response: Annotated[Literal["accepted", "declined", "tentative"], Field(description="The response to the event invitation")],
-                     cred_token: str = None) -> dict:
+                        ) -> dict:
     """Responds to a calendar event by updating the current user's attendee status."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
     if event_id == "":
         raise ValueError("argument `event_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         # Get current user's email
@@ -620,17 +621,16 @@ def respond_to_event(calendar_id: Annotated[str, Field(description="Calendar id 
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def delete_event(calendar_id: Annotated[str, Field(description="Calendar id to delete event from.")],
                  event_id: Annotated[str, Field(description="Event id to delete")],
-                 cred_token: str = None) -> dict:
+                 ) -> dict:
     """Deletes an event from the calendar."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
     if event_id == "":
         raise ValueError("argument `event_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     try:
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
@@ -642,20 +642,19 @@ def delete_event(calendar_id: Annotated[str, Field(description="Calendar id to d
 
 
 @mcp.tool(
-    exclude_args=["cred_token"],
 )
 def list_recurring_event_instances(calendar_id: Annotated[str, Field(description="Calendar id to list recurring event instances from.")],
                                    event_id: Annotated[str, Field(description="Event id to list recurring event instances for")],
                                    time_min: Annotated[str | None, Field(description="Upper bound (exclusive) for an event's start time to filter by. Must be an RFC3339 timestamp with mandatory time zone offset.")] = None,
                                    time_max: Annotated[str | None, Field(description="Lower bound (exclusive) for an event's end time to filter by. Must be an RFC3339 timestamp with mandatory time zone offset.")] = None,
                                    max_results: Annotated[int, Field(description="Maximum number of events to return.", ge=1, le=500)] = 250,
-                                   cred_token: str = None) -> list:
+                                   ) -> list:
     """Gets all instances of a recurring event."""
     if calendar_id == "":
         raise ValueError("argument `calendar_id` can't be empty")
     if event_id == "":
         raise ValueError("argument `event_id` can't be empty")
-    service = get_client(cred_token)
+    service = get_client(_get_access_token())
 
     params = {}
     if time_min:
@@ -674,6 +673,7 @@ def list_recurring_event_instances(calendar_id: Annotated[str, Field(description
     try:
         page_token = None
         all_instances = []
+        max_results_to_return = max_results
         while True:
             instances = (
                 service.events()

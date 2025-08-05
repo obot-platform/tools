@@ -3,11 +3,8 @@ from unittest.mock import patch, MagicMock, Mock
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
 from googleapiclient.errors import HttpError
-import sys
-import os
 # Add the parent directory to the Python path so we can import from src
-import sys
-from server import mcp
+from google.calendar.app.server import mcp
 import json
 
 # Configure pytest for async support

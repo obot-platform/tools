@@ -1,21 +1,28 @@
 # Obot Google Calendar MCP Server
-- Obot Google Calendar mcp server, converted from the google-calendar tool bundle.
-- supports streamable HTTP
-- tools of this mcp server expect `cred_token`(access_token of google oauth) as part of the tool input.
+
+- supports streamable HTTP and stdio
 
 ## Installation & Running
 
-### Option 1: Using uvx (Recommended)
+### Docker-compose (Recommended)
+Export (Google's) Oauth CLient ID and Secret for Oauth Proxy
+```bash
+export OAUTH_CLIENT_ID=xxx
+export OAUTH_CLIENT_SECRET=xxx
+```
+
+then:
+```bash
+docker-compose up
+```
+
+### Using uvx 
 install from local directory:
 ```bash
 uvx --from . google-calendar-mcp
 ```
-or stdio server:
-```bash
-uvx --from . google-calendar-mcp-stdio
-```
 
-### Option 2: Using uv (Development)
+### Using uv (Development)
 Install dependencies:
 ```bash
 uv pip install
