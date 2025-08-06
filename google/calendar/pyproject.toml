@@ -1,0 +1,44 @@
+[project]
+name = "google-calendar-mcp"
+version = "0.1.0"
+description = "Obot's google calendar mcp server"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=2.11.1",
+    "google>=3.0.0",
+    "google-api-python-client>=2.172.0",
+    "rfc3339-validator>=0.1.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/obot-platform/otto8-tools"
+Repository = "https://github.com/obot-platform/otto8-tools/google/calendar"
+
+[build-system]
+requires = ["uv_build>=0.7.21,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = "."
+source-exclude = [
+    "tests/",
+    ".pytest_cache/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+]
+
+
+[dependency-groups]
+dev = [
+    "coverage>=7.9.1",
+    "pytest>=8.4.0",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.7",
+]

@@ -1,0 +1,38 @@
+[project]
+name = "obot-outlook-mcp"
+version = "0.1.0"
+description = "Obot outlook mail mcp server"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.12.14",
+    "azure-core>=1.35.0",
+    "azure-identity>=1.23.0",
+    "fastmcp>=2.11.1",
+    "markdown>=3.8.2",
+    "markitdown[all]>=0.1.2",
+    "msgraph-sdk>=1.37.0",
+    "typing-extensions>=4.14.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.21,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = "."
+source-exclude = [
+    "tests/",
+    ".pytest_cache/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.4",
+]

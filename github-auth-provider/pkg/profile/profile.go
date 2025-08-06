@@ -6,9 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
+	"strings"
+
+	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 )
 
-type githubResponse struct {
+var githubBaseURL = "https://api.github.com"
+
+type githubUserProfile struct {
 	Login             string `json:"login"`
 	ID                int    `json:"id"`
 	NodeID            string `json:"node_id"`
@@ -43,27 +49,85 @@ type githubResponse struct {
 	UpdatedAt         string `json:"updated_at"`
 }
 
-func FetchGitHubProfile(ctx context.Context, accessToken, url string) (*githubResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+type githubOrganization struct {
+	ID        int64  `json:"id"`
+	Login     string `json:"login"`
+	AvatarURL string `json:"avatar_url"`
+}
+
+type githubTeam struct {
+	ID           int64              `json:"id"`
+	Name         string             `json:"name"`
+	Organization githubOrganization `json:"organization"`
+}
+
+func FetchUserProfile(ctx context.Context, accessToken string) (*githubUserProfile, error) {
+	var result githubUserProfile
+	err := makeGitHubRequest(ctx, accessToken, "user", &result)
 	if err != nil {
 		return nil, err
 	}
+	return &result, nil
+}
+
+func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupInfoList, error) {
+	var infos state.GroupInfoList
+
+	var orgs []githubOrganization
+	err := makeGitHubRequest(ctx, accessToken, "user/orgs", &orgs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user organizations: %w", err)
+	}
+	for _, org := range orgs {
+		infos = append(infos, state.GroupInfo{
+			ID:      fmt.Sprintf("github/org/%d", org.ID),
+			Name:    org.Login,
+			IconURL: &org.AvatarURL,
+		})
+	}
+
+	var teams []githubTeam
+	err = makeGitHubRequest(ctx, accessToken, "user/teams", &teams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user teams: %w", err)
+	}
+	for _, team := range teams {
+		infos = append(infos, state.GroupInfo{
+			ID:      fmt.Sprintf("github/org/%d/team/%d", team.Organization.ID, team.ID),
+			Name:    team.Name,
+			IconURL: &team.Organization.AvatarURL,
+		})
+	}
+
+	// Sort groups by ID lexicographically
+	slices.SortFunc(infos, func(a, b state.GroupInfo) int {
+		return strings.Compare(a.ID, b.ID)
+	})
+
+	return infos, nil
+}
+
+func makeGitHubRequest(ctx context.Context, accessToken, path string, result any) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/%s", githubBaseURL, path), nil)
+	if err != nil {
+		return err
+	}
 	req.Header.Set("Authorization", accessToken)
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		result, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("unexpected status code: %d: %s", resp.StatusCode, result)
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("unexpected status code: %d: %s", resp.StatusCode, body)
 	}
 
-	var profile githubResponse
-	if err = json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-		return nil, err
+	if err = json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return err
 	}
 
-	return &profile, nil
+	return nil
 }

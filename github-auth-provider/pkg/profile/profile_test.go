@@ -11,7 +11,7 @@ import (
 
 func TestFetchGitHubProfile(t *testing.T) {
 	// Arrange: setup a mock server
-	mockResponse := githubResponse{
+	mockResponse := githubUserProfile{
 		Login:     "mockuser",
 		AvatarURL: "https://example.com/avatar.png",
 		Name:      "Mock User",
@@ -32,8 +32,9 @@ func TestFetchGitHubProfile(t *testing.T) {
 	defer server.Close()
 
 	// Act: call the function with mock server URL
+	githubBaseURL = server.URL
 	ctx := context.Background()
-	profile, err := FetchGitHubProfile(ctx, "Bearer mocktoken", server.URL)
+	profile, err := FetchUserProfile(ctx, "Bearer mocktoken")
 
 	// Assert: check no error
 	if err != nil {

@@ -1,9 +1,19 @@
 from typing import Annotated
 
-import boto3
 from fastmcp import FastMCP
 
+from .aws_service import AWSService
+
 mcp = FastMCP(name="aws-ec2")
+aws_service = None
+
+
+def get_aws_service(region: str = "us-east-1") -> AWSService:
+    """Get or create AWS service instance."""
+    global aws_service
+    if aws_service is None or aws_service.region_name != region:
+        aws_service = AWSService(region_name=region)
+    return aws_service
 
 
 @mcp.tool()
@@ -13,33 +23,8 @@ async def list_instances(
     ] = "us-east-1",
 ):
     """List all instances in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-
-    try:
-        response = ec2_client.describe_instances()
-        instances = []
-        for reservation in response["Reservations"]:
-            for instance in reservation["Instances"]:
-                instance_name = None
-                if "Tags" in instance:
-                    for tag in instance["Tags"]:
-                        if tag["Key"] == "Name":
-                            instance_name = tag["Value"]
-                            break
-
-                instance_info = {
-                    "name": instance_name or "N/A",
-                    "instance_id": instance["InstanceId"],
-                    "vpc_id": instance.get("VpcId", "N/A"),
-                    "instance_type": instance["InstanceType"],
-                    "image_id": instance["ImageId"],
-                    "state": instance["State"]["Name"],
-                }
-                instances.append(instance_info)
-
-    except Exception as e:
-        return {"error": f"Failed to list instances: {str(e)}"}
-    return {"instances": instances}
+    service = get_aws_service(aws_region)
+    return service.list_instances()
 
 
 @mcp.tool()
@@ -50,12 +35,8 @@ async def start_instance(
     ] = "us-east-1",
 ):
     """Start the specified ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    try:
-        ec2_client.start_instances(InstanceIds=[instance_id])
-    except Exception as e:
-        return {"error": f"Failed to start instance: {str(e)}"}
-    return {"message": f"Instance {instance_id} started"}
+    service = get_aws_service(aws_region)
+    return service.start_instance(instance_id)
 
 
 @mcp.tool()
@@ -66,12 +47,8 @@ async def stop_instance(
     ] = "us-east-1",
 ):
     """Stop the specified ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    try:
-        ec2_client.stop_instances(InstanceIds=[instance_id])
-    except Exception as e:
-        return {"error": f"Failed to stop instance: {str(e)}"}
-    return {"message": f"Instance {instance_id} stopped"}
+    service = get_aws_service(aws_region)
+    return service.stop_instance(instance_id)
 
 
 @mcp.tool()
@@ -82,9 +59,8 @@ async def terminate_instance(
     ] = "us-east-1",
 ):
     """Terminate the specified ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    ec2_client.terminate_instances(InstanceIds=[instance_id])
-    return {"message": f"Instance {instance_id} terminated"}
+    service = get_aws_service(aws_region)
+    return service.terminate_instance(instance_id)
 
 
 @mcp.tool()
@@ -95,12 +71,8 @@ async def reboot_instance(
     ] = "us-east-1",
 ):
     """Reboot the specified ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    try:
-        ec2_client.reboot_instances(InstanceIds=[instance_id])
-    except Exception as e:
-        return {"error": f"Failed to reboot instance: {str(e)}"}
-    return {"message": f"Instance {instance_id} rebooted"}
+    service = get_aws_service(aws_region)
+    return service.reboot_instance(instance_id)
 
 
 @mcp.tool()
@@ -120,44 +92,17 @@ async def create_instance(
     ] = "us-east-1",
 ):
     """Create a new ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    try:
-        instance = ec2_client.run_instances(
-            InstanceType=instance_type,
-            ImageId=image_id,
-            SubnetId=subnet_id,
-            **({"SecurityGroupIds": security_group_ids} if security_group_ids else {}),
-            **({"KeyName": key_name} if key_name else {}),
-            **({"UserData": user_data} if user_data else {}),
-            MinCount=1,
-            MaxCount=1,
-            **(
-                {
-                    "TagSpecifications": [
-                        {
-                            "ResourceType": "instance",
-                            "Tags": [
-                                *(
-                                    {"Key": "Name", "Value": instance_name}
-                                    if instance_name
-                                    else []
-                                ),
-                                *(
-                                    [{"Key": k, "Value": v} for k, v in tags.items()]
-                                    if tags
-                                    else []
-                                ),
-                            ],
-                        }
-                    ]
-                }
-                if instance_name or tags
-                else {}
-            ),
-        )
-    except Exception as e:
-        return {"error": f"Failed to create instance: {str(e)}"}
-    return {"message": f"Instance {instance['Instances'][0]['InstanceId']} created"}
+    service = get_aws_service(aws_region)
+    return service.create_instance(
+        instance_type=instance_type,
+        image_id=image_id,
+        subnet_id=subnet_id,
+        key_name=key_name,
+        instance_name=instance_name,
+        tags=tags,
+        user_data=user_data,
+        security_group_ids=security_group_ids,
+    )
 
 
 @mcp.tool()
@@ -167,12 +112,8 @@ async def list_vpcs(
     ] = "us-east-1",
 ):
     """List all VPCs in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_vpcs()
-    try:
-        return {"vpcs": response["Vpcs"]}
-    except Exception as e:
-        return {"error": f"Failed to list VPCs: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.list_vpcs()
 
 
 @mcp.tool()
@@ -182,12 +123,8 @@ async def list_subnets(
     ] = "us-east-1",
 ):
     """List all subnets in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_subnets()
-    try:
-        return {"subnets": response["Subnets"]}
-    except Exception as e:
-        return {"error": f"Failed to list subnets: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.list_subnets()
 
 
 @mcp.tool()
@@ -198,12 +135,8 @@ async def list_security_groups(
     ] = "us-east-1",
 ):
     """List all security groups in the specified AWS region and VPC."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_security_groups()
-    try:
-        return {"security_groups": response["SecurityGroups"]}
-    except Exception as e:
-        return {"error": f"Failed to list security groups: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.list_security_groups(vpc_id)
 
 
 @mcp.tool()
@@ -214,12 +147,8 @@ async def get_instance_details(
     ] = "us-east-1",
 ):
     """Get the details of the specified ec2 instance in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_instances(InstanceIds=[instance_id])
-    try:
-        return {"instance": response["Reservations"][0]["Instances"][0]}
-    except Exception as e:
-        return {"error": f"Failed to get instance details: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.get_instance_details(instance_id)
 
 
 @mcp.tool()
@@ -230,14 +159,8 @@ async def search_instances_by_name(
     ] = "us-east-1",
 ):
     """Search for instances by name in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_instances(
-        Filters=[{"Name": "tag:Name", "Values": [instance_name]}]
-    )
-    try:
-        return {"instances": response["Reservations"]}
-    except Exception as e:
-        return {"error": f"Failed to search instances by name: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.search_instances_by_tag(tag_key="Name", tag_value=instance_name)
 
 
 @mcp.tool()
@@ -249,19 +172,14 @@ async def search_instances_by_tag(
     ] = "us-east-1",
 ):
     """Search for instances by tag in the specified AWS region."""
-    ec2_client = boto3.client("ec2", region_name=aws_region)
-    response = ec2_client.describe_instances(
-        Filters=[{"Name": f"tag:{tag_key}", "Values": [tag_value]}]
-    )
-    try:
-        return {"instances": response["Reservations"]}
-    except Exception as e:
-        return {"error": f"Failed to search instances by tag: {str(e)}"}
+    service = get_aws_service(aws_region)
+    return service.search_instances_by_tag(tag_key, tag_value)
 
 
 def serve():
+    """Run the FastMCP server."""
     mcp.run()
 
 
 if __name__ == "__main__":
-    mcp.run()
+    serve()

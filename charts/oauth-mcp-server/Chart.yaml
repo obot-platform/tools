@@ -1,0 +1,5 @@
+apiVersion: v2
+name: oauth-mcp-server
+description: A Helm chart to deploy MCP servers with the mcp-oauth-proxy sidecar
+version: 0.1.0
+appVersion: 1.0.0

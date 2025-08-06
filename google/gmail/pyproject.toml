@@ -1,0 +1,43 @@
+[project]
+name = "obot-gmail-mcp"
+version = "0.1.0"
+description = "Obot gmail mcp server"
+requires-python = ">=3.13"
+dependencies = [
+    "bs4>=0.0.2",
+    "fastmcp>=2.11.1",
+    "filetype>=1.2.0",
+    "google-api-python-client>=2.172.0",
+    "pytz>=2025.2",
+]
+
+[project.scripts]
+obot-gmail-mcp = "obot_gmail_mcp.server:streamable_http_server"
+obot-gmail-mcp-stdio = "obot_gmail_mcp.server:stdio_server"
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "coverage>=7.9.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.21,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "obot_gmail_mcp"
+module-root = "."
+source-exclude = [
+    "tests/",
+    ".pytest_cache/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+]

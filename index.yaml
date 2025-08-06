@@ -3,8 +3,6 @@ tools:
     reference: ./sendgrid
   file-summarizer:
     reference: ./file-summarizer
-  google-calendar:
-    reference: ./google/calendar
   zoom:
     reference: ./zoom
   wordpress:
@@ -21,8 +19,6 @@ tools:
     reference: ./linkedin-publishing
   google-docs:
     reference: ./google/docs
-  google-gmail:
-    reference: ./google/gmail
   google-search-console:
     reference: ./google/search-console
   google-sheets:
@@ -31,8 +27,6 @@ tools:
     reference: ./images
   excel:
     reference: ./microsoft365/excel
-  outlook-mail:
-    reference: ./microsoft365/outlook/mail
   outlook-calender:
     reference: ./microsoft365/outlook/calendar
   outlook-contact:
@@ -55,14 +49,10 @@ tools:
     reference: ./pagerduty
   postgres:
     reference: ./postgres
-  smartthings:
-    reference: ./smartthings
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
   discord:
     reference: ./discord
-  proxycurl:
-    reference: ./proxycurl
   memory:
     reference: ./memory
 

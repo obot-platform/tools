@@ -1,0 +1,62 @@
+[project]
+name = "knowledge-mcp"
+version = "0.1.0"
+description = "Obot's Multi-Tenant Knowledge MCP Server"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "chonkie>=1.1.0",
+    "fastmcp>=2.9.2",
+    "greenlet>=3.2.3",
+    "markitdown[all,pdf]>=0.1.2",
+    "pgvector>=0.4.1",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "sqlalchemy>=2.0.41",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "notebook>=7.4.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.21,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = "."
+source-exclude = [
+    "dev/",
+    "data/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+    "test_*.txt",
+    "test_*.pdf",
+    "knowledge_mcp.egg-info/",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

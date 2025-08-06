@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      PORT: 9000
+  
+  postgres_oauth:
+    image: postgres:15
+    container_name: oauth_db
+    environment:
+      POSTGRES_DB: oauth_proxy
+      POSTGRES_USER: oauth_user
+      POSTGRES_PASSWORD: oauth_password
+    ports:
+      - "5432:5432"  # Avoid conflict: expose on host port 5433
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  oauth-proxy:
+    image: ghcr.io/obot-platform/mcp-oauth-proxy:master
+    environment:
+      DATABASE_DSN: "postgres://oauth_user:oauth_password@postgres_oauth:5432/oauth_proxy?sslmode=disable"
+      SCOPES_SUPPORTED: "openid,profile,email,https://www.googleapis.com/auth/gmail.modify,https://www.googleapis.com/auth/gmail.labels,https://www.googleapis.com/auth/gmail.compose"
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      OAUTH_AUTHORIZE_URL: "https://accounts.google.com"
+      MCP_SERVER_URL: "http://app:9000/mcp/gmail/"
+    depends_on:
+      - postgres_oauth
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
