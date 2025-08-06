@@ -260,12 +260,6 @@ async def create_draft_tool(
             description="A comma-separated list of email addresses to BCC on the email. No spaces. Example: person1@example.com,person2@example.com"
         ),
     ] = None,
-    attachments: Annotated[
-        Optional[str],
-        Field(
-            description="A comma separated list of workspace file paths to attach to the email."
-        ),
-    ] = None,
     reply_email_id: Annotated[
         Optional[str], Field(description="The ID of the email to reply to.")
     ] = None,
@@ -280,18 +274,13 @@ async def create_draft_tool(
     try:
         client = create_client(SCOPES, get_access_token())
 
-        # Parse attachments
-        attachment_list = []
-        if attachments:
-            attachment_list = attachments.split(",")
-
         info = DraftInfo(
             subject=subject,
             body=body,
             recipients=recipients.split(","),
             cc=cc.split(",") if cc else [],
             bcc=bcc.split(",") if bcc else [],
-            attachments=attachment_list,
+            attachments=[],
             reply_all=reply_all,
             reply_to_email_id=reply_email_id or "",
         )
