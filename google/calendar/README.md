@@ -36,7 +36,7 @@ uv run server.py
 ## Testing
 
 ### Unit-test with pytest
-```
+```bash
 uv run python -m pytest
 ```
 

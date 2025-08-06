@@ -3,8 +3,11 @@ from unittest.mock import patch, MagicMock, Mock
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
 from googleapiclient.errors import HttpError
-# Add the parent directory to the Python path so we can import from src
-from google.calendar.app.server import mcp
+import sys
+import os
+# Add the parent directory to the Python path so we can import from app
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from app.server import mcp
 import json
 
 # Configure pytest for async support
@@ -84,8 +87,10 @@ class TestMCPServer:
 class TestCalendarFunctions:
     """Test individual calendar-related functions"""
     
-    @patch('server.get_client')
-    async def test_list_calendars_success(self, mock_get_client, mock_service, mock_calendar_data):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_list_calendars_success(self, mock_get_client, mock_get_token, mock_service, mock_calendar_data):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendarList().list().execute.return_value = {'items': mock_calendar_data}
         
@@ -93,14 +98,15 @@ class TestCalendarFunctions:
             # Call the tool function directly
             result = await client.call_tool(
                 name='list_calendars',
-                arguments={'cred_token': 'fake_token'}
+                arguments={}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_calendar_data
+            assert result.data == mock_calendar_data
         mock_service.calendarList().list().execute.assert_called_once()
 
-    @patch('server.get_client')
-    async def test_list_calendars_http_error(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_list_calendars_http_error(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendarList().list().execute.side_effect = HttpError(
             Mock(status=403), b'Forbidden'
@@ -110,37 +116,44 @@ class TestCalendarFunctions:
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='list_calendars',
-                    arguments={'cred_token': 'fake_token'}
+                    arguments={}
                 )
 
-    @patch('server.get_client')
-    async def test_get_calendar_success(self, mock_get_client, mock_service, mock_calendar_data):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_get_calendar_success(self, mock_get_client, mock_get_token, mock_service, mock_calendar_data):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
-        mock_service.calendars().get().execute.return_value = mock_calendar_data
+        # Use the first calendar from mock_calendar_data (it's a list)
+        mock_service.calendars().get().execute.return_value = mock_calendar_data[0]
         
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='get_calendar',
-                arguments={'calendar_id': 'test_id', 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'test_id'}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_calendar_data
+            res_json = result.data
+            assert res_json == mock_calendar_data[0]
         mock_service.calendars().get.assert_called_with(calendarId='test_id')
 
-    @patch('server.get_client')
-    async def test_get_calendar_empty_id(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_get_calendar_empty_id(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendars().get().execute.side_effect = ValueError("argument `calendar_id` can't be empty")
         with pytest.raises(ToolError, match="argument `calendar_id` can't be empty"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='get_calendar',
-                    arguments={'calendar_id': '', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': ''}
                 )
 
-    @patch('server.get_client')
-    @patch('server.get_user_timezone')
-    async def test_create_calendar_success(self, mock_get_timezone, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    @patch('app.server.get_user_timezone')
+    async def test_create_calendar_success(self, mock_get_timezone, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_get_timezone.return_value = 'America/New_York'
         mock_service.calendars().insert().execute.return_value = {'id': 'new_id'}
@@ -148,84 +161,98 @@ class TestCalendarFunctions:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='create_calendar',
-                arguments={'summary': 'Test Calendar', 'cred_token': 'fake_token'}
+                arguments={'summary': 'Test Calendar'}
             )
-            res_json = json.loads(result[0].text)
+            res_json = result.data
             assert res_json == {'id': 'new_id'}
 
-    @patch('server.get_client')
-    async def test_create_calendar_empty_summary(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_create_calendar_empty_summary(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendars().insert().execute.side_effect = ValueError("argument `summary` can't be empty")
         with pytest.raises(ToolError, match="argument `summary` can't be empty"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='create_calendar',
-                    arguments={'summary': '', 'cred_token': 'fake_token'}
+                    arguments={'summary': ''}
                 )
 
 
 class TestEventFunctions:
     """Test individual event-related functions"""
     
-    @patch('server.get_client')
-    async def test_list_events_success(self, mock_get_client, mock_service, mock_event_data):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_list_events_success(self, mock_get_client, mock_get_token, mock_service, mock_event_data):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.events().list().execute.return_value = {'items': mock_event_data}
         
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_events',
-                arguments={'calendar_id': 'calendar_id', 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'calendar_id'}
             )
-            res_json = json.loads(result[0].text)
+            res_json = result.data
             assert res_json == mock_event_data
 
-    @patch('server.get_client')
-    async def test_list_events_empty_calendar_id(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_list_events_empty_calendar_id(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.events().list().execute.side_effect = ValueError("argument `calendar_id` can't be empty")
         with pytest.raises(ToolError, match="argument `calendar_id` can't be empty"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='list_events',
-                    arguments={'calendar_id': '', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': ''}
                 )
 
-    @patch('server.get_client')
-    async def test_get_event_success(self, mock_get_client, mock_service, mock_event_data):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_get_event_success(self, mock_get_client, mock_get_token, mock_service, mock_event_data):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
-        mock_service.events().get().execute.return_value = mock_event_data
+        # Use the first event from mock_event_data (it's a list)
+        mock_service.events().get().execute.return_value = mock_event_data[0]
         
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='get_event',
-                arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id', 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id'}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_event_data
+            res_json = result.data
+            assert res_json == mock_event_data[0]
 
-    @patch('server.get_client')
-    async def test_get_event_empty_params(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_get_event_empty_params(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.events().get().execute.side_effect = ValueError("argument `calendar_id` can't be empty")
         with pytest.raises(ToolError, match="argument `calendar_id` can't be empty"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='get_event',
-                    arguments={'calendar_id': '', 'event_id': 'event_id', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': '', 'event_id': 'event_id'}
                 )
         
+        mock_service.events().get().execute.side_effect = ValueError("argument `event_id` can't be empty")
         with pytest.raises(ToolError, match="argument `event_id` can't be empty"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='get_event',
-                    arguments={'calendar_id': 'calendar_id', 'event_id': '', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': 'calendar_id', 'event_id': ''}
                 )
 
-    @patch('server.get_client')
-    @patch('server.get_user_timezone')
-    async def test_create_event_success(self, mock_get_timezone, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    @patch('app.server.get_user_timezone')
+    async def test_create_event_success(self, mock_get_timezone, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_get_timezone.return_value = 'America/New_York'
         mock_service.events().insert().execute.return_value = {'id': 'new_event_id'}
@@ -233,40 +260,46 @@ class TestEventFunctions:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='create_event',
-                arguments={'calendar_id': 'calendar_id', 'summary': 'Test Event', 'start_datetime': '2024-01-01T10:00:00-05:00', 'end_datetime': '2024-01-01T11:00:00-05:00', 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'calendar_id', 'summary': 'Test Event', 'start_datetime': '2024-01-01T10:00:00-05:00', 'end_datetime': '2024-01-01T11:00:00-05:00'}
             )
-            res_json = json.loads(result[0].text)
+            res_json = result.data
             assert res_json == {'id': 'new_event_id'}
 
-    @patch('server.get_client')
-    async def test_create_event_missing_time(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_create_event_missing_time(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
-        mock_service.events().insert().execute.side_effect = ValueError("Either start_date or start_datetime must be provided")
+        
         with pytest.raises(ToolError, match="Either start_date or start_datetime must be provided"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='create_event',
-                    arguments={'calendar_id': 'calendar_id', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': 'calendar_id'}
                 )
 
-    @patch('server.get_client')
-    async def test_create_event_invalid_datetime(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_create_event_invalid_datetime(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
-        mock_service.events().insert().execute.side_effect = ValueError("Invalid start_datetime")
+        
         with pytest.raises(ToolError, match="Invalid start_datetime"):
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='create_event',
-                    arguments={'calendar_id': 'calendar_id', 'start_datetime': 'invalid-datetime', 'end_datetime': '2024-01-01T11:00:00-05:00', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': 'calendar_id', 'start_datetime': 'invalid-datetime', 'end_datetime': '2024-01-01T11:00:00-05:00'}
                 )
 
 
 class TestValidationFunctions:
     """Test input validation and edge cases"""
     
-    @patch('server.get_client')
-    async def test_rfc3339_validation(self, mock_get_client):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_rfc3339_validation(self, mock_get_client, mock_get_token):
         """Test that valid RFC3339 timestamps are accepted"""
+        mock_get_token.return_value = 'fake_token'
         mock_service = MagicMock()
         mock_get_client.return_value = mock_service
         mock_service.events().list().execute.return_value = {'items': []}
@@ -284,16 +317,15 @@ class TestValidationFunctions:
                 async with Client(mcp) as client:
                     await client.call_tool(
                         name='list_events',
-                        arguments={'calendar_id': 'calendar_id', 'time_min': timestamp, 'cred_token': 'fake_token'}
+                        arguments={'calendar_id': 'calendar_id', 'time_min': timestamp}
                 )
             except ValueError as e:
                 if "Invalid time_min" in str(e):
                     pytest.fail(f"Valid timestamp {timestamp} was rejected")
 
-    @patch('server.get_client')
-    async def test_timezone_validation(self, mock_get_client):
+    async def test_timezone_validation(self):
         """Test timezone validation logic"""
-        from tools.event import is_valid_iana_timezone
+        from app.tools.event import is_valid_iana_timezone
         assert is_valid_iana_timezone('America/New_York')
         assert is_valid_iana_timezone('UTC')
         assert not is_valid_iana_timezone('Invalid/Timezone')
@@ -302,9 +334,11 @@ class TestValidationFunctions:
 class TestErrorHandling:
     """Test error handling across different scenarios"""
     
-    @patch('server.get_client')
-    async def test_http_error_handling(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_http_error_handling(self, mock_get_client, mock_get_token, mock_service):
         """Test that HttpErrors are properly converted to ToolErrors"""
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendarList().list().execute.side_effect = HttpError(
             Mock(status=500), b'Internal Server Error'
@@ -314,12 +348,14 @@ class TestErrorHandling:
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='list_calendars',
-                    arguments={'cred_token': 'fake_token'}
+                    arguments={}
                 )
 
-    @patch('server.get_client')
-    async def test_general_exception_handling(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_general_exception_handling(self, mock_get_client, mock_get_token, mock_service):
         """Test that general exceptions are properly converted to ToolErrors"""
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         mock_service.calendarList().list().execute.side_effect = Exception('Unexpected error')
         
@@ -327,16 +363,18 @@ class TestErrorHandling:
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='list_calendars',
-                    arguments={'cred_token': 'fake_token'}
+                    arguments={}
                 )
 
 
 class TestComplexScenarios:
     """Test complex business logic scenarios"""
     
-    @patch('server.get_client')
-    @patch('server.get_current_user_email')
-    async def test_respond_to_event_success(self, mock_get_email, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    @patch('app.server.get_current_user_email')
+    async def test_respond_to_event_success(self, mock_get_email, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_email.return_value = 'user@example.com'
         mock_get_client.return_value = mock_service
         
@@ -360,16 +398,18 @@ class TestComplexScenarios:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='respond_to_event',
-                arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id', 'response': 'accepted', 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id', 'response': 'accepted'}
             )
-            res_json = json.loads(result[0].text)
+            res_json = result.data
             assert res_json == event_with_attendees
         
         # Verify the patch was called with updated attendees
         mock_service.events().patch().execute.assert_called_once()
 
-    @patch('server.get_client')
-    async def test_move_event_invalid_type(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_move_event_invalid_type(self, mock_get_client, mock_get_token, mock_service):
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         
         # Mock an event type that cannot be moved
@@ -384,7 +424,7 @@ class TestComplexScenarios:
             async with Client(mcp) as client:
                 await client.call_tool(
                     name='move_event',
-                    arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id', 'new_calendar_id': 'new_calendar_id', 'cred_token': 'fake_token'}
+                    arguments={'calendar_id': 'calendar_id', 'event_id': 'event_id', 'new_calendar_id': 'new_calendar_id'}
                 )
 
 
@@ -392,9 +432,11 @@ class TestComplexScenarios:
 class TestPerformance:
     """Test performance characteristics"""
     
-    @patch('server.get_client')
-    async def test_large_event_list_pagination(self, mock_get_client, mock_service):
+    @patch('app.server._get_access_token')
+    @patch('app.server.get_client')
+    async def test_large_event_list_pagination(self, mock_get_client, mock_get_token, mock_service):
         """Test that pagination works correctly for large result sets"""
+        mock_get_token.return_value = 'fake_token'
         mock_get_client.return_value = mock_service
         
         # Mock paginated responses
@@ -411,11 +453,11 @@ class TestPerformance:
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_events',
-                arguments={'calendar_id': 'calendar_id', 'max_results': 300, 'cred_token': 'fake_token'}
+                arguments={'calendar_id': 'calendar_id', 'max_results': 300}
             )
         
         # Should return exactly 300 events (250 + 50)
-        res_json = json.loads(result[0].text)
+        res_json = result.data
         assert len(res_json) == 300
         # Should have made two API calls due to pagination
         assert mock_service.events().list().execute.call_count == 2
