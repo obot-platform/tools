@@ -1,3 +1,5 @@
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 from .apis.shared_drives import list_drives
 from .apis.files import list_files
 from fastmcp import FastMCP
@@ -26,6 +28,10 @@ mcp = FastMCP(
     on_duplicate_prompts="replace",
 )
 
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request: Request):
+    return JSONResponse({"status": "healthy"})
+
 def _get_access_token() -> str:
     headers = get_http_headers()
     access_token = headers.get("x-forwarded-access-token", None)
@@ -35,13 +41,16 @@ def _get_access_token() -> str:
 
 @mcp.tool(
     name="list_files",
+    annotations={
+        "readOnlyHint": True,
+    },
 )
 def list_files_tool(
-    drive_id: Annotated[str, Field(description="ID of the Google Drive to list files from. If unset, default to the user's personal drive.")] = None,
-    parent_id: Annotated[str, Field(description="ID of the parent folder to list files from. If unset, default to the root folder of user's personal drive.")] = None,
-    mime_type: Annotated[str, Field(description="Filter files by MIME type (e.g., 'application/pdf' for PDFs, 'image/jpeg' for JPEG images, 'application/vnd.google-apps.folder' for folders). If unset, returns all file types.")] = None,
-    file_name_contains: Annotated[str, Field(description="Case-insensitive search string to filter files by name. Returns files containing this string in their name.")] = None,
-    modified_time_after: Annotated[str, Field(description="Return only files modified after this timestamp (RFC 3339 format: YYYY-MM-DDTHH:MM:SSZ, e.g., '2024-03-20T10:00:00Z').")] = None,
+    drive_id: Annotated[str | None, Field(description="ID of the Google Drive to list files from. If unset, default to the user's personal drive.")] = None,
+    parent_id: Annotated[str | None, Field(description="ID of the parent folder to list files from. If unset, default to the root folder of user's personal drive.")] = None,
+    mime_type: Annotated[str | None, Field(description="Filter files by MIME type (e.g., 'application/pdf' for PDFs, 'image/jpeg' for JPEG images, 'application/vnd.google-apps.folder' for folders). If unset, returns all file types.")] = None,
+    file_name_contains: Annotated[str | None, Field(description="Case-insensitive search string to filter files by name. Returns files containing this string in their name.")] = None,
+    modified_time_after: Annotated[str | None, Field(description="Return only files modified after this timestamp (RFC 3339 format: YYYY-MM-DDTHH:MM:SSZ, e.g., '2024-03-20T10:00:00Z').")] = None,
     max_results: Annotated[int, Field(description="Maximum number of files to return", ge=1, le=1000, default=50)] = 50,
     ) -> list[dict]:
     """
@@ -97,8 +106,8 @@ def list_files_tool(
 )
 def copy_file_tool(
     file_id: Annotated[str, Field(description="ID of the file to copy")],
-    new_name: Annotated[str, Field(description="New name for the copied file. If not provided, the copied file will be named \"Copy of [original name]\".")] = None,
-    new_parent_id: Annotated[str, Field(description="New parent folder ID for the copied file. Provide this if you want to have the copied file in a different folder.")] = None,
+    new_name: Annotated[str | None, Field(description="New name for the copied file. If not provided, the copied file will be named \"Copy of [original name]\".")] = None,
+    new_parent_id: Annotated[str | None, Field(description="New parent folder ID for the copied file. Provide this if you want to have the copied file in a different folder.")] = None,
     ) -> dict:
     """
     Create a copy of a Google Drive file.
@@ -114,6 +123,9 @@ def copy_file_tool(
 
 @mcp.tool(
     name="get_file",
+    annotations={
+        "readOnlyHint": True,
+    },
 )
 def get_file_tool(
     file_id: Annotated[str, Field(description="ID of the file to get")],
@@ -176,8 +188,8 @@ def get_file_tool(
 )
 def update_file_tool(
     file_id: Annotated[str, Field(description="ID of the file or folder to update")],
-    new_name: Annotated[str, Field(description="New name for the file or folder")] = None,
-    new_parent_id: Annotated[str, Field(description="New parent folder ID. Provide this if you want to move the item to a different folder, use `root` to move to the root folder.")] = None,
+    new_name: Annotated[str | None, Field(description="New name for the file or folder")] = None,
+    new_parent_id: Annotated[str | None, Field(description="New parent folder ID. Provide this if you want to move the item to a different folder, use `root` to move to the root folder.")] = None,
     # new_workspace_file_path: Annotated[str, Field(description="Path to the new content of the file (not applicable for folders)")] = None,
     ) -> dict:
     """
@@ -217,7 +229,7 @@ def update_file_tool(
 )
 def create_folder_tool(
     folder_name: Annotated[str, Field(description="Name of the new folder")],
-    parent_id: Annotated[str, Field(description="ID of the parent folder for the new folder. If not provided, the folder will be created in the root folder.")] = None,
+    parent_id: Annotated[str | None, Field(description="ID of the parent folder for the new folder. If not provided, the folder will be created in the root folder.")] = None,
     ) -> dict:
     """
     Create a new folder in user's Google Drive.
@@ -274,6 +286,9 @@ def transfer_ownership_tool(
 
 @mcp.tool(
     name="list_permissions",
+    annotations={
+        "readOnlyHint": True,
+    },
 )
 def list_permissions_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to list permissions for")],
@@ -292,6 +307,9 @@ def list_permissions_tool(
 
 @mcp.tool(
     name="get_permission",
+    annotations={
+        "readOnlyHint": True,
+    },
 )
 def get_permission_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to get permission for")],
@@ -316,8 +334,8 @@ def create_permission_tool(
     file_id: Annotated[str, Field(description="ID of the file, folder, or shared drive to create permission for")],
     role: Annotated[Literal["owner", "organizer", "fileOrganizer", "writer", "commenter", "reader"], Field(description="Role for the new permission, must be one of [owner(for My Drive), organizer(for shared drive), fileOrganizer(for shared drive), writer, commenter, reader]")],
     type: Annotated[Literal["user", "group", "domain", "anyone"], Field(description="Type of the new permission, must be one of [user, group, domain, anyone]")],
-    email_address: Annotated[str, Field(description="Email address for user/group permission, required if type is user or group")] = None,
-    domain: Annotated[str, Field(description="Domain for domain permission, required if type is domain")] = None,
+    email_address: Annotated[str | None, Field(description="Email address for user/group permission, required if type is user or group")] = None,
+    domain: Annotated[str | None, Field(description="Domain for domain permission, required if type is domain")] = None,
     ) -> dict:
     """
     Create a new permission for a Google Drive file, folder, or shared drive.
@@ -383,6 +401,9 @@ def delete_permission_tool(
 
 @mcp.tool(
     name="list_shared_drives",
+    annotations={
+        "readOnlyHint": True,
+    },
 )
 def list_shared_drives() -> list[dict]:
     """
