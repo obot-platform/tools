@@ -1,18 +1,23 @@
 # Obot Google Drive MCP Server
-- Obot Google Drive mcp server, converted from the google-drive tool bundle.
-- supports streamable HTTP
-- tools of this mcp server expect `cred_token`(access_token of google oauth) as part of the tool input.
 
 ## Installation & Running
 
-### Option 1: Using uvx (Recommended)
+### Docker-compose
+Export (Google's) Oauth CLient ID and Secret for Oauth Proxy
+```bash
+export OAUTH_CLIENT_ID=xxx
+export OAUTH_CLIENT_SECRET=xxx
+```
+
+then:
+```bash
+docker-compose up
+```
+
+### Using uvx
 install from local directory:
 ```bash
 uvx --from . obot-google-drive-mcp
-```
-or stdio server:
-```bash
-uvx --from . obot-google-drive-mcp-stdio
 ```
 
 ### Option 2: Using uv (Development)
@@ -37,12 +42,3 @@ uv run python -m pytest
 
 #### Get Your Access Token
 This MCP server assumes Obot will take care of the Oauth2.0 flow and supply an access token. To test locally or without Obot, you need to get an access token by yourself. I use [postman workspace](https://blog.postman.com/how-to-access-google-apis-using-oauth-in-postman/) to create and manage my tokens.
-
-#### Local Example Client
-```
-export GOOGLE_OAUTH_TOKEN=xxx
-```
-and then
-```
-uv run example_client.py
-```

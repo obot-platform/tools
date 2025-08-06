@@ -3,7 +3,6 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
-import os
 import logging
 
 

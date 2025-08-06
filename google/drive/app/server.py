@@ -1,21 +1,21 @@
-from apis.shared_drives import list_drives
-from apis.files import list_files
+from .apis.shared_drives import list_drives
+from .apis.files import list_files
 from fastmcp import FastMCP
 from pydantic import Field
 from typing import Annotated, Literal
 import os
-from apis.helper import get_client
+from .apis.helper import get_client
 from googleapiclient.errors import HttpError
 from fastmcp.exceptions import ToolError
 
 # Import all the command functions
-from apis.files import download_file, copy_file, get_file, create_file, update_file, delete_file, create_folder
-from apis.permissions import list_permissions, get_permission, create_permission, update_permission, delete_permission, transfer_ownership
-from apis.shared_drives import create_drive, update_drive, delete_drive
+from .apis.files import copy_file, get_file, update_file, delete_file, create_folder
+from .apis.permissions import list_permissions, get_permission, create_permission, update_permission, delete_permission, transfer_ownership
+from .apis.shared_drives import create_drive, update_drive, delete_drive
 from fastmcp.server.dependencies import get_http_headers
 
 # Configure server-specific settings
-PORT = os.getenv("PORT", 9000)
+PORT = int(os.getenv("PORT", 9000))
 MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-drive")
 GOOGLE_OAUTH_TOKEN = os.getenv("GOOGLE_OAUTH_TOKEN")
 
