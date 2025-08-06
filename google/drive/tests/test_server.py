@@ -5,7 +5,6 @@ from fastmcp.exceptions import ToolError
 from googleapiclient.errors import HttpError
 # Add the parent directory to the Python path so we can import from src
 from app.server import mcp
-import json
 
 # Configure pytest for async support
 pytestmark = pytest.mark.asyncio
@@ -609,8 +608,6 @@ class TestErrorHandling:
     async def test_http_error_handling(self, mock_list_files, mock_get_client, mock_get_access_token, mock_service):
         mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
-        from googleapiclient.errors import HttpError
-        from unittest.mock import Mock
         mock_resp = Mock()
         mock_resp.status = 403
         mock_list_files.side_effect = HttpError(

@@ -75,32 +75,6 @@ def list_files_tool(
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
-## TODO: this tool requires the support of workspace
-# @mcp.tool(
-#     name="download_file",
-# )
-# def download_file_tool(
-#     file_id: Annotated[str, Field(description="ID of the file to download")],
-#     ) -> dict:
-#     """
-#     Download a Google Drive file to the user's GPTScript workspace
-#     """
-#     try:
-#         client = get_client(_get_access_token())
-#         content, file_name = download_file(client, file_id)
-#         if content:
-#             try:
-#                 save_to_gptscript_workspace(file_name, content)
-#                 return {"success": True, "message": f"Successfully downloaded file to: {file_name}", "file_name": file_name}
-#             except Exception as e:
-#                 raise ToolError(f"Error saving file to workspace: {e}")
-#         else:
-#             raise ToolError("Failed to download file")
-#     except HttpError as error:
-#         raise HttpError(f"Failed to download file, HttpError: {error}")
-#     except Exception as error:
-#         raise ToolError(f"Unexpected ToolError: {error}")
-
 @mcp.tool(
     name="copy_file",
 )
@@ -142,47 +116,6 @@ def get_file_tool(
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
-## TODO: this tool requires the support of workspace
-# @mcp.tool(
-#     name="create_file",
-# )
-# def create_file_tool(
-#     file_name: Annotated[str, Field(description="Name of the new file, MUST come with a file extension.")],
-#     mime_type: Annotated[str, Field(description="MIME type of the new file, please provide this if you can. If not provided, it will be inferred from the file extension.")] = None,
-#     parent_id: Annotated[str, Field(description="ID of the parent folder for the new file. If not provided, the file will be created in the root folder.")] = None,
-#     workspace_file_path: Annotated[str, Field(description="Path to a file in the user's GPTScript workspace. If provided, the file will be used as the content of the new file.")] = None,
-#     ) -> dict:
-#     """
-#     Create a new file in user's Google Drive. Optionally, can provide the content by providing a path to a Workspace file
-#     """
-#     try:
-#         client = get_client(_get_access_token())
-        
-#         if "." not in file_name:
-#             raise ValueError("file_name parameter must contain a file extension")
-        
-#         if not mime_type:
-#             # Try to infer MIME type from file extension
-#             guessed_type = mimetypes.guess_type(file_name)[0]
-#             if guessed_type:
-#                 mime_type = guessed_type
-#             else:
-#                 raise ValueError("Could not determine MIME type from file extension. Please provide mime_type explicitly.")
-
-#         file_content = None
-#         if workspace_file_path:
-#             try:
-#                 file_content = load_from_gptscript_workspace(workspace_file_path)
-#             except Exception as e:
-#                 raise ToolError(f"Failed to load file from GPTScript workspace: {e}")
-
-#         file = create_file(client, name=file_name, mime_type=mime_type, parent_id=parent_id, file_content=file_content)
-#         return file
-#     except HttpError as error:
-#         raise HttpError(f"Failed to create file, HttpError: {error}")
-#     except Exception as error:
-#         raise ToolError(f"Unexpected ToolError: {error}")
-
 @mcp.tool(
     name="update_file",
 )
@@ -200,22 +133,6 @@ def update_file_tool(
         
         mime_type = None
         new_content = None
-        
-        ## TODO: this argument requires the support of workspace
-        # if new_workspace_file_path:
-        #     try:
-        #         new_content = load_from_gptscript_workspace(new_workspace_file_path)
-        #     except Exception as e:
-        #         raise ToolError(f"Failed to load file from GPTScript workspace: {e}")
-
-        #     if new_content:
-        #         file_info = get_file(client, file_id, "mimeType")
-        #         mime_type = file_info.get("mimeType")
-
-        #         # Check if it's a folder
-        #         FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
-        #         if mime_type == FOLDER_MIME_TYPE:
-        #             raise ToolError("Cannot update content of a folder. Ignoring new content.")
 
         file = update_file(client, file_id=file_id, new_name=new_name, new_content=new_content, mime_type=mime_type, new_parent_id=new_parent_id)
         return file
