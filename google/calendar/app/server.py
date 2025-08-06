@@ -29,7 +29,8 @@ mcp = FastMCP(
     name="GoogleCalendarMCPServer",
     on_duplicate_tools="error",
     on_duplicate_resources="warn",
-    on_duplicate_prompts="replace"
+    on_duplicate_prompts="replace",
+    mask_error_details=True
 )
 
 def _get_access_token() -> str:
