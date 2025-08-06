@@ -204,7 +204,6 @@ def list_events(calendar_id: Annotated[str, Field(description="calendar id")],
     if order_by:
         params["orderBy"] = order_by
 
-    q = os.getenv("Q")
     if q:
         params["q"] = q
 
