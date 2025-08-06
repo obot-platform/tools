@@ -390,9 +390,9 @@ def delete_permission_tool(
         client = get_client(_get_access_token())
         success = delete_permission(client, file_id, permission_id)
         if success:
-            return f"Successfully deleted permission: {permission_id}"
+            return {"result": f"Successfully deleted permission: {permission_id}"}
         else:
-            return f"Failed to delete permission: {permission_id}"
+            return {"result": f"Failed to delete permission: {permission_id}"}
     except HttpError as error:
         raise HttpError(f"Failed to delete permission, HttpError: {error}")
     except Exception as error:

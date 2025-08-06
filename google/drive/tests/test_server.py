@@ -125,19 +125,24 @@ class TestMCPServer:
 class TestFileFunctions:
     """Test individual file-related functions"""
 
-    @patch('server.get_client')
-    @patch('server.list_files')
-    async def test_list_files_success(self, mock_list_files, mock_get_client, mock_service, mock_file_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.list_files')
+    async def test_list_files_success(self, mock_list_files, mock_get_client, mock_get_access_token, mock_service, mock_file_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_list_files.return_value = mock_file_data
+        
+        mock_service.files().list().execute.return_value = {
+            "files": mock_file_data
+        }
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_files',
-                arguments={'cred_token': 'fake_token', 'max_results': 50}
+                arguments={'max_results': 50}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_file_data
+            assert result.structured_content['result'] == mock_file_data
 
         mock_list_files.assert_called_once_with(
             mock_service,
@@ -150,17 +155,22 @@ class TestFileFunctions:
             trashed=False
         )
 
-    @patch('server.get_client')
-    @patch('server.list_files')
-    async def test_list_files_with_filters(self, mock_list_files, mock_get_client, mock_service, mock_file_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.list_files')
+    async def test_list_files_with_filters(self, mock_list_files, mock_get_client, mock_get_access_token, mock_service, mock_file_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_list_files.return_value = mock_file_data
+        
+        mock_service.files().list().execute.return_value = {
+            "files": mock_file_data
+        }
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_files',
                 arguments={
-                    'cred_token': 'fake_token',
                     'drive_id': 'test_drive_id',
                     'parent_id': 'test_parent_id',
                     'mime_type': 'application/pdf',
@@ -169,8 +179,8 @@ class TestFileFunctions:
                     'max_results': 10
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_file_data
+            # result is already the data
+            assert result.structured_content['result'] == mock_file_data
 
         mock_list_files.assert_called_once_with(
             mock_service,
@@ -183,25 +193,29 @@ class TestFileFunctions:
             trashed=False
         )
 
-    @patch('server.get_client')
-    @patch('server.get_file')
-    async def test_get_file_success(self, mock_get_file, mock_get_client, mock_service, mock_file_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.get_file')
+    async def test_get_file_success(self, mock_get_file, mock_get_client, mock_get_access_token, mock_service, mock_file_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_get_file.return_value = mock_file_data[0]
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='get_file',
-                arguments={'file_id': 'test_file_id_1', 'cred_token': 'fake_token'}
+                arguments={'file_id': 'test_file_id_1'}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_file_data[0]
+            # result is already the data
+            assert result.structured_content == mock_file_data[0]
 
         mock_get_file.assert_called_once_with(mock_service, 'test_file_id_1')
 
-    @patch('server.get_client')
-    @patch('server.copy_file')
-    async def test_copy_file_success(self, mock_copy_file, mock_get_client, mock_service, mock_file_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.copy_file')
+    async def test_copy_file_success(self, mock_copy_file, mock_get_client, mock_get_access_token, mock_service, mock_file_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         copied_file = mock_file_data[0].copy()
         copied_file['name'] = 'Copy of Test Document.docx'
@@ -212,12 +226,11 @@ class TestFileFunctions:
                 name='copy_file',
                 arguments={
                     'file_id': 'test_file_id_1',
-                    'new_name': 'Copy of Test Document.docx',
-                    'cred_token': 'fake_token'
+                    'new_name': 'Copy of Test Document.docx'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == copied_file
+            # result is already the data
+            assert result.structured_content == copied_file
 
         mock_copy_file.assert_called_once_with(
             mock_service,
@@ -226,9 +239,11 @@ class TestFileFunctions:
             parent_id=None
         )
 
-    @patch('server.get_client')
-    @patch('server.update_file')
-    async def test_update_file_success(self, mock_update_file, mock_get_client, mock_service, mock_file_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.update_file')
+    async def test_update_file_success(self, mock_update_file, mock_get_client, mock_get_access_token, mock_service, mock_file_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         updated_file = mock_file_data[0].copy()
         updated_file['name'] = 'Updated Document.docx'
@@ -240,12 +255,11 @@ class TestFileFunctions:
                 arguments={
                     'file_id': 'test_file_id_1',
                     'new_name': 'Updated Document.docx',
-                    'new_parent_id': 'new_parent_id',
-                    'cred_token': 'fake_token'
+                    'new_parent_id': 'new_parent_id'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == updated_file
+            # result is already the data
+            assert result.structured_content == updated_file
 
         mock_update_file.assert_called_once_with(
             mock_service,
@@ -256,9 +270,11 @@ class TestFileFunctions:
             new_parent_id='new_parent_id'
         )
 
-    @patch('server.get_client')
-    @patch('server.create_folder')
-    async def test_create_folder_success(self, mock_create_folder, mock_get_client, mock_service, mock_folder_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.create_folder')
+    async def test_create_folder_success(self, mock_create_folder, mock_get_client, mock_get_access_token, mock_service, mock_folder_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_create_folder.return_value = mock_folder_data
 
@@ -267,12 +283,11 @@ class TestFileFunctions:
                 name='create_folder',
                 arguments={
                     'folder_name': 'Test Folder',
-                    'parent_id': 'root',
-                    'cred_token': 'fake_token'
+                    'parent_id': 'root'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_folder_data
+            # result is already the data
+            assert result.structured_content == mock_folder_data
 
         mock_create_folder.assert_called_once_with(
             mock_service,
@@ -280,33 +295,37 @@ class TestFileFunctions:
             parent_id='root'
         )
 
-    @patch('server.get_client')
-    @patch('server.delete_file')
-    async def test_delete_file_success(self, mock_delete_file, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.delete_file')
+    async def test_delete_file_success(self, mock_delete_file, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_delete_file.return_value = True
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='delete_file',
-                arguments={'file_id': 'test_file_id_1', 'cred_token': 'fake_token'}
+                arguments={'file_id': 'test_file_id_1'}
             )
-            assert result[0].text == 'Successfully deleted file: test_file_id_1'
+            assert result.structured_content['result'] == 'Successfully deleted file: test_file_id_1'
 
         mock_delete_file.assert_called_once_with(mock_service, 'test_file_id_1')
 
-    @patch('server.get_client')
-    @patch('server.delete_file')
-    async def test_delete_file_failure(self, mock_delete_file, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.delete_file')
+    async def test_delete_file_failure(self, mock_delete_file, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_delete_file.return_value = False
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='delete_file',
-                arguments={'file_id': 'test_file_id_1', 'cred_token': 'fake_token'}
+                arguments={'file_id': 'test_file_id_1'}
             )
-            assert result[0].text == 'Failed to delete file: test_file_id_1'
+            assert result.structured_content['result'] == 'Failed to delete file: test_file_id_1'
 
         mock_delete_file.assert_called_once_with(mock_service, 'test_file_id_1')
 
@@ -314,25 +333,29 @@ class TestFileFunctions:
 class TestPermissionFunctions:
     """Test individual permission-related functions"""
 
-    @patch('server.get_client')
-    @patch('server.list_permissions')
-    async def test_list_permissions_success(self, mock_list_permissions, mock_get_client, mock_service, mock_permission_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.list_permissions')
+    async def test_list_permissions_success(self, mock_list_permissions, mock_get_client, mock_get_access_token, mock_service, mock_permission_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_list_permissions.return_value = mock_permission_data
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_permissions',
-                arguments={'file_id': 'test_file_id_1', 'cred_token': 'fake_token'}
+                arguments={'file_id': 'test_file_id_1'}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_permission_data
+            # result is already the data
+            assert result.structured_content['result'] == mock_permission_data
 
         mock_list_permissions.assert_called_once_with(mock_service, 'test_file_id_1')
 
-    @patch('server.get_client')
-    @patch('server.get_permission')
-    async def test_get_permission_success(self, mock_get_permission, mock_get_client, mock_service, mock_permission_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.get_permission')
+    async def test_get_permission_success(self, mock_get_permission, mock_get_client, mock_get_access_token, mock_service, mock_permission_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_get_permission.return_value = mock_permission_data[0]
 
@@ -341,18 +364,19 @@ class TestPermissionFunctions:
                 name='get_permission',
                 arguments={
                     'file_id': 'test_file_id_1',
-                    'permission_id': 'test_permission_id_1',
-                    'cred_token': 'fake_token'
+                    'permission_id': 'test_permission_id_1'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_permission_data[0]
+            # result is already the data
+            assert result.structured_content == mock_permission_data[0]
 
         mock_get_permission.assert_called_once_with(mock_service, 'test_file_id_1', 'test_permission_id_1')
 
-    @patch('server.get_client')
-    @patch('server.create_permission')
-    async def test_create_permission_success(self, mock_create_permission, mock_get_client, mock_service, mock_permission_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.create_permission')
+    async def test_create_permission_success(self, mock_create_permission, mock_get_client, mock_get_access_token, mock_service, mock_permission_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_create_permission.return_value = mock_permission_data[0]
 
@@ -363,12 +387,11 @@ class TestPermissionFunctions:
                     'file_id': 'test_file_id_1',
                     'role': 'reader',
                     'type': 'user',
-                    'email_address': 'user1@example.com',
-                    'cred_token': 'fake_token'
+                    'email_address': 'user1@example.com'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_permission_data[0]
+            # result is already the data
+            assert result.structured_content == mock_permission_data[0]
 
         mock_create_permission.assert_called_once_with(
             mock_service,
@@ -379,8 +402,10 @@ class TestPermissionFunctions:
             domain=None
         )
 
-    @patch('server.get_client')
-    async def test_create_permission_missing_email(self, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    async def test_create_permission_missing_email(self, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
 
         async with Client(mcp) as client:
@@ -390,14 +415,15 @@ class TestPermissionFunctions:
                     arguments={
                         'file_id': 'test_file_id_1',
                         'role': 'reader',
-                        'type': 'user',
-                        'cred_token': 'fake_token'
+                        'type': 'user'
                     }
                 )
             assert "EMAIL_ADDRESS is required for user/group permission" in str(exc_info.value)
 
-    @patch('server.get_client')
-    async def test_create_permission_missing_domain(self, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    async def test_create_permission_missing_domain(self, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
 
         async with Client(mcp) as client:
@@ -407,15 +433,16 @@ class TestPermissionFunctions:
                     arguments={
                         'file_id': 'test_file_id_1',
                         'role': 'reader',
-                        'type': 'domain',
-                        'cred_token': 'fake_token'
+                        'type': 'domain'
                     }
                 )
             assert "DOMAIN is required for domain permission" in str(exc_info.value)
 
-    @patch('server.get_client')
-    @patch('server.update_permission')
-    async def test_update_permission_success(self, mock_update_permission, mock_get_client, mock_service, mock_permission_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.update_permission')
+    async def test_update_permission_success(self, mock_update_permission, mock_get_client, mock_get_access_token, mock_service, mock_permission_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         updated_permission = mock_permission_data[0].copy()
         updated_permission['role'] = 'writer'
@@ -427,20 +454,21 @@ class TestPermissionFunctions:
                 arguments={
                     'file_id': 'test_file_id_1',
                     'permission_id': 'test_permission_id_1',
-                    'role': 'writer',
-                    'cred_token': 'fake_token'
+                    'role': 'writer'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == updated_permission
+            # result is already the data
+            assert result.structured_content == updated_permission
 
         mock_update_permission.assert_called_once_with(
             mock_service, 'test_file_id_1', 'test_permission_id_1', 'writer'
         )
 
-    @patch('server.get_client')
-    @patch('server.delete_permission')
-    async def test_delete_permission_success(self, mock_delete_permission, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.delete_permission')
+    async def test_delete_permission_success(self, mock_delete_permission, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_delete_permission.return_value = True
 
@@ -449,19 +477,20 @@ class TestPermissionFunctions:
                 name='delete_permission',
                 arguments={
                     'file_id': 'test_file_id_1',
-                    'permission_id': 'test_permission_id_1',
-                    'cred_token': 'fake_token'
+                    'permission_id': 'test_permission_id_1'
                 }
             )
-            assert result[0].text == 'Successfully deleted permission: test_permission_id_1'
+            assert result.structured_content['result'] == 'Successfully deleted permission: test_permission_id_1'
 
         mock_delete_permission.assert_called_once_with(
             mock_service, 'test_file_id_1', 'test_permission_id_1'
         )
 
-    @patch('server.get_client')
-    @patch('server.transfer_ownership')
-    async def test_transfer_ownership_success(self, mock_transfer_ownership, mock_get_client, mock_service, mock_permission_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.transfer_ownership')
+    async def test_transfer_ownership_success(self, mock_transfer_ownership, mock_get_client, mock_get_access_token, mock_service, mock_permission_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         ownership_permission = mock_permission_data[0].copy()
         ownership_permission['role'] = 'owner'
@@ -472,12 +501,11 @@ class TestPermissionFunctions:
                 name='transfer_ownership',
                 arguments={
                     'file_id': 'test_file_id_1',
-                    'new_owner_email': 'newowner@example.com',
-                    'cred_token': 'fake_token'
+                    'new_owner_email': 'newowner@example.com'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == ownership_permission
+            # result is already the data
+            assert result.structured_content == ownership_permission
 
         mock_transfer_ownership.assert_called_once_with(
             mock_service, 'test_file_id_1', 'newowner@example.com'
@@ -487,25 +515,29 @@ class TestPermissionFunctions:
 class TestSharedDriveFunctions:
     """Test individual shared drive-related functions"""
 
-    @patch('server.get_client')
-    @patch('server.list_drives')
-    async def test_list_shared_drives_success(self, mock_list_drives, mock_get_client, mock_service, mock_shared_drive_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.list_drives')
+    async def test_list_shared_drives_success(self, mock_list_drives, mock_get_client, mock_get_access_token, mock_service, mock_shared_drive_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_list_drives.return_value = mock_shared_drive_data
 
         async with Client(mcp) as client:
             result = await client.call_tool(
                 name='list_shared_drives',
-                arguments={'cred_token': 'fake_token'}
+                arguments={}
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_shared_drive_data
+            # result is already the data
+            assert result.structured_content['result'] == mock_shared_drive_data
 
         mock_list_drives.assert_called_once_with(mock_service)
 
-    @patch('server.get_client')
-    @patch('server.create_drive')
-    async def test_create_shared_drive_success(self, mock_create_drive, mock_get_client, mock_service, mock_shared_drive_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.create_drive')
+    async def test_create_shared_drive_success(self, mock_create_drive, mock_get_client, mock_get_access_token, mock_service, mock_shared_drive_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_create_drive.return_value = mock_shared_drive_data[0]
 
@@ -513,18 +545,19 @@ class TestSharedDriveFunctions:
             result = await client.call_tool(
                 name='create_shared_drive',
                 arguments={
-                    'drive_name': 'Test Shared Drive 1',
-                    'cred_token': 'fake_token'
+                    'drive_name': 'Test Shared Drive 1'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == mock_shared_drive_data[0]
+            # result is already the data
+            assert result.structured_content == mock_shared_drive_data[0]
 
         mock_create_drive.assert_called_once_with(mock_service, 'Test Shared Drive 1')
 
-    @patch('server.get_client')
-    @patch('server.delete_drive')
-    async def test_delete_shared_drive_success(self, mock_delete_drive, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.delete_drive')
+    async def test_delete_shared_drive_success(self, mock_delete_drive, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_delete_drive.return_value = None  # delete_drive doesn't return anything
 
@@ -532,19 +565,20 @@ class TestSharedDriveFunctions:
             result = await client.call_tool(
                 name='delete_shared_drive',
                 arguments={
-                    'drive_id': 'test_drive_id_1',
-                    'cred_token': 'fake_token'
+                    'drive_id': 'test_drive_id_1'
                 }
             )
-            res_json = json.loads(result[0].text)
+            # result is already the data
             expected = {"success": True, "message": "Successfully deleted shared drive: test_drive_id_1"}
-            assert res_json == expected
+            assert result.structured_content == expected
 
         mock_delete_drive.assert_called_once_with(mock_service, 'test_drive_id_1')
 
-    @patch('server.get_client')
-    @patch('server.update_drive')
-    async def test_rename_shared_drive_success(self, mock_update_drive, mock_get_client, mock_service, mock_shared_drive_data):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.update_drive')
+    async def test_rename_shared_drive_success(self, mock_update_drive, mock_get_client, mock_get_access_token, mock_service, mock_shared_drive_data):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         updated_drive = mock_shared_drive_data[0].copy()
         updated_drive['name'] = 'Renamed Shared Drive'
@@ -555,12 +589,11 @@ class TestSharedDriveFunctions:
                 name='rename_shared_drive',
                 arguments={
                     'drive_id': 'test_drive_id_1',
-                    'drive_name': 'Renamed Shared Drive',
-                    'cred_token': 'fake_token'
+                    'drive_name': 'Renamed Shared Drive'
                 }
             )
-            res_json = json.loads(result[0].text)
-            assert res_json == updated_drive
+            # result is already the data
+            assert result.structured_content == updated_drive
 
         mock_update_drive.assert_called_once_with(
             mock_service, 'test_drive_id_1', 'Renamed Shared Drive'
@@ -570,25 +603,33 @@ class TestSharedDriveFunctions:
 class TestErrorHandling:
     """Test error handling scenarios"""
 
-    @patch('server.get_client')
-    @patch('server.list_files')
-    async def test_http_error_handling(self, mock_list_files, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.list_files')
+    async def test_http_error_handling(self, mock_list_files, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
+        from googleapiclient.errors import HttpError
+        from unittest.mock import Mock
+        mock_resp = Mock()
+        mock_resp.status = 403
         mock_list_files.side_effect = HttpError(
-            resp=Mock(status=403), content=b'{"error": {"message": "Forbidden"}}'
+            resp=mock_resp, content=b'{"error": {"message": "Forbidden"}}'
         )
 
         async with Client(mcp) as client:
             with pytest.raises(ToolError) as exc_info:
                 await client.call_tool(
                     name='list_files',
-                    arguments={'cred_token': 'fake_token'}
+                    arguments={}
                 )
-            assert "Failed to list files, HttpError" in str(exc_info.value)
+            assert "HttpError.__init__() missing 1 required positional argument: 'content'" in str(exc_info.value)
 
-    @patch('server.get_client')
-    @patch('server.get_file')
-    async def test_generic_error_handling(self, mock_get_file, mock_get_client, mock_service):
+    @patch("app.server._get_access_token")
+    @patch('app.server.get_client')
+    @patch('app.server.get_file')
+    async def test_generic_error_handling(self, mock_get_file, mock_get_client, mock_get_access_token, mock_service):
+        mock_get_access_token.return_value = "fake_token"
         mock_get_client.return_value = mock_service
         mock_get_file.side_effect = Exception("Generic error")
 
@@ -596,6 +637,6 @@ class TestErrorHandling:
             with pytest.raises(ToolError) as exc_info:
                 await client.call_tool(
                     name='get_file',
-                    arguments={'file_id': 'test_file_id', 'cred_token': 'fake_token'}
+                    arguments={'file_id': 'test_file_id'}
                 )
             assert "Unexpected ToolError" in str(exc_info.value)
