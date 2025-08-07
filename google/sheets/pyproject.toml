@@ -1,0 +1,33 @@
+[project]
+name = "obot-google-sheets"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=2.11.2",
+    "google-api-python-client>=2.178.0",
+    "gspread>=6.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.7",
+]
+
+[build-system]
+requires = ["uv_build>=0.7.21,<0.8.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = "."
+source-exclude = [
+    "tests/",
+    ".pytest_cache/",
+    "__pycache__/",
+    ".venv/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+]
