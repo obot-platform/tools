@@ -9,7 +9,7 @@ Metadata: noUserAuth: groq-model-provider
 ---
 !metadata:Groq:providerMeta
 {
-    "icon": "https://www.groq.com/logo.svg",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Groq_logo.svg",
     "link": "https://groq.com/",
     "envVars": [
         {
