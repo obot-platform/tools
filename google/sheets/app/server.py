@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Annotated
 
 from fastmcp import FastMCP
@@ -113,6 +114,38 @@ def list_worksheets_tool(
         raise ToolError(f"HttpError listing worksheets: {err}")
     except Exception as err:
         raise ToolError(f"Unexpected error listing worksheets: {err}")
+
+
+@mcp.tool(name="create_worksheet")
+def create_worksheet_tool(
+    spreadsheet_id: Annotated[str, Field(description="The ID of the spreadsheet to create a worksheet in.")],
+    worksheet_name: Annotated[str, Field(description="The name of the new worksheet.")],
+    rows: Annotated[int, Field(description="Number of rows for the new worksheet.", ge=1, le=1000, default=100)] = 100,
+    cols: Annotated[int, Field(description="Number of columns for the new worksheet.", ge=1, le=100, default=26)] = 26,
+) -> str:
+    """
+    Create a new worksheet (tab) in an existing spreadsheet.
+    Returns the ID of the created worksheet.
+    """
+    token = _get_access_token()
+    gspread_client = get_gspread_client(token)
+    
+    try:
+        spreadsheet = gspread_client.open_by_key(spreadsheet_id)
+        
+        # Create the new worksheet
+        worksheet = spreadsheet.add_worksheet(
+            title=worksheet_name, 
+            rows=rows, 
+            cols=cols
+        )
+        
+        return f"Worksheet '{worksheet_name}' created with ID: {worksheet.id}"
+        
+    except HttpError as err:
+        raise ToolError(f"HttpError creating worksheet: {err}")
+    except Exception as err:
+        raise ToolError(f"Unexpected error creating worksheet: {err}")
 
 
 @mcp.tool(
@@ -232,7 +265,7 @@ def update_cells_tool(
     
 ) -> str:
     """
-    Update cells in a spreadsheet.
+    Update cells in a spreadsheet. If the cell is out of bounds, the sheet will be automatically expanded to fit the cell.
     """
     token = _get_access_token()
     gspread_client = get_gspread_client(token)
@@ -302,11 +335,11 @@ def update_range_with_formula_tool(
 ) -> str:
     """
     Efficiently fills a range of cells with formula templates.
+    If the range is out of bounds, the sheet will be automatically expanded to fit the range.
     Supports placeholders: {row} for row number, {col} for column letter.
     Automatically expands sheet if needed.
     """
     # Validate formula template manually since we removed the Pydantic model
-    import re
     
     # Fast check for most common invalid patterns
     if '{col}{row}' in formula_template or '{row}{col}' in formula_template:
@@ -437,8 +470,37 @@ def append_row_tool(
         raise ToolError(f"Unexpected error appending row: {err}")
 
 
+@mcp.tool(name="clear_range")
+def clear_range_tool(
+    spreadsheet_id: Annotated[str, Field(description="The ID of the spreadsheet to clear data from.")],
+    cell_range: Annotated[str, Field(description="Range of cells to clear in A1 notation (e.g., 'A1:C10', 'D2:D100')")],
+    worksheet_name: Annotated[str | None, Field(description="The name of the worksheet to clear data from. If not provided, the first worksheet will be used.")] = None,
+) -> str:
+    """
+    Clear content from a range of cells in a spreadsheet.
+    Removes values but preserves formatting.
+    """
+    token = _get_access_token()
+    gspread_client = get_gspread_client(token)
+
+    try:
+        # Open the spreadsheet
+        spreadsheet = gspread_client.open_by_key(spreadsheet_id)
+        sheet = spreadsheet.worksheet(worksheet_name) if worksheet_name else spreadsheet.sheet1
+        
+        # Clear the range
+        sheet.batch_clear([cell_range])
+        
+        return f"Successfully cleared range {cell_range} in spreadsheet {spreadsheet_id}"
+        
+    except HttpError as err:
+        raise ToolError(f"HttpError clearing range: {err}")
+    except Exception as err:
+        raise ToolError(f"Unexpected error clearing range: {err}")
+
+
 def streamable_http_server():
-    """Main entry point for the Gmail MCP server."""
+    """Main entry point for the Google Sheets MCP server."""
     mcp.run(
         transport="streamable-http",  # fixed to streamable-http
         host="0.0.0.0",
