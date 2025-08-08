@@ -1,11 +1,10 @@
-import json
 import os
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from fastmcp.server.dependencies import get_http_headers
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from .helper import get_google_client, get_gspread_client
@@ -15,9 +14,6 @@ from gspread.utils import a1_range_to_grid_range, rowcol_to_a1, ValueInputOption
 from gspread.exceptions import APIError
 
 
-
-
-# Configure server-specific settings
 PORT = int(os.getenv("PORT", 9000))
 MCP_PATH = os.getenv("MCP_PATH", "/mcp/google-sheets")
 
@@ -130,7 +126,7 @@ def create_spreadsheet_tool(
     Returns the ID of the created spreadsheet.
     """
     token = _get_access_token()
-    google_client = get_google_client(token)
+    google_client = get_google_client(token, service_name="sheets", version="v4")
 
     props = {
         'properties': {
@@ -227,33 +223,6 @@ def delete_spreadsheet_tool(
 class CellUpdate(BaseModel):
     cell: str = Field(description="Cell address in A1 notation (e.g., 'A1', 'B2', 'C10')")
     value: str = Field(description="Value to set in the cell. Can be text, number, or formula (starting with '=')")
-
-# Remove the FormulaRange model class since we'll flatten the parameters
-# class FormulaRange(BaseModel):
-#     target_range: str = Field(description="Range to fill with formulas in A1 notation (e.g., 'D2:D100', 'A5:Z5')")
-#     formula_template: str = Field(description="Formula template with placeholders: {row} for row number, {col} for column letter. Must reference valid cells like 'B{row}', 'A{row}+C{row}', '{col}1', etc. Examples: '=B{row}-C{row}' or '={col}2*2'")
-#     
-#     @field_validator('formula_template')
-#     @classmethod
-#     def validate_formula_template(cls, v: str) -> str:
-#         """Validate that formula template will generate valid cell references"""
-#         import re
-#         
-#         # Fast check for most common invalid patterns
-#         if '{col}{row}' in v or '{row}{col}' in v:
-#             raise ValueError(f"Invalid formula template: '{v}' contains invalid pattern. Use either fixed column with {{row}} (e.g., 'A{{row}}') or fixed row with {{col}} (e.g., '{{col}}1')")
-#         
-#         # Check that placeholders are valid (only if they exist)
-#         if '{' in v:
-#             valid_placeholders = ['{row}', '{col}']
-#             used_placeholders = re.findall(r'\{[^}]+\}', v)
-#             
-#             for placeholder in used_placeholders:
-#                 if placeholder not in valid_placeholders:
-#                     raise ValueError(f"Invalid placeholder '{placeholder}'. Only {{row}} and {{col}} are supported")
-#         
-#         return v
-
 
 @mcp.tool(name="update_cells")
 def update_cells_tool(
