@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -12,7 +13,9 @@ import (
 
 	oauth2proxy "github.com/oauth2-proxy/oauth2-proxy/v7"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
+	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/sessions"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
+	"github.com/oauth2-proxy/oauth2-proxy/v7/providers"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/github-auth-provider/pkg/profile"
@@ -33,6 +36,8 @@ type Options struct {
 	GitHubToken              *string `usage:"the token to use when verifying repository collaborators (must have push access to the repository)" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_TOKEN"`
 	GitHubAllowUsers         *string `usage:"users allowed to log in, even if they do not belong to the specified org and team or collaborators" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS"`
 }
+
+var counter int64
 
 func main() {
 	var opts Options
@@ -118,7 +123,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	oauthProxy, err := oauth2proxy.NewOAuthProxy(oauthProxyOpts, oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
+	oauthProxy, err := oauth2proxy.NewOAuthProxy(
+		&oauth2proxy.OAuthProxyOptions{
+			Options: oauthProxyOpts,
+			WrapProvider: func(provider providers.Provider) providers.Provider {
+				return &profileProvider{Provider: provider}
+			},
+		},
+		oauth2proxy.NewValidator(oauthProxyOpts.EmailDomains, oauthProxyOpts.AuthenticatedEmailsFile))
 	if err != nil {
 		fmt.Printf("ERROR: github-auth-provider: failed to create oauth2 proxy: %v\n", err)
 		os.Exit(1)
@@ -133,7 +145,7 @@ func main() {
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("http://127.0.0.1:%s", port)))
 	})
-	mux.HandleFunc("/obot-get-state", getState(oauthProxy))
+	mux.HandleFunc("/obot-get-state", state.ObotGetState(oauthProxy))
 	mux.HandleFunc("/obot-get-user-info", func(w http.ResponseWriter, r *http.Request) {
 		userInfo, err := profile.FetchUserProfile(r.Context(), r.Header.Get("Authorization"))
 		if err != nil {
@@ -152,58 +164,40 @@ func main() {
 	}
 }
 
-func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var sr state.SerializableRequest
-		if err := json.NewDecoder(r.Body).Decode(&sr); err != nil {
-			http.Error(w, fmt.Sprintf("failed to decode request body: %v", err), http.StatusBadRequest)
-			return
-		}
+type profileProvider struct {
+	providers.Provider
+}
 
-		reqObj, err := http.NewRequest(sr.Method, sr.URL, nil)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to create request object: %v", err), http.StatusBadRequest)
-			return
-		}
-
-		reqObj.Header = sr.Header
-
-		ss, err := state.GetSerializableState(p, reqObj)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get state: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to get state: %v\n", err)
-			return
-		}
-
-		// The User on the state, for GitHub, is the GitHub username.
-		// This is bad, because we want the user ID instead.
-		// Make API requests to get more info about the authenticated user.
-		ss.PreferredUsername = ss.User
-
-		// Get user info
-		userProfile, err := profile.FetchUserProfile(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get user info: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to get user info: %v\n", err)
-			return
-		}
-		ss.User = fmt.Sprintf("%d", userProfile.ID)
-
-		// Add user teams and organizations to auth groups
-		groups, err := profile.FetchUserGroupInfos(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
-		if err != nil {
-			// Note: Not a fatal error
-			fmt.Printf("WARNING: github-auth-provider: failed to get user auth groups: %v\n", err)
-		}
-		ss.Groups = groups.IDs()
-		ss.GroupInfos = groups
-
-		if err := json.NewEncoder(w).Encode(ss); err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode state: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to encode state: %v\n", err)
-			return
-		}
+func (p *profileProvider) EnrichSession(ctx context.Context, session *sessions.SessionState) error {
+	if err := p.Provider.EnrichSession(ctx, session); err != nil {
+		return err
 	}
+
+	// The User on the state, for GitHub, is the GitHub username.
+	// This is bad, because we want the user ID instead.
+	// Make API requests to get more info about the authenticated user.
+	session.PreferredUsername = session.User
+
+	// Get user info
+	userProfile, err := profile.FetchUserProfile(ctx, fmt.Sprintf("token %s", session.AccessToken))
+	if err != nil {
+		return fmt.Errorf("failed to get user info: %v", err)
+	}
+	session.User = fmt.Sprintf("%d", userProfile.ID)
+
+	// Add user teams and organizations to auth groups
+	groups, err := profile.FetchUserGroupInfos(ctx, fmt.Sprintf("token %s", session.AccessToken))
+	if err != nil {
+		// Note: Not a fatal error
+		fmt.Printf("WARNING: github-auth-provider: failed to get user auth groups: %v\n", err)
+	}
+
+	session.Groups, err = groups.ToJSONStrings()
+	if err != nil {
+		return fmt.Errorf("failed to encode groups: %v", err)
+	}
+
+	return nil
 }
 
 func listGroups(providerToken string) http.HandlerFunc {
