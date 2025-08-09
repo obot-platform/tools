@@ -21,8 +21,6 @@ tools:
     reference: ./google/docs
   google-search-console:
     reference: ./google/search-console
-  google-sheets:
-    reference: ./google/sheets
   images:
     reference: ./images
   excel:
