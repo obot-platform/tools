@@ -65,7 +65,7 @@ async def list_emails_tool(
     max_results: Annotated[
         int, Field(description="Maximum number of emails to return.", ge=1, le=1000)
     ] = 100,
-    query: Annotated[str, Field(description="Query to search for emails.")] = "",
+    query: Annotated[str, Field(description="Search query in Gmail search syntax (e.g., 'from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread'). Don't use `before` or `after` in the query")] = "",
     label_ids: Annotated[
         Optional[str],
         Field(description="Comma-separated list of label IDs to filter emails by."),
@@ -74,8 +74,8 @@ async def list_emails_tool(
         Literal["primary", "social", "promotions", "updates", "forums"],
         Field(description="Category to filter emails by."),
     ] = "primary",
-    after: Annotated[str, Field(description="Date to search for emails after.")] = "",
-    before: Annotated[str, Field(description="Date to search for emails before.")] = "",
+    after: Annotated[str, Field(description="To only return emails received strictly **after** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)")] = "",
+    before: Annotated[str, Field(description="To only return emails received strictly **before** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)")] = "",
     user_timezone: str = "UTC",
 ) -> Union[list[str], str]:
     """
