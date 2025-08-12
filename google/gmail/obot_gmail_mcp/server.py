@@ -1,5 +1,5 @@
 import os
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Literal, Union
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
@@ -63,19 +63,19 @@ def _get_access_token() -> str:
 )
 async def list_emails_tool(
     max_results: Annotated[
-        int, Field(description="Maximum number of emails to return.", ge=1, le=1000)
-    ] = 100,
-    query: Annotated[str, Field(description="Search query in Gmail search syntax (e.g., 'from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread'). Don't use `before` or `after` in the query")] = "",
+        int, Field(description="Maximum number of emails to return.", ge=1, le=1000, default=50)
+    ] = 50,
     label_ids: Annotated[
-        Optional[str],
-        Field(description="Comma-separated list of label IDs to filter emails by."),
+        str | None,
+        Field(description="Comma-separated list of label IDs to filter emails by.", default=None),
     ] = None,
     category: Annotated[
         Literal["primary", "social", "promotions", "updates", "forums"],
-        Field(description="Category to filter emails by."),
+        Field(description="Category to filter emails by.", default="primary"),
     ] = "primary",
-    after: Annotated[str, Field(description="To only return emails received strictly **after** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)")] = "",
-    before: Annotated[str, Field(description="To only return emails received strictly **before** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)")] = "",
+    after: Annotated[str, Field(description="To only return emails received strictly **after** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)", default="")] = "",
+    before: Annotated[str, Field(description="To only return emails received strictly **before** this timestamp. Format: `YYYY-MM-DDTHH:MM:SS±HH:MM` (ISO 8601 format with timezone offset)", default="")] = "",
+    query: Annotated[str, Field(description="Search query in Gmail search syntax (e.g., 'from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread'). Don't use `before` or `after` in the query. Prefer using `label_ids` and `category` instead. of adding them to the query.", default="")] = "",
     user_timezone: str = "UTC",
 ) -> Union[list[str], str]:
     """
@@ -151,7 +151,7 @@ async def list_emails_tool(
 )
 def list_drafts_tool(
     max_results: Annotated[
-        int, Field(description="Maximum number of drafts to return.", ge=1, le=20)
+        int, Field(description="Maximum number of drafts to return.", ge=1, le=20, default=10)
     ] = 10,
 ) -> list:
     """
@@ -172,7 +172,7 @@ def list_drafts_tool(
 )
 def list_labels_tool(
     label_id: Annotated[
-        Optional[str], Field(description="Label ID to fetch (optional)")
+        str | None, Field(description="Label ID to fetch", default=None)
     ] = None,
 ) -> list[dict]:
     """
@@ -219,14 +219,13 @@ def create_label_tool(
 def update_label_tool(
     label_id: Annotated[str, Field(description="ID of the label to update.")],
     label_name: Annotated[
-        Optional[str], Field(description="New name for the label")
+        str | None, Field(description="New name for the label", default=None)
     ] = None,
     label_list_visibility: Annotated[
-        Optional[Literal["labelShow", "labelHide", "labelShowIfUnread"]],
-        Field(description="Label list visibility"),
+        Literal["labelShow", "labelHide", "labelShowIfUnread"] | None, Field(description="Label list visibility", default=None)
     ] = None,
     message_list_visibility: Annotated[
-        Optional[Literal["show", "hide"]], Field(description="Message list visibility")
+        Literal["show", "hide"] | None, Field(description="Message list visibility", default=None)
     ] = None,
 ) -> dict:
     """
@@ -255,6 +254,14 @@ def delete_label_tool(
     return result
 
 
+def _parse_str_to_bool(value: str) -> bool:
+    if value.lower() == "true":
+        return True
+    elif value.lower() == "false":
+        return False
+    else:
+        raise ValueError(f"Invalid boolean value: {value}")
+
 @mcp.tool(
     name="modify_message_labels",
 )
@@ -263,25 +270,25 @@ def modify_message_labels_tool(
         str, Field(description="ID of the email message to modify labels for.")
     ],
     add_label_ids: Annotated[
-        Optional[list[str]], Field(description="List of label IDs to add")
+        list[str] | None, Field(description="List of label IDs to add", default=None)
     ] = None,
     remove_label_ids: Annotated[
-        Optional[list[str]], Field(description="List of label IDs to remove")
+        list[str] | None, Field(description="List of label IDs to remove", default=None)
     ] = None,
     archive: Annotated[
-        Optional[bool], Field(description="Whether to archive the message")
+        bool | str | None, Field(description="Whether to archive the message", default=None)
     ] = None,
     mark_as_read: Annotated[
-        Optional[bool], Field(description="Whether to mark the message as read")
+        bool | str | None, Field(description="Whether to mark the message as read", default=None)
     ] = None,
     mark_as_starred: Annotated[
-        Optional[bool], Field(description="Whether to mark the message as starred")
+        bool | str | None, Field(description="Whether to mark the message as starred", default=None)
     ] = None,
     mark_as_important: Annotated[
-        Optional[bool], Field(description="Whether to mark the message as important")
+        bool | str | None, Field(description="Whether to mark the message as important", default=None)
     ] = None,
     apply_action_to_thread: Annotated[
-        bool, Field(description="Whether to apply action to the whole thread")
+        bool | str, Field(description="Whether to apply action to the whole thread", default=False)
     ] = False,
 ) -> dict:
     """
@@ -291,6 +298,11 @@ def modify_message_labels_tool(
     service = get_client(access_token)
     add_labels = parse_label_ids(add_label_ids) if add_label_ids else None
     remove_labels = parse_label_ids(remove_label_ids) if remove_label_ids else None
+    archive = _parse_str_to_bool(archive) if isinstance(archive, str) else archive
+    mark_as_read = _parse_str_to_bool(mark_as_read) if isinstance(mark_as_read, str) else mark_as_read
+    mark_as_starred = _parse_str_to_bool(mark_as_starred) if isinstance(mark_as_starred, str) else mark_as_starred
+    mark_as_important = _parse_str_to_bool(mark_as_important) if isinstance(mark_as_important, str) else mark_as_important
+    apply_action_to_thread = _parse_str_to_bool(apply_action_to_thread) if isinstance(apply_action_to_thread, str) else (apply_action_to_thread if apply_action_to_thread is not None else False)
     res = modify_message_labels(
         service,
         email_id,
@@ -335,22 +347,24 @@ async def create_draft_tool(
     subject: Annotated[str, Field(description="Subject of the email.")],
     message: Annotated[str, Field(description="Message body of the email.")],
     cc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to cc the email to (Optional)"
+            description="Comma-separated list of email addresses to cc the email to",
+            default=None
         ),
     ] = None,
     bcc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to bcc the email to (Optional)"
+            description="Comma-separated list of email addresses to bcc the email to",
+            default=None
         ),
     ] = None,
     reply_to_email_id: Annotated[
-        Optional[str], Field(description="The ID of the email to reply to (Optional)")
+        str | None, Field(description="The ID of the email to reply to", default=None)
     ] = None,
     reply_all: Annotated[
-        bool, Field(description="Whether to reply to all (Optional: Default is false)")
+        bool | str, Field(description="Whether to reply to all", default=False)
     ] = False,
     # attachments: Annotated[list[str], Field(description="List of workspace file paths to attach to the email (Optional)")] = None, # not supported yet till workspace is implemented
 ) -> str:
@@ -359,6 +373,7 @@ async def create_draft_tool(
     """
     access_token = _get_access_token()
     service = get_client(access_token)
+    reply_all = _parse_str_to_bool(reply_all) if isinstance(reply_all, str) else reply_all
     # att_list = [a.strip() for a in attachments if a.strip()]
     try:
         draft_obj = await create_message_data(
@@ -428,15 +443,17 @@ def delete_email_tool(
 )
 def read_email_tool(
     email_id: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Email or Draft ID to read (Optional: If not provided, email_subject is required)"
+            description="Email or Draft ID to read (Optional: If not provided, email_subject is required)",
+            default=None
         ),
     ] = None,
     email_subject: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Email subject to read (Optional: If not provided, email_id is required)"
+            description="Email subject to read (Optional: If not provided, email_id is required)",
+            default=None
         ),
     ] = None,
     user_timezone: str = "UTC",
@@ -510,15 +527,17 @@ async def send_email_tool(
     subject: Annotated[str, Field(description="Subject of the email.")],
     message: Annotated[str, Field(description="Message body of the email.")],
     cc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to cc the email to (Optional)"
+            description="Comma-separated list of email addresses to cc the email to (Optional)",
+            default=None
         ),
     ] = None,
     bcc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to bcc the email to (Optional)"
+            description="Comma-separated list of email addresses to bcc the email to (Optional)",
+            default=None
         ),
     ] = None,
     # attachments: Annotated[list[str], Field(description="List of workspace file paths to attach to the email (Optional)")] = None, # not supported yet till workspace is implemented
@@ -565,22 +584,24 @@ async def update_draft_tool(
     subject: Annotated[str, Field(description="Subject of the email.")],
     message: Annotated[str, Field(description="Message body of the email.")],
     cc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to cc the email to (Optional)"
+            description="Comma-separated list of email addresses to cc the email to",
+            default=None
         ),
     ] = None,
     bcc_emails: Annotated[
-        Optional[str],
+        str | None,
         Field(
-            description="Comma-separated list of email addresses to bcc the email to (Optional)"
+            description="Comma-separated list of email addresses to bcc the email to",
+            default=None
         ),
     ] = None,
     reply_to_email_id: Annotated[
-        Optional[str], Field(description="The ID of the email to reply to (Optional)")
+        str | None, Field(description="The ID of the email to reply to", default=None)
     ] = None,
     reply_all: Annotated[
-        bool, Field(description="Whether to reply to all (Optional: Default is false)")
+        bool | str, Field(description="Whether to reply to all", default=False)
     ] = False,
     # attachments: Annotated[list[str], Field(description="List of workspace file paths to attach to the email (Optional)")] = None, # not supported yet till workspace is implemented
 ) -> str:
@@ -589,6 +610,7 @@ async def update_draft_tool(
     """
     access_token = _get_access_token()
     service = get_client(access_token)
+    reply_all = _parse_str_to_bool(reply_all) if isinstance(reply_all, str) else reply_all
     # att_list = [a.strip() for a in attachments if a.strip()] if attachments else []
     try:
         draft_response = await update_draft(
