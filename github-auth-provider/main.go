@@ -143,6 +143,7 @@ func main() {
 		json.NewEncoder(w).Encode(userInfo)
 	})
 	mux.HandleFunc("/obot-list-auth-groups", listGroups(legacyOpts.LegacyProvider.GitHubToken))
+	mux.HandleFunc("/obot-list-user-auth-groups", listUserGroups)
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
@@ -188,15 +189,6 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			return
 		}
 		ss.User = fmt.Sprintf("%d", userProfile.ID)
-
-		// Add user teams and organizations to auth groups
-		groups, err := profile.FetchUserGroupInfos(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
-		if err != nil {
-			// Note: Not a fatal error
-			fmt.Printf("WARNING: github-auth-provider: failed to get user auth groups: %v\n", err)
-		}
-		ss.Groups = groups.IDs()
-		ss.GroupInfos = groups
 
 		if err := json.NewEncoder(w).Encode(ss); err != nil {
 			http.Error(w, fmt.Sprintf("failed to encode state: %v", err), http.StatusInternalServerError)
@@ -252,5 +244,29 @@ func listGroups(providerToken string) http.HandlerFunc {
 			http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func listUserGroups(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "no authorization token provided", http.StatusUnauthorized)
+		return
+	}
+
+	groups, err := profile.FetchUserGroupInfos(r.Context(), token)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Handle nil groups slice
+	if groups == nil {
+		groups = state.GroupInfoList{}
+	}
+
+	if err := json.NewEncoder(w).Encode(groups); err != nil {
+		http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
+		return
 	}
 }
