@@ -1,7 +1,9 @@
 {
   "type": "module",
   "scripts": {
-    "tool": "node --no-warnings --loader ts-node/esm src/tools.ts"
+    "tool": "node --no-warnings --loader ts-node/esm src/tools.ts",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
   },
   "devDependencies": {
     "@types/node": "^22.15.2",

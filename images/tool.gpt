@@ -13,7 +13,7 @@ Credential: github.com/gptscript-ai/credentials/model-provider
 Metadata: noUserAuth: sys.model.provider.credential
 Share Context: Analyze Images Context
 Param: prompt: (optional) A prompt to analyze the images with (defaults "Provide a brief description of each image")
-Param: images: (required) A JSON array containing one or more URLs or file paths of images to analyze. Only supports jpeg, png, and webp.
+Param: images: (required) a new-line delimited string containing one or more URLs or file paths of images to analyze. Only supports jpeg, png, and webp.
 
 #!/usr/bin/env npm --silent --prefix ${GPTSCRIPT_TOOL_DIR} run tool -- analyzeImages
 
