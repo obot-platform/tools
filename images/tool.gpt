@@ -52,9 +52,9 @@ Use the Analyze Images tool to whenever you need to inspect, compare, or answer 
 
 You can pass multiple images to the Analyze Images tool at once using a single call.
 
-When calling the Analyze Images tool, always provide a JSON array containing one or more URLs or workspace file paths for the `images` argument, even if you are only analyzing a single image.
-e.g. Analyzing a single image: ["https://example.com/image2.png"]
-e.g. Analyzing multiple images: ["https://example.com/image1.webp", "cool.jpg", "cow.webp", "generated_image_defg1234.png", "https://example.com/image2.png"]
+When calling the Analyze Images tool, always provide a new-line delimited string containing one or more URLs or workspace file paths for the `images` argument.
+e.g. Analyzing a single image: "https://example.com/image2.png"
+e.g. Analyzing multiple images: "https://example.com/image1.webp\ncool.jpg\ncow.webp\ngenerated_image_defg1234.png\nhttps://example.com/image2.png"
 </analyze_image_tool_instructions>
 
 ---
