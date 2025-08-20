@@ -1,0 +1,14 @@
+[project]
+name = "wordpress-mcp"
+version = "0.1.0"
+description = "WordPress MCP Server - Manage posts, media, categories, and more on WordPress sites"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp",
+    "requests",
+    "python-dotenv",
+    "typing-extensions",
+]
+
+[project.scripts]
+wordpress-mcp = "main:main"
