@@ -1,6 +1,6 @@
 """WordPress Categories management tools."""
 
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Any, Annotated
 
 from src.server import mcp
 from src.config import config
@@ -22,27 +22,16 @@ def _format_category_response(response_json: Union[dict, list]) -> Union[dict, l
 
 @mcp.tool
 def list_categories(
-    context: str = "view",
-    page: int = 1,
-    per_page: int = 10,
-    search_query: Optional[str] = None,
-    order: str = "asc",
-    parent_id: Optional[int] = None,
-    post_id: Optional[int] = None,
-    slug: Optional[str] = None
+    context: Annotated[str, "The context of categories to list (view, embed, edit) - default: view"] = "view",
+    page: Annotated[int, "Page number to list - default: 1"] = 1,
+    per_page: Annotated[int, "Number of categories per page - default: 10"] = 10,
+    search_query: Annotated[Optional[str], "Limit results to those matching a string - default: None"] = None,
+    order: Annotated[str, "Sort order (asc, desc) - default: asc"] = "asc",
+    parent_id: Annotated[Optional[int], "Limit to categories assigned to a specific parent ID - default: None"] = None,
+    post_id: Annotated[Optional[int], "Limit to categories assigned to a specific post ID - default: None"] = None,
+    slug: Annotated[Optional[str], "Limit to category matching a specific slug - default: None"] = None
 ) -> Dict[str, Any]:
-    """List available categories in WordPress site.
-    
-    Args:
-        context: The context of categories to list (view, embed, edit) - default: view
-        page: Page number to list - default: 1
-        per_page: Number of categories per page - default: 10
-        search_query: Limit results to those matching a string
-        order: Sort order (asc, desc) - default: asc
-        parent_id: Limit to categories assigned to a specific parent ID
-        post_id: Limit to categories assigned to a specific post ID
-        slug: Limit to category matching a specific slug
-    """
+    """List available categories in WordPress site."""
     # Validate parameters
     if context not in ["view", "embed", "edit"]:
         raise ValueError(f"Invalid context: {context}")
@@ -82,19 +71,12 @@ def list_categories(
 
 @mcp.tool
 def create_category(
-    category_name: str,
-    description: Optional[str] = None,
-    slug: Optional[str] = None,
-    parent_id: Optional[int] = None
+    category_name: Annotated[str, "The name of the category"],
+    description: Annotated[Optional[str], "The description of the category (accepts HTML tags) - default: None"] = None,
+    slug: Annotated[Optional[str], "The slug for the category - default: None"] = None,
+    parent_id: Annotated[Optional[int], "The ID of the parent category - default: None"] = None
 ) -> Dict[str, Any]:
-    """Create a new category in WordPress site.
-    
-    Args:
-        category_name: The name of the category
-        description: The description of the category (accepts HTML tags)
-        slug: The slug for the category
-        parent_id: The ID of the parent category
-    """
+    """Create a new category in WordPress site."""
     if not category_name.strip():
         raise ValueError("Category name is required")
     
@@ -124,20 +106,15 @@ def create_category(
 
 @mcp.tool
 def update_category(
-    category_id: int,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
-    slug: Optional[str] = None,
-    parent_id: Optional[int] = None
+    category_id: Annotated[int, "The ID of the category to update"],
+    name: Annotated[Optional[str], "New name of the category - default: None"] = None,
+    description: Annotated[Optional[str], "New description of the category (accepts HTML tags) - default: None"] = None,
+    slug: Annotated[Optional[str], "New slug for the category - default: None"] = None,
+    parent_id: Annotated[Optional[int], "New parent ID of the category - default: None"] = None
 ) -> Dict[str, Any]:
     """Update an existing category in WordPress site. Only provided fields will be updated.
     
-    Args:
-        category_id: The ID of the category to update
-        name: New name of the category
-        description: New description of the category (accepts HTML tags)
-        slug: New slug for the category
-        parent_id: New parent ID of the category
+    At least one field must be provided to update.
     """
     # Build update data (only include provided fields)
     category_data = {}
@@ -173,11 +150,10 @@ def update_category(
 
 
 @mcp.tool
-def delete_category(category_id: int) -> Dict[str, Any]:
+def delete_category(category_id: Annotated[int, "The ID of the category to delete"]) -> Dict[str, Any]:
     """Delete a category in WordPress site.
     
-    Args:
-        category_id: The ID of the category to delete
+    Posts previously assigned to this category will be moved to 'Uncategorized'.
     """
     session = config.create_session()
     response = session.delete(f"{config.api_url}/categories/{category_id}")

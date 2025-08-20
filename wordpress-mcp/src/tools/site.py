@@ -1,6 +1,6 @@
 """WordPress Site management tools."""
 
-from typing import Dict, Any
+from typing import Dict, Any, Annotated
 
 from src.server import mcp
 from src.config import config

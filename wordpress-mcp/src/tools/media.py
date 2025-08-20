@@ -1,6 +1,6 @@
 """WordPress Media management tools."""
 
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Any, Annotated
 from urllib.parse import quote
 
 from src.server import mcp
@@ -25,32 +25,21 @@ def _format_media_response(response_json: Union[dict, list]) -> Union[dict, list
 
 @mcp.tool
 def list_media(
-    context: str = "view",
-    page: int = 1,
-    per_page: int = 10,
-    media_type: Optional[str] = None,
-    author_ids: Optional[str] = None,
-    search_query: Optional[str] = None,
-    publish_after: Optional[str] = None,
-    publish_before: Optional[str] = None,
-    modified_after: Optional[str] = None,
-    modified_before: Optional[str] = None,
-    order: str = "desc"
+    context: Annotated[str, "The context of media files to list (view, embed, edit) - default: view"] = "view",
+    page: Annotated[int, "Page number to list - default: 1"] = 1,
+    per_page: Annotated[int, "Number of media files per page - default: 10"] = 10,
+    media_type: Annotated[Optional[str], "Limit to specific media type (image, video, text, application, audio) - default: None"] = None,
+    author_ids: Annotated[Optional[str], "Comma-separated list of author IDs - default: None"] = None,
+    search_query: Annotated[Optional[str], "Limit results to those matching a string - default: None"] = None,
+    publish_after: Annotated[Optional[str], "ISO 8601 date to filter media files uploaded after - default: None"] = None,
+    publish_before: Annotated[Optional[str], "ISO 8601 date to filter media files uploaded before - default: None"] = None,
+    modified_after: Annotated[Optional[str], "ISO 8601 date to filter media files modified after - default: None"] = None,
+    modified_before: Annotated[Optional[str], "ISO 8601 date to filter media files modified before - default: None"] = None,
+    order: Annotated[str, "Sort order (asc, desc) - default: desc"] = "desc"
 ) -> Dict[str, Any]:
     """List media files in WordPress site and get basic information of each media file.
     
-    Args:
-        context: The context of media files to list (view, embed, edit) - default: view
-        page: Page number to list - default: 1
-        per_page: Number of media files per page - default: 10
-        media_type: Limit to specific media type (image, video, text, application, audio)
-        author_ids: Comma-separated list of author IDs
-        search_query: Limit results to those matching a string
-        publish_after: ISO 8601 date to filter media files uploaded after
-        publish_before: ISO 8601 date to filter media files uploaded before
-        modified_after: ISO 8601 date to filter media files modified after
-        modified_before: ISO 8601 date to filter media files modified before
-        order: Sort order (asc, desc) - default: desc
+    Date parameters must be valid ISO 8601 date strings (YYYY-MM-DDTHH:MM:SS).
     """
     # Validate parameters
     if context not in ["view", "embed", "edit"]:
@@ -118,18 +107,14 @@ def list_media(
 
 @mcp.tool
 def update_media(
-    media_id: int,
-    title: Optional[str] = None,
-    slug: Optional[str] = None,
-    author_id: Optional[int] = None
+    media_id: Annotated[int, "The ID of the media file"],
+    title: Annotated[Optional[str], "New title for the media file - default: None"] = None,
+    slug: Annotated[Optional[str], "New slug for the media file - default: None"] = None,
+    author_id: Annotated[Optional[int], "New author ID for the media file - default: None"] = None
 ) -> Dict[str, Any]:
     """Update the metadata of a media file in WordPress site.
     
-    Args:
-        media_id: The ID of the media file
-        title: New title for the media file
-        slug: New slug for the media file
-        author_id: New author ID for the media file
+    At least one field must be provided to update.
     """
     # Build update data (only include provided fields)
     media_data = {}
@@ -158,12 +143,8 @@ def update_media(
 
 
 @mcp.tool
-def delete_media(media_id: int) -> Dict[str, Any]:
-    """Delete a media file in WordPress site.
-    
-    Args:
-        media_id: The ID of the media file to delete
-    """
+def delete_media(media_id: Annotated[int, "The ID of the media file to delete"]) -> Dict[str, Any]:
+    """Delete a media file in WordPress site."""
     session = config.create_session()
     response = session.delete(f"{config.api_url}/media/{media_id}")
     

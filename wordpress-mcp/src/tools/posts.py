@@ -1,6 +1,6 @@
 """WordPress Posts management tools."""
 
-from typing import Optional, List, Union, Dict, Any
+from typing import Optional, List, Union, Dict, Any, Annotated
 from urllib.parse import quote
 import requests
 
@@ -26,36 +26,24 @@ def _format_posts_response(response_json: Union[dict, list]) -> Union[dict, list
 
 @mcp.tool
 def list_posts(
-    context: str = "view",
-    page: int = 1,
-    per_page: int = 10,
-    author_ids: Optional[str] = None,
-    search_query: Optional[str] = None,
-    statuses: str = "publish",
-    publish_after: Optional[str] = None,
-    publish_before: Optional[str] = None,
-    modified_after: Optional[str] = None,
-    modified_before: Optional[str] = None,
-    order: str = "desc",
-    categories: Optional[str] = None,
-    tags: Optional[str] = None
+    context: Annotated[str, "The context of posts to list (view, embed, edit) - default: view"] = "view",
+    page: Annotated[int, "Page number to list - default: 1"] = 1,
+    per_page: Annotated[int, "Number of posts per page - default: 10"] = 10,
+    author_ids: Annotated[Optional[str], "Comma-separated list of author IDs - default: None"] = None,
+    search_query: Annotated[Optional[str], "Limit results to those matching a string - default: None"] = None,
+    statuses: Annotated[str, "Comma-separated list of statuses - default: publish"] = "publish",
+    publish_after: Annotated[Optional[str], "ISO 8601 date to filter posts published after - default: None"] = None,
+    publish_before: Annotated[Optional[str], "ISO 8601 date to filter posts published before - default: None"] = None,
+    modified_after: Annotated[Optional[str], "ISO 8601 date to filter posts modified after - default: None"] = None,
+    modified_before: Annotated[Optional[str], "ISO 8601 date to filter posts modified before - default: None"] = None,
+    order: Annotated[str, "Sort order (asc, desc) - default: desc"] = "desc",
+    categories: Annotated[Optional[str], "Comma-separated list of category IDs - default: None"] = None,
+    tags: Annotated[Optional[str], "Comma-separated list of tag IDs - default: None"] = None
 ) -> Dict[str, Any]:
     """List posts in WordPress site and get basic information of each post.
     
-    Args:
-        context: The context of posts to list (view, embed, edit)
-        page: Page number to list (default: 1)
-        per_page: Number of posts per page (default: 10)
-        author_ids: Comma-separated list of author IDs
-        search_query: Limit results to those matching a string
-        statuses: Comma-separated list of statuses (default: publish)
-        publish_after: ISO 8601 date to filter posts published after
-        publish_before: ISO 8601 date to filter posts published before  
-        modified_after: ISO 8601 date to filter posts modified after
-        modified_before: ISO 8601 date to filter posts modified before
-        order: Sort order (asc, desc) (default: desc)
-        categories: Comma-separated list of category IDs
-        tags: Comma-separated list of tag IDs
+    Date parameters must be valid ISO 8601 date strings (YYYY-MM-DDTHH:MM:SS).
+    Valid statuses: publish, future, draft, pending, private, trash, auto-draft, inherit.
     """
     # Validate parameters
     if context not in ["view", "embed", "edit"]:
@@ -142,17 +130,11 @@ def list_posts(
 
 @mcp.tool
 def retrieve_post(
-    post_id: int,
-    context: str = "view",
-    password: Optional[str] = None
+    post_id: Annotated[int, "The ID of the post"],
+    context: Annotated[str, "The context of the post (view, embed, edit) - default: view"] = "view",
+    password: Annotated[Optional[str], "Password for protected posts - default: None"] = None
 ) -> Dict[str, Any]:
-    """Retrieve all metadata of a post in WordPress site.
-    
-    Args:
-        post_id: The ID of the post
-        context: The context of the post (view, embed, edit)
-        password: Password for protected posts
-    """
+    """Retrieve all metadata of a post in WordPress site."""
     if context not in ["view", "embed", "edit"]:
         raise ValueError(f"Invalid context: {context}")
     
@@ -175,40 +157,26 @@ def retrieve_post(
 
 @mcp.tool
 def create_post(
-    title: str = "",
-    content: str = "",
-    status: str = "draft",
-    comment_status: str = "open",
-    sticky: bool = False,
-    password: Optional[str] = None,
-    slug: Optional[str] = None,
-    date: Optional[str] = None,
-    featured_media: Optional[int] = None,
-    format: str = "standard",
-    author_id: Optional[int] = None,
-    excerpt: Optional[str] = None,
-    ping_status: str = "open",
-    categories: Optional[str] = None,
-    tags: Optional[str] = None
+    title: Annotated[str, "The title of the post - default: empty"] = "",
+    content: Annotated[str, "The content of the post (use HTML tags for formatting) - default: empty"] = "",
+    status: Annotated[str, "Status of the post (publish, future, draft, pending, private) - default: draft"] = "draft",
+    comment_status: Annotated[str, "Comment status (open, closed) - default: open"] = "open",
+    sticky: Annotated[bool, "Whether the post is sticky - default: false"] = False,
+    password: Annotated[Optional[str], "Password for the post - default: None"] = None,
+    slug: Annotated[Optional[str], "URL slug for the post - default: None"] = None,
+    date: Annotated[Optional[str], "ISO 8601 date string for publishing - default: None"] = None,
+    featured_media: Annotated[Optional[int], "ID of featured media file - default: None"] = None,
+    format: Annotated[str, "Post format (standard, aside, chat, gallery, link, image, quote, status, video, audio) - default: standard"] = "standard",
+    author_id: Annotated[Optional[int], "ID of the author - default: None"] = None,
+    excerpt: Annotated[Optional[str], "Post excerpt - default: None"] = None,
+    ping_status: Annotated[str, "Ping status (open, closed) - default: open"] = "open",
+    categories: Annotated[Optional[str], "Comma-separated list of category IDs - default: None"] = None,
+    tags: Annotated[Optional[str], "Comma-separated list of tag IDs - default: None"] = None
 ) -> Dict[str, Any]:
     """Create a post in WordPress site. By default, creates as draft.
     
-    Args:
-        title: The title of the post
-        content: The content of the post (use HTML tags for formatting)
-        status: Status of the post (publish, future, draft, pending, private)
-        comment_status: Comment status (open, closed)
-        sticky: Whether the post is sticky
-        password: Password for the post
-        slug: URL slug for the post
-        date: ISO 8601 date string for publishing
-        featured_media: ID of featured media file
-        format: Post format (standard, aside, chat, gallery, link, image, quote, status, video, audio)
-        author_id: ID of the author
-        excerpt: Post excerpt
-        ping_status: Ping status (open, closed)
-        categories: Comma-separated list of category IDs
-        tags: Comma-separated list of tag IDs
+    Use HTML tags for content formatting. At least one of title or content must be provided.
+    Date must be ISO 8601 format. Future dates will schedule the post.
     """
     if not title and not content:
         raise ValueError("At least one of title or content must be provided")
@@ -286,42 +254,26 @@ def create_post(
 
 @mcp.tool
 def update_post(
-    post_id: int,
-    title: Optional[str] = None,
-    content: Optional[str] = None,
-    status: Optional[str] = None,
-    comment_status: Optional[str] = None,
-    sticky: Optional[bool] = None,
-    password: Optional[str] = None,
-    slug: Optional[str] = None,
-    date: Optional[str] = None,
-    featured_media: Optional[int] = None,
-    format: Optional[str] = None,
-    author_id: Optional[int] = None,
-    excerpt: Optional[str] = None,
-    ping_status: Optional[str] = None,
-    categories: Optional[str] = None,
-    tags: Optional[str] = None
+    post_id: Annotated[int, "ID of the post to update"],
+    title: Annotated[Optional[str], "New title for the post - default: None"] = None,
+    content: Annotated[Optional[str], "New content for the post (use HTML tags for formatting) - default: None"] = None,
+    status: Annotated[Optional[str], "New status (publish, future, draft, pending, private) - default: None"] = None,
+    comment_status: Annotated[Optional[str], "New comment status (open, closed) - default: None"] = None,
+    sticky: Annotated[Optional[bool], "Whether the post should be sticky - default: None"] = None,
+    password: Annotated[Optional[str], "New password for the post - default: None"] = None,
+    slug: Annotated[Optional[str], "New URL slug - default: None"] = None,
+    date: Annotated[Optional[str], "New publication date (ISO 8601 format) - default: None"] = None,
+    featured_media: Annotated[Optional[int], "New featured media ID - default: None"] = None,
+    format: Annotated[Optional[str], "New post format - default: None"] = None,
+    author_id: Annotated[Optional[int], "New author ID - default: None"] = None,
+    excerpt: Annotated[Optional[str], "New excerpt - default: None"] = None,
+    ping_status: Annotated[Optional[str], "New ping status (open, closed) - default: None"] = None,
+    categories: Annotated[Optional[str], "New comma-separated list of category IDs - default: None"] = None,
+    tags: Annotated[Optional[str], "New comma-separated list of tag IDs - default: None"] = None
 ) -> Dict[str, Any]:
     """Update a post in WordPress site. Only provided fields will be updated.
     
-    Args:
-        post_id: ID of the post to update
-        title: New title for the post
-        content: New content for the post (use HTML tags for formatting)
-        status: New status (publish, future, draft, pending, private)
-        comment_status: New comment status (open, closed)
-        sticky: Whether the post should be sticky
-        password: New password for the post
-        slug: New URL slug
-        date: New publication date (ISO 8601 format)
-        featured_media: New featured media ID
-        format: New post format
-        author_id: New author ID
-        excerpt: New excerpt
-        ping_status: New ping status (open, closed)
-        categories: New comma-separated list of category IDs
-        tags: New comma-separated list of tag IDs
+    Use HTML tags for content formatting. Date must be ISO 8601 format.
     """
     # Validate parameters
     if status and status not in ["publish", "future", "draft", "pending", "private"]:
@@ -409,14 +361,12 @@ def update_post(
 
 @mcp.tool
 def delete_post(
-    post_id: int,
-    force: bool = False
+    post_id: Annotated[int, "ID of the post to delete"],
+    force: Annotated[bool, "Whether to permanently delete (true) or move to trash (false) - default: false"] = False
 ) -> Dict[str, Any]:
     """Delete a post in WordPress site.
     
-    Args:
-        post_id: ID of the post to delete
-        force: Whether to permanently delete (true) or move to trash (false)
+    If force=false, post is moved to trash. If force=true, post is permanently deleted.
     """
     params = {}
     if force:

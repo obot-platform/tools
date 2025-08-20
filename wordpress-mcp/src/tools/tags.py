@@ -1,6 +1,6 @@
 """WordPress Tags management tools."""
 
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Any, Annotated
 
 from src.server import mcp
 from src.config import config
@@ -22,25 +22,15 @@ def _format_tag_response(response_json: Union[dict, list]) -> Union[dict, list]:
 
 @mcp.tool
 def list_tags(
-    context: str = "view",
-    page: int = 1,
-    per_page: int = 10,
-    search_query: Optional[str] = None,
-    order: str = "asc",
-    post_id: Optional[int] = None,
-    slug: Optional[str] = None
+    context: Annotated[str, "The context of tags to list (view, embed, edit) - default: view"] = "view",
+    page: Annotated[int, "Page number to list - default: 1"] = 1,
+    per_page: Annotated[int, "Number of tags per page - default: 10"] = 10,
+    search_query: Annotated[Optional[str], "Limit results to those matching a string - default: None"] = None,
+    order: Annotated[str, "Sort order (asc, desc) - default: asc"] = "asc",
+    post_id: Annotated[Optional[int], "Limit to tags assigned to a specific post ID - default: None"] = None,
+    slug: Annotated[Optional[str], "Limit to tag matching a specific slug - default: None"] = None
 ) -> Dict[str, Any]:
-    """List available tags in WordPress site.
-    
-    Args:
-        context: The context of tags to list (view, embed, edit) - default: view
-        page: Page number to list - default: 1
-        per_page: Number of tags per page - default: 10
-        search_query: Limit results to those matching a string
-        order: Sort order (asc, desc) - default: asc
-        post_id: Limit to tags assigned to a specific post ID
-        slug: Limit to tag matching a specific slug
-    """
+    """List available tags in WordPress site."""
     # Validate parameters
     if context not in ["view", "embed", "edit"]:
         raise ValueError(f"Invalid context: {context}")
@@ -78,17 +68,11 @@ def list_tags(
 
 @mcp.tool
 def create_tag(
-    name: str,
-    description: Optional[str] = None,
-    slug: Optional[str] = None
+    name: Annotated[str, "The name of the tag"],
+    description: Annotated[Optional[str], "The description of the tag (accepts HTML tags) - default: None"] = None,
+    slug: Annotated[Optional[str], "The slug for the tag - default: None"] = None
 ) -> Dict[str, Any]:
-    """Create a new tag in WordPress site.
-    
-    Args:
-        name: The name of the tag
-        description: The description of the tag (accepts HTML tags)
-        slug: The slug for the tag
-    """
+    """Create a new tag in WordPress site."""
     if not name.strip():
         raise ValueError("Tag name is required")
     
@@ -116,18 +100,14 @@ def create_tag(
 
 @mcp.tool
 def update_tag(
-    tag_id: int,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
-    slug: Optional[str] = None
+    tag_id: Annotated[int, "The ID of the tag to update"],
+    name: Annotated[Optional[str], "New name of the tag - default: None"] = None,
+    description: Annotated[Optional[str], "New description of the tag (accepts HTML tags) - default: None"] = None,
+    slug: Annotated[Optional[str], "New slug for the tag - default: None"] = None
 ) -> Dict[str, Any]:
     """Update an existing tag in WordPress site. Only provided fields will be updated.
     
-    Args:
-        tag_id: The ID of the tag to update
-        name: New name of the tag
-        description: New description of the tag (accepts HTML tags)
-        slug: New slug for the tag
+    At least one field must be provided to update.
     """
     # Build update data (only include provided fields)
     tag_data = {}
@@ -161,11 +141,10 @@ def update_tag(
 
 
 @mcp.tool
-def delete_tag(tag_id: int) -> Dict[str, Any]:
+def delete_tag(tag_id: Annotated[int, "The ID of the tag to delete"]) -> Dict[str, Any]:
     """Delete a tag in WordPress site.
     
-    Args:
-        tag_id: The ID of the tag to delete
+    Posts previously assigned to this tag will no longer have it.
     """
     session = config.create_session()
     response = session.delete(f"{config.api_url}/tags/{tag_id}")
