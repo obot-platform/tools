@@ -31,7 +31,7 @@ def list_posts(
     per_page: Annotated[int, "Number of posts per page - default: 10"] = 10,
     author_ids: Annotated[Optional[str], "Comma-separated list of author IDs - default: None"] = None,
     search_query: Annotated[Optional[str], "Limit results to those matching a string - default: None"] = None,
-    statuses: Annotated[str, "Comma-separated list of statuses - default: publish"] = "publish",
+    statuses: Annotated[str, "Comma-separated list of statuses (must be one of publish, future, draft, pending, private, trash, auto-draft, inherit, request-pending, request-confirmed, request-failed, request-completed) - default: publish"] = "publish",
     publish_after: Annotated[Optional[str], "ISO 8601 date to filter posts published after - default: None"] = None,
     publish_before: Annotated[Optional[str], "ISO 8601 date to filter posts published before - default: None"] = None,
     modified_after: Annotated[Optional[str], "ISO 8601 date to filter posts modified after - default: None"] = None,
@@ -43,7 +43,6 @@ def list_posts(
     """List posts in WordPress site and get basic information of each post.
     
     Date parameters must be valid ISO 8601 date strings (YYYY-MM-DDTHH:MM:SS).
-    Valid statuses: publish, future, draft, pending, private, trash, auto-draft, inherit.
     """
     # Validate parameters
     if context not in ["view", "embed", "edit"]:
@@ -173,9 +172,11 @@ def create_post(
     categories: Annotated[Optional[str], "Comma-separated list of category IDs - default: None"] = None,
     tags: Annotated[Optional[str], "Comma-separated list of tag IDs - default: None"] = None
 ) -> Dict[str, Any]:
-    """Create a post in WordPress site. By default, creates as draft.
-    
-    Use HTML tags for content formatting. At least one of title or content must be provided.
+    """Create a post in WordPress site.
+
+    Use HTML tags to format the content, for example, <strong>Bold Text</strong> for bold text.
+    By default, the post will be created as a draft. Do NOT set status to publish unless it is confirmed by the user.
+
     Date must be ISO 8601 format. Future dates will schedule the post.
     """
     if not title and not content:
@@ -264,7 +265,7 @@ def update_post(
     slug: Annotated[Optional[str], "New URL slug - default: None"] = None,
     date: Annotated[Optional[str], "New publication date (ISO 8601 format) - default: None"] = None,
     featured_media: Annotated[Optional[int], "New featured media ID - default: None"] = None,
-    format: Annotated[Optional[str], "New post format - default: None"] = None,
+    format: Annotated[Optional[str], "New post format (standard, aside, chat, gallery, link, image, quote, status, video, audio) - default: None"] = None,
     author_id: Annotated[Optional[int], "New author ID - default: None"] = None,
     excerpt: Annotated[Optional[str], "New excerpt - default: None"] = None,
     ping_status: Annotated[Optional[str], "New ping status (open, closed) - default: None"] = None,
