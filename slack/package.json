@@ -2,7 +2,7 @@
     "name": "@obot-platform/slack-mcp",
     "version": "0.0.1",
     "description": "MCP server for Slack",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "type": "module",
     "scripts": {
         "start": "NODE_NO_WARNINGS=1 node dist/index.js",
