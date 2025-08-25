@@ -27,10 +27,7 @@ type Options struct {
 	AuthCookieSecret         string  `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
 	AuthEmailDomains         string  `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
 	AuthTokenRefreshDuration string  `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
-	GitHubTeams              *string `usage:"restrict logins to members of any of these GitHub teams (comma-separated list)" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_TEAMS"`
 	GitHubOrg                *string `usage:"restrict logins to members of this GitHub organization" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ORG"`
-	GitHubRepo               *string `usage:"restrict logins to collaborators on this GitHub repository (formatted orgname/repo)" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_REPO"`
-	GitHubToken              *string `usage:"the token to use when verifying repository collaborators (must have push access to the repository)" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_TOKEN"`
 	GitHubAllowUsers         *string `usage:"users allowed to log in, even if they do not belong to the specified org and team or collaborators" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS"`
 }
 
@@ -66,17 +63,8 @@ func main() {
 	legacyOpts.LegacyProvider.ClientSecret = opts.ClientSecret
 
 	// GitHub-specific options
-	if opts.GitHubTeams != nil {
-		legacyOpts.LegacyProvider.GitHubTeam = *opts.GitHubTeams
-	}
 	if opts.GitHubOrg != nil {
 		legacyOpts.LegacyProvider.GitHubOrg = *opts.GitHubOrg
-	}
-	if opts.GitHubRepo != nil {
-		legacyOpts.LegacyProvider.GitHubRepo = *opts.GitHubRepo
-	}
-	if opts.GitHubToken != nil {
-		legacyOpts.LegacyProvider.GitHubToken = *opts.GitHubToken
 	}
 	if opts.GitHubAllowUsers != nil {
 		legacyOpts.LegacyProvider.GitHubUsers = strings.Split(*opts.GitHubAllowUsers, ",")
@@ -142,7 +130,7 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
-	mux.HandleFunc("/obot-list-auth-groups", listGroups(legacyOpts.LegacyProvider.GitHubToken))
+	mux.HandleFunc("/obot-list-auth-groups", listGroups)
 	mux.HandleFunc("/obot-list-user-auth-groups", listUserGroups)
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
@@ -198,52 +186,47 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 	}
 }
 
-func listGroups(providerToken string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		token := providerToken
-		if token == "" {
-			token = r.Header.Get("Authorization")
-		}
-		if token == "" {
-			http.Error(w, "no github token provided", http.StatusUnauthorized)
-			return
-		}
+func listGroups(w http.ResponseWriter, r *http.Request) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		http.Error(w, "no authorization token provided", http.StatusUnauthorized)
+		return
+	}
 
-		groups, err := profile.FetchUserGroupInfos(r.Context(), token)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
-			return
-		}
+	groups, err := profile.FetchUserGroupInfos(r.Context(), token)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
+		return
+	}
 
-		// Handle nil groups slice
-		if groups == nil {
-			groups = state.GroupInfoList{}
-		}
+	// Handle nil groups slice
+	if groups == nil {
+		groups = state.GroupInfoList{}
+	}
 
-		// Get the name query parameter for filtering
-		nameFilter := r.URL.Query().Get("name")
-		if nameFilter != "" && len(groups) > 0 {
-			// Create a slice of group names for fuzzy matching
-			groupNames := make([]string, len(groups))
-			for i, group := range groups {
-				groupNames[i] = group.Name
-			}
-
-			// Perform fuzzy search - results are automatically ranked by relevance
-			matches := fuzzy.Find(nameFilter, groupNames)
-
-			// Filter groups based on fuzzy matches, preserving the relevance order
-			var filteredGroups state.GroupInfoList
-			for _, match := range matches {
-				filteredGroups = append(filteredGroups, groups[match.Index])
-			}
-			groups = filteredGroups
+	// Get the name query parameter for filtering
+	nameFilter := r.URL.Query().Get("name")
+	if nameFilter != "" && len(groups) > 0 {
+		// Create a slice of group names for fuzzy matching
+		groupNames := make([]string, len(groups))
+		for i, group := range groups {
+			groupNames[i] = group.Name
 		}
 
-		if err := json.NewEncoder(w).Encode(groups); err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
-			return
+		// Perform fuzzy search - results are automatically ranked by relevance
+		matches := fuzzy.Find(nameFilter, groupNames)
+
+		// Filter groups based on fuzzy matches, preserving the relevance order
+		var filteredGroups state.GroupInfoList
+		for _, match := range matches {
+			filteredGroups = append(filteredGroups, groups[match.Index])
 		}
+		groups = filteredGroups
+	}
+
+	if err := json.NewEncoder(w).Encode(groups); err != nil {
+		http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
+		return
 	}
 }
 
