@@ -57,7 +57,7 @@ type githubOrganization struct {
 
 type githubTeam struct {
 	ID           int64              `json:"id"`
-	Name         string             `json:"name"`
+	Slug         string             `json:"slug"`
 	Organization githubOrganization `json:"organization"`
 }
 
@@ -94,7 +94,7 @@ func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupIn
 	for _, team := range teams {
 		infos = append(infos, state.GroupInfo{
 			ID:      fmt.Sprintf("github/org/%d/team/%d", team.Organization.ID, team.ID),
-			Name:    team.Name,
+			Name:    fmt.Sprintf("%s/%s", team.Organization.Login, team.Slug),
 			IconURL: &team.Organization.AvatarURL,
 		})
 	}
