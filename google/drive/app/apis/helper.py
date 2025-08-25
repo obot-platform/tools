@@ -47,10 +47,6 @@ def get_user_timezone(service):
         settings = service.settings().get(setting="timezone").execute()
         return settings.get("value", "UTC")  # Default to UTC if not found
     except HttpError as err:
-        if err.status_code == 403:
-            raise ToolError(f"HttpError retrieving user timezone: {err}")
-        logger.error(f"HttpError retrieving user timezone: {err}")
-        return "UTC"
+        raise ToolError(f"HttpError retrieving user timezone: {err}")
     except Exception as e:
-        logger.error(f"Exception retrieving user timezone: {e}")
-        return "UTC"
+        raise ToolError(f"Exception retrieving user timezone: {e}")

@@ -122,7 +122,7 @@ def list_files_tool(
 
         return files
     except HttpError as error:
-        raise HttpError(f"Failed to list files, HttpError: {error}")
+        raise ToolError(f"Failed to list files, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -155,7 +155,7 @@ def copy_file_tool(
         )
         return file
     except HttpError as error:
-        raise HttpError(f"Failed to copy file, HttpError: {error}")
+        raise ToolError(f"Failed to copy file, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -177,7 +177,7 @@ def get_file_tool(
         file = get_file(client, file_id)
         return file
     except HttpError as error:
-        raise HttpError(f"Failed to get file, HttpError: {error}")
+        raise ToolError(f"Failed to get file, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -217,7 +217,7 @@ def update_file_tool(
         )
         return file
     except HttpError as error:
-        raise HttpError(f"Failed to update file, HttpError: {error}")
+        raise ToolError(f"Failed to update file, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -242,7 +242,7 @@ def create_folder_tool(
         folder = create_folder(client, name=folder_name, parent_id=parent_id)
         return folder
     except HttpError as error:
-        raise HttpError(f"Failed to create folder, HttpError: {error}")
+        raise ToolError(f"Failed to create folder, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -265,7 +265,7 @@ def delete_file_tool(
         else:
             return f"Failed to delete file: {file_id}"
     except HttpError as error:
-        raise HttpError(f"Failed to delete file, HttpError: {error}")
+        raise ToolError(f"Failed to delete file, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -289,7 +289,7 @@ def transfer_ownership_tool(
         permission = transfer_ownership(client, file_id, new_owner_email)
         return permission
     except HttpError as error:
-        raise HttpError(f"Failed to transfer ownership, HttpError: {error}")
+        raise ToolError(f"Failed to transfer ownership, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -316,7 +316,7 @@ def list_permissions_tool(
         permissions = list_permissions(client, file_id)
         return permissions
     except HttpError as error:
-        raise HttpError(f"Failed to list permissions, HttpError: {error}")
+        raise ToolError(f"Failed to list permissions, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -344,7 +344,7 @@ def get_permission_tool(
         permission = get_permission(client, file_id, permission_id)
         return permission
     except HttpError as error:
-        raise HttpError(f"Failed to get permission, HttpError: {error}")
+        raise ToolError(f"Failed to get permission, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -403,7 +403,7 @@ def create_permission_tool(
         )
         return permission
     except HttpError as error:
-        raise HttpError(f"Failed to create permission, HttpError: {error}")
+        raise ToolError(f"Failed to create permission, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -434,7 +434,7 @@ def update_permission_tool(
         permission = update_permission(client, file_id, permission_id, role)
         return permission
     except HttpError as error:
-        raise HttpError(f"Failed to update permission, HttpError: {error}")
+        raise ToolError(f"Failed to update permission, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -463,7 +463,7 @@ def delete_permission_tool(
         else:
             return {"result": f"Failed to delete permission: {permission_id}"}
     except HttpError as error:
-        raise HttpError(f"Failed to delete permission, HttpError: {error}")
+        raise ToolError(f"Failed to delete permission, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -498,7 +498,7 @@ def create_shared_drive_tool(
         drive = create_drive(client, drive_name)
         return drive
     except HttpError as error:
-        raise HttpError(f"Failed to create shared drive, HttpError: {error}")
+        raise ToolError(f"Failed to create shared drive, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -521,7 +521,7 @@ def delete_shared_drive_tool(
             "message": f"Successfully deleted shared drive: {drive_id}",
         }
     except HttpError as error:
-        raise HttpError(f"Failed to delete shared drive, HttpError: {error}")
+        raise ToolError(f"Failed to delete shared drive, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -541,7 +541,7 @@ def update_shared_drive_tool(
         drive = update_drive(client, drive_id, drive_name)
         return drive
     except HttpError as error:
-        raise HttpError(f"Failed to update shared drive, HttpError: {error}")
+        raise ToolError(f"Failed to update shared drive, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 
@@ -570,7 +570,7 @@ def read_file_tool(
         else:
             return md.convert(BytesIO(content))
     except HttpError as error:
-        raise HttpError(f"Failed to read file, HttpError: {error}")
+        raise ToolError(f"Failed to read file, HttpError: {error}")
     except Exception as error:
         raise ToolError(f"Unexpected ToolError: {error}")
 

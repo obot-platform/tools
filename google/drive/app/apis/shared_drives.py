@@ -19,10 +19,7 @@ def _generate_ids(service: Resource, count: int = 1, space: str = "drive") -> Li
         return response.get("ids", [])
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to generate IDs, HttpError: {error_details}")
 
 
 def list_drives(service: Resource) -> List[dict]:
@@ -73,10 +70,7 @@ def get_drive(service: Resource, drive_id: str) -> Optional[dict]:
         return service.drives().get(driveId=drive_id).execute()
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to get drive, HttpError: {error_details}")
 
 
 def create_drive(service: Resource, name: str) -> Optional[dict]:
@@ -97,10 +91,7 @@ def create_drive(service: Resource, name: str) -> Optional[dict]:
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to create shared drive, HttpError: {error_details}")
 
 
 def delete_drive(service: Resource, drive_id: str) -> bool:
@@ -119,10 +110,7 @@ def delete_drive(service: Resource, drive_id: str) -> bool:
         return True
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return False
+        raise ToolError(f"Failed to delete drive, HttpError: {error_details}")
 
 
 def update_drive(service: Resource, drive_id: str, new_name: str) -> Optional[dict]:
@@ -143,7 +131,4 @@ def update_drive(service: Resource, drive_id: str, new_name: str) -> Optional[di
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to update drive, HttpError: {error_details}")

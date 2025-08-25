@@ -1,6 +1,7 @@
 from typing import Optional, List
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
+from fastmcp.exceptions import ToolError
 
 
 def list_permissions(service: Resource, file_id: str) -> List[dict]:
@@ -39,10 +40,7 @@ def list_permissions(service: Resource, file_id: str) -> List[dict]:
         return permissions
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return []
+        raise ToolError(f"Failed to list permissions, HttpError: {error_details}")
 
 
 def create_permission(
@@ -88,10 +86,7 @@ def create_permission(
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to create permission, HttpError: {error_details}")
 
 
 def update_permission(
@@ -123,10 +118,7 @@ def update_permission(
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to update permission, HttpError: {error_details}")
 
 
 def delete_permission(service: Resource, file_id: str, permission_id: str) -> bool:
@@ -148,10 +140,7 @@ def delete_permission(service: Resource, file_id: str, permission_id: str) -> bo
         return True
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return False
+        raise ToolError(f"Failed to delete permission, HttpError: {error_details}")
 
 
 def get_permission(
@@ -181,10 +170,7 @@ def get_permission(
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to get permission, HttpError: {error_details}")
 
 
 def transfer_ownership(
@@ -217,7 +203,4 @@ def transfer_ownership(
         )
     except HttpError as error:
         error_details = error.error_details[0] if error.error_details else {}
-        print(
-            f"An error occurred. Error code: {error.resp.status}, Error message: {error_details}"
-        )
-        return None
+        raise ToolError(f"Failed to transfer ownership, HttpError: {error_details}")
