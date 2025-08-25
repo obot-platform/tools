@@ -33,7 +33,6 @@ logger = setup_logger(__name__)
 
 
 def get_client(cred_token: str, service_name: str = "drive", version: str = "v3"):
-
     creds = Credentials(token=cred_token)
     try:
         service = build(serviceName=service_name, version=version, credentials=creds)
@@ -46,9 +45,7 @@ def get_user_timezone(service):
     """Fetches the authenticated user's time zone from User's Google Calendar settings."""
     try:
         settings = service.settings().get(setting="timezone").execute()
-        return settings.get(
-            "value", "UTC"
-        )  # Default to UTC if not found
+        return settings.get("value", "UTC")  # Default to UTC if not found
     except HttpError as err:
         if err.status_code == 403:
             raise ToolError(f"HttpError retrieving user timezone: {err}")

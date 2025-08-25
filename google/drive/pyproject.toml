@@ -8,6 +8,7 @@ dependencies = [
     "fastmcp>=2.11.2",
     "filetype>=1.2.0",
     "google-api-python-client>=2.172.0",
+    "markitdown[all]>=0.1.2",
     "pytz>=2025.2",
 ]
 
@@ -21,7 +22,7 @@ dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
     "pytest-cov>=6.2.1",
-    "ruff>=0.12.7",
+    "ruff>=0.12.10",
 ]
 
 [build-system]
