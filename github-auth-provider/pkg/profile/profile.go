@@ -71,9 +71,10 @@ func FetchUserProfile(ctx context.Context, accessToken string) (*githubUserProfi
 }
 
 func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupInfoList, error) {
-	var infos state.GroupInfoList
-
-	var orgs []githubOrganization
+	var (
+		infos state.GroupInfoList
+		orgs  []githubOrganization
+	)
 	err := makeGitHubRequest(ctx, accessToken, "user/orgs", &orgs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch user organizations: %w", err)
