@@ -16,37 +16,29 @@ import (
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
+	"github.com/obot-platform/tools/github-auth-provider/pkg/config"
 	"github.com/obot-platform/tools/github-auth-provider/pkg/profile"
 	"github.com/sahilm/fuzzy"
 )
 
-type Options struct {
-	ClientID                 string  `env:"OBOT_GITHUB_AUTH_PROVIDER_CLIENT_ID"`
-	ClientSecret             string  `env:"OBOT_GITHUB_AUTH_PROVIDER_CLIENT_SECRET"`
-	ObotServerURL            string  `env:"OBOT_SERVER_URL"`
-	PostgresConnectionDSN    string  `env:"OBOT_AUTH_PROVIDER_POSTGRES_CONNECTION_DSN" optional:"true"`
-	AuthCookieSecret         string  `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
-	AuthEmailDomains         string  `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
-	AuthTokenRefreshDuration string  `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
-	GitHubOrg                *string `usage:"restrict logins to members of this GitHub organization" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ORG"`
-	GitHubAllowUsers         *string `usage:"users allowed to log in, even if they do not belong to the specified org and team or collaborators" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS"`
-}
-
 func main() {
-	var opts Options
-	if err := env.LoadEnvForStruct(&opts); err != nil {
-		fmt.Printf("ERROR: github-auth-provider: failed to load options: %v\n", err)
-		os.Exit(1)
+	opts, err := config.LoadEnv()
+	if len(os.Args) > 1 && os.Args[1] == "validate" {
+		if err != nil {
+			var validationErr env.ValidationError
+			if errors.As(err, &validationErr) {
+				if err := json.NewEncoder(os.Stdout).Encode(validationErr); err != nil {
+					fmt.Printf("ERROR: github-auth-provider: failed to encode validation errors: %v\n", err)
+					os.Exit(1)
+				}
+			}
+		}
+
+		return
 	}
 
-	refreshDuration, err := time.ParseDuration(opts.AuthTokenRefreshDuration)
 	if err != nil {
-		fmt.Printf("ERROR: github-auth-provider: failed to parse token refresh duration: %v\n", err)
-		os.Exit(1)
-	}
-
-	if refreshDuration < 0 {
-		fmt.Printf("ERROR: github-auth-provider: token refresh duration must be greater than 0\n")
+		fmt.Printf("ERROR: github-auth-provider: failed to load and validate options: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -64,12 +56,8 @@ func main() {
 	legacyOpts.LegacyProvider.ClientSecret = opts.ClientSecret
 
 	// GitHub-specific options
-	if opts.GitHubOrg != nil {
-		legacyOpts.LegacyProvider.GitHubOrg = *opts.GitHubOrg
-	}
-	if opts.GitHubAllowUsers != nil {
-		legacyOpts.LegacyProvider.GitHubUsers = strings.Split(*opts.GitHubAllowUsers, ",")
-	}
+	legacyOpts.LegacyProvider.GitHubOrg = opts.GitHubOrg
+	legacyOpts.LegacyProvider.GitHubUsers = opts.GitHubAllowUsers
 
 	oauthProxyOpts, err := legacyOpts.ToOptions()
 	if err != nil {
@@ -84,20 +72,14 @@ func main() {
 		oauthProxyOpts.Session.Postgres.ConnectionDSN = opts.PostgresConnectionDSN
 		oauthProxyOpts.Session.Postgres.TableNamePrefix = "github_"
 	}
-	oauthProxyOpts.Cookie.Refresh = refreshDuration
+	oauthProxyOpts.Cookie.Refresh = opts.AuthTokenRefreshDuration
 	oauthProxyOpts.Cookie.Name = "obot_access_token"
 	oauthProxyOpts.Cookie.Secret = string(cookieSecret)
 	oauthProxyOpts.Cookie.Secure = strings.HasPrefix(opts.ObotServerURL, "https://")
 	oauthProxyOpts.Cookie.CSRFExpire = 30 * time.Minute
 	oauthProxyOpts.Templates.Path = os.Getenv("GPTSCRIPT_TOOL_DIR") + "/../auth-providers-common/templates"
 	oauthProxyOpts.RawRedirectURL = opts.ObotServerURL + "/"
-	if opts.AuthEmailDomains != "" {
-		emailDomains := strings.Split(opts.AuthEmailDomains, ",")
-		for i := range emailDomains {
-			emailDomains[i] = strings.TrimSpace(emailDomains[i])
-		}
-		oauthProxyOpts.EmailDomains = emailDomains
-	}
+	oauthProxyOpts.EmailDomains = opts.AuthEmailDomains
 	oauthProxyOpts.Logging.RequestEnabled = false
 	oauthProxyOpts.Logging.AuthEnabled = false
 	oauthProxyOpts.Logging.StandardEnabled = false
@@ -131,7 +113,7 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
-	mux.HandleFunc("/obot-list-auth-groups", listGroups(*opts.GitHubOrg))
+	mux.HandleFunc("/obot-list-auth-groups", listGroups(opts.GitHubOrg))
 	mux.HandleFunc("/obot-list-user-auth-groups", listUserGroups)
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
