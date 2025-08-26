@@ -131,7 +131,7 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
-	mux.HandleFunc("/obot-list-auth-groups", listGroups(*opts.GitHubOrg))
+	mux.HandleFunc("/obot-list-auth-groups", listGroups(opts.GitHubOrg))
 	mux.HandleFunc("/obot-list-user-auth-groups", listUserGroups)
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
@@ -187,7 +187,7 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 	}
 }
 
-func listGroups(restrictOrg string) http.HandlerFunc {
+func listGroups(restrictOrg *string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 		if token == "" {
@@ -206,11 +206,11 @@ func listGroups(restrictOrg string) http.HandlerFunc {
 			groups = state.GroupInfoList{}
 		}
 
-		if restrictOrg != "" {
+		if restrictOrg != nil && *restrictOrg != "" {
 			// Elide all org and team groups that don't match the restrictOrg when set
 			groups = slices.DeleteFunc(groups, func(g state.GroupInfo) bool {
 				orgLogin, _, _ := strings.Cut(g.Name, "/")
-				return orgLogin != restrictOrg
+				return orgLogin != *restrictOrg
 			})
 		}
 
