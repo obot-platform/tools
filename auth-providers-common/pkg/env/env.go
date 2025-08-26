@@ -1,6 +1,7 @@
 package env
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
@@ -63,4 +64,56 @@ func LoadEnvForStruct[T any](s *T) error {
 	}
 
 	return nil
+}
+
+type ValidationError struct {
+	Err error `json:"error"`
+}
+
+func (e ValidationError) Error() string {
+	return e.Err.Error()
+}
+
+type FieldValidationError struct {
+	EnvVar    string `json:"envVar"`
+	Message   string `json:"message"`
+	Value     string `json:"value"`
+	Sensitive bool   `json:"sensitive"`
+}
+
+func (e FieldValidationError) Error() string {
+	if e.Sensitive {
+		return fmt.Sprintf("invalid environment variable %s: %s (value: %s)", e.EnvVar, e.Message, "REDACTED")
+	}
+	return fmt.Sprintf("invalid environment variable %s: %s (value: %s)", e.EnvVar, e.Message, e.Value)
+}
+
+func (e FieldValidationError) MarshalJSON() ([]byte, error) {
+	// Create a copy of the struct for JSON marshaling
+	value := e.Value
+	if e.Sensitive {
+		value = "REDACTED"
+	}
+
+	return json.Marshal(struct {
+		EnvVar    string `json:"envVar"`
+		Message   string `json:"message"`
+		Value     string `json:"value"`
+		Sensitive bool   `json:"sensitive"`
+	}{
+		EnvVar:    e.EnvVar,
+		Message:   e.Message,
+		Value:     value,
+		Sensitive: e.Sensitive,
+	})
+}
+
+type FieldValidationErrors []FieldValidationError
+
+func (e FieldValidationErrors) Error() string {
+	msgs := make([]string, len(e))
+	for i, err := range e {
+		msgs[i] = err.Error()
+	}
+	return strings.Join(msgs, "\n")
 }

@@ -66,3 +66,9 @@ Credential: ../placeholder-credential as github-auth-provider
         }
     ]
 }
+
+---
+Name: validate
+Description: Validate GitHub Provider Configuration
+
+#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool validate
