@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	oauth2proxy "github.com/oauth2-proxy/oauth2-proxy/v7"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/apis/options"
 	"github.com/oauth2-proxy/oauth2-proxy/v7/pkg/validation"
@@ -143,6 +144,16 @@ func main() {
 }
 
 func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
+	// Cache user IDs for up to 1 hour between requests.
+	// If the cache is full (5000 user IDs), the least recently used entries will be evicted.
+	// If the username or email updates, a new entry will be added to the cache and the latest id,
+	// username, and email will be returned to the caller of getState.
+	type profileKey struct {
+		username string
+		email    string
+	}
+	profileCache := expirable.NewLRU[profileKey, string](5000, nil, time.Hour)
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		var sr state.SerializableRequest
 		if err := json.NewDecoder(r.Body).Decode(&sr); err != nil {
@@ -166,18 +177,29 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 		}
 
 		// The User on the state, for GitHub, is the GitHub username.
-		// This is bad, because we want the user ID instead.
-		// Make API requests to get more info about the authenticated user.
+		// This is bad, because we want the user ID instead, which can only be
+		// retrieved by making a follow-up API request to GitHub.
 		ss.PreferredUsername = ss.User
 
-		// Get user info
-		userProfile, err := profile.FetchUserProfile(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get user info: %v", err), http.StatusInternalServerError)
-			fmt.Printf("ERROR: github-auth-provider: failed to get user info: %v\n", err)
-			return
+		// Attempt to get the user ID from the cache first
+		key := profileKey{
+			username: ss.PreferredUsername,
+			email:    ss.Email,
 		}
-		ss.User = fmt.Sprintf("%d", userProfile.ID)
+		if userID, ok := profileCache.Get(key); ok {
+			// Found a fresh user ID in the cache, apply it to the state
+			ss.User = userID
+		} else {
+			// We either couldn't find the user ID or the entry is stale, fetch the user profile from GitHub and update the cache
+			userProfile, err := profile.FetchUserProfile(r.Context(), fmt.Sprintf("token %s", ss.AccessToken))
+			if err != nil {
+				http.Error(w, fmt.Sprintf("failed to get user info: %v", err), http.StatusInternalServerError)
+				fmt.Printf("ERROR: github-auth-provider: failed to get user info: %v\n", err)
+				return
+			}
+			ss.User = fmt.Sprintf("%d", userProfile.ID)
+			profileCache.Add(key, ss.User)
+		}
 
 		if err := json.NewEncoder(w).Encode(ss); err != nil {
 			http.Error(w, fmt.Sprintf("failed to encode state: %v", err), http.StatusInternalServerError)
