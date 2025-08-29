@@ -48,6 +48,7 @@ cat << EOF
 </workspace_instructions>
 
 $FILES
+EOF
 
 ---
 Name: workspace_list
