@@ -34,6 +34,7 @@ type SerializableRequest struct {
 type SerializableState struct {
 	ExpiresOn         *time.Time    `json:"expiresOn"`
 	AccessToken       string        `json:"accessToken"`
+	IDToken           string        `json:"idToken"`
 	PreferredUsername string        `json:"preferredUsername"`
 	User              string        `json:"user"`
 	Email             string        `json:"email"`
@@ -92,6 +93,7 @@ func GetSerializableState(p *oauth2proxy.OAuthProxy, r *http.Request) (Serializa
 	return SerializableState{
 		ExpiresOn:         state.ExpiresOn,
 		AccessToken:       state.AccessToken,
+		IDToken:           state.IDToken,
 		PreferredUsername: state.PreferredUsername,
 		User:              state.User,
 		Email:             state.Email,
