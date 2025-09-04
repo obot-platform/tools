@@ -346,7 +346,7 @@ class SlackClient {
 }
 
 // Create MCP server using the SDK
-function createMcpServer(slackClient: SlackClient): McpServer {
+function createMcpServer(slackClient: SlackClient, token: string): McpServer {
   const server = new McpServer(
     {
       name: "slack-mcp-server",
@@ -358,6 +358,8 @@ function createMcpServer(slackClient: SlackClient): McpServer {
       },
     }
   );
+
+  const isBotToken = token.startsWith("xoxb-");
 
   server.tool(
     "list_channels",
@@ -431,17 +433,42 @@ function createMcpServer(slackClient: SlackClient): McpServer {
     }
   );
 
-  server.tool(
-    "search_messages",
-    "Search for messages in the Slack workspace",
-    SearchMessagesSchema.shape,
-    async ({ query, sortByTime }, { sendNotification }): Promise<CallToolResult> => {
-      const messages = await slackClient.searchMessages(query, sortByTime);
-      return {
-        content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
-      };
-    }
-  );
+  if (!isBotToken) {
+    server.tool(
+      "search_messages",
+      "Search for messages in the Slack workspace",
+      SearchMessagesSchema.shape,
+      async ({ query, sortByTime }, { sendNotification }): Promise<CallToolResult> => {
+        const messages = await slackClient.searchMessages(query, sortByTime);
+        return {
+          content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
+        };
+      }
+    );
+    server.tool(
+      "get_dm_history",
+      "Get the chat history for a direct message conversation",
+      GetDMHistorySchema.shape,
+      async ({ userIds, limit }, { sendNotification }): Promise<CallToolResult> => {
+        const messages = await slackClient.getDMHistory(userIds, limit);
+        return {
+          content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
+        };
+      }
+    );
+  
+    server.tool(
+      "get_dm_thread_history",
+      "Get the chat history for a thread in a direct message conversation",
+      GetDMThreadHistorySchema.shape,
+      async ({ userIds, threadId, limit }, { sendNotification }): Promise<CallToolResult> => {
+        const messages = await slackClient.getDMThreadHistory(userIds, threadId, limit);
+        return {
+          content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
+        };
+      }
+    );
+  }
 
   server.tool(
     "send_message",
@@ -528,30 +555,6 @@ function createMcpServer(slackClient: SlackClient): McpServer {
   );
 
   server.tool(
-    "get_dm_history",
-    "Get the chat history for a direct message conversation",
-    GetDMHistorySchema.shape,
-    async ({ userIds, limit }, { sendNotification }): Promise<CallToolResult> => {
-      const messages = await slackClient.getDMHistory(userIds, limit);
-      return {
-        content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
-      };
-    }
-  );
-
-  server.tool(
-    "get_dm_thread_history",
-    "Get the chat history for a thread in a direct message conversation",
-    GetDMThreadHistorySchema.shape,
-    async ({ userIds, threadId, limit }, { sendNotification }): Promise<CallToolResult> => {
-      const messages = await slackClient.getDMThreadHistory(userIds, threadId, limit);
-      return {
-        content: [{ type: "text", text: JSON.stringify(messages, null, 2) }],
-      };
-    }
-  );
-
-  server.tool(
     "user_context",
     "Get information about the logged in user",
     UserContextSchema.shape,
@@ -586,7 +589,7 @@ async function getServer() {
     }
 
     const slackClient = new SlackClient(botToken);
-    const mcpServer = createMcpServer(slackClient);
+    const mcpServer = createMcpServer(slackClient, botToken);
     return mcpServer;
   } catch (error) {
     console.error("Failed to initialize server:", error);
