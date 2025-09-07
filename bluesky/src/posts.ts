@@ -1,14 +1,14 @@
 import { RichText, AtpAgent, AppBskyFeedSearchPosts } from '@atproto/api'
 import { getFirstEmbedCard } from "./embed.ts"
 
-export async function searchPosts (
+export async function searchPosts(
     agent: AtpAgent,
     query?: string,
     since?: string,
     until?: string,
     limit?: string,
     tags?: string,
-): Promise<void> {
+): Promise<any> {
     let queryParams: AppBskyFeedSearchPosts.QueryParams = {
         q: query ?? '',
         sort: 'latest',
@@ -51,10 +51,10 @@ export async function searchPosts (
 
     const response = await agent.app.bsky.feed.searchPosts(queryParams)
 
-    console.log(JSON.stringify(response.data.posts))
+    return response.data.posts
 }
 
-export async function createPost(agent: AtpAgent, text?: string): Promise<void> {
+export async function createPost(agent: AtpAgent, text?: string): Promise<any> {
     if (!text) {
         throw new Error('Text is required')
     }
@@ -66,7 +66,7 @@ export async function createPost(agent: AtpAgent, text?: string): Promise<void> 
     const rt = new RichText({ text })
     await rt.detectFacets(agent)
 
-    await agent.post({
+    const post = await agent.post({
         text: rt.text,
         facets: rt.facets,
         // Attempt to get the embed card for the first link in the text.
@@ -74,15 +74,14 @@ export async function createPost(agent: AtpAgent, text?: string): Promise<void> 
         embed: await getFirstEmbedCard(rt, agent),
     })
 
-    console.log('Post created')
+    return post
 }
 
-export async function deletePost(agent: AtpAgent, postUri?: string): Promise<void> {
+export async function deletePost(agent: AtpAgent, postUri?: string): Promise<any> {
     if (!postUri) {
         throw new Error('Post URI is required')
     }
 
-    await agent.deletePost(postUri)
-
-    console.log('Post deleted')
+    const result = await agent.deletePost(postUri)
+    return result
 }
