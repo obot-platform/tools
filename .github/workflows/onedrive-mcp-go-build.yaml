@@ -1,0 +1,57 @@
+name: Build release onedrive-mcp-go
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+on:
+  push:
+    paths:
+      - "microsoft365/onedrive-mcp-go/**"
+    branches:
+      - main
+
+jobs:
+  oss-tools-build:
+    runs-on: depot-ubuntu-22.04
+    concurrency:
+      group: onedrive-mcp-go-build
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and Push Docker image
+        uses: depot/build-push-action@v1
+        id: build-and-push
+        with:
+          project: bbqjs4tj1g
+          context: ./microsoft365/onedrive-mcp-go
+          push: true
+          pull: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/${{ github.repository }}/onedrive-mcp-go:latest
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.1
+        with:
+          cosign-release: "v2.4.3"
+
+      - name: Sign Images
+        env:
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: ghcr.io/${{ github.repository }}/onedrive-mcp-go:latest
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
