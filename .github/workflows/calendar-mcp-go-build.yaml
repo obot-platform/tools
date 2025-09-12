@@ -1,4 +1,4 @@
-name: Build release onedrive-mcp-go
+name: Build release calendar-mcp-go
 
 permissions:
   id-token: write
@@ -8,7 +8,7 @@ permissions:
 on:
   push:
     paths:
-      - "microsoft365/onedrive-mcp-go/**"
+      - "microsoft365/calendar-mcp-go/**"
     branches:
       - main
 
@@ -16,7 +16,7 @@ jobs:
   oss-tools-build:
     runs-on: depot-ubuntu-22.04
     concurrency:
-      group: onedrive-mcp-go-build
+      group: calendar-mcp-go-build
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
@@ -33,12 +33,12 @@ jobs:
         id: build-and-push
         with:
           project: bbqjs4tj1g
-          context: ./microsoft365/onedrive-mcp-go
+          context: ./microsoft365/calendar-mcp-go
           push: true
           pull: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}/microsoft365-onedrive:latest
+            ghcr.io/${{ github.repository }}/microsoft365-calendar:latest
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.8.1
@@ -48,7 +48,7 @@ jobs:
       - name: Sign Images
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-          TAGS: ghcr.io/${{ github.repository }}/microsoft365-onedrive:latest
+          TAGS: ghcr.io/${{ github.repository }}/microsoft365-calendar:latest
         run: |
           images=""
           for tag in ${TAGS}; do
