@@ -6,6 +6,7 @@ permissions:
   packages: write
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "microsoft365/onedrive-mcp-go/**"
