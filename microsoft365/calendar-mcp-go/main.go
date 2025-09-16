@@ -27,7 +27,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-var httpAddr = flag.String("http", ":3000", "HTTP address to listen on for streamable HTTP server")
+var httpAddr = flag.String("http", ":9000", "HTTP address to listen on for streamable HTTP server")
 
 // StaticTokenCredential implements azcore.TokenCredential
 type StaticTokenCredential struct {
@@ -131,24 +131,24 @@ const (
 
 // Event detail types for GetEventDetails response
 type DetailedEventInfo struct {
-	ID               string                       `json:"id"`
-	Subject          string                       `json:"subject"`
-	Start            string                       `json:"start"`
-	End              string                       `json:"end"`
-	Location         string                       `json:"location,omitempty"`
-	IsOnline         bool                         `json:"is_online"`
-	Body             string                       `json:"body,omitempty"`
-	BodyPreview      string                       `json:"body_preview,omitempty"`
-	Attendees        []DetailedAttendeeInfo       `json:"attendees,omitempty"`
-	Organizer        *DetailedOrganizerInfo       `json:"organizer,omitempty"`
-	IsAllDay         bool                         `json:"is_all_day"`
-	ShowAs           string                       `json:"show_as,omitempty"`
-	Sensitivity      string                       `json:"sensitivity,omitempty"`
-	Importance       string                       `json:"importance,omitempty"`
-	Categories       []string                     `json:"categories,omitempty"`
-	Recurrence       map[string]interface{}       `json:"recurrence,omitempty"`
-	Attachments      []DetailedAttachmentInfo     `json:"attachments,omitempty"`
-	OnlineMeetingUrl string                       `json:"online_meeting_url,omitempty"`
+	ID               string                   `json:"id"`
+	Subject          string                   `json:"subject"`
+	Start            string                   `json:"start"`
+	End              string                   `json:"end"`
+	Location         string                   `json:"location,omitempty"`
+	IsOnline         bool                     `json:"is_online"`
+	Body             string                   `json:"body,omitempty"`
+	BodyPreview      string                   `json:"body_preview,omitempty"`
+	Attendees        []DetailedAttendeeInfo   `json:"attendees,omitempty"`
+	Organizer        *DetailedOrganizerInfo   `json:"organizer,omitempty"`
+	IsAllDay         bool                     `json:"is_all_day"`
+	ShowAs           string                   `json:"show_as,omitempty"`
+	Sensitivity      string                   `json:"sensitivity,omitempty"`
+	Importance       string                   `json:"importance,omitempty"`
+	Categories       []string                 `json:"categories,omitempty"`
+	Recurrence       map[string]interface{}   `json:"recurrence,omitempty"`
+	Attachments      []DetailedAttachmentInfo `json:"attachments,omitempty"`
+	OnlineMeetingUrl string                   `json:"online_meeting_url,omitempty"`
 }
 
 type DetailedAttendeeInfo struct {
@@ -275,13 +275,13 @@ func (c *CalendarMCPServer) ListEvents(ctx context.Context, req *mcp.CallToolReq
 	}
 
 	type EventInfo struct {
-		ID       string   `json:"id"`
-		Subject  string   `json:"subject"`
-		Start    string   `json:"start"`
-		End      string   `json:"end"`
-		Location string   `json:"location,omitempty"`
-		IsOnline bool     `json:"is_online"`
-		Body     string   `json:"body,omitempty"`
+		ID        string   `json:"id"`
+		Subject   string   `json:"subject"`
+		Start     string   `json:"start"`
+		End       string   `json:"end"`
+		Location  string   `json:"location,omitempty"`
+		IsOnline  bool     `json:"is_online"`
+		Body      string   `json:"body,omitempty"`
 		Attendees []string `json:"attendees,omitempty"`
 	}
 
@@ -1456,9 +1456,22 @@ func main() {
 	}
 
 	if *httpAddr != "" {
-		handler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
+		mcpHandler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
 		log.Printf("Calendar MCP server listening at %s", *httpAddr)
-		if err := http.ListenAndServe(*httpAddr, handler); err != nil {
+
+		// Create a custom multiplexer
+		mux := http.NewServeMux()
+
+		// Handle /health with custom handler
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
+
+		// Handle all other paths with MCP handler
+		mux.Handle("/", mcpHandler)
+
+		if err := http.ListenAndServe(*httpAddr, mux); err != nil {
 			log.Fatal(err)
 		}
 	} else {

@@ -21,7 +21,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-var httpAddr = flag.String("http", ":3000", "HTTP address to listen on for streamable HTTP server")
+var httpAddr = flag.String("http", ":9000", "HTTP address to listen on for streamable HTTP server")
 
 // StaticTokenCredential implements azcore.TokenCredential
 type StaticTokenCredential struct {
@@ -183,9 +183,9 @@ func (c *ContactMCPServer) CreateContact(ctx context.Context, req *mcp.CallToolR
 	}
 
 	// Validate that at least one field is provided
-	if (args.GivenName == nil || *args.GivenName == "") && 
-	   (args.Surname == nil || *args.Surname == "") && 
-	   len(emails) == 0 && len(phones) == 0 {
+	if (args.GivenName == nil || *args.GivenName == "") &&
+		(args.Surname == nil || *args.Surname == "") &&
+		len(emails) == 0 && len(phones) == 0 {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				&mcp.TextContent{
@@ -458,9 +458,22 @@ func main() {
 	}
 
 	if *httpAddr != "" {
-		handler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
+		mcpHandler := mcp.NewStreamableHTTPHandler(serverFactory, nil)
 		log.Printf("Contact MCP server listening at %s", *httpAddr)
-		if err := http.ListenAndServe(*httpAddr, handler); err != nil {
+
+		// Create a custom multiplexer
+		mux := http.NewServeMux()
+
+		// Handle /health with custom handler
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
+
+		// Handle all other paths with MCP handler
+		mux.Handle("/", mcpHandler)
+
+		if err := http.ListenAndServe(*httpAddr, mux); err != nil {
 			log.Fatal(err)
 		}
 	} else {

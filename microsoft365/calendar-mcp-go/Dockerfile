@@ -17,6 +17,6 @@ WORKDIR /root/
 
 COPY --from=builder /app/calendar-mcp-go .
 
-EXPOSE 3000
+EXPOSE 9000
 
 CMD ["./calendar-mcp-go"]

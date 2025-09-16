@@ -43,7 +43,7 @@ RUN chmod +x word-mcp-go
 # Switch to non-root user (but keep as root for now due to temp file access needs)
 # USER appuser
 
-EXPOSE 3000
+EXPOSE 9000
 
 # Set environment variables for LibreOffice
 ENV HOME=/tmp
