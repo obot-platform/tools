@@ -1,11 +1,10 @@
-
 import { AtpAgent, AppBskyActorSearchActors } from '@atproto/api'
 
-export async function searchUsers (
+export async function searchUsers(
     agent: AtpAgent,
     query?: string,
     limit?: string,
-): Promise<void> {
+): Promise<any> {
     let queryParams: AppBskyActorSearchActors.QueryParams = {
         q: query ?? '',
     }
@@ -24,5 +23,5 @@ export async function searchUsers (
 
     const response = await agent.app.bsky.actor.searchActors(queryParams)
 
-    console.log(JSON.stringify(response.data.actors))
+    return response.data.actors
 }
