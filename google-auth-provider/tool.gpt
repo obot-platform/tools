@@ -36,7 +36,7 @@ Credential: ../placeholder-credential as google-auth-provider
         {
             "name": "OBOT_AUTH_PROVIDER_EMAIL_DOMAINS",
             "friendlyName": "Allowed E-Mail Domains",
-            "description": "A list of email domains that are allowed to authenticate with this provider. * is a special value that allows all domains, 'All domains' will be displayed instead of *",
+            "description": "A list of email domains that are allowed to authenticate with this provider. * is a special value that allows all domains.",
             "sensitive": false
         }
     ],
