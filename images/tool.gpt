@@ -38,7 +38,7 @@ Type: context
 
 <generate_image_tool_instructions>
 The Generate Images tool returns a JSON object with each image’s `workspaceFilePath` and `downloadUrl`.
-Unless otherwise specified, to display images in the UI, use the `downloadUrl` in markdown format. Do NOT use `workspaceFilePath`, as it cannot be rendered by the UI.
+The native chat UI will handle displaying the generated image. So, unless otherwise specified, you don't need to include either `workspaceFilePath` or `downloadUrl` in your response.
 </generate_image_tool_instructions>
 
 ---
