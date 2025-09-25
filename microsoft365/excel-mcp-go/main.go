@@ -19,6 +19,7 @@ import (
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/microsoft/kiota-abstractions-go/serialization"
 	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
+	"github.com/microsoftgraph/msgraph-sdk-go/drives"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	util "github.com/obot-platform/tools/microsoft365/excel-mcp-go/utils"
@@ -583,9 +584,12 @@ func (e *ExcelMCPServer) CreateWorksheet(ctx context.Context, req *mcp.CallToolR
 		return nil, nil, fmt.Errorf("failed to retrieve user's drive ID")
 	}
 
+	requestBody := drives.NewItemItemsItemWorkbookWorksheetsAddPostRequestBody()
+	requestBody.SetName(util.Ptr(args.Name))
+
 	// Create new worksheet
 	_, err = e.client.Drives().ByDriveId(*drive.GetId()).Items().ByDriveItemId(args.WorkbookID).
-		Workbook().Worksheets().Post(ctx, nil, nil)
+		Workbook().Worksheets().Add().Post(ctx, requestBody, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create worksheet: %w", err)
 	}
