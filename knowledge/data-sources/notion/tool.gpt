@@ -1,9 +1,0 @@
-Name: Sync Notion Pages
-Description: Provides access to the Notion API (read-only)
-Credential: ./credential
-
-#!/usr/bin/env npm --prefix ${GPTSCRIPT_TOOL_DIR} --silent run start
-
----
-!metadata:*:oauth
-notion
