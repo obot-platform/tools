@@ -45,18 +45,8 @@ tools:
     reference: ./postgres
   gemini-image-generator:
     reference: ./gemini/image-generator.gpt
-  discord:
-    reference: ./discord
   memory:
     reference: ./memory
-
-knowledgeDataSources:
-  notion-data-source:
-    reference: ./knowledge/data-sources/notion
-  onedrive-data-source:
-    reference: ./knowledge/data-sources/onedrive
-  website-data-source:
-    reference: ./knowledge/data-sources/website
 
 system:
   knowledge-retrieval:
