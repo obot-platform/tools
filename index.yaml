@@ -1,52 +1,20 @@
 tools:
-  sendgrid:
-    reference: ./sendgrid
-  file-summarizer:
-    reference: ./file-summarizer
-  zoom:
-    reference: ./zoom
-  wordpress:
-    reference: ./wordpress
-  wordpress-seo:
-    reference: ./wordpress-seo
-  bluesky:
-    reference: ./bluesky
-  linkedin-publishing:
-    reference: ./linkedin-publishing
-  google-docs:
-    reference: ./google/docs
-  google-search-console:
-    reference: ./google/search-console
   images:
     reference: ./images
-  excel:
-    reference: ./microsoft365/excel
-  outlook-calender:
-    reference: ./microsoft365/outlook/calendar
-  outlook-contact:
-    reference: ./microsoft365/outlook/contact
-  word:
-    reference: ./microsoft365/word
-  onedrive:
-    reference: ./microsoft365/onedrive
   time:
     reference: ./time
   workspace-files:
     reference: ./workspace-files
   tasks:
     reference: ./tasks
-  threads:
-    reference: ./threads
   knowledge:
     reference: ./knowledge
-  pagerduty:
-    reference: ./pagerduty
-  postgres:
-    reference: ./postgres
-  gemini-image-generator:
-    reference: ./gemini/image-generator.gpt
+  threads:
+    reference: ./threads
   memory:
     reference: ./memory
+  file-summarizer:
+    reference: ./file-summarizer
 
 system:
   knowledge-retrieval:
@@ -59,8 +27,6 @@ system:
     reference: ./knowledge/delete.gpt
   knowledge-delete-file:
     reference: ./knowledge/delete-file.gpt
-  website-cleaner:
-    reference: ./website-cleaner
   workflow:
     reference: ./workflow
   result-formatter:
@@ -101,9 +67,3 @@ authProviders:
     reference: ./github-auth-provider
   google-auth-provider:
     reference: ./google-auth-provider
-
-fileScanners:
-  virus-total-provider:
-    reference: ./virus-total-provider
-  meta-defender-provider:
-    reference: ./meta-defender-provider
