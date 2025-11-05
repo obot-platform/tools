@@ -1,8 +1,8 @@
 module github.com/obot-platform/tools/context
 
-go 1.23.2
+go 1.25.3
 
-require github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
+require github.com/gptscript-ai/go-gptscript v0.9.7
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -11,6 +11,7 @@ require (
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
+	github.com/modelcontextprotocol/go-sdk v0.2.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/oasdiff/yaml v0.0.0-20241214135536-5f7845c759c8 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20241214160948-977117996672 // indirect
