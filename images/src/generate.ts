@@ -8,7 +8,7 @@ type ImageSize = '1024x1024' | '256x256' | '512x512' | '1792x1024' | '1024x1792'
 type ImageQuality = 'standard' | 'hd'
 
 const threadId = process.env.OBOT_THREAD_ID
-const obotServerUrl = process.env.OBOT_SERVER_URL
+const obotServerUrl = process.env.OBOT_SERVER_PUBLIC_URL ?? process.env.OBOT_SERVER_URL
 const downloadBaseUrl = (threadId !== undefined && obotServerUrl !== undefined) ? `${obotServerUrl}/api/threads/${threadId}/file` : null
 
 export async function generateImages (
