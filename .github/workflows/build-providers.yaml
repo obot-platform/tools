@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
 
 jobs:
   providers-build:
@@ -37,21 +39,20 @@ jobs:
           target: providers
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/obot-platform/tools/providers:latest
+            ${{ github.ref_type == 'tag' && format('ghcr.io/obot-platform/tools/providers:{0}', github.ref_name) || 'ghcr.io/obot-platform/tools/providers:latest' }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.8.1
         with:
-          cosign-release: 'v2.4.3'
+          cosign-release: "v2.4.3"
 
       - name: Sign Images
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-          TAGS: ghcr.io/obot-platform/tools/providers:latest
+          TAGS: ${{ github.ref_type == 'tag' && format('ghcr.io/obot-platform/tools/providers:{0}', github.ref_name) || 'ghcr.io/obot-platform/tools/providers:latest' }}
         run: |
           images=""
           for tag in ${TAGS}; do
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
-
