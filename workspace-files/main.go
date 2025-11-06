@@ -23,7 +23,7 @@ var (
 	MaxFileSize        = 250_000
 	ThreadID           = os.Getenv("OBOT_THREAD_ID")
 	ProjectID          = os.Getenv("OBOT_PROJECT_ID")
-	ServerURL          = os.Getenv("OBOT_SERVER_URL")
+	ServerURL          = os.Getenv("OBOT_SERVER_PUBLIC_URL")
 	ProjectWorkspaceID = os.Getenv("PROJECT_WORKSPACE_ID")
 	ProjectScoped      = os.Getenv("PROJECT_SCOPED") == "true"
 )
@@ -395,7 +395,10 @@ func downloadURL(ctx context.Context, filename string) error {
 	}
 
 	if ServerURL == "" {
-		return fmt.Errorf("OBOT_SERVER_URL environment variable is required")
+		ServerURL = os.Getenv("OBOT_SERVER_URL")
+		if ServerURL == "" {
+			return fmt.Errorf("OBOT_SERVER_PUBLIC_URL environment variable is required")
+		}
 	}
 
 	client, err := gptscript.NewGPTScript()
