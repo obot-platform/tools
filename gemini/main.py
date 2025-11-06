@@ -171,7 +171,7 @@ if __name__ == "__main__":
                     os.getenv('PROMPT'),
                     title,
                     get_download_base_url(
-                        os.getenv('OBOT_SERVER_URL'),
+                        os.getenv('OBOT_SERVER_PUBLIC_URL', os.getenv("OBOT_SERVER_URL")),
                         os.getenv('OBOT_THREAD_ID')
                     ),
                     os.getenv('ASPECT_RATIO', '1:1'),
