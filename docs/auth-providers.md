@@ -41,7 +41,7 @@ OAuth2 authorization code flow.
 #### Token Cookie
 
 The auth provider must store the token in a cookie called `obot_access_token`.
-This cookie should be set as `Secure` only if the `OBOT_SERVER_URL` environment variable starts with `https://`.
+This cookie should be set as `Secure` only if the `OBOT_SERVER_PUBLIC_URL` environment variable starts with `https://`.
 The cookie should be encrypted using the `OBOT_AUTH_PROVIDER_COOKIE_SECRET` environment variable.
 
 #### URL Paths

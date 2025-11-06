@@ -17,13 +17,17 @@ func LoadEnvForStruct[T any](s *T) error {
 
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		varName := field.Tag.Get("env")
-		if varName == "" {
+		varNames := field.Tag.Get("env")
+		if varNames == "" {
 			continue
 		}
 
-		// Check environment and default if set
-		value := os.Getenv(varName)
+		var value string
+		for varName := range strings.SplitSeq(varNames, ",") {
+			if value = os.Getenv(varName); value != "" {
+				break
+			}
+		}
 		if value == "" {
 			defaultValue := field.Tag.Get("default")
 			if defaultValue != "" {
@@ -32,7 +36,7 @@ func LoadEnvForStruct[T any](s *T) error {
 				if field.Tag.Get("optional") == "true" {
 					continue
 				}
-				return fmt.Errorf("missing required environment variable %s", varName)
+				return fmt.Errorf("missing required environment variable(s) %s", varNames)
 			}
 		}
 
