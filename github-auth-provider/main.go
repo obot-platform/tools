@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"slices"
 	"strings"
 	"time"
 
@@ -18,7 +17,6 @@ import (
 	"github.com/obot-platform/tools/auth-providers-common/pkg/env"
 	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 	"github.com/obot-platform/tools/github-auth-provider/pkg/profile"
-	"github.com/sahilm/fuzzy"
 )
 
 type Options struct {
@@ -132,8 +130,6 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
-	mux.HandleFunc("/obot-list-auth-groups", listGroups(opts.GitHubOrg))
-	mux.HandleFunc("/obot-list-user-auth-groups", listUserGroups)
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
@@ -206,86 +202,5 @@ func getState(p *oauth2proxy.OAuthProxy) http.HandlerFunc {
 			fmt.Printf("ERROR: github-auth-provider: failed to encode state: %v\n", err)
 			return
 		}
-	}
-}
-
-func listGroups(restrictOrg *string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		if token == "" {
-			http.Error(w, "no authorization token provided", http.StatusUnauthorized)
-			return
-		}
-
-		groups, err := profile.FetchUserGroupInfos(r.Context(), token)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
-			return
-		}
-
-		// Handle nil groups slice
-		if groups == nil {
-			groups = state.GroupInfoList{}
-		}
-
-		if restrictOrg != nil && *restrictOrg != "" {
-			// Elide all org and team groups that don't match the restrictOrg when set
-			groups = slices.DeleteFunc(groups, func(g state.GroupInfo) bool {
-				orgLogin, _, _ := strings.Cut(g.Name, "/")
-				return orgLogin != *restrictOrg
-			})
-		}
-
-		// Get the name query parameter for filtering
-		nameFilter := r.URL.Query().Get("name")
-		if nameFilter != "" && len(groups) > 0 {
-			// Create a slice of group names for fuzzy matching
-			groupNames := make([]string, len(groups))
-			for i, group := range groups {
-				groupNames[i] = group.Name
-			}
-
-			// Perform fuzzy search - results are automatically ranked by relevance
-			matches := fuzzy.Find(nameFilter, groupNames)
-
-			// Filter groups based on fuzzy matches, preserving the relevance order
-			var filteredGroups state.GroupInfoList
-			for _, match := range matches {
-				filteredGroups = append(filteredGroups, groups[match.Index])
-			}
-			groups = filteredGroups
-		}
-
-		if err := json.NewEncoder(w).Encode(groups); err != nil {
-			http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
-			return
-		}
-	}
-}
-
-func listUserGroups(w http.ResponseWriter, r *http.Request) {
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		http.Error(w, "no authorization token provided", http.StatusUnauthorized)
-		return
-	}
-
-	groups, err := profile.FetchUserGroupInfos(r.Context(), token)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to fetch user auth groups: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Handle nil groups slice
-	if groups == nil {
-		groups = state.GroupInfoList{}
-	}
-
-	// Note: Don't elide org and team groups because removing them here would cause Obot to drop
-	// group membership for the respective user and would cause ACR's to garbage collect MCP servers and
-	// server instances. In this case we want admins to manually clean up group based ACRs.
-	if err := json.NewEncoder(w).Encode(groups); err != nil {
-		http.Error(w, fmt.Sprintf("failed to encode groups: %v", err), http.StatusInternalServerError)
-		return
 	}
 }

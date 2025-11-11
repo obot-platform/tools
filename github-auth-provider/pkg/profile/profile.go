@@ -6,10 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"slices"
-	"strings"
-
-	"github.com/obot-platform/tools/auth-providers-common/pkg/state"
 )
 
 var githubBaseURL = "https://api.github.com"
@@ -49,18 +45,6 @@ type githubUserProfile struct {
 	UpdatedAt         string `json:"updated_at"`
 }
 
-type githubOrganization struct {
-	ID        int64  `json:"id"`
-	Login     string `json:"login"`
-	AvatarURL string `json:"avatar_url"`
-}
-
-type githubTeam struct {
-	ID           int64              `json:"id"`
-	Slug         string             `json:"slug"`
-	Organization githubOrganization `json:"organization"`
-}
-
 func FetchUserProfile(ctx context.Context, accessToken string) (*githubUserProfile, error) {
 	var result githubUserProfile
 	err := makeGitHubRequest(ctx, accessToken, "user", &result)
@@ -68,44 +52,6 @@ func FetchUserProfile(ctx context.Context, accessToken string) (*githubUserProfi
 		return nil, err
 	}
 	return &result, nil
-}
-
-func FetchUserGroupInfos(ctx context.Context, accessToken string) (state.GroupInfoList, error) {
-	var (
-		infos state.GroupInfoList
-		orgs  []githubOrganization
-	)
-	err := makeGitHubRequest(ctx, accessToken, "user/orgs", &orgs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch user organizations: %w", err)
-	}
-	for _, org := range orgs {
-		infos = append(infos, state.GroupInfo{
-			ID:      fmt.Sprintf("github/org/%d", org.ID),
-			Name:    org.Login,
-			IconURL: &org.AvatarURL,
-		})
-	}
-
-	var teams []githubTeam
-	err = makeGitHubRequest(ctx, accessToken, "user/teams", &teams)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch user teams: %w", err)
-	}
-	for _, team := range teams {
-		infos = append(infos, state.GroupInfo{
-			ID:      fmt.Sprintf("github/org/%d/team/%d", team.Organization.ID, team.ID),
-			Name:    fmt.Sprintf("%s/%s", team.Organization.Login, team.Slug),
-			IconURL: &team.Organization.AvatarURL,
-		})
-	}
-
-	// Sort groups by ID lexicographically
-	slices.SortFunc(infos, func(a, b state.GroupInfo) int {
-		return strings.Compare(a.ID, b.ID)
-	})
-
-	return infos, nil
 }
 
 func makeGitHubRequest(ctx context.Context, accessToken, path string, result any) error {
