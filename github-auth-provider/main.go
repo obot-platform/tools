@@ -130,6 +130,9 @@ func main() {
 		}
 		json.NewEncoder(w).Encode(userInfo)
 	})
+	mux.HandleFunc("obot-list-user-auth-groups", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
 	mux.HandleFunc("/", oauthProxy.ServeHTTP)
 
 	fmt.Printf("listening on 127.0.0.1:%s\n", port)
