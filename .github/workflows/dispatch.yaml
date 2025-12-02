@@ -17,3 +17,4 @@ jobs:
           name: Release ${{ github.event.client_payload.tag }}
           generateReleaseNotes: true
           prerelease: ${{ contains(github.event.client_payload.tag, '-rc') }}
+          token: ${{ secrets.DISPATCH_TOKEN }}
