@@ -39,7 +39,7 @@ jobs:
           target: tools
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ github.ref_type == 'tag' && format('ghcr.io/obot-platform/tools/tools:{0}', github.ref_name) || 'format('ghcr.io/{0}:latest', github.repository) }}
+            ${{ github.ref_type == 'tag' && format('ghcr.io/obot-platform/tools/tools:{0}', github.ref_name) || format('ghcr.io/{0}:latest', github.repository) }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.8.1
