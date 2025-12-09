@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gptscript-ai/chat-completion-client"
+	openai "github.com/gptscript-ai/chat-completion-client"
 )
 
 func Run(obotHost, port string) error {
