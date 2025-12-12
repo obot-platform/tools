@@ -24,7 +24,7 @@ filelock==3.20.0
 frozenlist==1.8.0
 fsspec==2025.12.0
 future==1.0.0
-gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@7431aa7f66e7196babab06a4561bbe75958d4a54
+gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@c473166c03a7256ea106ddecfa9fe1e9716e8665
 h11==0.16.0
 hf-xet==1.2.0
 httpcore==1.0.9
@@ -70,7 +70,7 @@ tqdm==4.66.3
 typer-slim==0.20.0
 typing-extensions==4.15.0
 typing-inspection==0.4.2
-urllib3==2.2.2
+urllib3==2.6.2
 uuid-utils==0.12.0
 uvicorn==0.38.0
 uvloop==0.22.1

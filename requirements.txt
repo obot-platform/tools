@@ -2,7 +2,7 @@ azure-identity==1.25.1
 azure-mgmt-cognitiveservices==14.1.0
 azure-mgmt-resource==24.0.0
 fastapi==0.124.2
-gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@7431aa7f66e7196babab06a4561bbe75958d4a54
+gptscript @ git+https://github.com/gptscript-ai/py-gptscript.git@c473166c03a7256ea106ddecfa9fe1e9716e8665
 openai==2.11.0
 tiktoken==0.12.0
 uvicorn[standard]==0.38.0
