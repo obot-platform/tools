@@ -29,7 +29,6 @@ func (s *Server) AnthropicProxyRedirect(req *http.Request) {
 	req.Host = req.URL.Host
 
 	apiKey := s.cfg.APIKey
-	fmt.Println(req.Header)
 	if requestAPIKey := req.Header.Get("X-Obot-OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY"); requestAPIKey != "" {
 		apiKey = requestAPIKey
 		req.Header.Del("X-Obot-OBOT_ANTHROPIC_MODEL_PROVIDER_API_KEY")
