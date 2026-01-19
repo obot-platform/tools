@@ -239,11 +239,18 @@ func readNonPlainOrLargeFile(ctx context.Context, filename, workspaceID string) 
 		return "", err
 	}
 
-	var text string
-	run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/tool.gpt", gptscript.Options{
-		Input:     string(jsonData),
-		Workspace: workspaceID,
-	})
+	var (
+		text    string
+		options = gptscript.Options{
+			Input:     string(jsonData),
+			Workspace: os.Getenv("GPTSCRIPT_WORKSPACE_ID"),
+		}
+	)
+	if workspaceID != "" {
+		options.Workspace = workspaceID
+	}
+
+	run, err := client.Run(ctx, "github.com/obot-platform/tools/file-summarizer/tool.gpt", options)
 	if err != nil {
 		return "", err
 	}
@@ -268,12 +275,16 @@ func read(ctx context.Context, filename string) error {
 	}
 
 	// Check if the file extension is not plain text. If it is, forward it the a separate tool to handle it.
-	var triedNonPlain bool
+	var (
+		triedNonPlain bool
+		nonPlainErr   error
+	)
 	for _, ext := range nonPlainTextFileTypes {
 		if strings.HasSuffix(strings.ToLower(filename), ext) {
-			text, err := readNonPlainOrLargeFile(ctx, filename, workspaceID) // hand it to the tool to ingest it and potentially summarize it
+			var text string
+			text, nonPlainErr = readNonPlainOrLargeFile(ctx, filename, workspaceID) // hand it to the tool to ingest it and potentially summarize it
 			triedNonPlain = true
-			if err == nil {
+			if nonPlainErr == nil {
 				fmt.Println(string(text))
 				return nil
 			}
@@ -296,6 +307,9 @@ func read(ctx context.Context, filename string) error {
 
 	if len(data) > MaxFileSize {
 		if triedNonPlain {
+			if nonPlainErr != nil {
+				return nonPlainErr
+			}
 			return fmt.Errorf("file size exceeds %d bytes", MaxFileSize)
 		}
 
