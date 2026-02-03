@@ -42,6 +42,8 @@ func RewriteModelsResponse(resp *http.Response) error {
 	}
 
 	var extraModels []api.Model
+	seenShortModels := make(map[string]struct{})
+
 	for i, model := range models.Data {
 		if model.Metadata == nil {
 			model.Metadata = make(map[string]string)
@@ -59,6 +61,21 @@ func RewriteModelsResponse(resp *http.Response) error {
 				Object:   model.Object,
 				OwnedBy:  model.OwnedBy,
 			})
+		}
+
+		// Add model with everything after the last '-' removed
+		if lastDash := strings.LastIndex(model.ID, "-"); lastDash != -1 {
+			shortModelID := model.ID[:lastDash]
+			if _, exists := seenShortModels[shortModelID]; !exists {
+				seenShortModels[shortModelID] = struct{}{}
+				extraModels = append(extraModels, api.Model{
+					ID:       shortModelID,
+					Metadata: model.Metadata,
+					Created:  model.Created,
+					Object:   model.Object,
+					OwnedBy:  model.OwnedBy,
+				})
+			}
 		}
 	}
 
