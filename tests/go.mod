@@ -32,7 +32,7 @@ require (
 	github.com/getkin/kin-openapi v0.133.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
-	github.com/go-git/go-git/v5 v5.16.3 // indirect
+	github.com/go-git/go-git/v5 v5.16.5 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
