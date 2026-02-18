@@ -40,6 +40,10 @@ func DefaultRewriteModelsResponse(resp *http.Response) error {
 			model.Metadata = make(map[string]string)
 		}
 		switch {
+		case strings.HasPrefix(model.ID, "gpt-image-"),
+			strings.HasPrefix(model.ID, "dall-e"),
+			strings.HasPrefix(model.ID, "ft:dall-e"):
+			model.Metadata["usage"] = "image-generation"
 		case strings.HasPrefix(model.ID, "gpt-"),
 			strings.HasPrefix(model.ID, "ft:gpt-"),
 			strings.HasPrefix(model.ID, "o1") && !strings.HasPrefix(model.ID, "o1-mini") && !strings.HasPrefix(model.ID, "o1-preview") && !strings.HasPrefix(model.ID, "o1-pro"),
@@ -50,9 +54,6 @@ func DefaultRewriteModelsResponse(resp *http.Response) error {
 		case strings.HasPrefix(model.ID, "text-embedding-"),
 			strings.HasPrefix(model.ID, "ft:text-embedding-"):
 			model.Metadata["usage"] = "text-embedding"
-		case strings.HasPrefix(model.ID, "dall-e"),
-			strings.HasPrefix(model.ID, "ft:dall-e"):
-			model.Metadata["usage"] = "image-generation"
 		}
 		models.Data[i] = model
 	}
