@@ -15,7 +15,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.8
 	github.com/gen2brain/go-fitz v1.24.14
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-git/go-git/v5 v5.16.3
+	github.com/go-git/go-git/v5 v5.16.5
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/go-gptscript v0.9.7
 	github.com/hupe1980/golc v0.0.113
