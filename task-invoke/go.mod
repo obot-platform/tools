@@ -1,6 +1,6 @@
 module github.com/obot-platform/tools/task-invoke
 
-go 1.25.3
+go 1.26.0
 
 require github.com/obot-platform/obot/apiclient v0.0.0-20251105183120-b2f91a57f7d3
 

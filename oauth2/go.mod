@@ -1,6 +1,6 @@
 module gateway-oauth2
 
-go 1.25.3
+go 1.26.0
 
 require (
 	github.com/gptscript-ai/go-gptscript v0.9.7

@@ -1,6 +1,6 @@
 module github.com/obot-platform/tools/memory
 
-go 1.25.3
+go 1.26.0
 
 require (
 	github.com/obot-platform/obot v0.12.1-0.20251105171125-aef1210c6225

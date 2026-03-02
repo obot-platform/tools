@@ -1,6 +1,6 @@
 module github.com/obot-platform/tools/google-auth-provider
 
-go 1.25.3
+go 1.26.0
 
 replace (
 	github.com/oauth2-proxy/oauth2-proxy/v7 => github.com/obot-platform/oauth2-proxy/v7 v7.0.0-20251112215948-0f320f3720bb
