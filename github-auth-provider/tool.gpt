@@ -63,6 +63,12 @@ Credential: ../placeholder-credential as github-auth-provider
             "friendlyName": "Allowed GitHub Users",
             "description": "A list of GitHub users allowed to log in, even if they do not belong to the specified org.",
             "sensitive": false
+        },
+        {
+            "name": "OBOT_AUTH_PROVIDER_ENABLE_LOGGING",
+            "friendlyName": "Enable Logging",
+            "description": "Set to true to enable request, auth, and standard logging for the auth provider. Default: false",
+            "sensitive": false
         }
     ]
 }

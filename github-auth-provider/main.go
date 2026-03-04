@@ -27,6 +27,7 @@ type Options struct {
 	AuthCookieSecret         string  `usage:"Secret used to encrypt cookie" env:"OBOT_AUTH_PROVIDER_COOKIE_SECRET"`
 	AuthEmailDomains         string  `usage:"Email domains allowed for authentication" default:"*" env:"OBOT_AUTH_PROVIDER_EMAIL_DOMAINS"`
 	AuthTokenRefreshDuration string  `usage:"Duration to refresh auth token after" optional:"true" default:"1h" env:"OBOT_AUTH_PROVIDER_TOKEN_REFRESH_DURATION"`
+	LoggingEnabled           string  `usage:"Enable oauth2-proxy logging" optional:"true" env:"OBOT_AUTH_PROVIDER_ENABLE_LOGGING"`
 	GitHubOrg                *string `usage:"restrict logins to members of this GitHub organization" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ORG"`
 	GitHubAllowUsers         *string `usage:"users allowed to log in, even if they do not belong to the specified org and team or collaborators" optional:"true" env:"OBOT_GITHUB_AUTH_PROVIDER_ALLOW_USERS"`
 }
@@ -97,9 +98,11 @@ func main() {
 		}
 		oauthProxyOpts.EmailDomains = emailDomains
 	}
-	oauthProxyOpts.Logging.RequestEnabled = false
-	oauthProxyOpts.Logging.AuthEnabled = false
-	oauthProxyOpts.Logging.StandardEnabled = false
+
+	loggingEnabled := strings.EqualFold(opts.LoggingEnabled, "true")
+	oauthProxyOpts.Logging.RequestEnabled = loggingEnabled
+	oauthProxyOpts.Logging.AuthEnabled = loggingEnabled
+	oauthProxyOpts.Logging.StandardEnabled = loggingEnabled
 
 	if err = validation.Validate(oauthProxyOpts); err != nil {
 		fmt.Printf("ERROR: github-auth-provider: failed to validate options: %v\n", err)

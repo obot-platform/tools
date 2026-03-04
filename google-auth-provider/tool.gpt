@@ -53,6 +53,12 @@ Credential: ../placeholder-credential as google-auth-provider
 			"friendlyName": "Token Refresh Duration",
 			"description": "Time to wait before attempting to refresh auth tokens. Should be in a format like 1h1m1s. Default: 1h",
 			"sensitive": false
+		},
+		{
+			"name": "OBOT_AUTH_PROVIDER_ENABLE_LOGGING",
+			"friendlyName": "Enable Logging",
+			"description": "Set to true to enable request, auth, and standard logging for the auth provider. Default: false",
+			"sensitive": false
 		}
 	]
 }
