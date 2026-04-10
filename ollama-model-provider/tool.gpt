@@ -11,6 +11,7 @@ Metadata: noUserAuth: ollama-model-provider
 {
     "icon": "https://ollama.com/public/ollama.png",
     "link": "https://ollama.com/",
+    "dialect": "OpenResponses",
     "envVars": [
         {
             "name": "OBOT_OLLAMA_MODEL_PROVIDER_HOST",
