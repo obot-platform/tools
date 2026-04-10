@@ -2,6 +2,6 @@ module github.com/obot-platform/tools/loop-data
 
 go 1.26.0
 
-require github.com/gptscript-ai/go-gptscript v0.9.7
+require github.com/gptscript-ai/go-gptscript v0.9.9
 
-require github.com/modelcontextprotocol/go-sdk v0.2.0 // indirect
+require github.com/google/jsonschema-go v0.4.2 // indirect

@@ -15,12 +15,12 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.8
 	github.com/gen2brain/go-fitz v1.24.14
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-git/go-git/v5 v5.16.3
+	github.com/go-git/go-git/v5 v5.17.2
 	github.com/google/uuid v1.6.0
-	github.com/gptscript-ai/go-gptscript v0.9.7
+	github.com/gptscript-ai/go-gptscript v0.9.9
 	github.com/hupe1980/golc v0.0.113
 	github.com/iwilltry42/bm25-go v0.0.0-20240909111832-a928590cc9da
-	github.com/jackc/pgx/v5 v5.7.4
+	github.com/jackc/pgx/v5 v5.9.1
 	github.com/jmcarbo/stopwords v1.1.9
 	github.com/joho/godotenv v1.5.1
 	github.com/knadh/koanf/maps v0.1.2
@@ -37,7 +37,7 @@ require (
 	github.com/pgvector/pgvector-go v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.7
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/tmc/langchaingo v0.1.13
 	golang.org/x/sync v0.18.0
 	gorm.io/driver/postgres v1.5.11
@@ -66,7 +66,7 @@ require (
 	github.com/aws/smithy-go v1.20.3 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cohere-ai/tokenizer v1.1.2 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -79,12 +79,13 @@ require (
 	github.com/gin-gonic/gin v1.10.0 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-billy/v5 v5.6.2 // indirect
+	github.com/go-git/go-billy/v5 v5.8.0 // indirect
 	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gobwas/ws v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hupe1980/go-promptlayer v0.0.6 // indirect
@@ -107,7 +108,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/modelcontextprotocol/go-sdk v0.2.0 // indirect
 	github.com/ncruces/go-sqlite3 v0.24.1 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
