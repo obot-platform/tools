@@ -1,6 +1,6 @@
 module github.com/gptscript-ai/gptscript-helper-sqlite
 
-go 1.26.0
+go 1.26.2
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

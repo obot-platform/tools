@@ -1,23 +1,15 @@
 {
   "type": "module",
   "scripts": {
-    "tool": "node --no-warnings --loader ts-node/esm src/tools.ts",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "tool": "node --no-warnings --loader ts-node/esm src/tools.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.2",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "eslint": "^8.56.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@gptscript-ai/gptscript": "^0.9.8",
+    "@gptscript-ai/gptscript": "0.9.9",
     "axios": "^1.13.6",
     "env-paths": "^4.0.0",
     "file-type": "^21.3.0",

@@ -1,6 +1,6 @@
 module github.com/obot-platform/tools/groq-model-provider
 
-go 1.23.4
+go 1.26.2
 
 replace github.com/obot-platform/tools/openai-model-provider => ../openai-model-provider
 
