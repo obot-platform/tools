@@ -51,8 +51,6 @@ modelProviders:
     reference: ./ollama-model-provider
   groq-model-provider:
     reference: ./groq-model-provider
-  voyage-model-provider:
-    reference: ./voyage-model-provider
   vllm-model-provider:
     reference: ./vllm-model-provider
   xai-model-provider:

@@ -1,9 +1,9 @@
 module github.com/obot-platform/tools/tests
 
-go 1.26.0
+go 1.26.2
 
 require (
-	github.com/gptscript-ai/go-gptscript v0.9.7
+	github.com/gptscript-ai/go-gptscript v0.9.9
 	github.com/gptscript-ai/gptscript v0.9.7
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -37,6 +37,7 @@ require (
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
+	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect

@@ -128,6 +128,8 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
+github.com/google/jsonschema-go v0.4.2 h1:tmrUohrwoLZZS/P3x7ex0WAVknEkBZM46iALbcqoRA8=
+github.com/google/jsonschema-go v0.4.2/go.mod h1:r5quNTdLOYEz95Ru18zA0ydNbBuYoo9tgaYcxEYhJVE=
 github.com/google/martian v2.1.0+incompatible/go.mod h1:9I4somxYTbIHy5NJKHRl3wXiIaQGbYVAs8BPL6v8lEs=
 github.com/google/pprof v0.0.0-20181206194817-3ea8567a2e57/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
 github.com/google/pprof v0.0.0-20190515194954-54271f7e092f/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
@@ -145,8 +147,8 @@ github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86 h1:m9yLtI
 github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86/go.mod h1:lK3K5EZx4dyT24UG3yCt0wmspkYqrj4D/8kxdN3relk=
 github.com/gptscript-ai/chat-completion-client v0.0.0-20250224164718-139cb4507b1d h1:p5uqZufDIMQzAALblZFkr8fwbnZbFXbBCR1ZMAFylXk=
 github.com/gptscript-ai/chat-completion-client v0.0.0-20250224164718-139cb4507b1d/go.mod h1:7P/o6/IWa1KqsntVf68hSnLKuu3+xuqm6lYhch1w4jo=
-github.com/gptscript-ai/go-gptscript v0.9.7 h1:ed+XYhOrhzlP0ibxh2kdXPxlNGZqdxbuZ5DfVG0R988=
-github.com/gptscript-ai/go-gptscript v0.9.7/go.mod h1:UDBhrLZmLDB0EMo8NZH6lu9Mm4iacMTfk9teUmDYlHs=
+github.com/gptscript-ai/go-gptscript v0.9.9 h1:7X9FteRK5li546JGTcfF0vgPl/DJ5TZNZCyb74P8u6g=
+github.com/gptscript-ai/go-gptscript v0.9.9/go.mod h1:8JGZNO+x4tkTrkT1q5PMrVCKY2AcnS/Ru8WCNvzLYIg=
 github.com/gptscript-ai/gptscript v0.9.7 h1:NRzKEejoUFf7+7cM/7UV1gcgMYXNriy+hjpW0jvw/q4=
 github.com/gptscript-ai/gptscript v0.9.7/go.mod h1:eL/jyy8f0cEyiWwI6hcWwuxKZtOGpDfJRezMSIISQhM=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
