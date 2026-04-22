@@ -11,6 +11,7 @@ Metadata: noUserAuth: openai-model-provider
 {
     "icon": "https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2/assets/duotone/open-ai-logo-duotone.svg",
     "link": "https://openai.com/",
+    "dialect": "OpenAIResponses",
     "envVars": [
         {
             "name": "OBOT_OPENAI_MODEL_PROVIDER_API_KEY",
