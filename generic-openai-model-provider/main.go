@@ -41,7 +41,7 @@ func main() {
 		Name:                 "Generic OpenAI",
 	}
 
-	if err := cfg.Validate("/tools/generic-openai-model-provider/validate"); err != nil {
+	if err := cfg.Validate(); err != nil {
 		os.Exit(1)
 	}
 

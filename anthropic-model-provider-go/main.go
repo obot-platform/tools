@@ -40,7 +40,7 @@ func main() {
 			header.Set("x-api-key", cfg.APIKey)
 			header.Set("anthropic-version", "2023-06-01")
 		}
-		if err := cfg.Validate("/tools/anthropic-model-provider/validate"); err != nil {
+		if err := cfg.Validate(); err != nil {
 			os.Exit(1)
 		}
 	}

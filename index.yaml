@@ -49,6 +49,8 @@ modelProviders:
     reference: ./anthropic-model-provider-go
   ollama-model-provider:
     reference: ./ollama-model-provider
+  generic-responses-model-provider:
+    reference: ./generic-responses-model-provider
   groq-model-provider:
     reference: ./groq-model-provider
   vllm-model-provider:
