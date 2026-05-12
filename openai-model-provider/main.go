@@ -37,7 +37,7 @@ func main() {
 	}).ServeHTTP
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
-		if err := cfg.Validate("/tools/openai-model-provider/validate"); err != nil {
+		if err := cfg.Validate(); err != nil {
 			os.Exit(1)
 		}
 		return

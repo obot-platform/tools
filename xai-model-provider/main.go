@@ -38,7 +38,7 @@ func main() {
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "validate" {
-		if err := cfg.Validate("/tools/xai-model-provider/validate"); err != nil {
+		if err := cfg.Validate(); err != nil {
 			os.Exit(1)
 		}
 		return

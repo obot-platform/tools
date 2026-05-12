@@ -59,8 +59,10 @@ func (cfg *Config) EnsureURL() error {
 		return nil
 	}
 
-	// Remove any trailing slashes from BaseURL
-	cfg.BaseURL = strings.TrimRight(cfg.BaseURL, "/")
+	cfg.BaseURL = strings.TrimRight(strings.TrimSpace(cfg.BaseURL), "/")
+	if cfg.BaseURL == "" {
+		return errors.New("base URL cannot be empty or '/'")
+	}
 
 	u, err := url.Parse(cfg.BaseURL)
 	if err != nil {
